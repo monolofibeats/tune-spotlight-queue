@@ -108,17 +108,19 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       )
     )];
 
-    // Sort: priority/paid items first (by amount), then by creation date
+    // Sort: priority items first (by amount paid desc), then regular items by FIFO (oldest first)
     const sortedItems = [...allItems].sort((a, b) => {
-      // First sort by amount paid (highest first)
-      if (a.amount_paid !== b.amount_paid) {
-        return b.amount_paid - a.amount_paid;
-      }
-      // Then by priority flag
+      // Priority items come first
       if (a.is_priority && !b.is_priority) return -1;
       if (!a.is_priority && b.is_priority) return 1;
-      // Finally by date
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      
+      // Among priority items, sort by amount paid (highest first)
+      if (a.is_priority && b.is_priority) {
+        return b.amount_paid - a.amount_paid;
+      }
+      
+      // Among regular items, sort by FIFO (oldest first)
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
     return (

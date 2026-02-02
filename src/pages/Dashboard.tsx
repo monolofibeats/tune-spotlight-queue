@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Music, 
-  Settings, 
-  BarChart3,
   Search,
   Trophy,
   Plus,
@@ -13,14 +11,26 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Loader2
+  Loader2,
+  Tv,
+  Video,
+  Link as LinkIcon,
+  Upload
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -51,10 +61,19 @@ interface SpecialEvent {
   end_time: string | null;
 }
 
+interface StreamConfig {
+  id: string;
+  stream_type: string;
+  stream_url: string | null;
+  video_url: string | null;
+  is_active: boolean;
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [events, setEvents] = useState<SpecialEvent[]>([]);
+  const [streamConfig, setStreamConfig] = useState<StreamConfig | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -65,12 +84,19 @@ const Dashboard = () => {
   const [newEventReward, setNewEventReward] = useState('');
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
+  // Stream config form
+  const [streamType, setStreamType] = useState<string>('none');
+  const [streamUrl, setStreamUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [isSavingStream, setIsSavingStream] = useState(false);
+
   const fetchSubmissions = async () => {
     const { data, error } = await supabase
       .from('submissions')
       .select('*')
+      .order('is_priority', { ascending: false })
       .order('amount_paid', { ascending: false })
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
 
     if (!error && data) {
       setSubmissions(data);
@@ -89,9 +115,27 @@ const Dashboard = () => {
     }
   };
 
+  const fetchStreamConfig = async () => {
+    // Using type assertion since stream_config table may not be in types yet
+    const { data, error } = await (supabase
+      .from('stream_config' as any)
+      .select('*')
+      .limit(1)
+      .maybeSingle()) as any;
+
+    if (!error && data) {
+      const config = data as StreamConfig;
+      setStreamConfig(config);
+      setStreamType(config.stream_type);
+      setStreamUrl(config.stream_url || '');
+      setVideoUrl(config.video_url || '');
+    }
+  };
+
   useEffect(() => {
     fetchSubmissions();
     fetchEvents();
+    fetchStreamConfig();
 
     // Subscribe to realtime changes
     const submissionsChannel = supabase
@@ -220,6 +264,53 @@ const Dashboard = () => {
     }
   };
 
+  const handleSaveStreamConfig = async () => {
+    setIsSavingStream(true);
+
+    try {
+      if (streamConfig) {
+        // Using type assertion since stream_config table may not be in types yet
+        const { error } = await (supabase
+          .from('stream_config' as any)
+          .update({
+            stream_type: streamType,
+            stream_url: streamUrl || null,
+            video_url: videoUrl || null,
+          } as any)
+          .eq('id', streamConfig.id)) as any;
+
+        if (error) throw error;
+      } else {
+        // Using type assertion since stream_config table may not be in types yet
+        const { error } = await (supabase
+          .from('stream_config' as any)
+          .insert({
+            stream_type: streamType,
+            stream_url: streamUrl || null,
+            video_url: videoUrl || null,
+            is_active: true,
+          } as any)) as any;
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Stream updated! 📺",
+        description: "Homepage stream settings have been saved",
+      });
+
+      fetchStreamConfig();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save stream settings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingStream(false);
+    }
+  };
+
   const filteredSubmissions = submissions.filter(s => {
     const matchesSearch = 
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -262,7 +353,7 @@ const Dashboard = () => {
               <h1 className="text-3xl font-display font-bold">Dashboard</h1>
             </div>
             <p className="text-muted-foreground">
-              Manage submissions, create events, and view analytics.
+              Manage submissions, stream settings, and special events.
             </p>
           </motion.div>
 
@@ -325,11 +416,11 @@ const Dashboard = () => {
               <TabsTrigger value="submissions" className="rounded-lg px-6">
                 Submissions
               </TabsTrigger>
-              <TabsTrigger value="events" className="rounded-lg px-6">
-                Special Events
+              <TabsTrigger value="stream" className="rounded-lg px-6">
+                Stream
               </TabsTrigger>
-              <TabsTrigger value="settings" className="rounded-lg px-6">
-                Settings
+              <TabsTrigger value="events" className="rounded-lg px-6">
+                Events
               </TabsTrigger>
             </TabsList>
 
@@ -471,6 +562,97 @@ const Dashboard = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="stream" className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-strong rounded-2xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <Tv className="w-6 h-6 text-primary" />
+                  <h2 className="text-xl font-display font-semibold">Homepage Stream Settings</h2>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Stream Type</Label>
+                    <Select value={streamType} onValueChange={setStreamType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select stream type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None (Hide stream)</SelectItem>
+                        <SelectItem value="twitch">Twitch Live</SelectItem>
+                        <SelectItem value="youtube">YouTube Live</SelectItem>
+                        <SelectItem value="tiktok">TikTok Live</SelectItem>
+                        <SelectItem value="video">Looping Video</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {(streamType === 'twitch' || streamType === 'youtube' || streamType === 'tiktok') && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Stream URL
+                      </Label>
+                      <Input
+                        placeholder={
+                          streamType === 'twitch' 
+                            ? 'https://twitch.tv/yourchannel'
+                            : streamType === 'youtube'
+                            ? 'https://youtube.com/watch?v=... or https://youtube.com/live/...'
+                            : 'https://tiktok.com/@username/live'
+                        }
+                        value={streamUrl}
+                        onChange={(e) => setStreamUrl(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {streamType === 'twitch' && 'Enter your Twitch channel URL'}
+                        {streamType === 'youtube' && 'Enter the YouTube live stream or video URL'}
+                        {streamType === 'tiktok' && 'Enter your TikTok live URL (will show a link to watch)'}
+                      </p>
+                    </div>
+                  )}
+
+                  {streamType === 'video' && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Video className="w-4 h-4" />
+                        Video URL
+                      </Label>
+                      <Input
+                        placeholder="https://example.com/video.mp4"
+                        value={videoUrl}
+                        onChange={(e) => setVideoUrl(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter a direct link to an MP4 video file. It will loop automatically.
+                      </p>
+                    </div>
+                  )}
+
+                  <Button 
+                    onClick={handleSaveStreamConfig} 
+                    disabled={isSavingStream}
+                    className="w-full"
+                  >
+                    {isSavingStream ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Save Stream Settings
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            </TabsContent>
+
             <TabsContent value="events" className="space-y-6">
               {/* Create Event Form */}
               <motion.div
@@ -485,7 +667,7 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="text-sm text-muted-foreground mb-2 block">Event Title *</label>
+                    <Label className="mb-2 block">Event Title *</Label>
                     <Input
                       placeholder="e.g., Highest Bidder Gets Playlist Add"
                       value={newEventTitle}
@@ -493,137 +675,96 @@ const Dashboard = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground mb-2 block">Reward *</label>
+                    <Label className="mb-2 block">Reward *</Label>
                     <Input
-                      placeholder="e.g., Spotify Playlist Feature"
+                      placeholder="e.g., Added to Spotify playlist with 10k followers"
                       value={newEventReward}
                       onChange={(e) => setNewEventReward(e.target.value)}
                     />
                   </div>
                 </div>
-
                 <div className="mb-4">
-                  <label className="text-sm text-muted-foreground mb-2 block">Description (optional)</label>
+                  <Label className="mb-2 block">Description (optional)</Label>
                   <Textarea
-                    placeholder="Describe the event rules..."
+                    placeholder="Describe the event..."
                     value={newEventDescription}
                     onChange={(e) => setNewEventDescription(e.target.value)}
+                    className="min-h-[80px]"
                   />
                 </div>
-
-                <Button
-                  variant="hero"
-                  onClick={handleCreateEvent}
+                <Button 
+                  onClick={handleCreateEvent} 
                   disabled={isCreatingEvent}
+                  className="w-full"
                 >
                   {isCreatingEvent ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
                   ) : (
-                    <Plus className="w-4 h-4" />
+                    <>
+                      <Plus className="w-4 h-4" />
+                      Create Event
+                    </>
                   )}
-                  Create Event
                 </Button>
               </motion.div>
 
               {/* Events List */}
               <div className="space-y-4">
-                {events.map((event, index) => (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`glass rounded-xl p-6 ${event.is_active ? 'border border-primary/30' : 'opacity-60'}`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{event.title}</h3>
-                          <Badge variant={event.is_active ? 'premium' : 'secondary'}>
-                            {event.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </div>
-                        {event.description && (
-                          <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
-                        )}
-                        <p className="text-sm text-primary">Reward: {event.reward}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleToggleEvent(event.id, event.is_active)}
-                        >
-                          {event.is_active ? 'Deactivate' : 'Activate'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteEvent(event.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-
-                {events.length === 0 && (
-                  <div className="glass rounded-2xl p-12 text-center">
-                    <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="font-semibold text-lg mb-2">No events yet</h3>
-                    <p className="text-muted-foreground">
-                      Create a special event to incentivize higher bids!
-                    </p>
+                <h3 className="text-lg font-semibold">Active Events</h3>
+                {events.length === 0 ? (
+                  <div className="glass rounded-2xl p-8 text-center">
+                    <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No events created yet</p>
                   </div>
+                ) : (
+                  events.map((event) => (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={`glass rounded-xl p-4 ${!event.is_active ? 'opacity-50' : ''}`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{event.title}</h4>
+                            <Badge variant={event.is_active ? 'default' : 'secondary'}>
+                              {event.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </div>
+                          {event.description && (
+                            <p className="text-sm text-muted-foreground">{event.description}</p>
+                          )}
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Reward:</span>{' '}
+                            <span className="text-primary">{event.reward}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleEvent(event.id, event.is_active)}
+                          >
+                            {event.is_active ? 'Deactivate' : 'Activate'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
                 )}
               </div>
-            </TabsContent>
-
-            <TabsContent value="settings">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-strong rounded-2xl p-6"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <Settings className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Settings</h2>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <label className="text-sm text-muted-foreground mb-2 block">
-                      Stream Channel (Twitch)
-                    </label>
-                    <Input 
-                      placeholder="Your Twitch username"
-                      defaultValue="mosi391"
-                      className="max-w-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm text-muted-foreground mb-2 block">
-                      Submission Page URL
-                    </label>
-                    <div className="flex gap-2 max-w-md">
-                      <Input 
-                        value={window.location.origin}
-                        readOnly
-                        className="bg-background/30"
-                      />
-                      <Button variant="outline" onClick={() => {
-                        navigator.clipboard.writeText(window.location.origin);
-                        toast({ title: "Copied!" });
-                      }}>Copy</Button>
-                    </div>
-                  </div>
-
-                  <Button variant="hero">Save Settings</Button>
-                </div>
-              </motion.div>
             </TabsContent>
           </Tabs>
         </div>
