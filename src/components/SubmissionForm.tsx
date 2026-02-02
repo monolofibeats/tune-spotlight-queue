@@ -34,7 +34,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
-  const [submitterName, setSubmitterName] = useState('');
   const [message, setMessage] = useState('');
   const [isPriority, setIsPriority] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
