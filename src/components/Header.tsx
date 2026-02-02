@@ -29,7 +29,7 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-4">
             <SocialLinks />
             
-            {isAdmin && (
+            {isAdmin ? (
               <>
                 <Link to="/dashboard">
                   <Button variant="ghost" className="gap-2">
@@ -42,6 +42,12 @@ export function Header() {
                   Logout
                 </Button>
               </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="hero" size="sm" className="gap-2">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
 
