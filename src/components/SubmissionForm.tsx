@@ -279,7 +279,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             </div>
             <div className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${
               isPriority 
-                ? 'border-amber-500 bg-amber-500' 
+                ? 'border-primary bg-primary' 
                 : 'border-muted-foreground'
             }`}>
               {isPriority && (
