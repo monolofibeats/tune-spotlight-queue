@@ -1,12 +1,15 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { SocialLinks } from './SocialLinks';
+import { useAuth } from '@/hooks/useAuth';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAdmin, signOut } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-border/50">
@@ -24,17 +27,22 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" className="gap-2">
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/">
-              <Button variant="hero" className="gap-2">
-                Submit Song
-              </Button>
-            </Link>
+            <SocialLinks />
+            
+            {isAdmin && (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="gap-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="ghost" className="gap-2" onClick={signOut}>
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -57,17 +65,31 @@ export function Header() {
           className="md:hidden glass-strong border-t border-border/50 p-4"
         >
           <nav className="flex flex-col gap-3">
-            <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start gap-2">
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="hero" className="w-full gap-2">
-                Submit Song
-              </Button>
-            </Link>
+            <div className="flex justify-center pb-3 border-b border-border/50">
+              <SocialLinks />
+            </div>
+            
+            {isAdmin && (
+              <>
+                <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start gap-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-2" 
+                  onClick={() => {
+                    signOut();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </>
+            )}
           </nav>
         </motion.div>
       )}
