@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,7 +10,15 @@ import { MusicEmbed } from './MusicEmbed';
 import { toast } from '@/hooks/use-toast';
 import { WatchlistRef } from './WatchlistDisplay';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
 
@@ -40,16 +48,31 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [songTitle, setSongTitle] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [isPriority, setIsPriority] = useState(false);
   const [priorityAmount, setPriorityAmount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [highestBid, setHighestBid] = useState(0);
+  const [showPriorityDialog, setShowPriorityDialog] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [searchParams] = useSearchParams();
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+
+  // Check user auth state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Fetch highest current bid
   useEffect(() => {
@@ -57,6 +80,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       const { data } = await supabase
         .from('submissions')
         .select('amount_paid')
+        .eq('is_priority', true)
         .eq('status', 'pending')
         .order('amount_paid', { ascending: false })
         .limit(1)
@@ -138,25 +162,84 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     }
   };
 
-  const handlePrioritySubmit = async () => {
-    // Redirect to Stripe checkout for priority submissions
-    const { data, error } = await supabase.functions.invoke('create-priority-payment', {
-      body: {
-        amount: priorityAmount,
-        songUrl,
-        artistName: artistName || 'Unknown Artist',
-        songTitle: songTitle || 'Untitled',
-        message,
-        email,
-        platform: platform || 'other',
-      },
+  const handleSocialLogin = async (provider: 'google' | 'apple') => {
+    try {
+      const { error } = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    toast({
+      title: "Signed out",
+      description: "You've been logged out",
     });
+  };
 
-    if (error) throw error;
-    if (!data?.url) throw new Error('Failed to create checkout session');
+  const handleSkipTheLine = () => {
+    if (!songUrl) {
+      toast({
+        title: "Missing information",
+        description: "Please enter a song link first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowPriorityDialog(true);
+  };
 
-    // Redirect to Stripe
-    window.location.href = data.url;
+  const handlePriorityPayment = async () => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please sign in to use priority submissions",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-priority-payment', {
+        body: {
+          amount: priorityAmount,
+          songUrl,
+          artistName: artistName || 'Unknown Artist',
+          songTitle: songTitle || 'Untitled',
+          message,
+          email: user.email || email,
+          platform: platform || 'other',
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.url) throw new Error('Failed to create checkout session');
+
+      // Open Stripe checkout
+      window.location.href = data.url;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      toast({
+        title: "Payment failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,12 +257,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setIsSubmitting(true);
 
     try {
-      if (isPriority) {
-        await handlePrioritySubmit();
-        // Don't reset form - user will be redirected to Stripe
-        return;
-      }
-
       // Free submission
       const cardData: FlyingCard = {
         id: `flying-${Date.now()}`,
@@ -217,7 +294,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       setSongTitle('');
       setEmail('');
       setMessage('');
-      setIsPriority(false);
       setPriorityAmount(5);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
@@ -232,254 +308,291 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="w-full max-w-2xl mx-auto relative"
-    >
-      {/* Flying Card Animation */}
-      <AnimatePresence>
-        {flyingCard && (
-          <motion.div
-            key={flyingCard.id}
-            initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-            animate={{ 
-              opacity: [1, 1, 0.8, 0],
-              scale: [1, 0.9, 0.7, 0.5],
-              x: [0, 100, 300, 500],
-              y: [0, -50, -100, -80],
-              rotate: [0, 5, 10, 15],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: [0.32, 0, 0.67, 0] }}
-            className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-2xl mx-auto relative"
+      >
+        {/* Flying Card Animation */}
+        <AnimatePresence>
+          {flyingCard && (
+            <motion.div
+              key={flyingCard.id}
+              initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+              animate={{ 
+                opacity: [1, 1, 0.8, 0],
+                scale: [1, 0.9, 0.7, 0.5],
+                x: [0, 100, 300, 500],
+                y: [0, -50, -100, -80],
+                rotate: [0, 5, 10, 15],
+              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: [0.32, 0, 0.67, 0] }}
+              className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
+            >
+              <div className="glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ring-2 ring-primary/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/20">
+                    <Star className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate">{flyingCard.songTitle}</p>
+                    <p className="text-sm text-muted-foreground truncate">{flyingCard.artistName}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+          <motion.div 
+            className="glass-strong rounded-2xl p-6 md:p-8 space-y-6"
+            animate={flyingCard ? { scale: 0.98, opacity: 0.7 } : { scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className={`glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ${
-              flyingCard.isPriority ? 'ring-2 ring-primary/50' : 'ring-2 ring-primary/30'
-            }`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  flyingCard.isPriority ? 'bg-primary' : 'bg-primary/20'
-                }`}>
-                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-primary-foreground fill-primary-foreground' : 'text-primary'}`} />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <Star className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-xl font-display font-semibold">Submit Your Song</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">
+                  Song Link (Spotify, Apple Music, SoundCloud, etc.) *
+                </label>
+                <Input
+                  placeholder="https://open.spotify.com/track/..."
+                  value={songUrl}
+                  onChange={(e) => setSongUrl(e.target.value)}
+                  className="bg-background/50"
+                />
+                {platform && (
+                  <div className="mt-2">
+                    <Badge variant="queue" className="text-xs">
+                      {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              {showPreview && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="overflow-hidden"
+                >
+                  <label className="text-sm text-muted-foreground mb-2 block">Preview</label>
+                  <MusicEmbed url={songUrl} platform={platform!} />
+                </motion.div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-2 block">Artist Name</label>
+                  <Input
+                    placeholder="Artist name"
+                    value={artistName}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    className="bg-background/50"
+                  />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold truncate">{flyingCard.songTitle}</p>
-                  <p className="text-sm text-muted-foreground truncate">{flyingCard.artistName}</p>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-2 block">Song Title</label>
+                  <Input
+                    placeholder="Song title"
+                    value={songTitle}
+                    onChange={(e) => setSongTitle(e.target.value)}
+                    className="bg-background/50"
+                  />
                 </div>
-                {flyingCard.isPriority && <Sparkles className="w-5 h-5 text-primary" />}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Email (optional, for updates)</label>
+                <Input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Message (optional)</label>
+                <Textarea
+                  placeholder="Why should we check out this song?"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="bg-background/50 min-h-[100px] resize-none rounded-lg border-border focus-visible:ring-primary/50"
+                />
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
 
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-        <motion.div 
-          className="glass-strong rounded-2xl p-6 md:p-8 space-y-6"
-          animate={flyingCard ? { scale: 0.98, opacity: 0.7 } : { scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Star className="w-5 h-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-display font-semibold">Submit Your Song</h2>
+          {/* Submit Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="submit"
+              variant="hero"
+              size="xl"
+              className="flex-1"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Submit Song (Free)
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleSkipTheLine}
+              size="xl"
+              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
+            >
+              <Zap className="w-5 h-5" />
+              Skip the Line
+            </Button>
           </div>
+        </form>
+      </motion.div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">
-                Song Link (Spotify, Apple Music, SoundCloud, etc.) *
-              </label>
-              <Input
-                placeholder="https://open.spotify.com/track/..."
-                value={songUrl}
-                onChange={(e) => setSongUrl(e.target.value)}
-                className="bg-background/50"
-              />
-              {platform && (
-                <div className="mt-2">
-                  <Badge variant="queue" className="text-xs">
-                    {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
-                  </Badge>
+      {/* Priority Payment Dialog */}
+      <Dialog open={showPriorityDialog} onOpenChange={setShowPriorityDialog}>
+        <DialogContent className="glass-strong border-border/50 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-500" />
+              Skip the Line - Priority Submission
+            </DialogTitle>
+            <DialogDescription>
+              Get your song reviewed faster by bidding for priority placement. Higher bids = higher position!
+            </DialogDescription>
+          </DialogHeader>
+
+          {!user ? (
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground text-center">
+                Sign in to use priority submissions
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => handleSocialLogin('google')}
+                  variant="outline"
+                  className="w-full gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </Button>
+                <Button
+                  onClick={() => handleSocialLogin('apple')}
+                  variant="outline"
+                  className="w-full gap-2"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  Continue with Apple
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6 py-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Signed in as {user.email}</span>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  Sign out
+                </Button>
+              </div>
+
+              {highestBid > 0 && (
+                <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-primary/10">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  <span className="text-muted-foreground">
+                    Current highest bid: <span className="text-primary font-semibold">${highestBid}</span>
+                  </span>
                 </div>
               )}
-            </div>
 
-            {showPreview && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="overflow-hidden"
-              >
-                <label className="text-sm text-muted-foreground mb-2 block">Preview</label>
-                <MusicEmbed url={songUrl} platform={platform!} />
-              </motion.div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Artist Name</label>
-                <Input
-                  placeholder="Artist name"
-                  value={artistName}
-                  onChange={(e) => setArtistName(e.target.value)}
-                  className="bg-background/50"
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium">Your Bid Amount</label>
+                  <div className="flex items-center gap-1 text-2xl font-bold text-amber-500">
+                    <DollarSign className="w-6 h-6" />
+                    {priorityAmount}
+                  </div>
+                </div>
+                <Slider
+                  value={[priorityAmount]}
+                  onValueChange={([value]) => setPriorityAmount(value)}
+                  min={5}
+                  max={100}
+                  step={1}
+                  className="w-full"
                 />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>$5 min</span>
+                  <span>$100</span>
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Song Title</label>
-                <Input
-                  placeholder="Song title"
-                  value={songTitle}
-                  onChange={(e) => setSongTitle(e.target.value)}
-                  className="bg-background/50"
-                />
-              </div>
-            </div>
 
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Email (optional, for updates)</label>
-              <Input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background/50"
-              />
-            </div>
+              {priorityAmount > highestBid && highestBid > 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-primary flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  You'll be #1 in the queue!
+                </motion.p>
+              )}
 
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Message (optional)</label>
-              <Textarea
-                placeholder="Why should we check out this song?"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="bg-background/50 min-h-[100px] resize-none rounded-lg border-border focus-visible:ring-primary/50"
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Priority Upgrade with Bidding */}
-        <motion.div
-          className={`glass rounded-2xl p-6 border-2 transition-all duration-300 ${
-            isPriority 
-              ? 'border-primary/50 bg-primary/5' 
-              : 'border-border hover:border-primary/30'
-          }`}
-        >
-          <div 
-            className="flex items-center justify-between cursor-pointer"
-            onClick={() => setIsPriority(!isPriority)}
-          >
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl transition-all ${isPriority ? 'bg-primary/20' : 'bg-secondary'}`}>
-                <Sparkles className={`w-6 h-6 ${isPriority ? 'text-primary' : 'text-muted-foreground'}`} />
-              </div>
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
-                  Skip the Watchlist
-                  <Badge variant="premium">From $5</Badge>
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Pay more to outbid others and get reviewed first
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-sm text-amber-200">
+                  <strong>Song:</strong> {songTitle || 'Untitled'} by {artistName || 'Unknown Artist'}
                 </p>
               </div>
-            </div>
-            <div className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${
-              isPriority ? 'border-primary bg-primary' : 'border-muted-foreground'
-            }`}>
-              {isPriority && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="w-2 h-2 bg-white rounded-full"
-                />
-              )}
-            </div>
-          </div>
 
-          {/* Bidding section */}
-          <AnimatePresence>
-            {isPriority && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
+              <Button
+                onClick={handlePriorityPayment}
+                disabled={isProcessingPayment}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                size="lg"
               >
-                <div className="pt-6 space-y-4">
-                  {highestBid > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <TrendingUp className="w-4 h-4 text-primary" />
-                      <span className="text-muted-foreground">
-                        Current highest bid: <span className="text-primary font-semibold">${highestBid}</span>
-                      </span>
-                    </div>
-                  )}
-
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="text-sm text-muted-foreground">Your bid amount</label>
-                      <div className="flex items-center gap-1 text-2xl font-display font-bold text-primary">
-                        <DollarSign className="w-6 h-6" />
-                        {priorityAmount}
-                      </div>
-                    </div>
-                    <Slider
-                      value={[priorityAmount]}
-                      onValueChange={([value]) => setPriorityAmount(value)}
-                      min={5}
-                      max={100}
-                      step={1}
-                      className="py-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>$5 min</span>
-                      <span>$100</span>
-                    </div>
-                  </div>
-
-                  {priorityAmount > highestBid && highestBid > 0 && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-sm text-primary flex items-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      You'll be #1 in the queue!
-                    </motion.p>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        <Button
-          type="submit"
-          variant={isPriority ? 'premium' : 'hero'}
-          size="xl"
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              {isPriority ? 'Redirecting to payment...' : 'Submitting...'}
-            </>
-          ) : (
-            <>
-              <Send className="w-5 h-5" />
-              {isPriority ? `Submit with Priority - $${priorityAmount}` : 'Submit Song (Free)'}
-            </>
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Redirecting to payment...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Pay ${priorityAmount} & Skip the Line
+                  </>
+                )}
+              </Button>
+            </div>
           )}
-        </Button>
-      </form>
-    </motion.div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
