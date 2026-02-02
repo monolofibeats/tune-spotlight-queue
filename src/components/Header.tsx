@@ -29,7 +29,7 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-4">
             <SocialLinks />
             
-            {isAdmin && (
+            {isAdmin ? (
               <>
                 <Link to="/dashboard">
                   <Button variant="ghost" className="gap-2">
@@ -42,6 +42,12 @@ export function Header() {
                   Logout
                 </Button>
               </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="hero" size="sm" className="gap-2">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
 
@@ -69,7 +75,7 @@ export function Header() {
               <SocialLinks />
             </div>
             
-            {isAdmin && (
+            {isAdmin ? (
               <>
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start gap-2">
@@ -89,6 +95,12 @@ export function Header() {
                   Logout
                 </Button>
               </>
+            ) : (
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="hero" className="w-full">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
         </motion.div>
