@@ -139,15 +139,15 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
           >
             <div className={`glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ${
-              flyingCard.isPriority ? 'ring-2 ring-amber-500/50' : 'ring-2 ring-primary/50'
+              flyingCard.isPriority ? 'ring-2 ring-primary/50' : 'ring-2 ring-primary/30'
             }`}>
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                   flyingCard.isPriority 
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
-                    : 'bg-amber-500/20'
+                    ? 'bg-primary' 
+                    : 'bg-primary/20'
                 }`}>
-                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-white fill-white' : 'text-amber-400'}`} />
+                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-primary-foreground fill-primary-foreground' : 'text-primary'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{flyingCard.songTitle}</p>
