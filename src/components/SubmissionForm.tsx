@@ -255,8 +255,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         <motion.div
           className={`glass rounded-2xl p-6 border-2 transition-all duration-300 cursor-pointer ${
             isPriority 
-              ? 'border-amber-500/50 bg-amber-500/5' 
-              : 'border-border hover:border-amber-500/30'
+              ? 'border-primary/50 bg-primary/5' 
+              : 'border-border hover:border-primary/30'
           }`}
           onClick={() => setIsPriority(!isPriority)}
           whileHover={{ scale: 1.01 }}
@@ -264,8 +264,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl transition-all ${isPriority ? 'bg-amber-500/20' : 'bg-secondary'}`}>
-                <Sparkles className={`w-6 h-6 ${isPriority ? 'text-amber-400' : 'text-muted-foreground'}`} />
+              <div className={`p-3 rounded-xl transition-all ${isPriority ? 'bg-primary/20' : 'bg-secondary'}`}>
+                <Sparkles className={`w-6 h-6 ${isPriority ? 'text-primary' : 'text-muted-foreground'}`} />
               </div>
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
