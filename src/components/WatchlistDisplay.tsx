@@ -53,6 +53,13 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       ...pendingSubmissions.map(s => ({ ...s, isNew: false })),
     ];
 
+    // Sort: priority items first, then by creation date
+    const sortedItems = [...allItems].sort((a, b) => {
+      if (a.isPriority && !b.isPriority) return -1;
+      if (!a.isPriority && b.isPriority) return 1;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
     return (
       <div className="w-full max-w-md" id="watchlist-container">
         <div className="flex items-center justify-between mb-4">
