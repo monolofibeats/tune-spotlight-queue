@@ -76,7 +76,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       watchlistRef?.current?.addNewItem({
         songTitle: cardData.songTitle,
         artistName: cardData.artistName,
-        submitterName: cardData.submitterName,
+        submitterName: '',
         isPriority: cardData.isPriority,
       });
     }, 400);
