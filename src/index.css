@@ -15,7 +15,7 @@
     --popover: 220 20% 7%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 175 80% 50%;
+    --primary: 38 92% 50%;
     --primary-foreground: 220 20% 4%;
 
     --secondary: 220 20% 12%;
@@ -24,7 +24,7 @@
     --muted: 220 15% 15%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 280 70% 60%;
+    --accent: 25 95% 53%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%;
@@ -32,25 +32,25 @@
 
     --border: 220 15% 18%;
     --input: 220 15% 15%;
-    --ring: 175 80% 50%;
+    --ring: 38 92% 50%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --glow-primary: 175 80% 50%;
-    --glow-accent: 280 70% 60%;
-    --gradient-start: 175 80% 50%;
-    --gradient-end: 200 90% 55%;
+    --glow-primary: 38 92% 50%;
+    --glow-accent: 25 95% 53%;
+    --gradient-start: 38 92% 50%;
+    --gradient-end: 25 95% 53%;
     --surface-glass: 220 20% 10%;
 
     --sidebar-background: 220 20% 6%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 175 80% 50%;
+    --sidebar-primary: 38 92% 50%;
     --sidebar-primary-foreground: 220 20% 4%;
     --sidebar-accent: 220 20% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 175 80% 50%;
+    --sidebar-ring: 38 92% 50%;
   }
 
   .dark {
@@ -98,24 +98,24 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500;
   }
 
   .bg-gradient-primary {
-    @apply bg-gradient-to-r from-primary to-cyan-400;
+    @apply bg-gradient-to-r from-amber-400 to-orange-500;
   }
 
   .bg-gradient-accent {
-    @apply bg-gradient-to-r from-accent to-pink-500;
+    @apply bg-gradient-to-r from-orange-500 to-rose-500;
   }
 
   .bg-mesh {
     background-image: 
-      radial-gradient(at 40% 20%, hsl(175 80% 50% / 0.08) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsl(280 70% 60% / 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsl(200 90% 55% / 0.06) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsl(175 80% 50% / 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsl(280 70% 60% / 0.08) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, hsl(38 92% 50% / 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(25 95% 53% / 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsl(45 93% 47% / 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(38 92% 50% / 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsl(25 95% 53% / 0.08) 0px, transparent 50%);
   }
 
   .noise {

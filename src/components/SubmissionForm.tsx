@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Music2, Sparkles, Send, Loader2 } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -145,9 +145,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                   flyingCard.isPriority 
                     ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
-                    : 'bg-primary/20'
+                    : 'bg-amber-500/20'
                 }`}>
-                  <Music2 className={`w-5 h-5 ${flyingCard.isPriority ? 'text-white' : 'text-primary'}`} />
+                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-white fill-white' : 'text-amber-400'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{flyingCard.songTitle}</p>
@@ -171,8 +171,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Music2 className="w-5 h-5 text-primary" />
+            <div className="p-2 rounded-lg bg-amber-500/20">
+              <Star className="w-5 h-5 text-amber-400" />
             </div>
             <h2 className="text-xl font-display font-semibold">Submit Your Song</h2>
           </div>

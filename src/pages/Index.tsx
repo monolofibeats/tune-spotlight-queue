@@ -112,7 +112,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2024 SongReact. Built for music lovers.</p>
+          <p>© 2024 UpStar. Rising stars, one song at a time. ⭐</p>
         </div>
       </footer>
     </div>
