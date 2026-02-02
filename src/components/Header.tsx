@@ -19,7 +19,7 @@ export function Header() {
             <motion.img 
               src={upstarLogo}
               alt="UpStar"
-              className="h-8 w-auto"
+              className="h-14 w-auto drop-shadow-lg"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             />
