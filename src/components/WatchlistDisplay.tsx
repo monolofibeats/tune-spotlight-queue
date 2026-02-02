@@ -1,15 +1,27 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Sparkles, Music } from 'lucide-react';
+import { Eye, Sparkles, Music, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Submission } from '@/types/submission';
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface SubmissionItem {
+  id: string;
+  song_title: string;
+  artist_name: string;
+  is_priority: boolean;
+  amount_paid: number;
+  status: string;
+  created_at: string;
+  isNew?: boolean;
+}
 
 interface WatchlistDisplayProps {
-  submissions: Submission[];
+  onlyRealtime?: boolean;
 }
 
 export interface WatchlistRef {
-  addNewItem: (item: { songTitle: string; artistName: string; submitterName: string; isPriority: boolean }) => void;
+  addNewItem: (item: { songTitle: string; artistName: string; isPriority: boolean; amountPaid?: number }) => void;
+  refreshList: () => void;
 }
 
 const formatTimeAgo = (date: Date): string => {
@@ -22,42 +34,91 @@ const formatTimeAgo = (date: Date): string => {
 };
 
 export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
-  ({ submissions }, ref) => {
-    const [newItems, setNewItems] = useState<Array<{
-      id: string;
-      songTitle: string;
-      artistName: string;
-      submitterName: string;
-      isPriority: boolean;
-      createdAt: Date;
-    }>>([]);
+  ({ onlyRealtime = false }, ref) => {
+    const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
+    const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
+
+    const fetchSubmissions = async () => {
+      const { data, error } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('status', 'pending')
+        .order('amount_paid', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setSubmissions(data);
+      }
+    };
+
+    useEffect(() => {
+      if (!onlyRealtime) {
+        fetchSubmissions();
+      }
+
+      // Subscribe to realtime changes
+      const channel = supabase
+        .channel('submissions_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'submissions',
+          },
+          () => {
+            fetchSubmissions();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }, [onlyRealtime]);
 
     useImperativeHandle(ref, () => ({
       addNewItem: (item) => {
-        const newItem = {
-          ...item,
-          id: `new-${Date.now()}`,
-          createdAt: new Date(),
+        const newItem: SubmissionItem = {
+          id: `local-${Date.now()}`,
+          song_title: item.songTitle,
+          artist_name: item.artistName,
+          is_priority: item.isPriority,
+          amount_paid: item.amountPaid || 0,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+          isNew: true,
         };
-        setNewItems(prev => [newItem, ...prev]);
+        setLocalItems(prev => [newItem, ...prev]);
+        
+        // Remove local item after a few seconds (it will come from realtime)
+        setTimeout(() => {
+          setLocalItems(prev => prev.filter(i => i.id !== newItem.id));
+        }, 3000);
+      },
+      refreshList: () => {
+        fetchSubmissions();
       },
     }));
 
-    const pendingSubmissions = submissions.filter(s => s.status === 'pending');
-    const allItems = [
-      ...newItems.map(item => ({
-        ...item,
-        status: 'pending' as const,
-        isNew: true,
-      })),
-      ...pendingSubmissions.map(s => ({ ...s, isNew: false })),
-    ];
+    // Combine local items with database items
+    const allItems = [...localItems, ...submissions.filter(
+      s => !localItems.some(l => 
+        l.song_title === s.song_title && l.artist_name === s.artist_name
+      )
+    )];
 
-    // Sort: priority items first, then by creation date
+    // Sort: priority/paid items first (by amount), then by creation date
     const sortedItems = [...allItems].sort((a, b) => {
-      if (a.isPriority && !b.isPriority) return -1;
-      if (!a.isPriority && b.isPriority) return 1;
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      // First sort by amount paid (highest first)
+      if (a.amount_paid !== b.amount_paid) {
+        return b.amount_paid - a.amount_paid;
+      }
+      // Then by priority flag
+      if (a.is_priority && !b.is_priority) return -1;
+      if (!a.is_priority && b.is_priority) return 1;
+      // Finally by date
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
     return (
@@ -72,7 +133,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
 
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
-            {sortedItems.slice(0, 5).map((submission, index) => (
+            {sortedItems.slice(0, 10).map((submission, index) => (
               <motion.div
                 key={submission.id}
                 layout
@@ -93,15 +154,15 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                   type: 'spring',
                   stiffness: 500,
                   damping: 30,
-                  delay: submission.isNew ? 0 : index * 0.1,
+                  delay: submission.isNew ? 0 : index * 0.05,
                 }}
                 className={`glass rounded-xl p-4 flex items-center gap-4 ${
                   submission.isNew ? 'ring-2 ring-primary/50 glow-primary' : ''
-                }`}
+                } ${submission.amount_paid > 0 ? 'border border-primary/30' : ''}`}
               >
                 <motion.div 
                   className={`w-10 h-10 rounded-lg flex items-center justify-center font-display font-bold ${
-                    submission.isPriority 
+                    submission.amount_paid > 0 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-muted-foreground'
                   }`}
@@ -115,9 +176,15 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium truncate">
-                      {submission.songTitle || 'Untitled'}
+                      {submission.song_title || 'Untitled'}
                     </p>
-                    {submission.isPriority && (
+                    {submission.amount_paid > 0 && (
+                      <Badge variant="premium" className="text-xs flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        {submission.amount_paid}
+                      </Badge>
+                    )}
+                    {submission.is_priority && (
                       <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                     )}
                     {submission.isNew && (
@@ -131,12 +198,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {submission.artistName || 'Unknown Artist'}
+                    {submission.artist_name || 'Unknown Artist'}
                   </p>
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  {formatTimeAgo(submission.createdAt)}
+                  {formatTimeAgo(new Date(submission.created_at))}
                 </div>
               </motion.div>
             ))}
