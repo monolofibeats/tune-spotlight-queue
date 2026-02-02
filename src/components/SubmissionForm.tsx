@@ -62,7 +62,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       id: `flying-${Date.now()}`,
       songTitle: songTitle || 'Untitled',
       artistName: artistName || 'Unknown Artist',
-      submitterName,
       isPriority,
     };
     
