@@ -97,7 +97,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setSongUrl('');
     setArtistName('');
     setSongTitle('');
-    setSubmitterName('');
     setMessage('');
     setIsPriority(false);
     setIsSubmitting(false);
