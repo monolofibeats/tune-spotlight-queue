@@ -53,6 +53,13 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       ...pendingSubmissions.map(s => ({ ...s, isNew: false })),
     ];
 
+    // Sort: priority items first, then by creation date
+    const sortedItems = [...allItems].sort((a, b) => {
+      if (a.isPriority && !b.isPriority) return -1;
+      if (!a.isPriority && b.isPriority) return 1;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
     return (
       <div className="w-full max-w-md" id="watchlist-container">
         <div className="flex items-center justify-between mb-4">
@@ -60,12 +67,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
             <Eye className="w-5 h-5 text-primary" />
             Watchlist
           </h3>
-          <Badge variant="queue">{allItems.length} pending</Badge>
+          <Badge variant="queue">{sortedItems.length} pending</Badge>
         </div>
 
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
-            {allItems.slice(0, 5).map((submission, index) => (
+            {sortedItems.slice(0, 5).map((submission, index) => (
               <motion.div
                 key={submission.id}
                 layout
@@ -95,7 +102,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                 <motion.div 
                   className={`w-10 h-10 rounded-lg flex items-center justify-center font-display font-bold ${
                     submission.isPriority 
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white' 
+                      ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-muted-foreground'
                   }`}
                   initial={submission.isNew ? { rotate: -180, scale: 0 } : {}}
@@ -111,7 +118,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                       {submission.songTitle || 'Untitled'}
                     </p>
                     {submission.isPriority && (
-                      <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                     )}
                     {submission.isNew && (
                       <motion.span
@@ -124,7 +131,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {submission.artistName || 'Unknown Artist'} • by {submission.submitterName}
+                    {submission.artistName || 'Unknown Artist'}
                   </p>
                 </div>
 
@@ -135,7 +142,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
             ))}
           </AnimatePresence>
 
-          {allItems.length === 0 && (
+          {sortedItems.length === 0 && (
             <div className="glass rounded-xl p-8 text-center">
               <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No songs in watchlist</p>

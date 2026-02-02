@@ -27,7 +27,6 @@ interface FlyingCard {
   id: string;
   songTitle: string;
   artistName: string;
-  submitterName: string;
   isPriority: boolean;
 }
 
@@ -35,7 +34,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
-  const [submitterName, setSubmitterName] = useState('');
   const [message, setMessage] = useState('');
   const [isPriority, setIsPriority] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,10 +46,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!songUrl || !submitterName) {
+    if (!songUrl) {
       toast({
         title: "Missing information",
-        description: "Please fill in the required fields.",
+        description: "Please enter a song link.",
         variant: "destructive",
       });
       return;
@@ -64,7 +62,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       id: `flying-${Date.now()}`,
       songTitle: songTitle || 'Untitled',
       artistName: artistName || 'Unknown Artist',
-      submitterName,
       isPriority,
     };
     
@@ -79,7 +76,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       watchlistRef?.current?.addNewItem({
         songTitle: cardData.songTitle,
         artistName: cardData.artistName,
-        submitterName: cardData.submitterName,
+        submitterName: '',
         isPriority: cardData.isPriority,
       });
     }, 400);
@@ -100,7 +97,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setSongUrl('');
     setArtistName('');
     setSongTitle('');
-    setSubmitterName('');
     setMessage('');
     setIsPriority(false);
     setIsSubmitting(false);
@@ -152,7 +148,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{flyingCard.songTitle}</p>
                   <p className="text-sm text-muted-foreground truncate">
-                    {flyingCard.artistName} • {flyingCard.submitterName}
+                    {flyingCard.artistName}
                   </p>
                 </div>
                 {flyingCard.isPriority && (
@@ -227,16 +223,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   className="bg-background/50"
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Your Name *</label>
-              <Input
-                placeholder="How should we call you?"
-                value={submitterName}
-                onChange={(e) => setSubmitterName(e.target.value)}
-                className="bg-background/50"
-              />
             </div>
 
             <div>
