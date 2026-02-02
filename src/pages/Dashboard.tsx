@@ -250,7 +250,7 @@ const Dashboard = () => {
                     </label>
                     <div className="flex gap-2 max-w-md">
                       <Input 
-                        value="songreact.app/submit/your-stream"
+                        value="upstar.app/submit/your-stream"
                         readOnly
                         className="bg-background/30"
                       />

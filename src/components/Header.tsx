@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Music2, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Star, Menu, X, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -13,12 +13,13 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3">
             <motion.div 
-              className="p-2 rounded-xl bg-gradient-to-br from-primary to-cyan-400"
-              whileHover={{ rotate: 10 }}
+              className="p-2 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500"
+              whileHover={{ rotate: 20, scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
-              <Music2 className="w-6 h-6 text-primary-foreground" />
+              <Star className="w-6 h-6 text-white fill-white" />
             </motion.div>
-            <span className="font-display font-bold text-xl">SongReact</span>
+            <span className="font-display font-bold text-xl">UpStar</span>
           </Link>
 
           {/* Desktop Nav */}
