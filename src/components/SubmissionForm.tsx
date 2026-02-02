@@ -156,7 +156,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   </p>
                 </div>
                 {flyingCard.isPriority && (
-                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <Sparkles className="w-5 h-5 text-primary" />
                 )}
               </div>
             </div>
