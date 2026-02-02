@@ -102,7 +102,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                 <motion.div 
                   className={`w-10 h-10 rounded-lg flex items-center justify-center font-display font-bold ${
                     submission.isPriority 
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white' 
+                      ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-muted-foreground'
                   }`}
                   initial={submission.isNew ? { rotate: -180, scale: 0 } : {}}
