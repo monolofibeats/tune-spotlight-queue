@@ -98,24 +98,24 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-500;
   }
 
   .bg-gradient-primary {
-    @apply bg-gradient-to-r from-amber-400 to-orange-500;
+    @apply bg-gradient-to-r from-yellow-400 to-yellow-500;
   }
 
   .bg-gradient-accent {
-    @apply bg-gradient-to-r from-orange-500 to-rose-500;
+    @apply bg-gradient-to-r from-yellow-500 to-amber-500;
   }
 
   .bg-mesh {
     background-image: 
-      radial-gradient(at 40% 20%, hsl(38 92% 50% / 0.08) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, hsl(25 95% 53% / 0.08) 0px, transparent 50%),
-      radial-gradient(at 0% 50%, hsl(45 93% 47% / 0.06) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, hsl(38 92% 50% / 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsl(25 95% 53% / 0.08) 0px, transparent 50%);
+      radial-gradient(at 40% 20%, hsl(50 100% 50% / 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsl(45 100% 55% / 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsl(50 100% 50% / 0.04) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsl(50 100% 50% / 0.03) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsl(45 100% 55% / 0.05) 0px, transparent 50%);
   }
 
   .noise {
