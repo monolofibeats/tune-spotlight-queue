@@ -27,7 +27,6 @@ interface FlyingCard {
   id: string;
   songTitle: string;
   artistName: string;
-  submitterName: string;
   isPriority: boolean;
 }
 
