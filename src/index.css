@@ -98,15 +98,15 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500;
   }
 
   .bg-gradient-primary {
-    @apply bg-gradient-to-r from-primary to-cyan-400;
+    @apply bg-gradient-to-r from-amber-400 to-orange-500;
   }
 
   .bg-gradient-accent {
-    @apply bg-gradient-to-r from-accent to-pink-500;
+    @apply bg-gradient-to-r from-orange-500 to-rose-500;
   }
 
   .bg-mesh {
