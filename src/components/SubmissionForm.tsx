@@ -226,16 +226,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             </div>
 
             <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Your Name *</label>
-              <Input
-                placeholder="How should we call you?"
-                value={submitterName}
-                onChange={(e) => setSubmitterName(e.target.value)}
-                className="bg-background/50"
-              />
-            </div>
-
-            <div>
               <label className="text-sm text-muted-foreground mb-2 block">Message (optional)</label>
               <Textarea
                 placeholder="Why should we check out this song?"

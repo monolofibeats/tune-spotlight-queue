@@ -142,7 +142,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
             ))}
           </AnimatePresence>
 
-          {allItems.length === 0 && (
+          {sortedItems.length === 0 && (
             <div className="glass rounded-xl p-8 text-center">
               <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No songs in watchlist</p>
