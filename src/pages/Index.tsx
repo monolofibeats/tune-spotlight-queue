@@ -103,7 +103,7 @@ const Index = () => {
       {/* Stream Section */}
       <section className="pb-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          <StreamEmbed platform="twitch" channelName="mosi391" />
+          <StreamEmbed />
         </div>
       </section>
 

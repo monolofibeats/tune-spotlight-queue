@@ -116,17 +116,19 @@ const Dashboard = () => {
   };
 
   const fetchStreamConfig = async () => {
-    const { data, error } = await supabase
-      .from('stream_config')
+    // Using type assertion since stream_config table may not be in types yet
+    const { data, error } = await (supabase
+      .from('stream_config' as any)
       .select('*')
       .limit(1)
-      .maybeSingle();
+      .maybeSingle()) as any;
 
     if (!error && data) {
-      setStreamConfig(data);
-      setStreamType(data.stream_type);
-      setStreamUrl(data.stream_url || '');
-      setVideoUrl(data.video_url || '');
+      const config = data as StreamConfig;
+      setStreamConfig(config);
+      setStreamType(config.stream_type);
+      setStreamUrl(config.stream_url || '');
+      setVideoUrl(config.video_url || '');
     }
   };
 
@@ -267,25 +269,27 @@ const Dashboard = () => {
 
     try {
       if (streamConfig) {
-        const { error } = await supabase
-          .from('stream_config')
+        // Using type assertion since stream_config table may not be in types yet
+        const { error } = await (supabase
+          .from('stream_config' as any)
           .update({
             stream_type: streamType,
             stream_url: streamUrl || null,
             video_url: videoUrl || null,
-          })
-          .eq('id', streamConfig.id);
+          } as any)
+          .eq('id', streamConfig.id)) as any;
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from('stream_config')
+        // Using type assertion since stream_config table may not be in types yet
+        const { error } = await (supabase
+          .from('stream_config' as any)
           .insert({
             stream_type: streamType,
             stream_url: streamUrl || null,
             video_url: videoUrl || null,
             is_active: true,
-          });
+          } as any)) as any;
 
         if (error) throw error;
       }

@@ -42,15 +42,16 @@ export function StreamEmbed() {
 
   const fetchConfig = async () => {
     try {
-      const { data, error } = await supabase
-        .from('stream_config')
+      // Using type assertion since stream_config table may not be in types yet
+      const { data, error } = await (supabase
+        .from('stream_config' as any)
         .select('*')
         .eq('is_active', true)
         .limit(1)
-        .maybeSingle();
+        .maybeSingle()) as any;
 
       if (error) throw error;
-      setConfig(data);
+      setConfig(data as StreamConfig | null);
     } catch (error) {
       console.error('Error fetching stream config:', error);
     } finally {
