@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
 import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
-import { mockSubmissions } from '@/lib/mockData';
-import { Sparkles, Zap, Shield, Music } from 'lucide-react';
+import { StreamEmbed } from '@/components/StreamEmbed';
+import { SpecialEventBanner } from '@/components/SpecialEventBanner';
+import { Sparkles, Zap, Shield, Music, DollarSign } from 'lucide-react';
 
 const features = [
   {
@@ -18,9 +19,9 @@ const features = [
     description: 'Listen directly in the stream',
   },
   {
-    icon: Sparkles,
-    title: 'Priority Watchlist',
-    description: 'Skip ahead for faster reviews',
+    icon: DollarSign,
+    title: 'Bid for Priority',
+    description: 'Pay more to skip ahead in queue',
   },
   {
     icon: Shield,
@@ -62,7 +63,7 @@ const Index = () => {
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Submit your songs for live reactions. No sign-up required. 
-              Get honest feedback from creators and their communities.
+              Bid for priority placement and get reviewed first!
             </p>
           </motion.div>
 
@@ -92,6 +93,20 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Special Event Banner */}
+      <section className="px-4 pb-8">
+        <div className="container mx-auto max-w-4xl">
+          <SpecialEventBanner />
+        </div>
+      </section>
+
+      {/* Stream Section */}
+      <section className="pb-12 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <StreamEmbed platform="twitch" channelName="mosi391" />
+        </div>
+      </section>
+
       {/* Main Content */}
       <section className="pb-20 px-4">
         <div className="container mx-auto">
@@ -103,7 +118,7 @@ const Index = () => {
 
             {/* Watchlist Display */}
             <div className="w-full lg:w-auto lg:sticky lg:top-24">
-              <WatchlistDisplay ref={watchlistRef} submissions={mockSubmissions} />
+              <WatchlistDisplay ref={watchlistRef} />
             </div>
           </div>
         </div>
