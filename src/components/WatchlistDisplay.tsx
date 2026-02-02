@@ -67,12 +67,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
             <Eye className="w-5 h-5 text-primary" />
             Watchlist
           </h3>
-          <Badge variant="queue">{allItems.length} pending</Badge>
+          <Badge variant="queue">{sortedItems.length} pending</Badge>
         </div>
 
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
-            {allItems.slice(0, 5).map((submission, index) => (
+            {sortedItems.slice(0, 5).map((submission, index) => (
               <motion.div
                 key={submission.id}
                 layout
