@@ -139,15 +139,15 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
           >
             <div className={`glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ${
-              flyingCard.isPriority ? 'ring-2 ring-amber-500/50' : 'ring-2 ring-primary/50'
+              flyingCard.isPriority ? 'ring-2 ring-primary/50' : 'ring-2 ring-primary/30'
             }`}>
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                   flyingCard.isPriority 
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
-                    : 'bg-amber-500/20'
+                    ? 'bg-primary' 
+                    : 'bg-primary/20'
                 }`}>
-                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-white fill-white' : 'text-amber-400'}`} />
+                  <Star className={`w-5 h-5 ${flyingCard.isPriority ? 'text-primary-foreground fill-primary-foreground' : 'text-primary'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{flyingCard.songTitle}</p>
@@ -156,7 +156,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   </p>
                 </div>
                 {flyingCard.isPriority && (
-                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <Sparkles className="w-5 h-5 text-primary" />
                 )}
               </div>
             </div>
@@ -171,8 +171,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-amber-500/20">
-              <Star className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Star className="w-5 h-5 text-primary" />
             </div>
             <h2 className="text-xl font-display font-semibold">Submit Your Song</h2>
           </div>
@@ -255,8 +255,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         <motion.div
           className={`glass rounded-2xl p-6 border-2 transition-all duration-300 cursor-pointer ${
             isPriority 
-              ? 'border-amber-500/50 bg-amber-500/5' 
-              : 'border-border hover:border-amber-500/30'
+              ? 'border-primary/50 bg-primary/5' 
+              : 'border-border hover:border-primary/30'
           }`}
           onClick={() => setIsPriority(!isPriority)}
           whileHover={{ scale: 1.01 }}
@@ -264,8 +264,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl transition-all ${isPriority ? 'bg-amber-500/20' : 'bg-secondary'}`}>
-                <Sparkles className={`w-6 h-6 ${isPriority ? 'text-amber-400' : 'text-muted-foreground'}`} />
+              <div className={`p-3 rounded-xl transition-all ${isPriority ? 'bg-primary/20' : 'bg-secondary'}`}>
+                <Sparkles className={`w-6 h-6 ${isPriority ? 'text-primary' : 'text-muted-foreground'}`} />
               </div>
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
@@ -279,7 +279,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             </div>
             <div className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${
               isPriority 
-                ? 'border-amber-500 bg-amber-500' 
+                ? 'border-primary bg-primary' 
                 : 'border-muted-foreground'
             }`}>
               {isPriority && (
