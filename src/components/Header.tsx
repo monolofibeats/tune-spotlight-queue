@@ -75,7 +75,7 @@ export function Header() {
               <SocialLinks />
             </div>
             
-            {isAdmin && (
+            {isAdmin ? (
               <>
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start gap-2">
@@ -95,6 +95,12 @@ export function Header() {
                   Logout
                 </Button>
               </>
+            ) : (
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="hero" className="w-full">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </nav>
         </motion.div>
