@@ -37,10 +37,10 @@
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --glow-primary: 175 80% 50%;
-    --glow-accent: 280 70% 60%;
-    --gradient-start: 175 80% 50%;
-    --gradient-end: 200 90% 55%;
+    --glow-primary: 38 92% 50%;
+    --glow-accent: 25 95% 53%;
+    --gradient-start: 38 92% 50%;
+    --gradient-end: 25 95% 53%;
     --surface-glass: 220 20% 10%;
 
     --sidebar-background: 220 20% 6%;
