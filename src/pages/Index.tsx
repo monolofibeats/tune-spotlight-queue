@@ -1,7 +1,8 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
-import { QueueDisplay } from '@/components/QueueDisplay';
+import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { mockSubmissions } from '@/lib/mockData';
 import { Sparkles, Zap, Shield, Music } from 'lucide-react';
 
@@ -18,7 +19,7 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: 'Priority Queue',
+    title: 'Priority Watchlist',
     description: 'Skip ahead for faster reviews',
   },
   {
@@ -29,6 +30,8 @@ const features = [
 ];
 
 const Index = () => {
+  const watchlistRef = useRef<WatchlistRef>(null);
+
   return (
     <div className="min-h-screen bg-background bg-mesh noise relative">
       <Header />
@@ -95,12 +98,12 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
             {/* Submission Form */}
             <div className="flex-1 w-full">
-              <SubmissionForm />
+              <SubmissionForm watchlistRef={watchlistRef} />
             </div>
 
-            {/* Queue Display */}
+            {/* Watchlist Display */}
             <div className="w-full lg:w-auto lg:sticky lg:top-24">
-              <QueueDisplay submissions={mockSubmissions} />
+              <WatchlistDisplay ref={watchlistRef} submissions={mockSubmissions} />
             </div>
           </div>
         </div>

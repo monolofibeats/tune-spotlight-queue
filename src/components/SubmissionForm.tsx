@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Music2, Sparkles, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { MusicEmbed } from './MusicEmbed';
 import { toast } from '@/hooks/use-toast';
+import { WatchlistRef } from './WatchlistDisplay';
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
 
@@ -18,7 +19,19 @@ const detectPlatform = (url: string): Platform => {
   return 'other';
 };
 
-export function SubmissionForm() {
+interface SubmissionFormProps {
+  watchlistRef?: React.RefObject<WatchlistRef>;
+}
+
+interface FlyingCard {
+  id: string;
+  songTitle: string;
+  artistName: string;
+  submitterName: string;
+  isPriority: boolean;
+}
+
+export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
@@ -26,6 +39,8 @@ export function SubmissionForm() {
   const [message, setMessage] = useState('');
   const [isPriority, setIsPriority] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
@@ -44,14 +59,41 @@ export function SubmissionForm() {
 
     setIsSubmitting(true);
     
+    // Create flying card data
+    const cardData: FlyingCard = {
+      id: `flying-${Date.now()}`,
+      songTitle: songTitle || 'Untitled',
+      artistName: artistName || 'Unknown Artist',
+      submitterName,
+      isPriority,
+    };
+    
+    // Start the flying animation
+    setFlyingCard(cardData);
+    
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Add to watchlist when animation is midway
+    setTimeout(() => {
+      watchlistRef?.current?.addNewItem({
+        songTitle: cardData.songTitle,
+        artistName: cardData.artistName,
+        submitterName: cardData.submitterName,
+        isPriority: cardData.isPriority,
+      });
+    }, 400);
+    
+    // Clear flying card after animation completes
+    setTimeout(() => {
+      setFlyingCard(null);
+    }, 800);
     
     toast({
       title: "Song submitted! 🎵",
       description: isPriority 
-        ? "Your song has been added to the priority queue!" 
-        : "Your song has been added to the queue.",
+        ? "Your song has been added to the priority watchlist!" 
+        : "Your song has been added to the watchlist.",
     });
     
     // Reset form
@@ -69,10 +111,65 @@ export function SubmissionForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full max-w-2xl mx-auto"
+      className="w-full max-w-2xl mx-auto relative"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="glass-strong rounded-2xl p-6 md:p-8 space-y-6">
+      {/* Flying Card Animation */}
+      <AnimatePresence>
+        {flyingCard && (
+          <motion.div
+            key={flyingCard.id}
+            initial={{ 
+              opacity: 1, 
+              scale: 1,
+              x: 0,
+              y: 0,
+            }}
+            animate={{ 
+              opacity: [1, 1, 0.8, 0],
+              scale: [1, 0.9, 0.7, 0.5],
+              x: [0, 100, 300, 500],
+              y: [0, -50, -100, -80],
+              rotate: [0, 5, 10, 15],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ 
+              duration: 0.8,
+              ease: [0.32, 0, 0.67, 0],
+            }}
+            className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
+          >
+            <div className={`glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ${
+              flyingCard.isPriority ? 'ring-2 ring-amber-500/50' : 'ring-2 ring-primary/50'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  flyingCard.isPriority 
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-500' 
+                    : 'bg-primary/20'
+                }`}>
+                  <Music2 className={`w-5 h-5 ${flyingCard.isPriority ? 'text-white' : 'text-primary'}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">{flyingCard.songTitle}</p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {flyingCard.artistName} • {flyingCard.submitterName}
+                  </p>
+                </div>
+                {flyingCard.isPriority && (
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+        <motion.div 
+          className="glass-strong rounded-2xl p-6 md:p-8 space-y-6"
+          animate={flyingCard ? { scale: 0.98, opacity: 0.7 } : { scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-primary/20">
               <Music2 className="w-5 h-5 text-primary" />
@@ -152,7 +249,7 @@ export function SubmissionForm() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Priority Upgrade */}
         <motion.div
@@ -172,7 +269,7 @@ export function SubmissionForm() {
               </div>
               <div>
                 <h3 className="font-semibold flex items-center gap-2">
-                  Skip the Queue
+                  Skip the Watchlist
                   <Badge variant="premium">$5</Badge>
                 </h3>
                 <p className="text-sm text-muted-foreground">
