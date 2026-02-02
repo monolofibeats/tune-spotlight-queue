@@ -46,10 +46,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!songUrl || !submitterName) {
+    if (!songUrl) {
       toast({
         title: "Missing information",
-        description: "Please fill in the required fields.",
+        description: "Please enter a song link.",
         variant: "destructive",
       });
       return;
