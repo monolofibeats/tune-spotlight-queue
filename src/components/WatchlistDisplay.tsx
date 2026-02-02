@@ -131,7 +131,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {submission.artistName || 'Unknown Artist'} • by {submission.submitterName}
+                    {submission.artistName || 'Unknown Artist'}
                   </p>
                 </div>
 
