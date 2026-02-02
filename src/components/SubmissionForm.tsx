@@ -148,7 +148,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{flyingCard.songTitle}</p>
                   <p className="text-sm text-muted-foreground truncate">
-                    {flyingCard.artistName} • {flyingCard.submitterName}
+                    {flyingCard.artistName}
                   </p>
                 </div>
                 {flyingCard.isPriority && (
