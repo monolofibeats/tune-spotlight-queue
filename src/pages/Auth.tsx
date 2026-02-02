@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail, Eye, EyeOff, Loader2, ArrowLeft, Zap } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, Loader2, ArrowLeft, Zap, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,13 +9,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from '@/hooks/use-toast';
 import upstarLogo from '@/assets/upstar-logo.png';
+import { z } from 'zod';
+
+const authSchema = z.object({
+  email: z.string().trim().email({ message: "Invalid email address" }).max(255),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }).max(72),
+});
 
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
+  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -44,10 +52,11 @@ export default function Auth() {
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    const validation = authSchema.safeParse({ email, password });
+    if (!validation.success) {
       toast({
-        title: "Missing credentials",
-        description: "Please enter your email and password.",
+        title: "Validation error",
+        description: validation.error.errors[0].message,
         variant: "destructive",
       });
       return;
@@ -57,7 +66,7 @@ export default function Auth() {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -86,6 +95,66 @@ export default function Auth() {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       toast({
         title: "Login failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const validation = authSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast({
+        title: "Validation error",
+        description: validation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        if (error.message.includes('already registered')) {
+          throw new Error('This email is already registered. Please sign in instead.');
+        }
+        throw error;
+      }
+
+      toast({
+        title: "Account created! 🎉",
+        description: "Please check your email to verify your account.",
+      });
+
+      setIsSignUp(false);
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
+      toast({
+        title: "Sign up failed",
         description: errorMessage,
         variant: "destructive",
       });
@@ -130,9 +199,11 @@ export default function Auth() {
                 className="h-16 w-auto mx-auto mb-4 drop-shadow-lg"
               />
             </Link>
-            <h1 className="text-2xl font-display font-bold mb-2">Sign In</h1>
+            <h1 className="text-2xl font-display font-bold mb-2">
+              {isSignUp ? 'Create Account' : 'Sign In'}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Access your account or skip the line
+              {isSignUp ? 'Join UpStar today' : 'Access your account or skip the line'}
             </p>
           </div>
 
@@ -144,7 +215,7 @@ export default function Auth() {
               </TabsTrigger>
               <TabsTrigger value="admin" className="gap-2">
                 <Lock className="w-4 h-4" />
-                Admin
+                Email Login
               </TabsTrigger>
             </TabsList>
 
@@ -218,7 +289,7 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="admin" className="space-y-4">
-              <form onSubmit={handleAdminLogin} className="space-y-4">
+              <form onSubmit={isSignUp ? handleSignUp : handleAdminLogin} className="space-y-4">
                 <div>
                   <label className="text-sm text-muted-foreground mb-2 block">
                     Email
@@ -227,7 +298,7 @@ export default function Auth() {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
                       type="email"
-                      placeholder="admin@upstar.com"
+                      placeholder="your@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
@@ -258,6 +329,24 @@ export default function Auth() {
                   </div>
                 </div>
 
+                {isSignUp && (
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-2 block">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   variant="hero"
@@ -268,19 +357,40 @@ export default function Auth() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Signing in...
+                      {isSignUp ? 'Creating account...' : 'Signing in...'}
+                    </>
+                  ) : isSignUp ? (
+                    <>
+                      <UserPlus className="w-5 h-5" />
+                      Create Account
                     </>
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
-                      Sign In as Admin
+                      Sign In
                     </>
                   )}
                 </Button>
               </form>
 
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                </button>
+              </div>
+
               <p className="text-xs text-muted-foreground text-center">
-                Admin access is restricted to authorized personnel only.
+                {isSignUp 
+                  ? 'Create an account to access all features.'
+                  : 'Sign in with your email and password.'}
               </p>
             </TabsContent>
           </Tabs>
