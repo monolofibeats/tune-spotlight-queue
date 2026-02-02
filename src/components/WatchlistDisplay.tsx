@@ -118,7 +118,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                       {submission.songTitle || 'Untitled'}
                     </p>
                     {submission.isPriority && (
-                      <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                      <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
                     )}
                     {submission.isNew && (
                       <motion.span
