@@ -14,6 +14,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
+import { usePricingConfig } from '@/hooks/usePricingConfig';
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,7 @@ interface FlyingCard {
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
+  const { minAmount, maxAmount, step, config } = usePricingConfig();
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
@@ -63,6 +65,13 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+
+  // Update priority amount when config changes
+  useEffect(() => {
+    if (config) {
+      setPriorityAmount(minAmount);
+    }
+  }, [config, minAmount]);
 
   // Check user auth state
   useEffect(() => {
@@ -595,7 +604,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-primary/10">
                   <TrendingUp className="w-4 h-4 text-primary" />
                   <span className="text-muted-foreground">
-                    Current highest bid: <span className="text-primary font-semibold">${highestBid}</span>
+                    Current highest bid: <span className="text-primary font-semibold">€{highestBid.toFixed(2)}</span>
                   </span>
                 </div>
               )}
@@ -610,8 +619,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                       <span className="text-emerald-400">#{priorityAmount}</span>
                     ) : (
                       <>
-                        <DollarSign className="w-6 h-6" />
-                        {priorityAmount}
+                        <span className="text-lg">€</span>
+                        {priorityAmount.toFixed(2)}
                       </>
                     )}
                   </div>
@@ -619,14 +628,14 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <Slider
                   value={[priorityAmount]}
                   onValueChange={([value]) => setPriorityAmount(value)}
-                  min={5}
-                  max={100}
-                  step={1}
+                  min={minAmount}
+                  max={maxAmount}
+                  step={step}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{isAdmin ? 'Lower priority' : '$5 min'}</span>
-                  <span>{isAdmin ? 'Higher priority' : '$100'}</span>
+                  <span>{isAdmin ? 'Lower priority' : `€${minAmount.toFixed(2)} min`}</span>
+                  <span>{isAdmin ? 'Higher priority' : `€${maxAmount.toFixed(2)}`}</span>
                 </div>
               </div>
 
@@ -669,7 +678,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 ) : (
                   <>
                     <Zap className="w-4 h-4" />
-                    Pay ${priorityAmount} & Skip the Line
+                    Pay €{priorityAmount.toFixed(2)} & Skip the Line
                   </>
                 )}
               </Button>
