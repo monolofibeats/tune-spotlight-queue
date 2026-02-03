@@ -145,6 +145,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     verifyPayment();
   }, [searchParams, watchlistRef]);
 
+  const { play } = useSoundEffects();
+
   const handleFreeSubmit = async () => {
     // Direct database insert for free submissions
     const { error } = await supabase.from('submissions').insert({
@@ -156,6 +158,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       email: email || null,
       amount_paid: 0,
       is_priority: false,
+      user_id: user?.id || null,
     });
 
     if (error) {
