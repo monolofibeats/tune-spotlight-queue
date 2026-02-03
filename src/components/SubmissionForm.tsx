@@ -12,6 +12,7 @@ import { WatchlistRef } from './WatchlistDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   Dialog,
   DialogContent,
