@@ -38,6 +38,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SessionManager } from '@/components/SessionManager';
 import { AdminSpotManager } from '@/components/AdminSpotManager';
+import { ScreenStreamer } from '@/components/ScreenStreamer';
 
 interface Submission {
   id: string;
@@ -583,6 +584,9 @@ const Dashboard = () => {
             <TabsContent value="stream" className="space-y-6">
               {/* Session Manager */}
               <SessionManager />
+              
+              {/* Screen Streamer */}
+              <ScreenStreamer />
               
               {/* Pre-Stream Spots Manager */}
               <AdminSpotManager />
