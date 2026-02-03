@@ -187,7 +187,16 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
 
         channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
           if (payload.fromBroadcaster && payload.targetViewerId === viewerId && payload.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+            // Only add ICE candidate if remote description is already set
+            if (pc.remoteDescription) {
+              try {
+                await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+              } catch (err) {
+                console.warn('Failed to add ICE candidate:', err);
+              }
+            } else {
+              console.log('Skipping ICE candidate - remote description not set yet');
+            }
           }
         });
 
