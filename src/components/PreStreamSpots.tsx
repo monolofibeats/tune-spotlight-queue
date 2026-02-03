@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Star, Zap, Loader2, Lock, Check, Shield } from 'lucide-react';
+import { Crown, Star, Zap, Loader2, Lock, Check, Shield, Upload, X, Music2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -27,13 +27,16 @@ interface PreStreamSpot {
   submission_id: string | null;
 }
 
-const SPOT_CONFIG = [
-  { number: 1, price: 100, label: 'First', color: 'from-yellow-400 to-amber-500' },
-  { number: 2, price: 75, label: 'Second', color: 'from-gray-300 to-gray-400' },
-  { number: 3, price: 50, label: 'Third', color: 'from-amber-600 to-amber-700' },
-  { number: 4, price: 30, label: 'Fourth', color: 'from-zinc-400 to-zinc-500' },
-  { number: 5, price: 15, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
+const SPOT_COLORS = [
+  { number: 1, label: 'First', color: 'from-yellow-400 to-amber-500' },
+  { number: 2, label: 'Second', color: 'from-gray-300 to-gray-400' },
+  { number: 3, label: 'Third', color: 'from-amber-600 to-amber-700' },
+  { number: 4, label: 'Fourth', color: 'from-zinc-400 to-zinc-500' },
+  { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
+
+const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export function PreStreamSpots() {
   const { user, isAdmin } = useAuth();
@@ -47,7 +50,10 @@ export function PreStreamSpots() {
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
   const [message, setMessage] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSpots = async () => {
     const { data, error } = await (supabase
@@ -116,6 +122,77 @@ export function PreStreamSpots() {
     verifyPayment();
   }, [searchParams, play]);
 
+  const uploadAudioFile = async (): Promise<string | null> => {
+    if (!audioFile) return null;
+    
+    setIsUploadingFile(true);
+    try {
+      const fileExt = audioFile.name.split('.').pop();
+      const fileName = `spots/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('song-files')
+        .upload(fileName, audioFile);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('song-files')
+        .getPublicUrl(fileName);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw new Error('Failed to upload audio file');
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a .wav, .mp3, or .flac file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 50MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setAudioFile(file);
+  };
+
+  const removeAudioFile = () => {
+    setAudioFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedSpot(null);
+    setSongUrl('');
+    setArtistName('');
+    setSongTitle('');
+    setMessage('');
+    setAudioFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // Admin bypass: claim spot without payment
   const handleAdminClaimSpot = async () => {
     const spot = spots.find(s => s.spot_number === selectedSpot);
@@ -124,6 +201,9 @@ export function PreStreamSpots() {
     setIsPurchasing(true);
 
     try {
+      // Upload audio file if present
+      const audioFileUrl = await uploadAudioFile();
+
       // Create submission first
       const { data: submission, error: submissionError } = await supabase
         .from('submissions')
@@ -134,9 +214,10 @@ export function PreStreamSpots() {
           artist_name: artistName || 'Unknown Artist',
           song_title: songTitle || 'Untitled',
           message: message || null,
-          amount_paid: SPOT_CONFIG.find(c => c.number === selectedSpot)?.price || 0,
+          amount_paid: spot.price_cents / 100,
           is_priority: true,
           user_id: user?.id || null,
+          audio_file_url: audioFileUrl,
         })
         .select()
         .single();
@@ -162,11 +243,7 @@ export function PreStreamSpots() {
         description: "Admin bypass: No payment required",
       });
       
-      setSelectedSpot(null);
-      setSongUrl('');
-      setArtistName('');
-      setSongTitle('');
-      setMessage('');
+      resetForm();
       fetchSpots();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to claim spot';
@@ -218,14 +295,19 @@ export function PreStreamSpots() {
     setIsPurchasing(true);
 
     try {
+      // Upload audio file first if present
+      const audioFileUrl = await uploadAudioFile();
+
       const { data, error } = await supabase.functions.invoke('purchase-prestream-spot', {
         body: {
           spotNumber: selectedSpot,
           spotId: spot.id,
+          priceCents: spot.price_cents,
           songUrl,
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
           message,
+          audioFileUrl,
           platform: songUrl.includes('spotify') ? 'spotify' : 
                    songUrl.includes('soundcloud') ? 'soundcloud' : 'other',
         },
@@ -254,6 +336,9 @@ export function PreStreamSpots() {
   // If no spots exist, show nothing
   if (spots.length === 0) return null;
 
+  const selectedSpotData = spots.find(s => s.spot_number === selectedSpot);
+  const selectedSpotColor = SPOT_COLORS.find(c => c.number === selectedSpot);
+
   return (
     <>
       <motion.div
@@ -274,9 +359,10 @@ export function PreStreamSpots() {
         </div>
 
         <div className="grid grid-cols-5 gap-2 md:gap-3">
-          {SPOT_CONFIG.map((config) => {
+          {SPOT_COLORS.map((config) => {
             const spot = spots.find(s => s.spot_number === config.number);
             const isAvailable = spot?.is_available ?? false;
+            const priceEuros = spot ? spot.price_cents / 100 : 0;
 
             return (
               <motion.button
@@ -295,7 +381,7 @@ export function PreStreamSpots() {
                   #{config.number}
                 </span>
                 <span className="text-xs font-semibold text-black/80">
-                  €{config.price}
+                  €{priceEuros}
                 </span>
                 {!isAvailable && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-xl">
@@ -313,7 +399,7 @@ export function PreStreamSpots() {
       </motion.div>
 
       {/* Purchase Dialog */}
-      <Dialog open={selectedSpot !== null} onOpenChange={() => setSelectedSpot(null)}>
+      <Dialog open={selectedSpot !== null} onOpenChange={() => resetForm()}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -321,7 +407,7 @@ export function PreStreamSpots() {
               Purchase Spot #{selectedSpot}
             </DialogTitle>
             <DialogDescription>
-              Your song will be reviewed {SPOT_CONFIG.find(c => c.number === selectedSpot)?.label?.toLowerCase()} 
+              Your song will be reviewed {selectedSpotColor?.label?.toLowerCase()} 
               {' '}when the stream starts
             </DialogDescription>
           </DialogHeader>
@@ -387,6 +473,52 @@ export function PreStreamSpots() {
                 />
               </div>
 
+              {/* Audio File Upload */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">
+                  Audio File (optional) - .wav, .mp3, .flac
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="spot-audio-file-input"
+                />
+                {audioFile ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <Music2 className="w-5 h-5 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{audioFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeAudioFile}
+                      className="shrink-0 h-8 w-8 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-10 text-sm border-dashed"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Audio File
+                  </Button>
+                )}
+              </div>
+
               <div className={`flex items-center justify-between p-3 rounded-lg ${
                 isAdmin 
                   ? 'bg-emerald-500/10 border border-emerald-500/30' 
@@ -394,23 +526,23 @@ export function PreStreamSpots() {
               }`}>
                 <span className="font-medium">{isAdmin ? 'Cost' : 'Total'}</span>
                 <span className={`text-xl font-display font-bold ${isAdmin ? 'text-emerald-400' : 'text-primary'}`}>
-                  {isAdmin ? 'FREE' : `€${SPOT_CONFIG.find(c => c.number === selectedSpot)?.price}`}
+                  {isAdmin ? 'FREE' : `€${selectedSpotData ? selectedSpotData.price_cents / 100 : 0}`}
                 </span>
               </div>
 
               <Button
                 onClick={handlePurchase}
-                disabled={isPurchasing || !songUrl}
+                disabled={isPurchasing || isUploadingFile || !songUrl}
                 className={`w-full ${isAdmin 
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
                   : ''
                 }`}
                 size="lg"
               >
-                {isPurchasing ? (
+                {isPurchasing || isUploadingFile ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    {isAdmin ? 'Claiming...' : 'Processing...'}
+                    {isUploadingFile ? 'Uploading file...' : isAdmin ? 'Claiming...' : 'Processing...'}
                   </>
                 ) : isAdmin ? (
                   <>
