@@ -1,7 +1,31 @@
 import { createLovableAuth } from '@lovable.dev/cloud-auth-js';
+import { supabase } from '../supabase/client';
+
+const lovableAuth = createLovableAuth({
+  oauthBrokerUrl: `${import.meta.env.VITE_SUPABASE_URL}/auth/v1`,
+});
 
 export const lovable = {
-  auth: createLovableAuth({
-    oauthBrokerUrl: `${import.meta.env.VITE_SUPABASE_URL}/auth/v1`,
-  }),
+  auth: {
+    signInWithOAuth: async (provider: "google" | "apple", opts?: { redirect_uri?: string }) => {
+      const result = await lovableAuth.signInWithOAuth(provider, {
+        ...opts,
+      });
+
+      if (result.redirected) {
+        return result;
+      }
+
+      if (result.error) {
+        return result;
+      }
+
+      try {
+        await supabase.auth.setSession(result.tokens);
+      } catch (e) {
+        return { error: e instanceof Error ? e : new Error(String(e)) };
+      }
+      return result;
+    },
+  },
 };
