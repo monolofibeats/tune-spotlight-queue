@@ -6,11 +6,13 @@ import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
 import { LiveIndicator } from './LiveIndicator';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
