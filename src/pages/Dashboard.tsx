@@ -37,6 +37,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SessionManager } from '@/components/SessionManager';
+import { AdminSpotManager } from '@/components/AdminSpotManager';
 
 interface Submission {
   id: string;
