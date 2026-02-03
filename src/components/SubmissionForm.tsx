@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ interface FlyingCard {
 }
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
+  const { user: authUser, isAdmin } = useAuth();
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
@@ -208,7 +210,60 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setShowPriorityDialog(true);
   };
 
+  // Admin bypass: directly insert priority submission without payment
+  const handleAdminPrioritySubmit = async () => {
+    setIsProcessingPayment(true);
+    
+    try {
+      const { error } = await supabase.from('submissions').insert({
+        song_url: songUrl,
+        platform: platform || 'other',
+        artist_name: artistName || 'Unknown Artist',
+        song_title: songTitle || 'Untitled',
+        message: message || null,
+        email: authUser?.email || email || null,
+        amount_paid: priorityAmount, // Record the amount for sorting
+        is_priority: true,
+        user_id: authUser?.id || null,
+      });
+
+      if (error) throw error;
+
+      play('success');
+      toast({
+        title: "Priority submission added! 🎉",
+        description: "Admin bypass: No payment required",
+      });
+      
+      setShowPriorityDialog(false);
+      watchlistRef?.current?.refreshList();
+      
+      // Reset form
+      setSongUrl('');
+      setArtistName('');
+      setSongTitle('');
+      setEmail('');
+      setMessage('');
+      setPriorityAmount(5);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
+      toast({
+        title: "Submission failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handlePriorityPayment = async () => {
+    // Admin bypass - no payment required
+    if (isAdmin) {
+      await handleAdminPrioritySubmit();
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Login required",
@@ -526,7 +581,17 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 </Button>
               </div>
 
-              {highestBid > 0 && (
+              {/* Admin Mode Banner */}
+              {isAdmin && (
+                <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300 font-medium">
+                    Admin Mode: No payment required
+                  </span>
+                </div>
+              )}
+
+              {highestBid > 0 && !isAdmin && (
                 <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-primary/10">
                   <TrendingUp className="w-4 h-4 text-primary" />
                   <span className="text-muted-foreground">
@@ -537,10 +602,18 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">Your Bid Amount</label>
+                  <label className="text-sm font-medium">
+                    {isAdmin ? 'Priority Position' : 'Your Bid Amount'}
+                  </label>
                   <div className="flex items-center gap-1 text-2xl font-bold text-amber-500">
-                    <DollarSign className="w-6 h-6" />
-                    {priorityAmount}
+                    {isAdmin ? (
+                      <span className="text-emerald-400">#{priorityAmount}</span>
+                    ) : (
+                      <>
+                        <DollarSign className="w-6 h-6" />
+                        {priorityAmount}
+                      </>
+                    )}
                   </div>
                 </div>
                 <Slider
@@ -552,12 +625,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>$5 min</span>
-                  <span>$100</span>
+                  <span>{isAdmin ? 'Lower priority' : '$5 min'}</span>
+                  <span>{isAdmin ? 'Higher priority' : '$100'}</span>
                 </div>
               </div>
 
-              {priorityAmount > highestBid && highestBid > 0 && (
+              {priorityAmount > highestBid && highestBid > 0 && !isAdmin && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -577,13 +650,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               <Button
                 onClick={handlePriorityPayment}
                 disabled={isProcessingPayment}
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                className={`w-full ${isAdmin 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
+                } text-white`}
                 size="lg"
               >
                 {isProcessingPayment ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Redirecting to payment...
+                    {isAdmin ? 'Submitting...' : 'Redirecting to payment...'}
+                  </>
+                ) : isAdmin ? (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Add Priority (Admin)
                   </>
                 ) : (
                   <>

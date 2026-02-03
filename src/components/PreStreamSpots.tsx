@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Star, Zap, Loader2, Lock, Check } from 'lucide-react';
+import { Crown, Star, Zap, Loader2, Lock, Check, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,7 @@ const SPOT_CONFIG = [
 ];
 
 export function PreStreamSpots() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { isLive } = useStreamSession();
   const { play } = useSoundEffects();
   const [searchParams] = useSearchParams();
@@ -116,6 +116,70 @@ export function PreStreamSpots() {
     verifyPayment();
   }, [searchParams, play]);
 
+  // Admin bypass: claim spot without payment
+  const handleAdminClaimSpot = async () => {
+    const spot = spots.find(s => s.spot_number === selectedSpot);
+    if (!spot) return;
+
+    setIsPurchasing(true);
+
+    try {
+      // Create submission first
+      const { data: submission, error: submissionError } = await supabase
+        .from('submissions')
+        .insert({
+          song_url: songUrl,
+          platform: songUrl.includes('spotify') ? 'spotify' : 
+                   songUrl.includes('soundcloud') ? 'soundcloud' : 'other',
+          artist_name: artistName || 'Unknown Artist',
+          song_title: songTitle || 'Untitled',
+          message: message || null,
+          amount_paid: SPOT_CONFIG.find(c => c.number === selectedSpot)?.price || 0,
+          is_priority: true,
+          user_id: user?.id || null,
+        })
+        .select()
+        .single();
+
+      if (submissionError) throw submissionError;
+
+      // Update the spot
+      const { error: spotError } = await supabase
+        .from('pre_stream_spots' as any)
+        .update({
+          is_available: false,
+          purchased_by: user?.id,
+          purchased_at: new Date().toISOString(),
+          submission_id: submission.id,
+        })
+        .eq('id', spot.id);
+
+      if (spotError) throw spotError;
+
+      play('success');
+      toast({
+        title: `Spot #${selectedSpot} Claimed! 🎉`,
+        description: "Admin bypass: No payment required",
+      });
+      
+      setSelectedSpot(null);
+      setSongUrl('');
+      setArtistName('');
+      setSongTitle('');
+      setMessage('');
+      fetchSpots();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to claim spot';
+      toast({
+        title: "Claim failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
   const handlePurchase = async () => {
     if (!user) {
       toast({
@@ -142,6 +206,12 @@ export function PreStreamSpots() {
         description: "This spot has already been purchased",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Admin bypass - no payment required
+    if (isAdmin) {
+      await handleAdminClaimSpot();
       return;
     }
 
@@ -268,6 +338,16 @@ export function PreStreamSpots() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Admin Mode Banner */}
+              {isAdmin && (
+                <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300 font-medium">
+                    Admin Mode: No payment required
+                  </span>
+                </div>
+              )}
+
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   Song Link *
@@ -307,23 +387,35 @@ export function PreStreamSpots() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/30">
-                <span className="font-medium">Total</span>
-                <span className="text-xl font-display font-bold text-primary">
-                  €{SPOT_CONFIG.find(c => c.number === selectedSpot)?.price}
+              <div className={`flex items-center justify-between p-3 rounded-lg ${
+                isAdmin 
+                  ? 'bg-emerald-500/10 border border-emerald-500/30' 
+                  : 'bg-primary/10 border border-primary/30'
+              }`}>
+                <span className="font-medium">{isAdmin ? 'Cost' : 'Total'}</span>
+                <span className={`text-xl font-display font-bold ${isAdmin ? 'text-emerald-400' : 'text-primary'}`}>
+                  {isAdmin ? 'FREE' : `€${SPOT_CONFIG.find(c => c.number === selectedSpot)?.price}`}
                 </span>
               </div>
 
               <Button
                 onClick={handlePurchase}
                 disabled={isPurchasing || !songUrl}
-                className="w-full"
+                className={`w-full ${isAdmin 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
+                  : ''
+                }`}
                 size="lg"
               >
                 {isPurchasing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    {isAdmin ? 'Claiming...' : 'Processing...'}
+                  </>
+                ) : isAdmin ? (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Claim Spot #{selectedSpot} (Admin)
                   </>
                 ) : (
                   <>
