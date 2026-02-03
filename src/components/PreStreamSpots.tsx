@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Star, Zap, Loader2, Lock, Check } from 'lucide-react';
+import { Crown, Star, Zap, Loader2, Lock, Check, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,7 @@ const SPOT_CONFIG = [
 ];
 
 export function PreStreamSpots() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { isLive } = useStreamSession();
   const { play } = useSoundEffects();
   const [searchParams] = useSearchParams();
