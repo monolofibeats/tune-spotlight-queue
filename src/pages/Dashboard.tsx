@@ -585,6 +585,9 @@ const Dashboard = () => {
               {/* Session Manager */}
               <SessionManager />
               
+              {/* Screen Streamer */}
+              <ScreenStreamer />
+              
               {/* Pre-Stream Spots Manager */}
               <AdminSpotManager />
               
