@@ -565,6 +565,9 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="stream" className="space-y-6">
+              {/* Session Manager */}
+              <SessionManager />
+              
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
