@@ -97,7 +97,7 @@ export function Header() {
             <Link to="/library" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                 <Film className="w-4 h-4" />
-                Library
+                {t('nav.library')}
               </Button>
             </Link>
             
@@ -109,7 +109,7 @@ export function Header() {
               <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                   <User className="w-4 h-4" />
-                  My Songs
+                  {t('nav.mySongs')}
                 </Button>
               </Link>
             )}
@@ -119,7 +119,7 @@ export function Header() {
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Button 
@@ -132,7 +132,7 @@ export function Header() {
                   }}
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  {t('nav.logout')}
                 </Button>
               </>
             ) : user ? (
@@ -146,12 +146,12 @@ export function Header() {
                 }}
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t('nav.logout')}
               </Button>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button size="sm" className="w-full h-9 text-sm">
-                  Sign In
+                  {t('nav.signIn')}
                 </Button>
               </Link>
             )}
