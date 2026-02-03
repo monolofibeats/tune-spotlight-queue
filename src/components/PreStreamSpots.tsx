@@ -338,6 +338,16 @@ export function PreStreamSpots() {
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Admin Mode Banner */}
+              {isAdmin && (
+                <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300 font-medium">
+                    Admin Mode: No payment required
+                  </span>
+                </div>
+              )}
+
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   Song Link *
@@ -377,23 +387,35 @@ export function PreStreamSpots() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/30">
-                <span className="font-medium">Total</span>
-                <span className="text-xl font-display font-bold text-primary">
-                  €{SPOT_CONFIG.find(c => c.number === selectedSpot)?.price}
+              <div className={`flex items-center justify-between p-3 rounded-lg ${
+                isAdmin 
+                  ? 'bg-emerald-500/10 border border-emerald-500/30' 
+                  : 'bg-primary/10 border border-primary/30'
+              }`}>
+                <span className="font-medium">{isAdmin ? 'Cost' : 'Total'}</span>
+                <span className={`text-xl font-display font-bold ${isAdmin ? 'text-emerald-400' : 'text-primary'}`}>
+                  {isAdmin ? 'FREE' : `€${SPOT_CONFIG.find(c => c.number === selectedSpot)?.price}`}
                 </span>
               </div>
 
               <Button
                 onClick={handlePurchase}
                 disabled={isPurchasing || !songUrl}
-                className="w-full"
+                className={`w-full ${isAdmin 
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
+                  : ''
+                }`}
                 size="lg"
               >
                 {isPurchasing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    {isAdmin ? 'Claiming...' : 'Processing...'}
+                  </>
+                ) : isAdmin ? (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    Claim Spot #{selectedSpot} (Admin)
                   </>
                 ) : (
                   <>
