@@ -5,129 +5,81 @@ import { SubmissionForm } from '@/components/SubmissionForm';
 import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
-import { Sparkles, Zap, Shield, Music, DollarSign } from 'lucide-react';
-
-const features = [
-  {
-    icon: Music,
-    title: 'Any Platform',
-    description: 'Spotify, Apple Music, SoundCloud & more',
-  },
-  {
-    icon: Zap,
-    title: 'Instant Embed',
-    description: 'Listen directly in the stream',
-  },
-  {
-    icon: DollarSign,
-    title: 'Bid for Priority',
-    description: 'Pay more to skip ahead in queue',
-  },
-  {
-    icon: Shield,
-    title: 'No Sign-Up',
-    description: 'Submit in seconds, no account needed',
-  },
-];
+import { HowItWorks } from '@/components/HowItWorks';
+import { Sparkles } from 'lucide-react';
 
 const Index = () => {
   const watchlistRef = useRef<WatchlistRef>(null);
 
   return (
-    <div className="min-h-screen bg-background bg-mesh noise relative">
+    <div className="min-h-screen bg-background relative">
       <Header />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-12 md:pt-40 md:pb-20 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-3xl mx-auto mb-12"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6"
-            >
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Live Music Reviews</span>
-            </motion.div>
-            
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold mb-6 leading-tight">
-              Get Your Music{' '}
-              <span className="text-gradient">Heard & Reviewed</span>
-            </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Submit your songs for live reactions. No sign-up required. 
-              Bid for priority placement and get reviewed first!
-            </p>
-          </motion.div>
-
-          {/* Features */}
+      {/* Hero Section - Minimal */}
+      <section className="pt-24 pb-8 md:pt-32 md:pb-12 px-4">
+        <div className="container mx-auto max-w-2xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16"
+            transition={{ duration: 0.5 }}
           >
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="glass rounded-2xl p-4 text-center"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-3">
-                  <feature.icon className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
-                <p className="text-xs text-muted-foreground">{feature.description}</p>
-              </motion.div>
-            ))}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-card/30 mb-4">
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span className="text-xs font-medium text-muted-foreground">Live Music Reviews</span>
+            </div>
+            
+            <h1 className="text-3xl md:text-5xl font-display font-bold mb-3 leading-tight">
+              Get Your Music{' '}
+              <span className="text-primary">Heard</span>
+            </h1>
+            
+            <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
+              Submit songs for live reviews. No sign-up required.
+            </p>
           </motion.div>
         </div>
       </section>
 
+      {/* How It Works */}
+      <HowItWorks />
+
       {/* Special Event Banner */}
-      <section className="px-4 pb-8">
-        <div className="container mx-auto max-w-4xl">
+      <section className="px-4 pb-6">
+        <div className="container mx-auto max-w-3xl">
           <SpecialEventBanner />
         </div>
       </section>
 
       {/* Stream Section */}
-      <section className="pb-12 px-4">
-        <div className="container mx-auto max-w-4xl">
+      <section className="pb-8 px-4">
+        <div className="container mx-auto max-w-3xl">
           <StreamEmbed />
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="pb-20 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+      {/* Main Content - Stacked on mobile */}
+      <section className="pb-16 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Submission Form */}
-            <div className="flex-1 w-full">
+            <div>
               <SubmissionForm watchlistRef={watchlistRef} />
             </div>
 
             {/* Watchlist Display */}
-            <div className="w-full lg:w-auto lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-20 lg:self-start">
               <WatchlistDisplay ref={watchlistRef} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-8 px-4">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2024 UpStar. Rising stars, one song at a time. ⭐</p>
+      {/* Footer - Minimal */}
+      <footer className="border-t border-border/30 py-6 px-4">
+        <div className="container mx-auto text-center">
+          <p className="text-xs text-muted-foreground">
+            © 2024 UpStar ⭐
+          </p>
         </div>
       </footer>
     </div>
