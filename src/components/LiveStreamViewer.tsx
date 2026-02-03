@@ -61,15 +61,31 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
     }
   }, []);
 
-  // Listen for fullscreen changes
+  // Listen for fullscreen changes and keyboard shortcuts
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle F key when not typing in an input
+      if (e.key === 'f' || e.key === 'F') {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          toggleFullscreen();
+        }
+      }
+      // ESC to exit fullscreen is handled natively by the browser
+    };
+
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [toggleFullscreen]);
 
   useEffect(() => {
     const video = videoRef.current;
