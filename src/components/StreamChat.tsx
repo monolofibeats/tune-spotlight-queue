@@ -154,7 +154,7 @@ export function StreamChat({ roomId }: StreamChatProps) {
             </p>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Message Input */}
       <form onSubmit={handleSendMessage} className="p-3 border-t border-border/50 flex gap-2">
