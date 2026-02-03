@@ -116,6 +116,70 @@ export function PreStreamSpots() {
     verifyPayment();
   }, [searchParams, play]);
 
+  // Admin bypass: claim spot without payment
+  const handleAdminClaimSpot = async () => {
+    const spot = spots.find(s => s.spot_number === selectedSpot);
+    if (!spot) return;
+
+    setIsPurchasing(true);
+
+    try {
+      // Create submission first
+      const { data: submission, error: submissionError } = await supabase
+        .from('submissions')
+        .insert({
+          song_url: songUrl,
+          platform: songUrl.includes('spotify') ? 'spotify' : 
+                   songUrl.includes('soundcloud') ? 'soundcloud' : 'other',
+          artist_name: artistName || 'Unknown Artist',
+          song_title: songTitle || 'Untitled',
+          message: message || null,
+          amount_paid: SPOT_CONFIG.find(c => c.number === selectedSpot)?.price || 0,
+          is_priority: true,
+          user_id: user?.id || null,
+        })
+        .select()
+        .single();
+
+      if (submissionError) throw submissionError;
+
+      // Update the spot
+      const { error: spotError } = await supabase
+        .from('pre_stream_spots' as any)
+        .update({
+          is_available: false,
+          purchased_by: user?.id,
+          purchased_at: new Date().toISOString(),
+          submission_id: submission.id,
+        })
+        .eq('id', spot.id);
+
+      if (spotError) throw spotError;
+
+      play('success');
+      toast({
+        title: `Spot #${selectedSpot} Claimed! 🎉`,
+        description: "Admin bypass: No payment required",
+      });
+      
+      setSelectedSpot(null);
+      setSongUrl('');
+      setArtistName('');
+      setSongTitle('');
+      setMessage('');
+      fetchSpots();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to claim spot';
+      toast({
+        title: "Claim failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
   const handlePurchase = async () => {
     if (!user) {
       toast({
@@ -142,6 +206,12 @@ export function PreStreamSpots() {
         description: "This spot has already been purchased",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Admin bypass - no payment required
+    if (isAdmin) {
+      await handleAdminClaimSpot();
       return;
     }
 
