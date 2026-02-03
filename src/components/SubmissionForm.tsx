@@ -287,6 +287,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         setFlyingCard(null);
       }, 800);
       
+      play('submit');
       toast({
         title: "Song submitted! 🎵",
         description: "Your song has been added to the watchlist.",
