@@ -92,6 +92,13 @@ export function Header() {
           className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
         >
           <nav className="flex flex-col gap-2">
+            <Link to="/library" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                <Film className="w-4 h-4" />
+                Library
+              </Button>
+            </Link>
+            
             <div className="flex justify-center pb-2 border-b border-border/30">
               <SocialLinks />
             </div>
