@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ interface FlyingCard {
 }
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
+  const { user: authUser, isAdmin } = useAuth();
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
