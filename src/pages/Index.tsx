@@ -6,7 +6,6 @@ import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
-import { Soundboard } from '@/components/Soundboard';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
