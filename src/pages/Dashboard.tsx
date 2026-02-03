@@ -569,6 +569,9 @@ const Dashboard = () => {
               {/* Session Manager */}
               <SessionManager />
               
+              {/* Pre-Stream Spots Manager */}
+              <AdminSpotManager />
+              
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
