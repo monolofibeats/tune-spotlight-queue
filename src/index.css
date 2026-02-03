@@ -154,6 +154,33 @@
   }
 }
 
+/* Stream active/inactive theme states */
+.stream-active {
+  --primary: 50 100% 50%;
+  --accent: 50 100% 50%;
+  --ring: 50 100% 50%;
+}
+
+.stream-inactive {
+  --primary: 0 0% 50%;
+  --accent: 0 0% 50%;
+  --ring: 0 0% 50%;
+}
+
+/* Pulsing effect for live stream */
+.stream-live .pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px -5px hsl(50 100% 50% / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px -5px hsl(50 100% 50% / 0.6);
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -171,4 +198,56 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* VFX Animations */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s ease-out forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 0.6s ease-in-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out forwards;
 }
