@@ -72,6 +72,39 @@ export type Database = {
           },
         ]
       }
+      pricing_config: {
+        Row: {
+          config_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_amount_cents: number
+          min_amount_cents: number
+          step_cents: number
+          updated_at: string
+        }
+        Insert: {
+          config_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount_cents?: number
+          min_amount_cents?: number
+          step_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          config_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount_cents?: number
+          min_amount_cents?: number
+          step_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       special_events: {
         Row: {
           created_at: string

@@ -23,7 +23,7 @@ export function Header() {
               <img 
                 src={upstarLogo}
                 alt="UpStar"
-                className="h-10 w-auto"
+                className="h-20 w-auto"
               />
             </Link>
             <LiveIndicator />

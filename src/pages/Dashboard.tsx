@@ -38,6 +38,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SessionManager } from '@/components/SessionManager';
 import { AdminSpotManager } from '@/components/AdminSpotManager';
+import { AdminPricingPanel } from '@/components/AdminPricingPanel';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 
 interface Submission {
@@ -587,6 +588,9 @@ const Dashboard = () => {
               
               {/* Screen Streamer */}
               <ScreenStreamer />
+              
+              {/* Pricing Configuration */}
+              <AdminPricingPanel />
               
               {/* Pre-Stream Spots Manager */}
               <AdminSpotManager />
