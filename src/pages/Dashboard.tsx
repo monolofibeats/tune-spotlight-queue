@@ -15,7 +15,8 @@ import {
   Tv,
   Video,
   Link as LinkIcon,
-  Upload
+  Upload,
+  Radio
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
+import { SessionManager } from '@/components/SessionManager';
 
 interface Submission {
   id: string;
@@ -563,6 +565,9 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="stream" className="space-y-6">
+              {/* Session Manager */}
+              <SessionManager />
+              
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

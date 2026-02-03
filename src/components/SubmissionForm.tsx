@@ -12,6 +12,7 @@ import { WatchlistRef } from './WatchlistDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useSearchParams } from 'react-router-dom';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import {
   Dialog,
   DialogContent,
@@ -144,6 +145,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     verifyPayment();
   }, [searchParams, watchlistRef]);
 
+  const { play } = useSoundEffects();
+
   const handleFreeSubmit = async () => {
     // Direct database insert for free submissions
     const { error } = await supabase.from('submissions').insert({
@@ -155,6 +158,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       email: email || null,
       amount_paid: 0,
       is_priority: false,
+      user_id: user?.id || null,
     });
 
     if (error) {
@@ -283,6 +287,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         setFlyingCard(null);
       }, 800);
       
+      play('submit');
       toast({
         title: "Song submitted! 🎵",
         description: "Your song has been added to the watchlist.",
