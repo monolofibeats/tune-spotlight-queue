@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +23,11 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
+    // Initialize Supabase client to fetch pricing config
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const { 
       amount, 
       songUrl, 
@@ -34,10 +40,18 @@ serve(async (req) => {
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform });
 
-    // Validate minimum amount is $5 (500 cents)
+    // Fetch minimum amount from pricing_config
+    const { data: pricingConfig } = await supabase
+      .from('pricing_config')
+      .select('min_amount_cents')
+      .eq('config_type', 'skip_line')
+      .single();
+
+    const minAmountCents = pricingConfig?.min_amount_cents ?? 50; // Default to €0.50
     const amountCents = Math.round(amount * 100);
-    if (amountCents < 500) {
-      throw new Error("Minimum priority payment is $5");
+    
+    if (amountCents < minAmountCents) {
+      throw new Error(`Minimum priority payment is €${(minAmountCents / 100).toFixed(2)}`);
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
