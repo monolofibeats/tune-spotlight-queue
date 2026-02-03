@@ -89,7 +89,8 @@ export function StreamEmbed() {
 
   // Screen share stream
   if (config.stream_type === 'screenshare' && config.stream_url) {
-    return <ScreenShareViewer roomId={config.stream_url} />;
+    return <LiveStreamViewer roomId={config.stream_url} />;
+  }
   }
 
   // Looping video
