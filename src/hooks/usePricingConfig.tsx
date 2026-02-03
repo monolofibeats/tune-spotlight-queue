@@ -10,7 +10,7 @@ interface PricingConfig {
   is_active: boolean;
 }
 
-type ConfigType = 'skip_line' | 'submission';
+type ConfigType = 'skip_line' | 'submission' | 'submissions_open';
 
 export function usePricingConfig(configType: ConfigType = 'skip_line') {
   const [config, setConfig] = useState<PricingConfig | null>(null);
@@ -135,5 +135,6 @@ export function useAllPricingConfigs() {
     updateConfig,
     skipLineConfig: configs['skip_line'],
     submissionConfig: configs['submission'],
+    submissionsOpenConfig: configs['submissions_open'],
   };
 }
