@@ -151,6 +151,36 @@ export type Database = {
           },
         ]
       }
+      stream_config: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          stream_type: string
+          stream_url: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          stream_type?: string
+          stream_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          stream_type?: string
+          stream_url?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       stream_recordings: {
         Row: {
           created_at: string
