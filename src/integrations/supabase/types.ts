@@ -50,10 +50,41 @@ export type Database = {
         }
         Relationships: []
       }
+      stream_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean
+          started_at: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          started_at?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean
+          started_at?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           amount_paid: number
           artist_name: string
+          boost_amount: number
           created_at: string
           email: string | null
           feedback: string | null
@@ -65,10 +96,12 @@ export type Database = {
           song_url: string
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           amount_paid?: number
           artist_name?: string
+          boost_amount?: number
           created_at?: string
           email?: string | null
           feedback?: string | null
@@ -80,10 +113,12 @@ export type Database = {
           song_url: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           amount_paid?: number
           artist_name?: string
+          boost_amount?: number
           created_at?: string
           email?: string | null
           feedback?: string | null
@@ -95,6 +130,7 @@ export type Database = {
           song_url?: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
