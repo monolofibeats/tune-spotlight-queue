@@ -37,6 +37,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SessionManager } from '@/components/SessionManager';
+import { AdminSpotManager } from '@/components/AdminSpotManager';
 
 interface Submission {
   id: string;
@@ -567,6 +568,9 @@ const Dashboard = () => {
             <TabsContent value="stream" className="space-y-6">
               {/* Session Manager */}
               <SessionManager />
+              
+              {/* Pre-Stream Spots Manager */}
+              <AdminSpotManager />
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

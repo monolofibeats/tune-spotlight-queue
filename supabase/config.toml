@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.verify-payment]
 verify_jwt = false
+
+[functions.purchase-prestream-spot]
+verify_jwt = false
+
+[functions.verify-spot-payment]
+verify_jwt = false

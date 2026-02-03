@@ -7,6 +7,7 @@ import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { Soundboard } from '@/components/Soundboard';
+import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
 
@@ -47,6 +48,15 @@ const Index = () => {
 
       {/* How It Works */}
       <HowItWorks />
+
+      {/* Pre-Stream Spots - Only visible when NOT live */}
+      {!isLive && (
+        <section className="px-4 pb-6">
+          <div className="container mx-auto max-w-3xl">
+            <PreStreamSpots />
+          </div>
+        </section>
+      )}
 
       {/* Special Event Banner */}
       <section className="px-4 pb-6">
