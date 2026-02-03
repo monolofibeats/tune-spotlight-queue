@@ -105,7 +105,11 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
   // Listen for fullscreen changes and keyboard shortcuts
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const fullscreenElement = document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      setIsFullscreen(!!fullscreenElement);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -118,15 +122,26 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
         }
       }
       // ESC to exit fullscreen is handled natively by the browser
+      // But also handle it for CSS-based fullscreen
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
     document.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [toggleFullscreen]);
+  }, [toggleFullscreen, isFullscreen]);
 
   useEffect(() => {
     const video = videoRef.current;
