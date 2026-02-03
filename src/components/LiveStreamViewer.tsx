@@ -345,12 +345,18 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
 
   return (
     <motion.div
-      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`glass-strong rounded-2xl overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 rounded-none bg-black' : ''}`}
     >
-      <div className={`flex ${isFullscreen ? 'h-full' : ''}`}>
+      <div
+        ref={containerRef}
+        className={`glass-strong rounded-2xl overflow-hidden transition-all duration-300 ${
+          isFullscreen 
+            ? 'fixed inset-0 z-[9999] rounded-none bg-black' 
+            : ''
+        }`}
+      >
+        <div className={`flex ${isFullscreen ? 'h-full' : ''}`}>
         {/* Main Stream Area */}
         <div className={`flex-1 flex flex-col ${isFullscreen && showChat ? 'w-[calc(100%-320px)]' : 'w-full'}`}>
           {/* Header */}
