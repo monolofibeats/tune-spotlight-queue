@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield, Ban } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield, Ban, Upload, X, Music2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+
+const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
 
@@ -60,6 +63,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [songTitle, setSongTitle] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [priorityAmount, setPriorityAmount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
@@ -68,6 +73,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
@@ -202,7 +208,69 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     verifyPayment();
   }, [searchParams, watchlistRef, play]);
 
+  const uploadAudioFile = async (): Promise<string | null> => {
+    if (!audioFile) return null;
+    
+    setIsUploadingFile(true);
+    try {
+      const fileExt = audioFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('song-files')
+        .upload(fileName, audioFile);
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('song-files')
+        .getPublicUrl(fileName);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw new Error('Failed to upload audio file');
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a .wav, .mp3, or .flac file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 50MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setAudioFile(file);
+  };
+
+  const removeAudioFile = () => {
+    setAudioFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleFreeSubmit = async () => {
+    // Upload audio file if present
+    const audioFileUrl = await uploadAudioFile();
+    
     // Direct database insert for free submissions
     const { error } = await supabase.from('submissions').insert({
       song_url: songUrl,
@@ -214,6 +282,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       amount_paid: 0,
       is_priority: false,
       user_id: user?.id || null,
+      audio_file_url: audioFileUrl,
     });
 
     if (error) {
@@ -428,6 +497,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setSongTitle('');
     setEmail('');
     setMessage('');
+    setAudioFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setPriorityAmount(minAmount);
   };
 
@@ -630,6 +703,52 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[80px] text-sm resize-none bg-background/50"
                 />
+              </div>
+
+              {/* Audio File Upload */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">
+                  Audio File (optional) - .wav, .mp3, .flac
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="audio-file-input"
+                />
+                {audioFile ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                    <Music2 className="w-5 h-5 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{audioFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeAudioFile}
+                      className="shrink-0 h-8 w-8 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-10 text-sm border-dashed"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Audio File
+                  </Button>
+                )}
               </div>
             </div>
           </div>

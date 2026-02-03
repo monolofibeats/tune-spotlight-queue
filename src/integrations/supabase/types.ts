@@ -308,6 +308,7 @@ export type Database = {
         Row: {
           amount_paid: number
           artist_name: string
+          audio_file_url: string | null
           boost_amount: number
           created_at: string
           email: string | null
@@ -325,6 +326,7 @@ export type Database = {
         Insert: {
           amount_paid?: number
           artist_name?: string
+          audio_file_url?: string | null
           boost_amount?: number
           created_at?: string
           email?: string | null
@@ -342,6 +344,7 @@ export type Database = {
         Update: {
           amount_paid?: number
           artist_name?: string
+          audio_file_url?: string | null
           boost_amount?: number
           created_at?: string
           email?: string | null
