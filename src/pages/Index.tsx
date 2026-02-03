@@ -8,12 +8,15 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { Soundboard } from '@/components/Soundboard';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
   const watchlistRef = useRef<WatchlistRef>(null);
   const { isLive } = useStreamSession();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -30,17 +33,17 @@ const Index = () => {
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-card/30 mb-4 ${isLive ? 'pulse-glow' : ''}`}>
               <Sparkles className={`w-3 h-3 ${isLive ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
               <span className="text-xs font-medium text-muted-foreground">
-                {isLive ? 'We\'re Live!' : 'Live Music Reviews'}
+                {isLive ? t('hero.badge.live') : t('hero.badge.offline')}
               </span>
             </div>
             
             <h1 className="text-3xl md:text-5xl font-display font-bold mb-3 leading-tight">
-              Get Your Music{' '}
-              <span className={isLive ? 'text-primary' : 'text-muted-foreground'}>Heard</span>
+              {t('hero.title')}{' '}
+              <span className={isLive ? 'text-primary' : 'text-muted-foreground'}>{t('hero.titleHighlight')}</span>
             </h1>
             
             <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
-              Submit songs for live reviews. No sign-up required.
+              {t('hero.subtitle')}
             </p>
           </motion.div>
         </div>
@@ -106,6 +109,8 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      <LanguageSwitcher />
     </div>
   );
 };

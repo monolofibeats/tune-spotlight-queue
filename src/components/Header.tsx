@@ -6,11 +6,13 @@ import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
 import { LiveIndicator } from './LiveIndicator';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
@@ -32,7 +34,7 @@ export function Header() {
             <Link to="/library">
               <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                 <Film className="w-3.5 h-3.5" />
-                Library
+                {t('nav.library')}
               </Button>
             </Link>
             
@@ -42,7 +44,7 @@ export function Header() {
               <Link to="/my-dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                   <User className="w-3.5 h-3.5" />
-                  My Songs
+                  {t('nav.mySongs')}
                 </Button>
               </Link>
             )}
@@ -52,7 +54,7 @@ export function Header() {
                 <Link to="/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                     <LayoutDashboard className="w-3.5 h-3.5" />
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
@@ -66,7 +68,7 @@ export function Header() {
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="h-8 text-xs px-3">
-                  Sign In
+                  {t('nav.signIn')}
                 </Button>
               </Link>
             )}
@@ -95,7 +97,7 @@ export function Header() {
             <Link to="/library" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                 <Film className="w-4 h-4" />
-                Library
+                {t('nav.library')}
               </Button>
             </Link>
             
@@ -107,7 +109,7 @@ export function Header() {
               <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                   <User className="w-4 h-4" />
-                  My Songs
+                  {t('nav.mySongs')}
                 </Button>
               </Link>
             )}
@@ -117,7 +119,7 @@ export function Header() {
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Button 
@@ -130,7 +132,7 @@ export function Header() {
                   }}
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  {t('nav.logout')}
                 </Button>
               </>
             ) : user ? (
@@ -144,12 +146,12 @@ export function Header() {
                 }}
               >
                 <LogOut className="w-4 h-4" />
-                Logout
+                {t('nav.logout')}
               </Button>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button size="sm" className="w-full h-9 text-sm">
-                  Sign In
+                  {t('nav.signIn')}
                 </Button>
               </Link>
             )}

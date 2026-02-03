@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { StreamLibrary } from '@/components/StreamLibrary';
-import { ClipsGallery } from '@/components/ClipCreator';
+import { ClipsGallery, Clip } from '@/components/ClipCreator';
+import { ClipViewer } from '@/components/ClipViewer';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { AnimatePresence } from 'framer-motion';
 
 const Library = () => {
+  const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
+
   return (
     <div className="min-h-screen bg-background relative">
       <Header />
@@ -16,10 +22,18 @@ const Library = () => {
             className="space-y-8"
           >
             <StreamLibrary />
-            <ClipsGallery />
+            <ClipsGallery onClipSelect={setSelectedClip} />
           </motion.div>
         </div>
       </main>
+
+      <LanguageSwitcher />
+
+      <AnimatePresence>
+        {selectedClip && (
+          <ClipViewer clip={selectedClip} onClose={() => setSelectedClip(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
