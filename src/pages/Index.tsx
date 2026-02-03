@@ -6,7 +6,6 @@ import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
-import { Soundboard } from '@/components/Soundboard';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
@@ -74,15 +73,6 @@ const Index = () => {
           <StreamEmbed />
         </div>
       </section>
-
-      {/* Soundboard - Only visible when live */}
-      {isLive && (
-        <section className="pb-8 px-4">
-          <div className="container mx-auto max-w-3xl">
-            <Soundboard />
-          </div>
-        </section>
-      )}
 
       {/* Main Content - Stacked on mobile */}
       <section className="pb-16 px-4">

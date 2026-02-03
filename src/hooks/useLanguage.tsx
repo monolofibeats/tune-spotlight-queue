@@ -84,6 +84,7 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.openIn': 'Open in',
     'stream.tiktokLive': 'TikTok Live',
     'stream.watchOnTiktok': 'Watch the stream on TikTok',
+    'stream.liveScreenShare': 'Live Screen Share',
     'stream.screenShare': 'Live Screen Share',
     'stream.adminStreaming': 'Admin is streaming live',
     'stream.connecting': 'Connecting to live stream...',
@@ -92,6 +93,12 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.clickUnmute': 'Click the sound icon to unmute',
     'stream.audioEnabled': 'Audio enabled',
     'stream.refresh': 'Refresh Page',
+    'stream.chat.title': 'Live Chat',
+    'stream.chat.enterUsername': 'Enter a username to join the chat',
+    'stream.chat.usernamePlaceholder': 'Your username...',
+    'stream.chat.join': 'Join',
+    'stream.chat.empty': 'No messages yet. Be the first to chat!',
+    'stream.chat.messagePlaceholder': 'Send a message...',
     
     // Library
     'library.title': 'Stream Library',
@@ -309,6 +316,7 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.openIn': 'Öffnen in',
     'stream.tiktokLive': 'TikTok Live',
     'stream.watchOnTiktok': 'Stream auf TikTok ansehen',
+    'stream.liveScreenShare': 'Live-Bildschirmübertragung',
     'stream.screenShare': 'Live-Bildschirmübertragung',
     'stream.adminStreaming': 'Admin streamt live',
     'stream.connecting': 'Verbindung zum Stream...',
@@ -317,6 +325,12 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.clickUnmute': 'Klicke auf das Lautsprecher-Symbol zum Aktivieren',
     'stream.audioEnabled': 'Audio aktiviert',
     'stream.refresh': 'Seite aktualisieren',
+    'stream.chat.title': 'Live-Chat',
+    'stream.chat.enterUsername': 'Gib einen Benutzernamen ein, um zu chatten',
+    'stream.chat.usernamePlaceholder': 'Dein Benutzername...',
+    'stream.chat.join': 'Beitreten',
+    'stream.chat.empty': 'Noch keine Nachrichten. Sei der Erste!',
+    'stream.chat.messagePlaceholder': 'Nachricht senden...',
     
     // Library
     'library.title': 'Stream-Bibliothek',
@@ -534,6 +548,7 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.openIn': 'Открыть в',
     'stream.tiktokLive': 'TikTok Live',
     'stream.watchOnTiktok': 'Смотреть стрим в TikTok',
+    'stream.liveScreenShare': 'Трансляция экрана',
     'stream.screenShare': 'Трансляция экрана',
     'stream.adminStreaming': 'Админ ведёт стрим',
     'stream.connecting': 'Подключение к стриму...',
@@ -542,6 +557,12 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.clickUnmute': 'Нажмите на иконку звука для включения',
     'stream.audioEnabled': 'Звук включён',
     'stream.refresh': 'Обновить страницу',
+    'stream.chat.title': 'Чат',
+    'stream.chat.enterUsername': 'Введите имя для чата',
+    'stream.chat.usernamePlaceholder': 'Ваше имя...',
+    'stream.chat.join': 'Войти',
+    'stream.chat.empty': 'Пока нет сообщений. Будьте первым!',
+    'stream.chat.messagePlaceholder': 'Написать сообщение...',
     
     // Library
     'library.title': 'Библиотека стримов',

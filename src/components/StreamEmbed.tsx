@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Radio, Tv2, ExternalLink, Loader2, Monitor } from 'lucide-react';
+import { Radio, Tv2, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ScreenShareViewer } from './ScreenShareViewer';
+import { LiveStreamViewer } from './LiveStreamViewer';
 
 interface StreamConfig {
   id: string;
@@ -89,7 +89,7 @@ export function StreamEmbed() {
 
   // Screen share stream
   if (config.stream_type === 'screenshare' && config.stream_url) {
-    return <ScreenShareViewer roomId={config.stream_url} />;
+    return <LiveStreamViewer roomId={config.stream_url} />;
   }
 
   // Looping video
