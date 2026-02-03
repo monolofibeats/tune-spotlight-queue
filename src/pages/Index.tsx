@@ -109,6 +109,8 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      <LanguageSwitcher />
     </div>
   );
 };
