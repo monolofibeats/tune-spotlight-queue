@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield } from 'lucide-react';
+import { Star, Sparkles, Send, Loader2, DollarSign, TrendingUp, Zap, Shield, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -53,6 +53,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     isActive: submissionPaid,
     config: submissionConfig 
   } = usePricingConfig('submission');
+  const { isActive: submissionsOpen } = usePricingConfig('submissions_open');
   
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
@@ -537,8 +538,23 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div 
-            className="rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50"
+            className={`rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50 relative ${
+              !submissionsOpen ? 'opacity-50 pointer-events-none' : ''
+            }`}
           >
+            {/* Submissions Closed Overlay */}
+            {!submissionsOpen && (
+              <div className="absolute inset-0 flex items-center justify-center z-10 rounded-xl bg-background/80 backdrop-blur-sm">
+                <div className="text-center p-6">
+                  <Ban className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold text-lg mb-1">Submissions Closed</h3>
+                  <p className="text-sm text-muted-foreground">
+                    New submissions are temporarily disabled. Check back soon!
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-primary" />
               <h2 className="text-base font-display font-semibold">Submit Your Song</h2>

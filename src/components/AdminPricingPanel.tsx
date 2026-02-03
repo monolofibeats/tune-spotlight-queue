@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Settings, Loader2, Check, AlertCircle, Zap, Send } from 'lucide-react';
+import { DollarSign, Settings, Loader2, Check, AlertCircle, Zap, Send, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +19,7 @@ interface PricingFormState {
 }
 
 export function AdminPricingPanel() {
-  const { configs, isLoading, updateConfig, skipLineConfig, submissionConfig } = useAllPricingConfigs();
+  const { configs, isLoading, updateConfig, skipLineConfig, submissionConfig, submissionsOpenConfig } = useAllPricingConfigs();
   
   // Skip Line state
   const [skipLine, setSkipLine] = useState<PricingFormState>({
@@ -30,6 +30,9 @@ export function AdminPricingPanel() {
   const [submission, setSubmission] = useState<PricingFormState>({
     min: 1, max: 20, step: 0.5, isActive: false
   });
+  
+  // Submissions open state (master toggle)
+  const [submissionsOpen, setSubmissionsOpen] = useState(true);
   
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -53,11 +56,14 @@ export function AdminPricingPanel() {
         isActive: submissionConfig.is_active,
       });
     }
-  }, [skipLineConfig, submissionConfig]);
+    if (submissionsOpenConfig) {
+      setSubmissionsOpen(submissionsOpenConfig.is_active);
+    }
+  }, [skipLineConfig, submissionConfig, submissionsOpenConfig]);
 
   // Track changes
   useEffect(() => {
-    if (skipLineConfig && submissionConfig) {
+    if (skipLineConfig && submissionConfig && submissionsOpenConfig) {
       const skipChanged = 
         skipLine.min !== skipLineConfig.min_amount_cents / 100 ||
         skipLine.max !== skipLineConfig.max_amount_cents / 100 ||
@@ -70,9 +76,11 @@ export function AdminPricingPanel() {
         submission.step !== submissionConfig.step_cents / 100 ||
         submission.isActive !== submissionConfig.is_active;
       
-      setHasChanges(skipChanged || subChanged);
+      const openChanged = submissionsOpen !== submissionsOpenConfig.is_active;
+      
+      setHasChanges(skipChanged || subChanged || openChanged);
     }
-  }, [configs, skipLine, submission, skipLineConfig, submissionConfig]);
+  }, [configs, skipLine, submission, submissionsOpen, skipLineConfig, submissionConfig, submissionsOpenConfig]);
 
   const handleSave = async () => {
     // Validation
@@ -97,6 +105,13 @@ export function AdminPricingPanel() {
     setIsSaving(true);
 
     try {
+      // Update submissions open config
+      const { error: openError } = await updateConfig('submissions_open', {
+        is_active: submissionsOpen,
+      });
+
+      if (openError) throw openError;
+
       // Update skip line config
       const { error: skipError } = await updateConfig('skip_line', {
         min_amount_cents: Math.round(skipLine.min * 100),
@@ -119,9 +134,11 @@ export function AdminPricingPanel() {
 
       toast({
         title: "Pricing updated! 💰",
-        description: submission.isActive 
-          ? `Submissions: €${submission.min.toFixed(2)}, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`
-          : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`,
+        description: !submissionsOpen 
+          ? "Submissions are currently CLOSED"
+          : submission.isActive 
+            ? `Submissions: €${submission.min.toFixed(2)}, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`
+            : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`,
       });
       setHasChanges(false);
     } catch (error) {
@@ -166,6 +183,35 @@ export function AdminPricingPanel() {
             Unsaved changes
           </Badge>
         )}
+      </div>
+
+      {/* Master Toggle - Accept Submissions */}
+      <div className={`flex items-center justify-between p-4 rounded-lg border ${
+        submissionsOpen 
+          ? 'bg-emerald-500/10 border-emerald-500/30' 
+          : 'bg-destructive/10 border-destructive/30'
+      }`}>
+        <div className="flex items-center gap-3">
+          {submissionsOpen ? (
+            <Send className="w-5 h-5 text-emerald-400" />
+          ) : (
+            <Ban className="w-5 h-5 text-destructive" />
+          )}
+          <div>
+            <p className="font-medium">
+              {submissionsOpen ? 'Submissions Open' : 'Submissions Closed'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {submissionsOpen 
+                ? 'Users can submit songs' 
+                : 'Form is disabled for all users'}
+            </p>
+          </div>
+        </div>
+        <Switch 
+          checked={submissionsOpen} 
+          onCheckedChange={setSubmissionsOpen}
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
