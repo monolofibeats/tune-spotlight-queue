@@ -34,7 +34,7 @@ export function Header() {
             <Link to="/library">
               <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                 <Film className="w-3.5 h-3.5" />
-                Library
+                {t('nav.library')}
               </Button>
             </Link>
             
@@ -44,7 +44,7 @@ export function Header() {
               <Link to="/my-dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                   <User className="w-3.5 h-3.5" />
-                  My Songs
+                  {t('nav.mySongs')}
                 </Button>
               </Link>
             )}
@@ -54,7 +54,7 @@ export function Header() {
                 <Link to="/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                     <LayoutDashboard className="w-3.5 h-3.5" />
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Button>
                 </Link>
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
@@ -68,7 +68,7 @@ export function Header() {
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="h-8 text-xs px-3">
-                  Sign In
+                  {t('nav.signIn')}
                 </Button>
               </Link>
             )}
