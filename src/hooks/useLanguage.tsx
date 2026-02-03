@@ -84,6 +84,7 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.openIn': 'Open in',
     'stream.tiktokLive': 'TikTok Live',
     'stream.watchOnTiktok': 'Watch the stream on TikTok',
+    'stream.liveScreenShare': 'Live Screen Share',
     'stream.screenShare': 'Live Screen Share',
     'stream.adminStreaming': 'Admin is streaming live',
     'stream.connecting': 'Connecting to live stream...',
@@ -92,6 +93,12 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.clickUnmute': 'Click the sound icon to unmute',
     'stream.audioEnabled': 'Audio enabled',
     'stream.refresh': 'Refresh Page',
+    'stream.chat.title': 'Live Chat',
+    'stream.chat.enterUsername': 'Enter a username to join the chat',
+    'stream.chat.usernamePlaceholder': 'Your username...',
+    'stream.chat.join': 'Join',
+    'stream.chat.empty': 'No messages yet. Be the first to chat!',
+    'stream.chat.messagePlaceholder': 'Send a message...',
     
     // Library
     'library.title': 'Stream Library',
