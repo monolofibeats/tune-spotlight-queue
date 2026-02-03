@@ -7,16 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Pre-stream spot prices (Stripe price IDs)
-const SPOT_PRICES: Record<number, { priceId: string; amount: number }> = {
-  1: { priceId: "price_1Swh2uKA9czhEBog4QvqwtAP", amount: 10000 }, // €100
-  2: { priceId: "price_1Swh2vKA9czhEBoghvuwB2qA", amount: 7500 },  // €75
-  3: { priceId: "price_1Swh2wKA9czhEBogx2WndTei", amount: 5000 },  // €50
-  4: { priceId: "price_1Swh2xKA9czhEBog3QgqivbN", amount: 3000 },  // €30
-  5: { priceId: "price_1Swh2xKA9czhEBogHoTgzupW", amount: 1500 },  // €15
-};
-
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[PURCHASE-SPOT] ${step}${detailsStr}`);
 };
@@ -34,11 +25,22 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { spotNumber, spotId, songUrl, artistName, songTitle, message, platform } = await req.json();
-    logStep("Request data", { spotNumber, spotId });
+    const { 
+      spotNumber, 
+      spotId, 
+      priceCents,
+      songUrl, 
+      artistName, 
+      songTitle, 
+      message, 
+      audioFileUrl,
+      platform 
+    } = await req.json();
+    
+    logStep("Request data", { spotNumber, spotId, priceCents });
 
-    if (!spotNumber || !SPOT_PRICES[spotNumber]) {
-      throw new Error("Invalid spot number");
+    if (!spotNumber || !spotId) {
+      throw new Error("Invalid spot data");
     }
 
     if (!songUrl) {
@@ -57,7 +59,7 @@ serve(async (req) => {
     const user = userData.user;
     logStep("User authenticated", { email: user.email });
 
-    // Verify spot is still available
+    // Verify spot is still available and get current price
     const { data: spot, error: spotError } = await supabaseClient
       .from('pre_stream_spots')
       .select('*')
@@ -68,7 +70,10 @@ serve(async (req) => {
     if (spotError || !spot) {
       throw new Error("This spot is no longer available");
     }
-    logStep("Spot verified available", { spotId });
+    
+    // Use the price from the database (authoritative source)
+    const actualPriceCents = spot.price_cents;
+    logStep("Spot verified available", { spotId, priceCents: actualPriceCents });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -82,16 +87,22 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const spotPrice = SPOT_PRICES[spotNumber];
     const origin = req.headers.get("origin") || "https://tune-spotlight-queue.lovable.app";
 
-    // Create checkout session
+    // Create checkout session with dynamic price
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: spotPrice.priceId,
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: `Pre-Stream Spot #${spotNumber}`,
+              description: `Priority spot #${spotNumber} for the next stream`,
+            },
+            unit_amount: actualPriceCents,
+          },
           quantity: 1,
         },
       ],
@@ -106,7 +117,9 @@ serve(async (req) => {
         artist_name: artistName || "Unknown Artist",
         song_title: songTitle || "Untitled",
         message: message || "",
+        audio_file_url: audioFileUrl || "",
         platform: platform || "other",
+        price_cents: actualPriceCents.toString(),
       },
     });
 

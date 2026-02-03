@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const logStep = (step: string, details?: any) => {
+const logStep = (step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[VERIFY-SPOT-PAYMENT] ${step}${detailsStr}`);
 };
@@ -51,6 +51,11 @@ serve(async (req) => {
       throw new Error("Invalid session metadata");
     }
 
+    // Use the price from metadata (set during checkout from database)
+    const amountPaid = metadata.price_cents 
+      ? Math.round(parseInt(metadata.price_cents) / 100) 
+      : Math.round((session.amount_total || 0) / 100);
+
     // Create the submission first
     const { data: submission, error: submissionError } = await supabaseAdmin
       .from('submissions')
@@ -60,12 +65,10 @@ serve(async (req) => {
         artist_name: metadata.artist_name,
         song_title: metadata.song_title,
         message: metadata.message || null,
-        amount_paid: parseInt(metadata.spot_number) === 1 ? 100 : 
-                    parseInt(metadata.spot_number) === 2 ? 75 :
-                    parseInt(metadata.spot_number) === 3 ? 50 :
-                    parseInt(metadata.spot_number) === 4 ? 30 : 15,
+        amount_paid: amountPaid,
         is_priority: true,
         user_id: metadata.user_id,
+        audio_file_url: metadata.audio_file_url || null,
       })
       .select()
       .single();
