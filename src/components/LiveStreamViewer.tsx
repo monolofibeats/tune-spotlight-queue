@@ -44,27 +44,72 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
     return remoteStream.getVideoTracks().some((t) => t.readyState === 'live');
   }, [remoteStream]);
 
-  // Handle fullscreen
+  // Handle fullscreen - use video element for better cross-browser/iframe support
   const toggleFullscreen = useCallback(async () => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    const video = videoRef.current;
+    
+    if (!container && !video) {
+      console.error('No element available for fullscreen');
+      return;
+    }
 
     try {
-      if (!document.fullscreenElement) {
-        await containerRef.current.requestFullscreen();
+      // Check if we're currently in fullscreen
+      const fullscreenElement = document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+
+      if (!fullscreenElement) {
+        // Try container first, fallback to video
+        const element = container || video;
+        
+        if (element?.requestFullscreen) {
+          await element.requestFullscreen();
+        } else if ((element as any)?.webkitRequestFullscreen) {
+          await (element as any).webkitRequestFullscreen();
+        } else if ((element as any)?.mozRequestFullScreen) {
+          await (element as any).mozRequestFullScreen();
+        } else if ((element as any)?.msRequestFullscreen) {
+          await (element as any).msRequestFullscreen();
+        } else if ((video as any)?.webkitEnterFullscreen) {
+          // iOS Safari video-specific fullscreen
+          (video as any).webkitEnterFullscreen();
+        } else {
+          console.warn('Fullscreen API not supported');
+          // Fallback: toggle a manual fullscreen state
+          setIsFullscreen(prev => !prev);
+          return;
+        }
         setIsFullscreen(true);
       } else {
-        await document.exitFullscreen();
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
         setIsFullscreen(false);
       }
     } catch (err) {
       console.error('Fullscreen error:', err);
+      // If native fullscreen fails (e.g., in iframe), use CSS-based fullscreen
+      setIsFullscreen(prev => !prev);
     }
   }, []);
 
   // Listen for fullscreen changes and keyboard shortcuts
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const fullscreenElement = document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+      setIsFullscreen(!!fullscreenElement);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -77,15 +122,26 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
         }
       }
       // ESC to exit fullscreen is handled natively by the browser
+      // But also handle it for CSS-based fullscreen
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
     document.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [toggleFullscreen]);
+  }, [toggleFullscreen, isFullscreen]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -289,12 +345,18 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
 
   return (
     <motion.div
-      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`glass-strong rounded-2xl overflow-hidden ${isFullscreen ? 'fixed inset-0 z-50 rounded-none bg-black' : ''}`}
     >
-      <div className={`flex ${isFullscreen ? 'h-full' : ''}`}>
+      <div
+        ref={containerRef}
+        className={`glass-strong rounded-2xl overflow-hidden transition-all duration-300 ${
+          isFullscreen 
+            ? 'fixed inset-0 z-[9999] rounded-none bg-black' 
+            : ''
+        }`}
+      >
+        <div className={`flex ${isFullscreen ? 'h-full' : ''}`}>
         {/* Main Stream Area */}
         <div className={`flex-1 flex flex-col ${isFullscreen && showChat ? 'w-[calc(100%-320px)]' : 'w-full'}`}>
           {/* Header */}
@@ -406,6 +468,7 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
       </div>
     </motion.div>
   );
