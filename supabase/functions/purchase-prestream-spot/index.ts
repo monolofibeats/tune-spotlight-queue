@@ -34,10 +34,11 @@ serve(async (req) => {
       songTitle, 
       message, 
       audioFileUrl,
+      email,
       platform 
     } = await req.json();
     
-    logStep("Request data", { spotNumber, spotId, priceCents });
+    logStep("Request data", { spotNumber, spotId, priceCents, email });
 
     if (!spotNumber || !spotId) {
       throw new Error("Invalid spot data");
@@ -47,17 +48,25 @@ serve(async (req) => {
       throw new Error("Song URL is required");
     }
 
-    // Authenticate user
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    // Get user email - either from authenticated user or from request body
+    let userEmail = email;
+    let userId: string | null = null;
     
-    if (userError || !userData.user?.email) {
-      throw new Error("User not authenticated");
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseClient.auth.getUser(token);
+      if (userData.user?.email) {
+        userEmail = userData.user.email;
+        userId = userData.user.id;
+      }
     }
     
-    const user = userData.user;
-    logStep("User authenticated", { email: user.email });
+    if (!userEmail) {
+      throw new Error("Email is required");
+    }
+    
+    logStep("User context", { email: userEmail, authenticated: !!userId });
 
     // Verify spot is still available and get current price
     const { data: spot, error: spotError } = await supabaseClient
@@ -80,8 +89,8 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Check for existing customer
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Check for existing customer by email
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
@@ -92,7 +101,7 @@ serve(async (req) => {
     // Create checkout session with dynamic price
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : userEmail,
       line_items: [
         {
           price_data: {
@@ -112,7 +121,8 @@ serve(async (req) => {
       metadata: {
         spot_id: spotId,
         spot_number: spotNumber.toString(),
-        user_id: user.id,
+        user_id: userId || "",
+        email: userEmail,
         song_url: songUrl,
         artist_name: artistName || "Unknown Artist",
         song_title: songTitle || "Untitled",

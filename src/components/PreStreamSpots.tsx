@@ -50,6 +50,7 @@ export function PreStreamSpots() {
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
   const [message, setMessage] = useState('');
+  const [email, setEmail] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
@@ -187,6 +188,7 @@ export function PreStreamSpots() {
     setArtistName('');
     setSongTitle('');
     setMessage('');
+    setEmail('');
     setAudioFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -258,19 +260,20 @@ export function PreStreamSpots() {
   };
 
   const handlePurchase = async () => {
-    if (!user) {
+    if (!songUrl) {
       toast({
-        title: "Login required",
-        description: "Please sign in to purchase a pre-stream spot",
+        title: "Missing information",
+        description: "Please enter your song link",
         variant: "destructive",
       });
       return;
     }
 
-    if (!songUrl) {
+    // Require email if not logged in
+    if (!user && !email) {
       toast({
-        title: "Missing information",
-        description: "Please enter your song link",
+        title: "Email required",
+        description: "Please enter your email address",
         variant: "destructive",
       });
       return;
@@ -307,6 +310,7 @@ export function PreStreamSpots() {
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
           message,
+          email: user?.email || email,
           audioFileUrl,
           platform: songUrl.includes('spotify') ? 'spotify' : 
                    songUrl.includes('soundcloud') ? 'soundcloud' : 'other',
@@ -412,63 +416,67 @@ export function PreStreamSpots() {
             </DialogDescription>
           </DialogHeader>
 
-          {!user ? (
-            <div className="text-center py-4">
-              <Lock className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground mb-4">
-                Please sign in to purchase a spot
-              </p>
-              <Button asChild>
-                <a href="/auth">Sign In</a>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Admin Mode Banner */}
-              {isAdmin && (
-                <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
-                  <Shield className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-300 font-medium">
-                    Admin Mode: No payment required
-                  </span>
-                </div>
-              )}
+          <div className="space-y-4">
+            {/* Admin Mode Banner */}
+            {isAdmin && (
+              <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300 font-medium">
+                  Admin Mode: No payment required
+                </span>
+              </div>
+            )}
 
+            {/* Email field for guests */}
+            {!user && (
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Song Link *
+                  Email Address *
                 </label>
                 <Input
-                  placeholder="Spotify, SoundCloud, or any link..."
-                  value={songUrl}
-                  onChange={(e) => setSongUrl(e.target.value)}
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+            )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Artist</label>
-                  <Input
-                    placeholder="Artist name"
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Title</label>
-                  <Input
-                    placeholder="Song title"
-                    value={songTitle}
-                    onChange={(e) => setSongTitle(e.target.value)}
-                  />
-                </div>
-              </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">
+                Song Link *
+              </label>
+              <Input
+                placeholder="Spotify, SoundCloud, or any link..."
+                value={songUrl}
+                onChange={(e) => setSongUrl(e.target.value)}
+              />
+            </div>
 
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Message (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Artist</label>
                 <Input
-                  placeholder="Anything you want us to know?"
-                  value={message}
+                  placeholder="Artist name"
+                  value={artistName}
+                  onChange={(e) => setArtistName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Title</label>
+                <Input
+                  placeholder="Song title"
+                  value={songTitle}
+                  onChange={(e) => setSongTitle(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Message (optional)</label>
+              <Input
+                placeholder="Anything you want us to know?"
+                value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </div>
@@ -557,7 +565,6 @@ export function PreStreamSpots() {
                 )}
               </Button>
             </div>
-          )}
         </DialogContent>
       </Dialog>
     </>

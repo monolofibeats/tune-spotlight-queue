@@ -382,10 +382,11 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       return;
     }
 
-    if (!user) {
+    // Require email if not logged in
+    if (!user && !email) {
       toast({
-        title: "Login required",
-        description: "Please sign in to use priority submissions",
+        title: "Email required",
+        description: "Please enter your email address",
         variant: "destructive",
       });
       return;
@@ -401,7 +402,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
           message,
-          email: user.email || email,
+          email: user?.email || email,
           platform: platform || 'other',
         },
       });
