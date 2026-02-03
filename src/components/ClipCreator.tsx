@@ -186,7 +186,7 @@ export function ClipCreator({ recording, onClose }: ClipCreatorProps) {
   );
 }
 
-export function ClipsGallery() {
+export function ClipsGallery({ onClipSelect }: { onClipSelect?: (clip: Clip) => void }) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -235,14 +235,15 @@ export function ClipsGallery() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {clips.map((clip) => (
-          <motion.div
+          <motion.button
             key={clip.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="rounded-lg border border-border/50 bg-card/50 p-3 hover:border-primary/30 transition-all"
+            onClick={() => onClipSelect?.(clip)}
+            className="text-left rounded-lg border border-border/50 bg-card/50 p-3 hover:border-primary/30 hover:bg-card/80 transition-all cursor-pointer group"
           >
             <div className="flex items-center gap-2 mb-2">
-              <Play className="w-4 h-4 text-primary" />
+              <Play className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium truncate">{clip.title}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -250,9 +251,11 @@ export function ClipsGallery() {
               {Math.floor((clip.end_time_seconds - clip.start_time_seconds) / 60)}:
               {((clip.end_time_seconds - clip.start_time_seconds) % 60).toString().padStart(2, '0')}
             </div>
-          </motion.div>
+          </motion.button>
         ))}
       </div>
     </div>
   );
 }
+
+export type { Clip };
