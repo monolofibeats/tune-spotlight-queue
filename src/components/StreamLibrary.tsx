@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Film, Play, Clock, Eye, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { RecordingViewer } from './RecordingViewer';
 
 interface Recording {
   id: string;
@@ -33,14 +34,15 @@ export function StreamLibrary() {
   const [newDescription, setNewDescription] = useState('');
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [newThumbnailUrl, setNewThumbnailUrl] = useState('');
+  const [newDuration, setNewDuration] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
   const fetchRecordings = async () => {
-    const { data, error } = await (supabase
-      .from('stream_recordings' as any)
+    const { data, error } = await supabase
+      .from('stream_recordings')
       .select('*')
       .eq('is_public', true)
-      .order('recorded_at', { ascending: false })) as any;
+      .order('recorded_at', { ascending: false });
 
     if (!error && data) {
       setRecordings(data);
@@ -51,6 +53,17 @@ export function StreamLibrary() {
   useEffect(() => {
     fetchRecordings();
   }, []);
+
+  const parseDuration = (durationStr: string): number | null => {
+    if (!durationStr) return null;
+    const parts = durationStr.split(':').map(Number);
+    if (parts.length === 3) {
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    } else if (parts.length === 2) {
+      return parts[0] * 60 + parts[1];
+    }
+    return parseInt(durationStr) || null;
+  };
 
   const handleAddRecording = async () => {
     if (!newTitle || !newVideoUrl) {
@@ -64,14 +77,15 @@ export function StreamLibrary() {
 
     setIsAdding(true);
 
-    const { error } = await (supabase
-      .from('stream_recordings' as any)
+    const { error } = await supabase
+      .from('stream_recordings')
       .insert({
         title: newTitle,
         description: newDescription || null,
         video_url: newVideoUrl,
         thumbnail_url: newThumbnailUrl || null,
-      })) as any;
+        duration_seconds: parseDuration(newDuration),
+      });
 
     if (error) {
       toast({
@@ -88,6 +102,7 @@ export function StreamLibrary() {
       setNewDescription('');
       setNewVideoUrl('');
       setNewThumbnailUrl('');
+      setNewDuration('');
       setShowAddForm(false);
       fetchRecordings();
     }
@@ -96,10 +111,10 @@ export function StreamLibrary() {
   };
 
   const handleDeleteRecording = async (id: string) => {
-    const { error } = await (supabase
-      .from('stream_recordings' as any)
+    const { error } = await supabase
+      .from('stream_recordings')
       .delete()
-      .eq('id', id)) as any;
+      .eq('id', id);
 
     if (error) {
       toast({
@@ -120,10 +135,10 @@ export function StreamLibrary() {
   };
 
   const incrementViewCount = async (recording: Recording) => {
-    await (supabase
-      .from('stream_recordings' as any)
+    await supabase
+      .from('stream_recordings')
       .update({ view_count: recording.view_count + 1 })
-      .eq('id', recording.id)) as any;
+      .eq('id', recording.id);
   };
 
   const formatDuration = (seconds: number | null) => {
@@ -202,6 +217,14 @@ export function StreamLibrary() {
               />
             </div>
             <div className="space-y-2">
+              <Label>Duration (HH:MM:SS or MM:SS)</Label>
+              <Input
+                value={newDuration}
+                onChange={(e) => setNewDuration(e.target.value)}
+                placeholder="1:30:00"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
               <Label>Description</Label>
               <Textarea
                 value={newDescription}
@@ -297,45 +320,15 @@ export function StreamLibrary() {
         </div>
       )}
 
-      {/* Video Player Modal */}
-      {selectedRecording && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-          onClick={() => setSelectedRecording(null)}
-        >
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            className="w-full max-w-4xl bg-card rounded-xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="aspect-video">
-              <iframe
-                src={selectedRecording.video_url.replace('watch?v=', 'embed/')}
-                className="w-full h-full"
-                allowFullScreen
-                allow="autoplay"
-              />
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold text-lg">{selectedRecording.title}</h3>
-              {selectedRecording.description && (
-                <p className="text-sm text-muted-foreground mt-1">{selectedRecording.description}</p>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-3"
-                onClick={() => setSelectedRecording(null)}
-              >
-                Close
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
+      {/* Recording Viewer Modal */}
+      <AnimatePresence>
+        {selectedRecording && (
+          <RecordingViewer
+            recording={selectedRecording}
+            onClose={() => setSelectedRecording(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

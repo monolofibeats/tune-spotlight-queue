@@ -494,21 +494,24 @@ const Dashboard = () => {
                           </Badge>
                         </div>
 
-                        {/* Embed or Link */}
-                        {(submission.platform === 'spotify' || submission.platform === 'soundcloud') ? (
-                          <MusicEmbed url={submission.song_url} platform={submission.platform as 'spotify' | 'soundcloud'} />
-                        ) : (
-                          <a 
-                            href={submission.song_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                          >
-                            <LinkIcon className="w-4 h-4" />
-                            {submission.song_url.length > 50 
-                              ? `${submission.song_url.substring(0, 50)}...` 
-                              : submission.song_url}
-                          </a>
+                        {/* Always show clickable link */}
+                        <a 
+                          href={submission.song_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all"
+                        >
+                          <LinkIcon className="w-4 h-4 flex-shrink-0" />
+                          {submission.song_url.length > 60 
+                            ? `${submission.song_url.substring(0, 60)}...` 
+                            : submission.song_url}
+                        </a>
+                        
+                        {/* Optional embed preview for supported platforms */}
+                        {(submission.platform === 'spotify' || submission.platform === 'soundcloud') && (
+                          <div className="mt-2">
+                            <MusicEmbed url={submission.song_url} platform={submission.platform as 'spotify' | 'soundcloud'} />
+                          </div>
                         )}
 
                         {submission.message && (
