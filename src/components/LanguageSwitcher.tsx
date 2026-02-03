@@ -2,9 +2,9 @@ import { motion } from 'framer-motion';
 import { useLanguage, Language } from '@/hooks/useLanguage';
 
 const languages: { code: Language; label: string; flag: string }[] = [
-  { code: 'en', label: 'EN', flag: '🇬🇧' },
-  { code: 'de', label: 'DE', flag: '🇩🇪' },
-  { code: 'ru', label: 'RU', flag: '🇷🇺' },
+  { code: 'en', label: 'EN', flag: 'EN' },
+  { code: 'de', label: 'DE', flag: 'DE' },
+  { code: 'ru', label: 'RU', flag: 'RU' },
 ];
 
 export function LanguageSwitcher() {
