@@ -8,12 +8,15 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { Soundboard } from '@/components/Soundboard';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
   const watchlistRef = useRef<WatchlistRef>(null);
   const { isLive } = useStreamSession();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background relative">
