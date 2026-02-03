@@ -8,7 +8,6 @@ import {
   Users,
   Type,
   Image as ImageIcon,
-  X,
   Play,
   Square
 } from 'lucide-react';
@@ -19,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 import upstarLogo from '@/assets/upstar-logo.png';
 
@@ -29,8 +29,14 @@ interface OverlaySettings {
   showBanner: boolean;
 }
 
+interface PeerConnection {
+  viewerId: string;
+  connection: RTCPeerConnection;
+}
+
 export function ScreenStreamer() {
   const { user } = useAuth();
+  const { play } = useSoundEffects();
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -44,9 +50,17 @@ export function ScreenStreamer() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>(0);
-  const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const peerConnectionsRef = useRef<PeerConnection[]>([]);
+  const roomIdRef = useRef<string>('');
+
+  // ICE servers for WebRTC
+  const iceServers = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+    ],
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -54,6 +68,66 @@ export function ScreenStreamer() {
       stopStreaming();
     };
   }, []);
+
+  const createPeerConnection = async (viewerId: string) => {
+    const pc = new RTCPeerConnection(iceServers);
+
+    // Add stream tracks to peer connection
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        pc.addTrack(track, streamRef.current!);
+      });
+    }
+
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate && channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'ice-candidate',
+          payload: {
+            candidate: event.candidate,
+            targetViewerId: viewerId,
+            fromBroadcaster: true,
+          },
+        });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log(`Connection state for ${viewerId}:`, pc.connectionState);
+      if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+        removePeerConnection(viewerId);
+      }
+    };
+
+    // Create offer
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    // Send offer to viewer
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'offer',
+        payload: {
+          offer: pc.localDescription,
+          targetViewerId: viewerId,
+        },
+      });
+    }
+
+    peerConnectionsRef.current.push({ viewerId, connection: pc });
+    return pc;
+  };
+
+  const removePeerConnection = (viewerId: string) => {
+    const index = peerConnectionsRef.current.findIndex(p => p.viewerId === viewerId);
+    if (index !== -1) {
+      peerConnectionsRef.current[index].connection.close();
+      peerConnectionsRef.current.splice(index, 1);
+    }
+  };
 
   const startStreaming = async () => {
     setIsStarting(true);
@@ -77,47 +151,89 @@ export function ScreenStreamer() {
         videoRef.current.play();
       }
 
-      // Create room on the server
-      const roomId = `room_${Date.now()}_${user?.id?.slice(0, 8)}`;
-      
-      const { error } = await supabase.functions.invoke('stream-signal', {
-        body: { action: 'create-room', roomId },
-      });
+      // Create room ID
+      const roomId = `room_${Date.now()}_${user?.id?.slice(0, 8) || 'admin'}`;
+      roomIdRef.current = roomId;
 
-      if (error) throw error;
+      // Update stream config in database
+      const { data: existingConfig } = await (supabase
+        .from('stream_config' as any)
+        .select('id')
+        .eq('is_active', true)
+        .maybeSingle()) as any;
 
-      // Set up Supabase Realtime channel for broadcasting
+      if (existingConfig) {
+        await (supabase
+          .from('stream_config' as any)
+          .update({
+            stream_type: 'screenshare',
+            stream_url: roomId,
+          })
+          .eq('id', existingConfig.id)) as any;
+      } else {
+        await (supabase
+          .from('stream_config' as any)
+          .insert({
+            stream_type: 'screenshare',
+            stream_url: roomId,
+            is_active: true,
+          })) as any;
+      }
+
+      // Set up Supabase Realtime channel for WebRTC signaling
       const channel = supabase.channel(`screenshare:${roomId}`, {
         config: {
           broadcast: { self: false },
-          presence: { key: user?.id || 'admin' },
+          presence: { key: user?.id || 'broadcaster' },
         },
       });
 
-      // Track viewers
+      // Handle viewer joining
+      channel.on('broadcast', { event: 'viewer-join' }, async ({ payload }) => {
+        console.log('Viewer joining:', payload.viewerId);
+        await createPeerConnection(payload.viewerId);
+      });
+
+      // Handle answer from viewer
+      channel.on('broadcast', { event: 'answer' }, async ({ payload }) => {
+        const pc = peerConnectionsRef.current.find(p => p.viewerId === payload.viewerId);
+        if (pc && payload.answer) {
+          await pc.connection.setRemoteDescription(new RTCSessionDescription(payload.answer));
+        }
+      });
+
+      // Handle ICE candidates from viewer
+      channel.on('broadcast', { event: 'ice-candidate' }, async ({ payload }) => {
+        if (payload.fromViewer) {
+          const pc = peerConnectionsRef.current.find(p => p.viewerId === payload.viewerId);
+          if (pc && payload.candidate) {
+            await pc.connection.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          }
+        }
+      });
+
+      // Track viewers with presence
       channel.on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        const count = Object.keys(state).length - 1; // Exclude self
+        const count = Object.keys(state).length - 1; // Exclude broadcaster
         setViewerCount(Math.max(0, count));
       });
 
       await channel.subscribe();
-      await channel.track({ role: 'broadcaster' });
+      await channel.track({ role: 'broadcaster', oderId: user?.id });
 
-      broadcastChannelRef.current = channel;
+      channelRef.current = channel;
 
-      // Start canvas compositing for overlay
-      startCanvasCompositing();
-
-      // Handle stream end (user clicks "Stop sharing")
+      // Handle stream end (user clicks "Stop sharing" in browser)
       stream.getVideoTracks()[0].onended = () => {
         stopStreaming();
       };
 
       setIsStreaming(true);
+      play('success');
       toast({
         title: "Screen share started! 📺",
-        description: "Your screen is now visible on the homepage",
+        description: "Your screen is now live on the homepage",
       });
 
     } catch (error: any) {
@@ -133,30 +249,33 @@ export function ScreenStreamer() {
   };
 
   const stopStreaming = async () => {
+    // Close all peer connections
+    peerConnectionsRef.current.forEach(pc => pc.connection.close());
+    peerConnectionsRef.current = [];
+
     // Stop media tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
 
-    // Cancel animation frame
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-
     // Leave the channel
-    if (broadcastChannelRef.current) {
-      await broadcastChannelRef.current.unsubscribe();
-      broadcastChannelRef.current = null;
+    if (channelRef.current) {
+      await channelRef.current.unsubscribe();
+      channelRef.current = null;
     }
 
-    // Close room on server
+    // Update database
     try {
-      await supabase.functions.invoke('stream-signal', {
-        body: { action: 'close-room' },
-      });
+      await (supabase
+        .from('stream_config' as any)
+        .update({
+          stream_type: 'none',
+          stream_url: null,
+        })
+        .eq('is_active', true)) as any;
     } catch (e) {
-      console.error('Error closing room:', e);
+      console.error('Error updating config:', e);
     }
 
     setIsStreaming(false);
@@ -167,76 +286,6 @@ export function ScreenStreamer() {
       description: "Screen share has stopped",
     });
   };
-
-  const startCanvasCompositing = useCallback(() => {
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    if (!canvas || !video) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const logoImg = new Image();
-    logoImg.src = upstarLogo;
-
-    const render = () => {
-      if (!streamRef.current) return;
-
-      // Match canvas size to video
-      canvas.width = video.videoWidth || 1920;
-      canvas.height = video.videoHeight || 1080;
-
-      // Draw video frame
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Draw logo overlay
-      if (overlay.showLogo && logoImg.complete) {
-        const logoSize = 80;
-        let x = 20;
-        let y = 20;
-
-        switch (overlay.logoPosition) {
-          case 'top-right':
-            x = canvas.width - logoSize - 20;
-            break;
-          case 'bottom-left':
-            y = canvas.height - logoSize - 20;
-            break;
-          case 'bottom-right':
-            x = canvas.width - logoSize - 20;
-            y = canvas.height - logoSize - 20;
-            break;
-        }
-
-        ctx.globalAlpha = 0.8;
-        ctx.drawImage(logoImg, x, y, logoSize, logoSize);
-        ctx.globalAlpha = 1;
-      }
-
-      // Draw banner text
-      if (overlay.showBanner && overlay.bannerText) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(overlay.bannerText, canvas.width / 2, canvas.height - 25);
-      }
-
-      animationFrameRef.current = requestAnimationFrame(render);
-    };
-
-    render();
-  }, [overlay]);
-
-  // Update compositing when overlay changes
-  useEffect(() => {
-    if (isStreaming) {
-      startCanvasCompositing();
-    }
-  }, [overlay, isStreaming, startCanvasCompositing]);
 
   return (
     <motion.div
@@ -271,6 +320,7 @@ export function ScreenStreamer() {
               variant="ghost"
               size="icon"
               onClick={() => setShowSettings(!showSettings)}
+              className="hover:scale-110 active:scale-95 transition-transform"
             >
               <Settings className="w-5 h-5" />
             </Button>
@@ -287,10 +337,6 @@ export function ScreenStreamer() {
               muted
               playsInline
               className="w-full h-full object-contain"
-            />
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none hidden"
             />
             
             {/* Live Indicator */}
@@ -362,7 +408,7 @@ export function ScreenStreamer() {
                         variant={overlay.logoPosition === pos ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setOverlay(o => ({ ...o, logoPosition: pos }))}
-                        className="text-xs capitalize"
+                        className="text-xs capitalize hover:scale-105 active:scale-95 transition-transform"
                       >
                         {pos.replace('-', ' ')}
                       </Button>
@@ -402,7 +448,7 @@ export function ScreenStreamer() {
         {isStreaming ? (
           <Button
             variant="destructive"
-            className="flex-1"
+            className="flex-1 hover:scale-[1.02] active:scale-[0.98] transition-transform"
             onClick={stopStreaming}
           >
             <Square className="w-4 h-4 mr-2" />
@@ -410,7 +456,7 @@ export function ScreenStreamer() {
           </Button>
         ) : (
           <Button
-            className="flex-1"
+            className="flex-1 hover:scale-[1.02] active:scale-[0.98] transition-transform"
             onClick={startStreaming}
             disabled={isStarting}
           >
