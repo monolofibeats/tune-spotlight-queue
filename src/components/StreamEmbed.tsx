@@ -91,7 +91,6 @@ export function StreamEmbed() {
   if (config.stream_type === 'screenshare' && config.stream_url) {
     return <LiveStreamViewer roomId={config.stream_url} />;
   }
-  }
 
   // Looping video
   if (config.stream_type === 'video' && config.video_url) {
