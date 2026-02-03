@@ -316,6 +316,7 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.openIn': 'Öffnen in',
     'stream.tiktokLive': 'TikTok Live',
     'stream.watchOnTiktok': 'Stream auf TikTok ansehen',
+    'stream.liveScreenShare': 'Live-Bildschirmübertragung',
     'stream.screenShare': 'Live-Bildschirmübertragung',
     'stream.adminStreaming': 'Admin streamt live',
     'stream.connecting': 'Verbindung zum Stream...',
@@ -324,6 +325,12 @@ const translations: Record<Language, Record<string, string>> = {
     'stream.clickUnmute': 'Klicke auf das Lautsprecher-Symbol zum Aktivieren',
     'stream.audioEnabled': 'Audio aktiviert',
     'stream.refresh': 'Seite aktualisieren',
+    'stream.chat.title': 'Live-Chat',
+    'stream.chat.enterUsername': 'Gib einen Benutzernamen ein, um zu chatten',
+    'stream.chat.usernamePlaceholder': 'Dein Benutzername...',
+    'stream.chat.join': 'Beitreten',
+    'stream.chat.empty': 'Noch keine Nachrichten. Sei der Erste!',
+    'stream.chat.messagePlaceholder': 'Nachricht senden...',
     
     // Library
     'library.title': 'Stream-Bibliothek',
