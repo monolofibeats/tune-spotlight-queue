@@ -210,7 +210,60 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setShowPriorityDialog(true);
   };
 
+  // Admin bypass: directly insert priority submission without payment
+  const handleAdminPrioritySubmit = async () => {
+    setIsProcessingPayment(true);
+    
+    try {
+      const { error } = await supabase.from('submissions').insert({
+        song_url: songUrl,
+        platform: platform || 'other',
+        artist_name: artistName || 'Unknown Artist',
+        song_title: songTitle || 'Untitled',
+        message: message || null,
+        email: authUser?.email || email || null,
+        amount_paid: priorityAmount, // Record the amount for sorting
+        is_priority: true,
+        user_id: authUser?.id || null,
+      });
+
+      if (error) throw error;
+
+      play('success');
+      toast({
+        title: "Priority submission added! 🎉",
+        description: "Admin bypass: No payment required",
+      });
+      
+      setShowPriorityDialog(false);
+      watchlistRef?.current?.refreshList();
+      
+      // Reset form
+      setSongUrl('');
+      setArtistName('');
+      setSongTitle('');
+      setEmail('');
+      setMessage('');
+      setPriorityAmount(5);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
+      toast({
+        title: "Submission failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handlePriorityPayment = async () => {
+    // Admin bypass - no payment required
+    if (isAdmin) {
+      await handleAdminPrioritySubmit();
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Login required",
