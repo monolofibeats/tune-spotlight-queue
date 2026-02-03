@@ -60,6 +60,13 @@ export type Database = {
             foreignKeyName: "pre_stream_spots_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pre_stream_spots_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
             referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
@@ -341,7 +348,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_submissions_queue: {
+        Row: {
+          artist_name: string | null
+          created_at: string | null
+          id: string | null
+          is_priority: boolean | null
+          platform: string | null
+          song_title: string | null
+          status: string | null
+        }
+        Insert: {
+          artist_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_priority?: boolean | null
+          platform?: string | null
+          song_title?: string | null
+          status?: string | null
+        }
+        Update: {
+          artist_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_priority?: boolean | null
+          platform?: string | null
+          song_title?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

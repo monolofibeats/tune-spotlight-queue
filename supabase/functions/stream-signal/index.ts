@@ -97,10 +97,11 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("[stream-signal] Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal error";
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
