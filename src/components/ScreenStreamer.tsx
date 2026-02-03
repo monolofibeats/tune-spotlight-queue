@@ -148,7 +148,12 @@ export function ScreenStreamer() {
       // Set up the preview
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        const playPromise = videoRef.current.play();
+        if (playPromise && typeof (playPromise as Promise<void>).catch === 'function') {
+          (playPromise as Promise<void>).catch((e) => {
+            console.warn('[ScreenStreamer] preview video.play() was blocked:', e);
+          });
+        }
       }
 
       // Create room ID
@@ -335,6 +340,7 @@ export function ScreenStreamer() {
             <video
               ref={videoRef}
               muted
+              autoPlay
               playsInline
               className="w-full h-full object-contain"
             />
