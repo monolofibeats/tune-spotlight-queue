@@ -61,8 +61,8 @@ serve(async (req) => {
       customer_email: email || undefined,
       line_items: [
         {
-          price_data: {
-            currency: "usd",
+      price_data: {
+            currency: "eur",
             product_data: {
               name: `Priority Submission: ${songTitle || 'Song'}`,
               description: `Skip the watchlist for "${songTitle}" by ${artistName}`,
