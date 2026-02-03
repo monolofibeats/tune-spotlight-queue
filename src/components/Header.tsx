@@ -12,39 +12,36 @@ export function Header() {
   const { isAdmin, signOut } = useAuth();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-border/50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center">
-            <motion.img 
+            <img 
               src={upstarLogo}
               alt="UpStar"
-              className="h-14 w-auto drop-shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              className="h-10 w-auto"
             />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-3">
             <SocialLinks />
             
             {isAdmin ? (
               <>
                 <Link to="/dashboard">
-                  <Button variant="ghost" className="gap-2">
-                    <LayoutDashboard className="w-4 h-4" />
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <LayoutDashboard className="w-3.5 h-3.5" />
                     Dashboard
                   </Button>
                 </Link>
-                <Button variant="ghost" className="gap-2" onClick={signOut}>
-                  <LogOut className="w-4 h-4" />
-                  Logout
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
+                  <LogOut className="w-3.5 h-3.5" />
                 </Button>
               </>
             ) : (
               <Link to="/auth">
-                <Button variant="hero" size="sm" className="gap-2">
+                <Button size="sm" className="h-8 text-xs px-3">
                   Sign In
                 </Button>
               </Link>
@@ -55,10 +52,10 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden h-8 w-8"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </Button>
         </div>
       </div>
@@ -66,26 +63,27 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden glass-strong border-t border-border/50 p-4"
+          className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
         >
-          <nav className="flex flex-col gap-3">
-            <div className="flex justify-center pb-3 border-b border-border/50">
+          <nav className="flex flex-col gap-2">
+            <div className="flex justify-center pb-2 border-b border-border/30">
               <SocialLinks />
             </div>
             
             {isAdmin ? (
               <>
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
                   </Button>
                 </Link>
                 <Button 
-                  variant="ghost" 
-                  className="w-full justify-start gap-2" 
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start gap-2 h-9 text-sm" 
                   onClick={() => {
                     signOut();
                     setMobileMenuOpen(false);
@@ -97,7 +95,7 @@ export function Header() {
               </>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="hero" className="w-full">
+                <Button size="sm" className="w-full h-9 text-sm">
                   Sign In
                 </Button>
               </Link>

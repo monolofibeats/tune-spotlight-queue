@@ -59,46 +59,38 @@ export function SpecialEventBanner() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="glass-strong rounded-2xl p-4 md:p-6 border-2 border-primary/30 relative overflow-hidden"
+        exit={{ opacity: 0, y: -10 }}
+        className="rounded-lg p-4 border border-primary/30 bg-primary/5 relative overflow-hidden"
       >
-        {/* Glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 animate-pulse" />
-        
-        <div className="relative flex flex-col md:flex-row items-start md:items-center gap-4">
-          <div className="p-3 rounded-xl bg-primary/20 shrink-0">
-            <Trophy className="w-8 h-8 text-primary" />
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+            <Trophy className="w-5 h-5 text-primary" />
           </div>
           
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                Special Event
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <Sparkles className="w-3 h-3 text-primary" />
+              <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                Event
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-display font-bold mb-1">
+            <h3 className="text-sm font-display font-bold mb-0.5 truncate">
               {event.title}
             </h3>
-            {event.description && (
-              <p className="text-sm text-muted-foreground mb-2">
-                {event.description}
-              </p>
-            )}
-            <div className="flex items-center gap-2">
-              <Gift className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                Reward: {event.reward}
+            <div className="flex items-center gap-1.5">
+              <Gift className="w-3 h-3 text-primary" />
+              <span className="text-xs text-primary">
+                {event.reward}
               </span>
             </div>
           </div>
 
           {event.end_time && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Timer className="w-4 h-4" />
-              <span>Ends {new Date(event.end_time).toLocaleDateString()}</span>
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
+              <Timer className="w-3 h-3" />
+              <span>{new Date(event.end_time).toLocaleDateString()}</span>
             </div>
           )}
         </div>

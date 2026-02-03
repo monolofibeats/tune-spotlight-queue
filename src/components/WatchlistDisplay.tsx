@@ -124,98 +124,72 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     });
 
     return (
-      <div className="w-full max-w-md" id="watchlist-container">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display font-semibold text-lg flex items-center gap-2">
-            <Eye className="w-5 h-5 text-primary" />
-            Watchlist
+      <div className="w-full" id="watchlist-container">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display font-semibold text-sm flex items-center gap-2">
+            <Eye className="w-4 h-4 text-primary" />
+            Queue
           </h3>
-          <Badge variant="queue">{sortedItems.length} pending</Badge>
+          <Badge variant="queue" className="text-xs">{sortedItems.length}</Badge>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <AnimatePresence mode="popLayout">
-            {sortedItems.slice(0, 10).map((submission, index) => (
+            {sortedItems.slice(0, 8).map((submission, index) => (
               <motion.div
                 key={submission.id}
                 layout
-                initial={submission.isNew ? { 
-                  opacity: 0, 
-                  scale: 0.8,
-                  x: -100,
-                  y: -20,
-                } : { opacity: 0, x: -20 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  x: 0, 
-                  y: 0,
-                }}
-                exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                initial={submission.isNew ? { opacity: 0, x: -20 } : { opacity: 0 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
                 transition={{ 
                   type: 'spring',
-                  stiffness: 500,
+                  stiffness: 400,
                   damping: 30,
-                  delay: submission.isNew ? 0 : index * 0.05,
+                  delay: submission.isNew ? 0 : index * 0.03,
                 }}
-                className={`glass rounded-xl p-4 flex items-center gap-4 ${
-                  submission.isNew ? 'ring-2 ring-primary/50 glow-primary' : ''
-                } ${submission.amount_paid > 0 ? 'border border-primary/30' : ''}`}
+                className={`rounded-lg p-3 flex items-center gap-3 bg-card/50 border border-border/30 ${
+                  submission.isNew ? 'ring-1 ring-primary/50' : ''
+                } ${submission.amount_paid > 0 ? 'border-primary/30' : ''}`}
               >
-                <motion.div 
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center font-display font-bold ${
+                <div 
+                  className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
                     submission.amount_paid > 0 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-muted-foreground'
                   }`}
-                  initial={submission.isNew ? { rotate: -180, scale: 0 } : {}}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
                   {index + 1}
-                </motion.div>
+                </div>
                 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium truncate">
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-medium text-sm truncate">
                       {submission.song_title || 'Untitled'}
                     </p>
                     {submission.amount_paid > 0 && (
-                      <Badge variant="premium" className="text-xs flex items-center gap-1">
-                        <DollarSign className="w-3 h-3" />
-                        {submission.amount_paid}
+                      <Badge variant="premium" className="text-[10px] px-1.5 py-0">
+                        ${submission.amount_paid}
                       </Badge>
                     )}
-                    {submission.is_priority && (
-                      <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
-                    )}
-                    {submission.isNew && (
-                      <motion.span
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full"
-                      >
-                        New!
-                      </motion.span>
-                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {submission.artist_name || 'Unknown Artist'}
+                  <p className="text-xs text-muted-foreground truncate">
+                    {submission.artist_name || 'Unknown'}
                   </p>
                 </div>
 
-                <div className="text-xs text-muted-foreground">
+                <span className="text-[10px] text-muted-foreground/60 shrink-0">
                   {formatTimeAgo(new Date(submission.created_at))}
-                </div>
+                </span>
               </motion.div>
             ))}
           </AnimatePresence>
 
           {sortedItems.length === 0 && (
-            <div className="glass rounded-xl p-8 text-center">
-              <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No songs in watchlist</p>
-              <p className="text-sm text-muted-foreground/60">Be the first to submit!</p>
+            <div className="rounded-lg p-6 text-center bg-card/30 border border-border/30">
+              <Music className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No songs yet</p>
+              <p className="text-xs text-muted-foreground/60">Be the first!</p>
             </div>
           )}
         </div>

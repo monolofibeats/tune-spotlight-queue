@@ -310,10 +310,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-2xl mx-auto relative"
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-xl mx-auto relative"
       >
         {/* Flying Card Animation */}
         <AnimatePresence>
@@ -324,22 +324,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               animate={{ 
                 opacity: [1, 1, 0.8, 0],
                 scale: [1, 0.9, 0.7, 0.5],
-                x: [0, 100, 300, 500],
-                y: [0, -50, -100, -80],
-                rotate: [0, 5, 10, 15],
+                x: [0, 50, 150, 250],
+                y: [0, -30, -60, -50],
               }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: [0.32, 0, 0.67, 0] }}
+              transition={{ duration: 0.6, ease: [0.32, 0, 0.67, 0] }}
               className="absolute top-0 left-0 right-0 z-50 pointer-events-none"
             >
-              <div className="glass-strong rounded-2xl p-4 max-w-sm mx-auto shadow-2xl ring-2 ring-primary/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/20">
-                    <Star className="w-5 h-5 text-primary" />
+              <div className="rounded-xl p-3 max-w-xs mx-auto shadow-lg bg-card border border-border">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/20">
+                    <Star className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{flyingCard.songTitle}</p>
-                    <p className="text-sm text-muted-foreground truncate">{flyingCard.artistName}</p>
+                    <p className="font-medium text-sm truncate">{flyingCard.songTitle}</p>
+                    <p className="text-xs text-muted-foreground truncate">{flyingCard.artistName}</p>
                   </div>
                 </div>
               </div>
@@ -347,32 +346,28 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           )}
         </AnimatePresence>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-          <motion.div 
-            className="glass-strong rounded-2xl p-6 md:p-8 space-y-6"
-            animate={flyingCard ? { scale: 0.98, opacity: 0.7 } : { scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          <div 
+            className="rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50"
           >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <Star className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="text-xl font-display font-semibold">Submit Your Song</h2>
+            <div className="flex items-center gap-2 mb-1">
+              <Star className="w-4 h-4 text-primary" />
+              <h2 className="text-base font-display font-semibold">Submit Your Song</h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">
-                  Song Link (Spotify, Apple Music, SoundCloud, etc.) *
+                <label className="text-xs text-muted-foreground mb-1.5 block">
+                  Song Link *
                 </label>
                 <Input
-                  placeholder="https://open.spotify.com/track/..."
+                  placeholder="Paste Spotify, SoundCloud, or any link..."
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
-                  className="bg-background/50"
+                  className="h-10 text-sm bg-background/50"
                 />
                 {platform && (
-                  <div className="mt-2">
+                  <div className="mt-1.5">
                     <Badge variant="queue" className="text-xs">
                       {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
                     </Badge>
@@ -386,73 +381,71 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   animate={{ opacity: 1, height: 'auto' }}
                   className="overflow-hidden"
                 >
-                  <label className="text-sm text-muted-foreground mb-2 block">Preview</label>
                   <MusicEmbed url={songUrl} platform={platform!} />
                 </motion.div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm text-muted-foreground mb-2 block">Artist Name</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Artist</label>
                   <Input
                     placeholder="Artist name"
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
-                    className="bg-background/50"
+                    className="h-10 text-sm bg-background/50"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground mb-2 block">Song Title</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Title</label>
                   <Input
                     placeholder="Song title"
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
-                    className="bg-background/50"
+                    className="h-10 text-sm bg-background/50"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Email (optional, for updates)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Email (optional)</label>
                 <Input
                   type="email"
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/50"
+                  className="h-10 text-sm bg-background/50"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Message (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Message (optional)</label>
                 <Textarea
-                  placeholder="Why should we check out this song?"
+                  placeholder="Why should we check this out?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="bg-background/50 min-h-[100px] resize-none rounded-lg border-border focus-visible:ring-primary/50"
+                  className="min-h-[80px] text-sm resize-none bg-background/50"
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Submit Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* Submit Buttons - Stacked on mobile */}
+          <div className="flex flex-col gap-2">
             <Button
               type="submit"
-              variant="hero"
-              size="xl"
-              className="flex-1"
+              size="lg"
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Submitting...
                 </>
               ) : (
                 <>
-                  <Send className="w-5 h-5" />
-                  Submit Song (Free)
+                  <Send className="w-4 h-4" />
+                  Submit (Free)
                 </>
               )}
             </Button>
@@ -460,10 +453,11 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             <Button
               type="button"
               onClick={handleSkipTheLine}
-              size="xl"
-              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
+              variant="outline"
+              size="lg"
+              className="w-full border-primary/30 text-primary hover:bg-primary/10"
             >
-              <Zap className="w-5 h-5" />
+              <Zap className="w-4 h-4" />
               Skip the Line
             </Button>
           </div>
