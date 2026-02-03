@@ -15,7 +15,8 @@ import {
   Tv,
   Video,
   Link as LinkIcon,
-  Upload
+  Upload,
+  Radio
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { MusicEmbed } from '@/components/MusicEmbed';
+import { SessionManager } from '@/components/SessionManager';
 
 interface Submission {
   id: string;
