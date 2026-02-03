@@ -47,7 +47,13 @@ interface FlyingCard {
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
-  const { minAmount, maxAmount, step, config } = usePricingConfig();
+  const { minAmount, maxAmount, step, config, isActive: skipLineActive } = usePricingConfig('skip_line');
+  const { 
+    minAmount: submissionPrice, 
+    isActive: submissionPaid,
+    config: submissionConfig 
+  } = usePricingConfig('submission');
+  
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
@@ -120,12 +126,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     };
   }, []);
 
+  const { play } = useSoundEffects();
+
   // Handle payment verification on return
   useEffect(() => {
     const verifyPayment = async () => {
       const sessionId = searchParams.get('session_id');
       const paymentStatus = searchParams.get('payment');
+      const submissionPayment = searchParams.get('submission_payment');
 
+      // Handle priority payment verification
       if (paymentStatus === 'success' && sessionId) {
         try {
           const { data, error } = await supabase.functions.invoke('verify-payment', {
@@ -135,6 +145,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           if (error) throw error;
 
           if (data.success) {
+            play('success');
             toast({
               title: "Payment successful! 🎉",
               description: data.message,
@@ -145,9 +156,39 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
           console.error('Payment verification error:', error);
         }
 
-        // Clean URL
         window.history.replaceState({}, '', '/');
       } else if (paymentStatus === 'cancelled') {
+        toast({
+          title: "Payment cancelled",
+          description: "Your submission was not processed.",
+          variant: "destructive",
+        });
+        window.history.replaceState({}, '', '/');
+      }
+
+      // Handle submission payment verification
+      if (submissionPayment === 'success' && sessionId) {
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-submission-payment', {
+            body: { sessionId },
+          });
+
+          if (error) throw error;
+
+          if (data.success) {
+            play('success');
+            toast({
+              title: "Song submitted! 🎵",
+              description: data.message,
+            });
+            watchlistRef?.current?.refreshList();
+          }
+        } catch (error) {
+          console.error('Submission payment verification error:', error);
+        }
+
+        window.history.replaceState({}, '', '/');
+      } else if (submissionPayment === 'cancelled') {
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
@@ -158,9 +199,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     };
 
     verifyPayment();
-  }, [searchParams, watchlistRef]);
-
-  const { play } = useSoundEffects();
+  }, [searchParams, watchlistRef, play]);
 
   const handleFreeSubmit = async () => {
     // Direct database insert for free submissions
@@ -314,6 +353,83 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     }
   };
 
+  // Handle paid submission via Stripe
+  const handlePaidSubmit = async () => {
+    if (!songUrl) {
+      toast({
+        title: "Missing information",
+        description: "Please enter a song link.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Admin bypass - submit for free
+    if (isAdmin) {
+      setIsSubmitting(true);
+      try {
+        await handleFreeSubmit();
+        play('success');
+        toast({
+          title: "Song submitted! 🎵",
+          description: "Admin bypass: No payment required",
+        });
+        watchlistRef?.current?.refreshList();
+        resetForm();
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
+        toast({
+          title: "Submission failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-submission-payment', {
+        body: {
+          amount: submissionPrice,
+          songUrl,
+          artistName: artistName || 'Unknown Artist',
+          songTitle: songTitle || 'Untitled',
+          message,
+          email: user?.email || email,
+          platform: platform || 'other',
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.url) throw new Error('Failed to create checkout session');
+
+      play('click');
+      window.location.href = data.url;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
+      toast({
+        title: "Payment failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSongUrl('');
+    setArtistName('');
+    setSongTitle('');
+    setEmail('');
+    setMessage('');
+    setPriorityAmount(minAmount);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -323,6 +439,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         description: "Please enter a song link.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // If submissions are paid and user is not admin, redirect to payment
+    if (submissionPaid && !isAdmin) {
+      await handlePaidSubmit();
       return;
     }
 
@@ -361,13 +483,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         description: "Your song has been added to the watchlist.",
       });
       
-      // Reset form
-      setSongUrl('');
-      setArtistName('');
-      setSongTitle('');
-      setEmail('');
-      setMessage('');
-      setPriorityAmount(5);
+      resetForm();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
       toast({
@@ -507,13 +623,23 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             <Button
               type="submit"
               size="lg"
-              className="w-full"
+              className={`w-full ${submissionPaid && !isAdmin ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' : ''}`}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Submitting...
+                  {submissionPaid && !isAdmin ? 'Processing...' : 'Submitting...'}
+                </>
+              ) : submissionPaid && !isAdmin ? (
+                <>
+                  <DollarSign className="w-4 h-4" />
+                  Submit (€{submissionPrice.toFixed(2)})
+                </>
+              ) : isAdmin && submissionPaid ? (
+                <>
+                  <Shield className="w-4 h-4" />
+                  Submit (Admin - Free)
                 </>
               ) : (
                 <>
@@ -523,16 +649,18 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               )}
             </Button>
 
-            <Button
-              type="button"
-              onClick={handleSkipTheLine}
-              variant="outline"
-              size="lg"
-              className="w-full border-primary/30 text-primary hover:bg-primary/10"
-            >
-              <Zap className="w-4 h-4" />
-              Skip the Line
-            </Button>
+            {skipLineActive && (
+              <Button
+                type="button"
+                onClick={handleSkipTheLine}
+                variant="outline"
+                size="lg"
+                className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              >
+                <Zap className="w-4 h-4" />
+                Skip the Line
+              </Button>
+            )}
           </div>
         </form>
       </motion.div>

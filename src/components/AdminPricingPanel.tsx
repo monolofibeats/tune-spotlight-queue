@@ -1,70 +1,93 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Settings, Loader2, Check, AlertCircle } from 'lucide-react';
+import { DollarSign, Settings, Loader2, Check, AlertCircle, Zap, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAllPricingConfigs } from '@/hooks/usePricingConfig';
 import { toast } from '@/hooks/use-toast';
 
+interface PricingFormState {
+  min: number;
+  max: number;
+  step: number;
+  isActive: boolean;
+}
+
 export function AdminPricingPanel() {
-  const { config, isLoading, updateConfig, minAmount, maxAmount, step } = usePricingConfig();
+  const { configs, isLoading, updateConfig, skipLineConfig, submissionConfig } = useAllPricingConfigs();
   
-  const [localMin, setLocalMin] = useState(0.5);
-  const [localMax, setLocalMax] = useState(100);
-  const [localStep, setLocalStep] = useState(0.5);
-  const [isActive, setIsActive] = useState(true);
+  // Skip Line state
+  const [skipLine, setSkipLine] = useState<PricingFormState>({
+    min: 0.5, max: 100, step: 0.5, isActive: true
+  });
+  
+  // Submission state
+  const [submission, setSubmission] = useState<PricingFormState>({
+    min: 1, max: 20, step: 0.5, isActive: false
+  });
+  
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState('skip_line');
 
   // Sync local state with config
   useEffect(() => {
-    if (config) {
-      setLocalMin(config.min_amount_cents / 100);
-      setLocalMax(config.max_amount_cents / 100);
-      setLocalStep(config.step_cents / 100);
-      setIsActive(config.is_active);
+    if (skipLineConfig) {
+      setSkipLine({
+        min: skipLineConfig.min_amount_cents / 100,
+        max: skipLineConfig.max_amount_cents / 100,
+        step: skipLineConfig.step_cents / 100,
+        isActive: skipLineConfig.is_active,
+      });
     }
-  }, [config]);
+    if (submissionConfig) {
+      setSubmission({
+        min: submissionConfig.min_amount_cents / 100,
+        max: submissionConfig.max_amount_cents / 100,
+        step: submissionConfig.step_cents / 100,
+        isActive: submissionConfig.is_active,
+      });
+    }
+  }, [skipLineConfig, submissionConfig]);
 
   // Track changes
   useEffect(() => {
-    if (config) {
-      const changed = 
-        localMin !== config.min_amount_cents / 100 ||
-        localMax !== config.max_amount_cents / 100 ||
-        localStep !== config.step_cents / 100 ||
-        isActive !== config.is_active;
-      setHasChanges(changed);
+    if (skipLineConfig && submissionConfig) {
+      const skipChanged = 
+        skipLine.min !== skipLineConfig.min_amount_cents / 100 ||
+        skipLine.max !== skipLineConfig.max_amount_cents / 100 ||
+        skipLine.step !== skipLineConfig.step_cents / 100 ||
+        skipLine.isActive !== skipLineConfig.is_active;
+      
+      const subChanged = 
+        submission.min !== submissionConfig.min_amount_cents / 100 ||
+        submission.max !== submissionConfig.max_amount_cents / 100 ||
+        submission.step !== submissionConfig.step_cents / 100 ||
+        submission.isActive !== submissionConfig.is_active;
+      
+      setHasChanges(skipChanged || subChanged);
     }
-  }, [config, localMin, localMax, localStep, isActive]);
+  }, [configs, skipLine, submission, skipLineConfig, submissionConfig]);
 
   const handleSave = async () => {
     // Validation
-    if (localMin < 0.5) {
+    if (skipLine.min >= skipLine.max) {
       toast({
-        title: "Invalid minimum",
-        description: "Minimum must be at least €0.50",
+        title: "Invalid skip line range",
+        description: "Minimum must be less than maximum",
         variant: "destructive",
       });
       return;
     }
     
-    if (localMax > 100) {
+    if (submission.isActive && submission.min >= submission.max) {
       toast({
-        title: "Invalid maximum",
-        description: "Maximum cannot exceed €100",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (localMin >= localMax) {
-      toast({
-        title: "Invalid range",
+        title: "Invalid submission range",
         description: "Minimum must be less than maximum",
         variant: "destructive",
       });
@@ -73,25 +96,40 @@ export function AdminPricingPanel() {
 
     setIsSaving(true);
 
-    const { error } = await updateConfig({
-      min_amount_cents: Math.round(localMin * 100),
-      max_amount_cents: Math.round(localMax * 100),
-      step_cents: Math.round(localStep * 100),
-      is_active: isActive,
-    });
-
-    if (error) {
-      toast({
-        title: "Failed to save",
-        description: error.message,
-        variant: "destructive",
+    try {
+      // Update skip line config
+      const { error: skipError } = await updateConfig('skip_line', {
+        min_amount_cents: Math.round(skipLine.min * 100),
+        max_amount_cents: Math.round(skipLine.max * 100),
+        step_cents: Math.round(skipLine.step * 100),
+        is_active: skipLine.isActive,
       });
-    } else {
+
+      if (skipError) throw skipError;
+
+      // Update submission config
+      const { error: subError } = await updateConfig('submission', {
+        min_amount_cents: Math.round(submission.min * 100),
+        max_amount_cents: Math.round(submission.max * 100),
+        step_cents: Math.round(submission.step * 100),
+        is_active: submission.isActive,
+      });
+
+      if (subError) throw subError;
+
       toast({
         title: "Pricing updated! 💰",
-        description: `Bid range: €${localMin.toFixed(2)} - €${localMax.toFixed(2)}`,
+        description: submission.isActive 
+          ? `Submissions: €${submission.min.toFixed(2)}, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`
+          : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`,
       });
       setHasChanges(false);
+    } catch (error) {
+      toast({
+        title: "Failed to save",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive",
+      });
     }
 
     setIsSaving(false);
@@ -117,9 +155,9 @@ export function AdminPricingPanel() {
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Skip the Line Pricing</h3>
+            <h3 className="font-semibold">Pricing Controls</h3>
             <p className="text-xs text-muted-foreground">
-              Adjust bid amounts in real-time
+              Adjust submission and bid prices in real-time
             </p>
           </div>
         </div>
@@ -130,121 +168,192 @@ export function AdminPricingPanel() {
         )}
       </div>
 
-      {/* Active Toggle */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
-        <div className="flex items-center gap-2">
-          <Settings className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Priority Bidding Active</span>
-        </div>
-        <Switch 
-          checked={isActive} 
-          onCheckedChange={setIsActive}
-        />
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="skip_line" className="gap-2">
+            <Zap className="w-4 h-4" />
+            Skip the Line
+          </TabsTrigger>
+          <TabsTrigger value="submission" className="gap-2">
+            <Send className="w-4 h-4" />
+            Submissions
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Min Amount */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm">Minimum Bid</Label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">€</span>
-            <Input
-              type="number"
-              min={0.5}
-              max={localMax - 0.5}
-              step={0.5}
-              value={localMin}
-              onChange={(e) => setLocalMin(parseFloat(e.target.value) || 0.5)}
-              className="w-24 h-9 text-right"
+        {/* Skip the Line Tab */}
+        <TabsContent value="skip_line" className="space-y-4 mt-4">
+          {/* Active Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+            <div className="flex items-center gap-2">
+              <Settings className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Priority Bidding Active</span>
+            </div>
+            <Switch 
+              checked={skipLine.isActive} 
+              onCheckedChange={(checked) => setSkipLine(s => ({ ...s, isActive: checked }))}
             />
           </div>
-        </div>
-        <Slider
-          value={[localMin]}
-          onValueChange={([val]) => setLocalMin(val)}
-          min={0.5}
-          max={50}
-          step={0.5}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>€0.50</span>
-          <span>€50.00</span>
-        </div>
-      </div>
 
-      {/* Max Amount */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm">Maximum Bid</Label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">€</span>
-            <Input
-              type="number"
-              min={localMin + 0.5}
+          {/* Min Amount */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Minimum Bid</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min={0.5}
+                  max={skipLine.max - 0.5}
+                  step={0.5}
+                  value={skipLine.min}
+                  onChange={(e) => setSkipLine(s => ({ ...s, min: parseFloat(e.target.value) || 0.5 }))}
+                  className="w-24 h-9 text-right"
+                />
+              </div>
+            </div>
+            <Slider
+              value={[skipLine.min]}
+              onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))}
+              min={0.5}
+              max={50}
+              step={0.5}
+            />
+          </div>
+
+          {/* Max Amount */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Maximum Bid</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min={skipLine.min + 0.5}
+                  max={100}
+                  step={0.5}
+                  value={skipLine.max}
+                  onChange={(e) => setSkipLine(s => ({ ...s, max: parseFloat(e.target.value) || 100 }))}
+                  className="w-24 h-9 text-right"
+                />
+              </div>
+            </div>
+            <Slider
+              value={[skipLine.max]}
+              onValueChange={([val]) => setSkipLine(s => ({ ...s, max: val }))}
+              min={5}
               max={100}
               step={0.5}
-              value={localMax}
-              onChange={(e) => setLocalMax(parseFloat(e.target.value) || 100)}
-              className="w-24 h-9 text-right"
             />
           </div>
-        </div>
-        <Slider
-          value={[localMax]}
-          onValueChange={([val]) => setLocalMax(val)}
-          min={5}
-          max={100}
-          step={0.5}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>€5.00</span>
-          <span>€100.00</span>
-        </div>
-      </div>
 
-      {/* Step Amount */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm">Step Increment</Label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">€</span>
-            <Input
-              type="number"
-              min={0.5}
-              max={10}
-              step={0.5}
-              value={localStep}
-              onChange={(e) => setLocalStep(parseFloat(e.target.value) || 0.5)}
-              className="w-24 h-9 text-right"
+          {/* Step */}
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Step Increment</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">€</span>
+              <Input
+                type="number"
+                min={0.5}
+                max={10}
+                step={0.5}
+                value={skipLine.step}
+                onChange={(e) => setSkipLine(s => ({ ...s, step: parseFloat(e.target.value) || 0.5 }))}
+                className="w-24 h-9 text-right"
+              />
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <p className="text-sm font-medium text-amber-400 mb-2">Skip the Line Preview</p>
+            <p className="text-xs text-muted-foreground">
+              Users can bid between €{skipLine.min.toFixed(2)} and €{skipLine.max.toFixed(2)} 
+              in €{skipLine.step.toFixed(2)} increments
+            </p>
+          </div>
+        </TabsContent>
+
+        {/* Submissions Tab */}
+        <TabsContent value="submission" className="space-y-4 mt-4">
+          {/* Paid Toggle */}
+          <div className={`flex items-center justify-between p-3 rounded-lg ${
+            submission.isActive ? 'bg-primary/20 border border-primary/30' : 'bg-secondary/30'
+          }`}>
+            <div>
+              <p className="text-sm font-medium">
+                {submission.isActive ? 'Paid Submissions' : 'Free Submissions'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {submission.isActive 
+                  ? 'Users must pay to submit songs' 
+                  : 'Anyone can submit songs for free'}
+              </p>
+            </div>
+            <Switch 
+              checked={submission.isActive} 
+              onCheckedChange={(checked) => setSubmission(s => ({ ...s, isActive: checked }))}
             />
           </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Slider will move in €{localStep.toFixed(2)} increments
-        </p>
-      </div>
 
-      {/* Preview */}
-      <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 space-y-2">
-        <p className="text-sm font-medium text-primary">Current Settings Preview</p>
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div>
-            <p className="text-xs text-muted-foreground">Min</p>
-            <p className="text-lg font-bold">€{localMin.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Max</p>
-            <p className="text-lg font-bold">€{localMax.toFixed(2)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Step</p>
-            <p className="text-lg font-bold">€{localStep.toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
+          {submission.isActive && (
+            <>
+              {/* Fixed Price */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Submission Price</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">€</span>
+                    <Input
+                      type="number"
+                      min={0.5}
+                      max={100}
+                      step={0.5}
+                      value={submission.min}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 1;
+                        setSubmission(s => ({ ...s, min: val, max: Math.max(val, s.max) }));
+                      }}
+                      className="w-24 h-9 text-right"
+                    />
+                  </div>
+                </div>
+                <Slider
+                  value={[submission.min]}
+                  onValueChange={([val]) => setSubmission(s => ({ ...s, min: val, max: Math.max(val, s.max) }))}
+                  min={0.5}
+                  max={20}
+                  step={0.5}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>€0.50</span>
+                  <span>€20.00</span>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                <p className="text-sm font-medium text-primary mb-2">Submission Fee Active</p>
+                <p className="text-2xl font-bold">€{submission.min.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Per song submission
+                </p>
+              </div>
+            </>
+          )}
+
+          {!submission.isActive && (
+            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <p className="text-sm font-medium text-emerald-400 mb-2">Free Submissions Active</p>
+              <p className="text-xs text-muted-foreground">
+                Users can submit songs without payment. Toggle on to start charging.
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Validation Warning */}
-      {localMin >= localMax && (
+      {((skipLine.min >= skipLine.max) || (submission.isActive && submission.min >= submission.max)) && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm">Minimum must be less than maximum</span>
@@ -254,7 +363,7 @@ export function AdminPricingPanel() {
       {/* Save Button */}
       <Button
         onClick={handleSave}
-        disabled={isSaving || !hasChanges || localMin >= localMax}
+        disabled={isSaving || !hasChanges || skipLine.min >= skipLine.max}
         className="w-full"
         size="lg"
       >
@@ -266,7 +375,7 @@ export function AdminPricingPanel() {
         ) : (
           <>
             <Check className="w-4 h-4" />
-            Save Pricing Changes
+            Save All Pricing Changes
           </>
         )}
       </Button>
