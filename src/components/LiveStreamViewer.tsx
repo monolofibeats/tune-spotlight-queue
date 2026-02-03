@@ -469,6 +469,7 @@ export function LiveStreamViewer({ roomId }: LiveStreamViewerProps) {
           )}
         </AnimatePresence>
       </div>
+      </div>
     </motion.div>
   );
 }
