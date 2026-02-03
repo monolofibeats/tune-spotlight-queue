@@ -78,17 +78,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   // Fetch highest current bid
   useEffect(() => {
     const fetchHighestBid = async () => {
-      const { data } = await supabase
-        .from('submissions')
-        .select('amount_paid')
-        .eq('is_priority', true)
-        .eq('status', 'pending')
-        .order('amount_paid', { ascending: false })
-        .limit(1)
-        .single();
+      try {
+        // Use maybeSingle() so we don't throw/emit a 406 when there are 0 rows.
+        const { data, error } = await supabase
+          .from('submissions')
+          .select('amount_paid')
+          .eq('is_priority', true)
+          .eq('status', 'pending')
+          .order('amount_paid', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (data) {
-        setHighestBid(data.amount_paid);
+        if (error) throw error;
+        setHighestBid(data?.amount_paid ?? 0);
+      } catch (e) {
+        console.error('Error fetching highest bid:', e);
       }
     };
 
