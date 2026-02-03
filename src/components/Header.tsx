@@ -63,26 +63,27 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden glass-strong border-t border-border/50 p-4"
+          className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
         >
-          <nav className="flex flex-col gap-3">
-            <div className="flex justify-center pb-3 border-b border-border/50">
+          <nav className="flex flex-col gap-2">
+            <div className="flex justify-center pb-2 border-b border-border/30">
               <SocialLinks />
             </div>
             
             {isAdmin ? (
               <>
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
                   </Button>
                 </Link>
                 <Button 
-                  variant="ghost" 
-                  className="w-full justify-start gap-2" 
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start gap-2 h-9 text-sm" 
                   onClick={() => {
                     signOut();
                     setMobileMenuOpen(false);
@@ -94,7 +95,7 @@ export function Header() {
               </>
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="hero" className="w-full">
+                <Button size="sm" className="w-full h-9 text-sm">
                   Sign In
                 </Button>
               </Link>
