@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      pre_stream_spots: {
+        Row: {
+          created_at: string
+          id: string
+          is_available: boolean
+          price_cents: number
+          purchased_at: string | null
+          purchased_by: string | null
+          session_id: string | null
+          spot_number: number
+          submission_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price_cents: number
+          purchased_at?: string | null
+          purchased_by?: string | null
+          session_id?: string | null
+          spot_number: number
+          submission_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price_cents?: number
+          purchased_at?: string | null
+          purchased_by?: string | null
+          session_id?: string | null
+          spot_number?: number
+          submission_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pre_stream_spots_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "stream_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pre_stream_spots_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       special_events: {
         Row: {
           created_at: string
@@ -49,6 +100,109 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      stream_clips: {
+        Row: {
+          clip_url: string | null
+          created_at: string
+          created_by: string | null
+          end_time_seconds: number
+          id: string
+          is_public: boolean
+          recording_id: string
+          start_time_seconds: number
+          thumbnail_url: string | null
+          title: string
+          view_count: number
+        }
+        Insert: {
+          clip_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time_seconds: number
+          id?: string
+          is_public?: boolean
+          recording_id: string
+          start_time_seconds: number
+          thumbnail_url?: string | null
+          title: string
+          view_count?: number
+        }
+        Update: {
+          clip_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_time_seconds?: number
+          id?: string
+          is_public?: boolean
+          recording_id?: string
+          start_time_seconds?: number
+          thumbnail_url?: string | null
+          title?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_clips_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "stream_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stream_recordings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          is_public: boolean
+          recorded_at: string
+          session_id: string | null
+          thumbnail_url: string | null
+          title: string
+          video_url: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_public?: boolean
+          recorded_at?: string
+          session_id?: string | null
+          thumbnail_url?: string | null
+          title: string
+          video_url: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          is_public?: boolean
+          recorded_at?: string
+          session_id?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          video_url?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "stream_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stream_sessions: {
         Row: {
