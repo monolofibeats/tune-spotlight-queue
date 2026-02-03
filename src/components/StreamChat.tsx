@@ -130,7 +130,7 @@ export function StreamChat({ roomId }: StreamChatProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Chat Messages */}
-      <ScrollArea className="flex-1 p-3" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-3" ref={scrollRef}>
         <div className="space-y-2">
           <AnimatePresence mode="popLayout">
             {messages.map((msg) => (
