@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Monitor, Loader2, Users, Volume2, VolumeX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +17,12 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
   const [viewerCount, setViewerCount] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
   const viewerIdRef = useRef<string>(`viewer_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
 
   const iceServers = {
@@ -29,6 +31,30 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
       { urls: 'stun:stun1.l.google.com:19302' },
     ],
   };
+
+  const hasRemoteVideo = useMemo(() => {
+    if (!remoteStream) return false;
+    return remoteStream.getVideoTracks().some((t) => t.readyState === 'live');
+  }, [remoteStream]);
+
+  useEffect(() => {
+    // Keep <video> synced with the latest stream; this fixes cases where
+    // ontrack fires before the ref is ready, or event.streams is empty.
+    const video = videoRef.current;
+    if (!video || !remoteStream) return;
+
+    if (video.srcObject !== remoteStream) {
+      video.srcObject = remoteStream;
+    }
+
+    // Ensure playback actually starts (some browsers need an explicit play call)
+    const playPromise = video.play();
+    if (playPromise && typeof (playPromise as Promise<void>).catch === 'function') {
+      (playPromise as Promise<void>).catch((e) => {
+        console.warn('[ScreenShareViewer] video.play() was blocked:', e);
+      });
+    }
+  }, [remoteStream]);
 
   useEffect(() => {
     const joinRoom = async () => {
@@ -42,12 +68,28 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
         // Handle incoming tracks
         pc.ontrack = (event) => {
           console.log('Received track:', event.track.kind);
-          if (videoRef.current && event.streams[0]) {
-            videoRef.current.srcObject = event.streams[0];
-            setHasVideo(true);
-            setIsConnecting(false);
-            setIsConnected(true);
+
+          // Some browsers provide event.streams = [] for remote tracks.
+          // Build/maintain a MediaStream manually so the <video> can render.
+          const incoming = event.streams?.[0];
+          let stream = incoming || remoteStreamRef.current;
+          if (!stream) stream = new MediaStream();
+          if (!incoming) {
+            // Avoid duplicates when multiple ontrack events fire.
+            const existingIds = new Set(stream.getTracks().map((t) => t.id));
+            if (!existingIds.has(event.track.id)) {
+              stream.addTrack(event.track);
+            }
           }
+
+          remoteStreamRef.current = stream;
+          setRemoteStream(stream);
+
+          if (event.track.kind === 'video') {
+            setHasVideo(true);
+          }
+          setIsConnecting(false);
+          setIsConnected(true);
         };
 
         // Handle ICE candidates
@@ -129,9 +171,10 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
           payload: { viewerId },
         });
 
-        // Set timeout for connection
+        // Set timeout for connection (avoid stale closure by reading refs/state)
         setTimeout(() => {
-          if (!hasVideo && isConnecting) {
+          const hasAnyVideo = remoteStreamRef.current?.getVideoTracks().some((t) => t.readyState === 'live');
+          if (!hasAnyVideo) {
             setIsConnecting(false);
             setError('Could not connect to stream. Please refresh and try again.');
           }
@@ -152,6 +195,12 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
       }
       if (channelRef.current) {
         channelRef.current.unsubscribe();
+      }
+
+      // Stop remote stream tracks (if any)
+      if (remoteStreamRef.current) {
+        remoteStreamRef.current.getTracks().forEach((t) => t.stop());
+        remoteStreamRef.current = null;
       }
     };
   }, [roomId]);
@@ -250,7 +299,7 @@ export function ScreenShareViewer({ roomId }: ScreenShareViewerProps) {
           LIVE
         </div>
 
-        {!hasVideo && isConnected && (
+        {(!hasVideo || !hasRemoteVideo) && isConnected && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <Loader2 className="w-8 h-8 animate-spin text-white" />
           </div>
