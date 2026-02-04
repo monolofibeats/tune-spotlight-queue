@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -12,7 +12,11 @@ import {
   Mail,
   MessageSquare,
   Copy,
-  Check
+  Check,
+  FileAudio,
+  Download,
+  Play,
+  Pause
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +35,7 @@ interface Submission {
   status: string;
   feedback: string | null;
   created_at: string;
+  audio_file_url: string | null;
 }
 
 interface SubmissionListItemProps {
