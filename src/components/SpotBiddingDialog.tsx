@@ -55,7 +55,7 @@ export function SpotBiddingDialog({
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<number | null>(null);
   const [incrementPercent, setIncrementPercent] = useState(10);
-  const [minBidAmount, setMinBidAmount] = useState(0.5);
+  const [minBidAmount, setMinBidAmount] = useState<number | null>(null); // Start as null until loaded
 
   useEffect(() => {
     if (open) {
@@ -78,16 +78,26 @@ export function SpotBiddingDialog({
         setIncrementPercent(bidConfig.min_amount_cents); // Stored as %
       }
 
-      // Get skip_line minimum price
-      const { data: skipConfig } = await supabase
+      // Get skip_line minimum price - REQUIRED for proper validation
+      const { data: skipConfig, error: skipError } = await supabase
         .from('pricing_config')
         .select('*')
         .eq('config_type', 'skip_line')
         .single();
 
-      if (skipConfig) {
-        setMinBidAmount(skipConfig.min_amount_cents / 100);
+      if (skipError || !skipConfig) {
+        console.error('Failed to load skip_line config:', skipError);
+        toast({
+          title: 'Error',
+          description: 'Failed to load pricing configuration',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
       }
+
+      const loadedMinBid = skipConfig.min_amount_cents / 100;
+      setMinBidAmount(loadedMinBid);
 
       // Get all pending priority submissions with their bids
       const { data: pendingSubmissions } = await supabase
@@ -124,7 +134,7 @@ export function SpotBiddingDialog({
         if (submission) {
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;
           const yourPrice = Math.max(
-            minBidAmount,
+            loadedMinBid,
             Math.ceil(totalPaid * (1 + percent / 100) * 100) / 100
           );
           
@@ -136,11 +146,11 @@ export function SpotBiddingDialog({
             artistName: submission.artist_name || undefined,
           });
         } else {
-          // Empty spot - use minimum price
+          // Empty spot - use minimum price from DB
           calculatedSpots.push({
             position: i + 1,
             currentPrice: 0,
-            yourPrice: minBidAmount,
+            yourPrice: loadedMinBid,
           });
         }
       }
