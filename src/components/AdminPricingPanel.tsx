@@ -327,12 +327,12 @@ export function AdminPricingPanel() {
           }`}>
             <div>
               <p className="text-sm font-medium">
-                {submission.isActive ? 'Paid Submissions' : 'Free Submissions'}
+                {submission.isActive ? 'Bezahlte Einsendungen' : 'Gratis Einsendungen'}
               </p>
               <p className="text-xs text-muted-foreground">
                 {submission.isActive 
-                  ? 'Users must pay to submit songs' 
-                  : 'Anyone can submit songs for free'}
+                  ? 'Nutzer müssen bezahlen wenn sie Tracks schicken wollen' 
+                  : 'Jeder kann Songs gratis einsenden'}
               </p>
             </div>
             <Switch 
