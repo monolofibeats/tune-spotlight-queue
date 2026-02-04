@@ -100,40 +100,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch highest current bid
-  useEffect(() => {
-    const fetchHighestBid = async () => {
-      try {
-        // Use maybeSingle() so we don't throw/emit a 406 when there are 0 rows.
-        const { data, error } = await supabase
-          .from('submissions')
-          .select('amount_paid')
-          .eq('is_priority', true)
-          .eq('status', 'pending')
-          .order('amount_paid', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (error) throw error;
-        setHighestBid(data?.amount_paid ?? 0);
-      } catch (e) {
-        console.error('Error fetching highest bid:', e);
-      }
-    };
-
-    fetchHighestBid();
-
-    // Subscribe to changes
-    const channel = supabase
-      .channel('highest_bid')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'submissions' }, fetchHighestBid)
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   const { play } = useSoundEffects();
 
   // Handle payment verification on return
