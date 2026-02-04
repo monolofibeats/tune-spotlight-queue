@@ -35,7 +35,6 @@ const SPOT_COLORS = [
   { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
 
-const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export function PreStreamSpots() {
