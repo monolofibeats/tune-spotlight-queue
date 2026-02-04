@@ -152,11 +152,11 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                 }}
                 className={`rounded-lg p-3 flex items-center gap-3 bg-card/50 border border-border/30 ${
                   submission.isNew ? 'ring-1 ring-primary/50' : ''
-                } ${submission.amount_paid > 0 ? 'border-primary/30' : ''}`}
+                } ${submission.is_priority ? 'border-primary/30' : ''}`}
               >
                 <div 
                   className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
-                    submission.amount_paid > 0 
+                    submission.is_priority 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-secondary text-muted-foreground'
                   }`}
@@ -169,9 +169,9 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     <p className="font-medium text-sm truncate">
                       {submission.song_title || 'Untitled'}
                     </p>
-                    {submission.amount_paid > 0 && (
+                    {submission.is_priority && (
                       <Badge variant="premium" className="text-[10px] px-1.5 py-0">
-                        ${submission.amount_paid}
+                        Priority
                       </Badge>
                     )}
                   </div>
