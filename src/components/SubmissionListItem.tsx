@@ -227,12 +227,14 @@ export function SubmissionListItem({
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/30">
                   <FileAudio className="w-4 h-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <audio 
-                      ref={audioRef} 
-                      src={submission.audio_file_url}
-                      onEnded={() => setIsPlaying(false)}
-                      className="hidden"
-                    />
+                    {audioUrl && (
+                      <audio 
+                        ref={audioRef} 
+                        src={audioUrl}
+                        onEnded={() => setIsPlaying(false)}
+                        className="hidden"
+                      />
+                    )}
                     <p className="text-xs text-muted-foreground truncate">Hochgeladene Audio Datei</p>
                   </div>
                   <Button
@@ -243,8 +245,11 @@ export function SubmissionListItem({
                       e.stopPropagation();
                       toggleAudioPlayback();
                     }}
+                    disabled={isLoadingAudio || !audioUrl}
                   >
-                    {isPlaying ? (
+                    {isLoadingAudio ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : isPlaying ? (
                       <Pause className="w-3.5 h-3.5" />
                     ) : (
                       <Play className="w-3.5 h-3.5" />
