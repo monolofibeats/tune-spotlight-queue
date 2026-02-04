@@ -723,10 +723,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
           {/* Submit Buttons - Stacked on mobile */}
           <div className="flex flex-col gap-2">
+            {/* Free/Default Submit Button - Dark style */}
             <Button
               type="submit"
               size="lg"
-              className={`w-full ${submissionPaid && !isAdmin ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' : ''}`}
+              variant={submissionPaid && !isAdmin ? "default" : "secondary"}
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -752,13 +754,14 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               )}
             </Button>
 
+            {/* Skip Line Button - Bright/Primary style */}
             {skipLineActive && (
               <Button
                 type="button"
                 onClick={handleSkipTheLine}
-                variant="outline"
+                variant="hero"
                 size="lg"
-                className="w-full border-primary/30 text-primary hover:bg-primary/10"
+                className="w-full"
               >
                 <Zap className="w-4 h-4" />
                 {t('submission.skipWaitingList')}
