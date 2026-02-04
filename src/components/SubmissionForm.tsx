@@ -555,7 +555,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
                   onChange={handleFileChange}
                   className="hidden"
                   id="audio-file-input"

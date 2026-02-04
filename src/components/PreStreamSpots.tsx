@@ -483,7 +483,6 @@ export function PreStreamSpots() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
                   onChange={handleFileChange}
                   className="hidden"
                   id="spot-audio-file-input"
