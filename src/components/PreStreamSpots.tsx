@@ -160,7 +160,7 @@ export function PreStreamSpots() {
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50MB",
+        description: "Maximum file size is 100MB",
         variant: "destructive",
       });
       return;
