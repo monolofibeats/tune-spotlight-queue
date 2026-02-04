@@ -24,6 +24,7 @@ export type Database = {
           notification_type: string
           offer_amount_cents: number | null
           submission_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -34,6 +35,7 @@ export type Database = {
           notification_type: string
           offer_amount_cents?: number | null
           submission_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -44,6 +46,7 @@ export type Database = {
           notification_type?: string
           offer_amount_cents?: number | null
           submission_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

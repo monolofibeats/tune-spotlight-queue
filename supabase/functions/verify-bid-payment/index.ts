@@ -127,11 +127,12 @@ serve(async (req) => {
           .insert({
             submission_id: bid.submission_id,
             email: bid.email,
+            user_id: bid.user_id || null, // Include user_id for proper RLS access
             notification_type: 'outbid',
             offer_amount_cents: suggestedBid,
           });
         
-        logStep("Outbid notification created", { email: bid.email, suggestedBid });
+        logStep("Outbid notification created", { email: bid.email, userId: bid.user_id, suggestedBid });
       }
     }
 

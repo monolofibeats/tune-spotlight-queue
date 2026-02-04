@@ -34,7 +34,7 @@ export function BidNotificationBell() {
   const [open, setOpen] = useState(false);
 
   const fetchNotifications = async () => {
-    if (!user?.email) return;
+    if (!user?.id) return;
     
     setIsLoading(true);
     try {
@@ -47,7 +47,7 @@ export function BidNotificationBell() {
             artist_name
           )
         `)
-        .eq('email', user.email)
+        .eq('user_id', user.id)
         .eq('is_read', false)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -66,7 +66,7 @@ export function BidNotificationBell() {
     fetchNotifications();
 
     // Subscribe to realtime changes
-    if (user?.email) {
+    if (user?.id) {
       const channel = supabase
         .channel('bid_notifications_changes')
         .on(
@@ -75,7 +75,7 @@ export function BidNotificationBell() {
             event: 'INSERT',
             schema: 'public',
             table: 'bid_notifications',
-            filter: `email=eq.${user.email}`,
+            filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
             // Show toast for new notifications
@@ -95,7 +95,7 @@ export function BidNotificationBell() {
         supabase.removeChannel(channel);
       };
     }
-  }, [user?.email]);
+  }, [user?.id]);
 
   const markAsRead = async (id: string) => {
     await supabase
