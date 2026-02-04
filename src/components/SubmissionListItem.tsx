@@ -75,6 +75,30 @@ export function SubmissionListItem({
     });
   };
 
+  const toggleAudioPlayback = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleDownloadFile = () => {
+    if (submission.audio_file_url) {
+      const link = document.createElement('a');
+      link.href = submission.audio_file_url;
+      link.download = `${submission.artist_name} - ${submission.song_title}`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+  };
+
   return (
     <motion.div
       layout
