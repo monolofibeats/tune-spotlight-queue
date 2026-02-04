@@ -596,7 +596,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.linkLabel')} *
+                  {t('submission.linkLabel')}
                 </label>
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
