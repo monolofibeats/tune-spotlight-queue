@@ -353,11 +353,8 @@ const Dashboard = () => {
           >
             <div className="flex items-center gap-3 mb-2">
               <LayoutDashboard className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-display font-bold">Dashboard</h1>
+              <h1 className="text-3xl font-display font-bold">Live Review</h1>
             </div>
-            <p className="text-muted-foreground">
-              Manage submissions, stream settings, and special events.
-            </p>
           </motion.div>
 
           {/* Stats */}
