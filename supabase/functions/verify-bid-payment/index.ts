@@ -88,12 +88,13 @@ serve(async (req) => {
       logStep("Bid created");
     }
 
-    // Update submission to mark as priority
+    // Update submission to mark as priority (convert cents to euros for boost_amount)
+    const newTotalCents = (existingBid?.total_paid_cents || 0) + bidAmountCents;
     await supabaseAdmin
       .from('submissions')
       .update({
         is_priority: true,
-        boost_amount: (existingBid?.total_paid_cents || 0) + bidAmountCents,
+        boost_amount: newTotalCents / 100, // Store in euros, not cents
       })
       .eq('id', submissionId);
 
