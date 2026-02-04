@@ -378,10 +378,10 @@ export function AdminPricingPanel() {
 
               {/* Preview */}
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <p className="text-sm font-medium text-primary mb-2">Submission Fee Active</p>
+                <p className="text-sm font-medium text-primary mb-2">Einsendungspreis gerade</p>
                 <p className="text-2xl font-bold">€{submission.min.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Per song submission
+                  Pro Einsendung
                 </p>
               </div>
             </>
