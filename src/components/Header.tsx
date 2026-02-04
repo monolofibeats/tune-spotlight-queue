@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
 import { LiveIndicator } from './LiveIndicator';
+import { BidNotificationBell } from './BidNotificationBell';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import upstarLogo from '@/assets/upstar-logo.png';
