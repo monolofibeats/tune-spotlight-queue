@@ -236,6 +236,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
 export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
   ({ src, isLoading = false, onEnded }, ref) => {
     const audioRef = useRef<HTMLAudioElement>(null);
+    const pendingSeekRef = useRef<number | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -246,30 +247,62 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       const audio = audioRef.current;
       if (!audio) return;
 
+      // Attach listeners *after* the audio element exists, and re-run when src changes.
+      // Previously, the <audio> element wasn't rendered until src existed, so the effect
+      // ran with audioRef.current === null and never attached listeners.
       const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-      const handleLoadedMetadata = () => setDuration(audio.duration);
+      const handleLoadedMetadata = () => {
+        const dur = Number.isFinite(audio.duration) ? audio.duration : 0;
+        setDuration(dur);
+
+        if (pendingSeekRef.current !== null && dur > 0) {
+          const nextTime = Math.max(0, Math.min(pendingSeekRef.current, dur));
+          pendingSeekRef.current = null;
+          audio.currentTime = nextTime;
+          setCurrentTime(nextTime);
+        }
+      };
+      const handleDurationChange = () => {
+        const dur = Number.isFinite(audio.duration) ? audio.duration : 0;
+        setDuration(dur);
+      };
       const handleEnded = () => {
         setIsPlaying(false);
         onEnded?.();
       };
-      const handleDurationChange = () => {
-        if (audio.duration && isFinite(audio.duration)) {
-          setDuration(audio.duration);
-        }
+      const handleError = () => {
+        // Keep UI stable if source fails.
+        setIsPlaying(false);
+        setDuration(0);
+        setCurrentTime(0);
       };
 
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('durationchange', handleDurationChange);
       audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('error', handleError);
+
+      // Ensure src changes trigger a real reload and metadata fetch
+      audio.pause();
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      pendingSeekRef.current = null;
+
+      audio.src = src ?? '';
+      if (src) {
+        audio.load();
+      }
 
       return () => {
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('durationchange', handleDurationChange);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
       };
-    }, [onEnded]);
+    }, [src, onEnded]);
 
     useEffect(() => {
       if (audioRef.current) {
@@ -282,18 +315,34 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {
+            // e.g. NotSupportedError (bad URL / codec) or autoplay restrictions
+            setIsPlaying(false);
+          });
+        }
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     };
 
     const handleSeek = useCallback((time: number) => {
-      if (audioRef.current && isFinite(time)) {
-        audioRef.current.currentTime = time;
-        setCurrentTime(time);
+      const audio = audioRef.current;
+      if (!audio || !Number.isFinite(time) || !src) return;
+
+      // If metadata isn't loaded yet, store the request and apply on loadedmetadata.
+      if (!Number.isFinite(audio.duration) || audio.duration === 0) {
+        pendingSeekRef.current = time;
+        audio.load();
+        return;
       }
-    }, []);
+
+      const nextTime = Math.max(0, Math.min(time, audio.duration));
+      audio.currentTime = nextTime;
+      setCurrentTime(nextTime);
+    }, [src]);
 
     const handleVolumeChange = useCallback((vol: number) => {
       setVolume(vol);
@@ -315,9 +364,8 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
 
     return (
       <div ref={ref} className="flex flex-col gap-3 w-full p-3 rounded-lg bg-background/50 border border-border/30">
-        {src && (
-          <audio ref={audioRef} src={src} preload="metadata" />
-        )}
+        {/* Always render the audio element so refs + listeners work even when src arrives later */}
+        <audio ref={audioRef} preload="metadata" />
         
         {/* Progress bar and time */}
         <div className="flex items-center gap-3">
