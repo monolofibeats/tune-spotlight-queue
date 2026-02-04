@@ -172,9 +172,9 @@ export function AdminPricingPanel() {
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Pricing Controls</h3>
+            <h3 className="font-semibold">Zahlungseinstellungen</h3>
             <p className="text-xs text-muted-foreground">
-              Adjust submission and bid prices in real-time
+              Einsendungs- und Gebotspreise in Echtzeit anpassen
             </p>
           </div>
         </div>
