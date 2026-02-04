@@ -584,7 +584,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-6">
                   <Trophy className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Create Special Event</h2>
+                  <h2 className="text-xl font-display font-semibold">Event erstellen</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
