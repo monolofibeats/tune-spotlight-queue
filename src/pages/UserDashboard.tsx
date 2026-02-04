@@ -113,34 +113,6 @@ const UserDashboard = () => {
     };
   }, [user]);
 
-  const handleBoost = async (id: string, currentBoost: number) => {
-    setBoostingId(id);
-    
-    // For now, we'll just increment boost. In a real app, this would trigger a payment
-    const newBoost = currentBoost + 5;
-    
-    const { error } = await supabase
-      .from('submissions')
-      .update({ boost_amount: newBoost })
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to boost submission",
-        variant: "destructive",
-      });
-    } else {
-      play('boost');
-      toast({
-        title: "Boosted! ⚡",
-        description: "Your song has been pushed up in the queue",
-      });
-    }
-    
-    setBoostingId(null);
-  };
-
   const stats = {
     total: submissions.length,
     pending: submissions.filter(s => s.status === 'pending').length,

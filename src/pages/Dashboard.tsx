@@ -483,6 +483,9 @@ const Dashboard = () => {
               {/* Pricing Configuration */}
               <AdminPricingPanel />
               
+              {/* Bid Increment Settings */}
+              <AdminBidSettings />
+              
               {/* Pre-Stream Spots Manager */}
               <AdminSpotManager />
               
