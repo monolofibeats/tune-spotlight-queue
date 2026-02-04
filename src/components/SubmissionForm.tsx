@@ -689,7 +689,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <label className="text-xs text-muted-foreground mb-1.5 block">Email (optional)</label>
                 <Input
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="deine@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-10 text-sm bg-background/50"
