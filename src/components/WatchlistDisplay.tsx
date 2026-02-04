@@ -49,13 +49,13 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        // Transform to match our interface (the view doesn't have amount_paid)
+        // Transform to match our interface
         const transformed: SubmissionItem[] = data.map(item => ({
           id: item.id || '',
           song_title: item.song_title || 'Untitled',
           artist_name: item.artist_name || 'Unknown Artist',
           is_priority: item.is_priority || false,
-          amount_paid: 0, // View doesn't expose this
+          amount_paid: Number(item.amount_paid) || 0,
           status: item.status || 'pending',
           created_at: item.created_at || new Date().toISOString(),
         }));
