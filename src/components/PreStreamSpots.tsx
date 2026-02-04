@@ -35,7 +35,7 @@ const SPOT_COLORS = [
   { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function PreStreamSpots() {
   const { user, isAdmin } = useAuth();
