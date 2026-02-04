@@ -317,7 +317,7 @@ export function SubmissionListItem({
                   }}
                 >
                   <XCircle className="w-3 h-3" />
-                  Skip
+                  Überspringen
                 </Button>
                 <Button
                   variant="ghost"

@@ -266,7 +266,7 @@ export function AdminSpotManager() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Adjust prices (€0.50 - €500) and click "Save Prices". Click "Reset All Spots" before each stream to make all spots available again.
+        Leg die Preise fest (0,50€ - 500€) und klick auf "Preise speichern". Klick auf "Alle Plätze zurücksetzen" vor jedem Stream damit alle Plätze wieder verfügbar werden.
       </p>
     </div>
   );
