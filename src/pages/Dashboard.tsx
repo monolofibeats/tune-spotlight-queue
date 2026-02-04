@@ -567,7 +567,7 @@ const Dashboard = () => {
                     ) : (
                       <>
                         <Upload className="w-4 h-4" />
-                        Save Stream Settings
+                        Livestream Einstellungen speichern
                       </>
                     )}
                   </Button>
