@@ -794,7 +794,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 className="w-full border-primary/30 text-primary hover:bg-primary/10"
               >
                 <Zap className="w-4 h-4" />
-                Skip the Line
+                Warteliste überspringen
               </Button>
             )}
           </div>
