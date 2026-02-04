@@ -45,12 +45,10 @@ interface FlyingCard {
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
   const { t } = useLanguage();
-  // Skip line config (only need isActive now, pricing comes from spot system)
-  const { minAmount, maxAmount, step, config, isActive: skipLineActive } = usePricingConfig('skip_line');
+  const { isActive: skipLineActive } = usePricingConfig('skip_line');
   const { 
     minAmount: submissionPrice, 
     isActive: submissionPaid,
-    config: submissionConfig 
   } = usePricingConfig('submission');
   const { isActive: submissionsOpen } = usePricingConfig('submissions_open');
   
@@ -61,11 +59,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [message, setMessage] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
-  const [priorityAmount, setPriorityAmount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,13 +69,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
-
-  // Update priority amount when config changes
-  useEffect(() => {
-    if (config) {
-      setPriorityAmount(minAmount);
-    }
-  }, [config, minAmount]);
 
   // Check user auth state
   useEffect(() => {
