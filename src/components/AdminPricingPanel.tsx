@@ -421,7 +421,7 @@ export function AdminPricingPanel() {
         ) : (
           <>
             <Check className="w-4 h-4" />
-            Save All Pricing Changes
+            Alle Zahlungseinstellungen speichern
           </>
         )}
       </Button>
