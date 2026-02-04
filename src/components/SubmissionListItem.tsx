@@ -292,7 +292,7 @@ export function SubmissionListItem({
                   disabled={submission.status === 'reviewing'}
                 >
                   <Eye className="w-3 h-3" />
-                  Review
+                  Überprüfen
                 </Button>
                 <Button
                   variant="default"
