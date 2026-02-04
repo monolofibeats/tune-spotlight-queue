@@ -36,6 +36,7 @@ const formatTimeAgo = (date: Date): string => {
 
 export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
   ({ onlyRealtime = false }, ref) => {
+    const { t } = useLanguage();
     const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
