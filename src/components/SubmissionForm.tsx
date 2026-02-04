@@ -15,6 +15,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ interface FlyingCard {
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
+  const { t } = useLanguage();
   const { minAmount, maxAmount, step, config, isActive: skipLineActive } = usePricingConfig('skip_line');
   const { 
     minAmount: submissionPrice, 
@@ -631,16 +633,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-display font-semibold">Schick uns deinen Track!</h2>
+              <h2 className="text-base font-display font-semibold">{t('submission.title')}</h2>
             </div>
 
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Musiklink *
+                  {t('submission.linkLabel')} *
                 </label>
                 <Input
-                  placeholder="dein Musiklink?"
+                  placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
                   className="h-10 text-sm bg-background/50"
@@ -666,18 +668,18 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Künstler</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.artistLabel')}</label>
                   <Input
-                    placeholder="Künstler Name"
+                    placeholder={t('submission.artistPlaceholder')}
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
                     className="h-10 text-sm bg-background/50"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Titel</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.titleLabel')}</label>
                   <Input
-                    placeholder="Song Titel"
+                    placeholder={t('submission.titlePlaceholder')}
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     className="h-10 text-sm bg-background/50"
@@ -686,10 +688,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Email (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
                 <Input
                   type="email"
-                  placeholder="deine@email.com"
+                  placeholder={t('submission.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-10 text-sm bg-background/50"
@@ -697,9 +699,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Bemerkungen (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
                 <Textarea
-                  placeholder="was ist besonders an diesem Track?"
+                  placeholder={t('submission.messagePlaceholder')}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[80px] text-sm resize-none bg-background/50"
@@ -709,7 +711,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Musik Datei (optional) - .wav, .mp3, .flac
+                  {t('submission.audioFileLabel')} - .wav, .mp3, .flac
                 </label>
                 <input
                   ref={fileInputRef}
@@ -747,7 +749,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     className="w-full h-10 text-sm border-dashed"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Datei hochladen
+                    {t('submission.uploadFile')}
                   </Button>
                 )}
               </div>
@@ -775,12 +777,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               ) : isAdmin && submissionPaid ? (
                 <>
                   <Shield className="w-4 h-4" />
-                  Abschicken (Admin - gratis)
+                  {t('submission.submitAdminFree')}
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  Abschicken (gratis)
+                  {t('submission.submitFree')}
                 </>
               )}
             </Button>
@@ -794,7 +796,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 className="w-full border-primary/30 text-primary hover:bg-primary/10"
               >
                 <Zap className="w-4 h-4" />
-                Warteliste überspringen
+                {t('submission.skipWaitingList')}
               </Button>
             )}
           </div>

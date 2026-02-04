@@ -3,6 +3,7 @@ import { Eye, Sparkles, Music, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SubmissionItem {
   id: string;
@@ -35,6 +36,7 @@ const formatTimeAgo = (date: Date): string => {
 
 export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
   ({ onlyRealtime = false }, ref) => {
+    const { t } = useLanguage();
     const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
@@ -128,7 +130,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display font-semibold text-sm flex items-center gap-2">
             <Eye className="w-4 h-4 text-primary" />
-            Warteliste
+            {t('queue.title')}
           </h3>
           <Badge variant="queue" className="text-xs">{sortedItems.length}</Badge>
         </div>
@@ -188,8 +190,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
           {sortedItems.length === 0 && (
             <div className="rounded-lg p-6 text-center bg-card/30 border border-border/30">
               <Music className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No songs yet</p>
-              <p className="text-xs text-muted-foreground/60">Be the first!</p>
+              <p className="text-sm text-muted-foreground">{t('queue.empty')}</p>
+              <p className="text-xs text-muted-foreground/60">{t('queue.beFirst')}</p>
             </div>
           )}
         </div>
