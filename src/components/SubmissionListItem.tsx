@@ -104,7 +104,7 @@ export function SubmissionListItem({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={`rounded-lg border transition-colors ${
-        submission.amount_paid > 0 
+        submission.is_priority 
           ? 'border-primary/40 bg-primary/5' 
           : 'border-border/50 bg-card/30'
       } ${isExpanded ? 'bg-card/50' : 'hover:bg-card/40'}`}
@@ -114,11 +114,11 @@ export function SubmissionListItem({
         className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {/* Priority/Amount indicator */}
-        {submission.amount_paid > 0 && (
+        {/* Priority indicator - no amount shown */}
+        {submission.is_priority && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
-            <DollarSign className="w-2.5 h-2.5" />
-            {submission.amount_paid}
+            <Zap className="w-2.5 h-2.5" />
+            Priority
           </Badge>
         )}
 
