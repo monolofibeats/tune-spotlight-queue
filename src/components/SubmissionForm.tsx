@@ -709,7 +709,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Audio File (optional) - .wav, .mp3, .flac
+                  Musik Datei (optional) - .wav, .mp3, .flac
                 </label>
                 <input
                   ref={fileInputRef}
@@ -747,7 +747,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     className="w-full h-10 text-sm border-dashed"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Audio File
+                    Datei hochladen
                   </Button>
                 )}
               </div>
