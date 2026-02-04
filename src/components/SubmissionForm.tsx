@@ -633,16 +633,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-display font-semibold">Schick uns deinen Track!</h2>
+              <h2 className="text-base font-display font-semibold">{t('submission.title')}</h2>
             </div>
 
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Musiklink *
+                  {t('submission.linkLabel')} *
                 </label>
                 <Input
-                  placeholder="dein Musiklink?"
+                  placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
                   className="h-10 text-sm bg-background/50"
