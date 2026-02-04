@@ -269,7 +269,7 @@ export function AdminPricingPanel() {
           {/* Max Amount */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">Maximum Bid</Label>
+              <Label className="text-sm">Maximum Preis</Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">€</span>
                 <Input
