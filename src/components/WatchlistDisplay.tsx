@@ -190,8 +190,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
           {sortedItems.length === 0 && (
             <div className="rounded-lg p-6 text-center bg-card/30 border border-border/30">
               <Music className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No songs yet</p>
-              <p className="text-xs text-muted-foreground/60">Be the first!</p>
+              <p className="text-sm text-muted-foreground">{t('queue.empty')}</p>
+              <p className="text-xs text-muted-foreground/60">{t('queue.beFirst')}</p>
             </div>
           )}
         </div>

@@ -569,6 +569,24 @@ const translations: Record<Language, Record<string, string>> = {
     'form.processingPayment': 'Обработка...',
     'form.proceedPayment': 'Перейти к оплате',
     
+    // Submission Form (new keys)
+    'submission.title': 'Покажите, что у вас есть!',
+    'submission.linkLabel': 'Ссылка на трек',
+    'submission.linkPlaceholder': 'ваша ссылка на музыку?',
+    'submission.artistLabel': 'Исполнитель',
+    'submission.artistPlaceholder': 'Имя исполнителя',
+    'submission.titleLabel': 'Название',
+    'submission.titlePlaceholder': 'Название песни',
+    'submission.emailLabel': 'Email (необязательно)',
+    'submission.emailPlaceholder': 'ваш@email.com',
+    'submission.messageLabel': 'Сообщение (необязательно)',
+    'submission.messagePlaceholder': 'Расскажите, что особенного в этом треке!',
+    'submission.audioFileLabel': 'Аудио файл (необязательно)',
+    'submission.uploadFile': 'Загрузить файл',
+    'submission.submitFree': 'Отправить трек (бесплатно)',
+    'submission.submitAdminFree': 'Отправить трек (Админ - бесплатно)',
+    'submission.skipWaitingList': 'Пропустить очередь',
+    
     // Watchlist / Queue
     'queue.title': 'Очередь',
     'queue.empty': 'Пока нет песен',
