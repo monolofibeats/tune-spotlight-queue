@@ -589,17 +589,17 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <Label className="mb-2 block">Event Title *</Label>
+                    <Label className="mb-2 block">Titel des Events *</Label>
                     <Input
-                      placeholder="e.g., Highest Bidder Gets Playlist Add"
+                      placeholder="z.B. der höchste Bieter bekommt einen Playlist Add"
                       value={newEventTitle}
                       onChange={(e) => setNewEventTitle(e.target.value)}
                     />
                   </div>
                   <div>
-                    <Label className="mb-2 block">Reward *</Label>
+                    <Label className="mb-2 block">Belohnung *</Label>
                     <Input
-                      placeholder="e.g., Added to Spotify playlist with 10k followers"
+                      placeholder="z.B. du wirst zu einer Spotify Playlist mit 10K Followern hinzugefügt"
                       value={newEventReward}
                       onChange={(e) => setNewEventReward(e.target.value)}
                     />
