@@ -350,6 +350,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Artist name and song title are required
+    if (!artistName.trim() || !songTitle.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both artist name and song title.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Either song URL or audio file is required
     if (!songUrl && !audioFile) {
       toast({
