@@ -389,9 +389,9 @@ export function AdminPricingPanel() {
 
           {!submission.isActive && (
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <p className="text-sm font-medium text-emerald-400 mb-2">Free Submissions Active</p>
+              <p className="text-sm font-medium text-emerald-400 mb-2">Gratis Einsendungen aktiv</p>
               <p className="text-xs text-muted-foreground">
-                Users can submit songs without payment. Toggle on to start charging.
+                Nutzer können Tracks schicken ohne zu bezahlen. Aktiviere bezahlte Einsendungen um Geld zu verlangen.
               </p>
             </div>
           )}
