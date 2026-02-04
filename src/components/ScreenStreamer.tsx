@@ -471,7 +471,7 @@ export function ScreenStreamer() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            {isStarting ? 'Starting...' : 'Start Screen Share'}
+            {isStarting ? 'Startet...' : 'Bildschirm teilen'}
           </Button>
         )}
       </div>
