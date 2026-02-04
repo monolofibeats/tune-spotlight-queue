@@ -15,6 +15,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Dialog,
   DialogContent,
