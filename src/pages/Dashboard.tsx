@@ -492,7 +492,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-6">
                   <Tv className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Homepage Stream Settings</h2>
+                  <h2 className="text-xl font-display font-semibold">Startseite Einstellungen</h2>
                 </div>
 
                 <div className="space-y-6">
