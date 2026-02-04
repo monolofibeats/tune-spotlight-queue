@@ -251,12 +251,12 @@ export function AdminSpotManager() {
                 {spot.is_available ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm text-emerald-500">Available</span>
+                    <span className="text-sm text-emerald-500">Verfügbar</span>
                   </>
                 ) : (
                   <>
                     <X className="w-4 h-4 text-red-500" />
-                    <span className="text-sm text-red-500">Sold</span>
+                    <span className="text-sm text-red-500">Verkauft</span>
                   </>
                 )}
               </div>
