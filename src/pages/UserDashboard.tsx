@@ -207,7 +207,7 @@ const UserDashboard = () => {
             </div>
             <div className="rounded-xl border border-border/50 bg-card/50 p-4">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-primary" />
+                <Zap className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground">Invested</span>
               </div>
               <p className="text-2xl font-display font-bold mt-1">€{stats.totalSpent}</p>
