@@ -3,6 +3,7 @@ import { Eye, Sparkles, Music, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SubmissionItem {
   id: string;
