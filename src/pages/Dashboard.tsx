@@ -448,114 +448,15 @@ const Dashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Submissions List */}
-              <div className="space-y-4">
-                {filteredSubmissions.map((submission, index) => (
-                  <motion.div
+              {/* Submissions List - Compact */}
+              <div className="space-y-1.5">
+                {filteredSubmissions.map((submission) => (
+                  <SubmissionListItem
                     key={submission.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`glass-strong rounded-2xl p-6 ${
-                      submission.amount_paid > 0 ? 'border border-primary/30' : ''
-                    }`}
-                  >
-                    <div className="flex flex-col lg:flex-row gap-6">
-                      {/* Song Info */}
-                      <div className="flex-1 space-y-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{submission.song_title}</h3>
-                              {submission.amount_paid > 0 && (
-                                <Badge variant="premium" className="flex items-center gap-1">
-                                  <DollarSign className="w-3 h-3" />
-                                  {submission.amount_paid}
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-muted-foreground">{submission.artist_name}</p>
-                          </div>
-                          <Badge variant={
-                            submission.status === 'reviewed' ? 'default' :
-                            submission.status === 'pending' ? 'queue' : 'secondary'
-                          }>
-                            {submission.status}
-                          </Badge>
-                        </div>
-
-                        {/* Always show clickable link */}
-                        <a 
-                          href={submission.song_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 text-sm text-primary hover:underline break-all"
-                        >
-                          <LinkIcon className="w-4 h-4 flex-shrink-0" />
-                          {submission.song_url.length > 60 
-                            ? `${submission.song_url.substring(0, 60)}...` 
-                            : submission.song_url}
-                        </a>
-                        
-                        {/* Optional embed preview for supported platforms */}
-                        {(submission.platform === 'spotify' || submission.platform === 'soundcloud') && (
-                          <div className="mt-2">
-                            <MusicEmbed url={submission.song_url} platform={submission.platform as 'spotify' | 'soundcloud'} />
-                          </div>
-                        )}
-
-                        {submission.message && (
-                          <p className="text-sm text-muted-foreground italic">
-                            "{submission.message}"
-                          </p>
-                        )}
-
-                        {submission.email && (
-                          <p className="text-xs text-muted-foreground">
-                            Contact: {submission.email}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-row lg:flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleStatusChange(submission.id, 'reviewing')}
-                          disabled={submission.status === 'reviewing'}
-                        >
-                          <Eye className="w-4 h-4" />
-                          Review
-                        </Button>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleStatusChange(submission.id, 'reviewed')}
-                          disabled={submission.status === 'reviewed'}
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Done
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleStatusChange(submission.id, 'skipped')}
-                        >
-                          <XCircle className="w-4 h-4" />
-                          Skip
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteSubmission(submission.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
+                    submission={submission}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDeleteSubmission}
+                  />
                 ))}
 
                 {filteredSubmissions.length === 0 && (
