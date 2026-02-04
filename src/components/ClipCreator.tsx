@@ -187,6 +187,7 @@ export function ClipCreator({ recording, onClose }: ClipCreatorProps) {
 }
 
 export function ClipsGallery({ onClipSelect }: { onClipSelect?: (clip: Clip) => void }) {
+  const { isAdmin } = useAuth();
   const [clips, setClips] = useState<Clip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -202,6 +203,29 @@ export function ClipsGallery({ onClipSelect }: { onClipSelect?: (clip: Clip) => 
       setClips(data);
     }
     setIsLoading(false);
+  };
+
+  const handleDeleteClip = async (clipId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const { error } = await (supabase
+      .from('stream_clips' as any)
+      .delete()
+      .eq('id', clipId)) as any;
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete clip",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Clip deleted",
+        description: "The clip has been removed",
+      });
+      fetchClips();
+    }
   };
 
   useEffect(() => {
