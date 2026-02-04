@@ -35,7 +35,7 @@ const SPOT_COLORS = [
   { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function PreStreamSpots() {
   const { user, isAdmin } = useAuth();
@@ -160,7 +160,7 @@ export function PreStreamSpots() {
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50MB",
+        description: "Maximum file size is 100MB",
         variant: "destructive",
       });
       return;
@@ -478,7 +478,7 @@ export function PreStreamSpots() {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  File Upload (optional, max 50MB)
+                  File Upload (optional, max 100MB)
                 </label>
                 <input
                   ref={fileInputRef}

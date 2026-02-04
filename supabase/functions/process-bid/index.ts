@@ -57,14 +57,15 @@ serve(async (req) => {
       user = userData.user;
     }
 
-    // Verify submission exists and belongs to user
-    const { data: submission, error: subError } = await supabaseClient
+    // Verify submission exists (use admin client to bypass RLS)
+    const { data: submission, error: subError } = await supabaseAdmin
       .from('submissions')
       .select('*')
       .eq('id', submissionId)
       .single();
 
     if (subError || !submission) {
+      logStep("Submission lookup failed", { error: subError?.message, submissionId });
       throw new Error('Submission not found');
     }
 

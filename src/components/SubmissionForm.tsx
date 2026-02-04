@@ -17,7 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
 
@@ -195,7 +195,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50MB",
+        description: "Maximum file size is 100MB",
         variant: "destructive",
       });
       return;
@@ -550,7 +550,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.audioFileLabel')} (max 50MB)
+                  {t('submission.audioFileLabel')} (max 100MB)
                 </label>
                 <input
                   ref={fileInputRef}
