@@ -6,20 +6,19 @@ import {
   TrendingUp, 
   Clock, 
   Loader2,
-  Zap,
-  DollarSign
+  Zap
 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { MusicEmbed } from '@/components/MusicEmbed';
+import { SubmissionBidPanel } from '@/components/SubmissionBidPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface UserSubmission {
   id: string;
