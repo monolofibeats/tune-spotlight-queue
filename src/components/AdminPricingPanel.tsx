@@ -427,7 +427,7 @@ export function AdminPricingPanel() {
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        Changes apply immediately to all users
+        Änderungen werden sofort aktiv
       </p>
     </motion.div>
   );

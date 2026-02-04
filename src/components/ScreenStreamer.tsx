@@ -477,8 +477,8 @@ export function ScreenStreamer() {
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Your browser will ask which screen, window, or tab to share.
-        Viewers will see it live on the homepage.
+        Dein Browser wird dich fragen welchen Bildschirm, Fenster oder Tab du teilen willst.
+        Zuschauer werden es dann live auf der Website sehen.
       </p>
     </motion.div>
   );
