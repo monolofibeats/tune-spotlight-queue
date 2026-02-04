@@ -103,10 +103,20 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         };
         setLocalItems(prev => [newItem, ...prev]);
         
-        // Remove local item after a few seconds (it will come from realtime)
+        // Refresh the list from DB after a short delay to get the real item
+        // Keep the local item until DB sync confirms it
         setTimeout(() => {
-          setLocalItems(prev => prev.filter(i => i.id !== newItem.id));
-        }, 3000);
+          fetchSubmissions().then(() => {
+            // Only remove local items that now exist in DB
+            setLocalItems(prev => prev.filter(localItem => {
+              const existsInDb = submissions.some(dbItem => 
+                dbItem.song_title === localItem.song_title && 
+                dbItem.artist_name === localItem.artist_name
+              );
+              return !existsInDb;
+            }));
+          });
+        }, 2000);
       },
       refreshList: () => {
         fetchSubmissions();
