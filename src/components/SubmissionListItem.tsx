@@ -188,6 +188,48 @@ export function SubmissionListItem({
                 </Button>
               </div>
 
+              {/* Audio File - if uploaded */}
+              {submission.audio_file_url && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/30">
+                  <FileAudio className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <audio 
+                      ref={audioRef} 
+                      src={submission.audio_file_url}
+                      onEnded={() => setIsPlaying(false)}
+                      className="hidden"
+                    />
+                    <p className="text-xs text-muted-foreground truncate">Uploaded audio file</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAudioPlayback();
+                    }}
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-3.5 h-3.5" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadFile();
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+
               {/* Message if exists */}
               {submission.message && (
                 <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
