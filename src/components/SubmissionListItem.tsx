@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -14,15 +14,13 @@ import {
   Copy,
   Check,
   FileAudio,
-  Download,
-  Play,
-  Pause,
-  Loader2
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
+import { AudioPlayer } from '@/components/AudioPlayer';
 
 interface Submission {
   id: string;
@@ -54,10 +52,8 @@ export function SubmissionListItem({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Fetch signed URL when expanded and has audio file
   useEffect(() => {
@@ -97,16 +93,6 @@ export function SubmissionListItem({
     });
   };
 
-  const toggleAudioPlayback = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
   const handleDownloadFile = async () => {
     if (!submission.audio_file_url) return;
@@ -224,48 +210,29 @@ export function SubmissionListItem({
 
               {/* Audio File - if uploaded */}
               {submission.audio_file_url && (
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/30">
-                  <FileAudio className="w-4 h-4 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    {audioUrl && (
-                      <audio 
-                        ref={audioRef} 
-                        src={audioUrl}
-                        onEnded={() => setIsPlaying(false)}
-                        className="hidden"
-                      />
-                    )}
-                    <p className="text-xs text-muted-foreground truncate">Hochgeladene Audio Datei</p>
+                <div className="p-3 rounded-lg bg-secondary/50 border border-border/30 space-y-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileAudio className="w-4 h-4 text-primary shrink-0" />
+                      <p className="text-xs text-muted-foreground">Hochgeladene Audio Datei</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownloadFile();
+                      }}
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      Download
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleAudioPlayback();
-                    }}
-                    disabled={isLoadingAudio || !audioUrl}
-                  >
-                    {isLoadingAudio ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="w-3.5 h-3.5" />
-                    ) : (
-                      <Play className="w-3.5 h-3.5" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownloadFile();
-                    }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </Button>
+                  <AudioPlayer 
+                    src={audioUrl} 
+                    isLoading={isLoadingAudio}
+                  />
                 </div>
               )}
 
