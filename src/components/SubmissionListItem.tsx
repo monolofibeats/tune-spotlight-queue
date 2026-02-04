@@ -266,12 +266,12 @@ export function SubmissionListItem({
                       {copiedContact ? (
                         <>
                           <Check className="w-3 h-3 mr-1" />
-                          Copied!
+                          Kopiert!
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3 mr-1" />
-                          Copy Contact
+                          Kontaktinformation kopieren
                         </>
                       )}
                     </Button>
