@@ -81,8 +81,6 @@ const UserDashboard = () => {
 
     verifyBidPayment();
   }, [searchParams, play]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [boostingId, setBoostingId] = useState<string | null>(null);
 
   const fetchSubmissions = async () => {
     if (!user) return;
