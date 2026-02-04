@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.stream-signal]
 verify_jwt = false
+
+[functions.process-bid]
+verify_jwt = false
+
+[functions.verify-bid-payment]
+verify_jwt = false
+
+[functions.send-bid-notification]
+verify_jwt = false
