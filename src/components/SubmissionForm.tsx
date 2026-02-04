@@ -775,12 +775,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               ) : isAdmin && submissionPaid ? (
                 <>
                   <Shield className="w-4 h-4" />
-                  Submit (Admin - Free)
+                  Abschicken (Admin - gratis)
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  Submit (Free)
+                  Abschicken (gratis)
                 </>
               )}
             </Button>
