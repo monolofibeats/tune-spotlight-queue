@@ -199,12 +199,12 @@ export function AdminPricingPanel() {
           )}
           <div>
             <p className="font-medium">
-              {submissionsOpen ? 'Submissions Open' : 'Submissions Closed'}
+              {submissionsOpen ? 'Einsendungen offen' : 'Einsendungen geschlossen'}
             </p>
             <p className="text-xs text-muted-foreground">
               {submissionsOpen 
-                ? 'Users can submit songs' 
-                : 'Form is disabled for all users'}
+                ? 'Nutzer können Tracks schicken' 
+                : 'Nutzer können gerade keine Tracks schicken'}
             </p>
           </div>
         </div>
