@@ -627,7 +627,7 @@ const Dashboard = () => {
                   ) : (
                     <>
                       <Plus className="w-4 h-4" />
-                      Create Event
+                      Event erstellen
                     </>
                   )}
                 </Button>
