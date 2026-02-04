@@ -311,10 +311,10 @@ export function AdminPricingPanel() {
 
           {/* Preview */}
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <p className="text-sm font-medium text-amber-400 mb-2">Skip the Line Preview</p>
+            <p className="text-sm font-medium text-amber-400 mb-2">Warteliste überspringen Vorschau</p>
             <p className="text-xs text-muted-foreground">
-              Users can bid between €{skipLine.min.toFixed(2)} and €{skipLine.max.toFixed(2)} 
-              in €{skipLine.step.toFixed(2)} increments
+              Nutzer können zwischen €{skipLine.min.toFixed(2)} und €{skipLine.max.toFixed(2)} 
+              bieten in €{skipLine.step.toFixed(2)} Geboten
             </p>
           </div>
         </TabsContent>
