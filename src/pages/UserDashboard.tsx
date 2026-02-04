@@ -37,6 +37,7 @@ interface UserSubmission {
 const UserDashboard = () => {
   const { user } = useAuth();
   const { play } = useSoundEffects();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [submissions, setSubmissions] = useState<UserSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
