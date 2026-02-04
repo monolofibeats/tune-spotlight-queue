@@ -184,7 +184,7 @@ export function AdminSpotManager() {
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-1" />
-                  Save Prices
+                  Preise speichern
                 </>
               )}
             </Button>
