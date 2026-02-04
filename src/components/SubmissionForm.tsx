@@ -631,7 +631,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-display font-semibold">Submit Your Song</h2>
+              <h2 className="text-base font-display font-semibold">Schick uns deinen Track!</h2>
             </div>
 
             <div className="space-y-3">
