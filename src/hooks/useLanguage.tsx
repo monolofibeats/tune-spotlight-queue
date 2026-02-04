@@ -319,8 +319,26 @@ const translations: Record<Language, Record<string, string>> = {
     'form.processingPayment': 'Verarbeitung...',
     'form.proceedPayment': 'Zur Zahlung',
     
+    // Submission Form (new keys)
+    'submission.title': 'Schick uns deinen Track!',
+    'submission.linkLabel': 'Musiklink',
+    'submission.linkPlaceholder': 'dein Musiklink?',
+    'submission.artistLabel': 'Künstler',
+    'submission.artistPlaceholder': 'Künstler Name',
+    'submission.titleLabel': 'Titel',
+    'submission.titlePlaceholder': 'Song Titel',
+    'submission.emailLabel': 'Email (optional)',
+    'submission.emailPlaceholder': 'deine@email.com',
+    'submission.messageLabel': 'Bemerkungen (optional)',
+    'submission.messagePlaceholder': 'was ist besonders an diesem Track?',
+    'submission.audioFileLabel': 'Musik Datei (optional)',
+    'submission.uploadFile': 'Datei hochladen',
+    'submission.submitFree': 'Abschicken (gratis)',
+    'submission.submitAdminFree': 'Abschicken (Admin - gratis)',
+    'submission.skipWaitingList': 'Warteliste überspringen',
+    
     // Watchlist / Queue
-    'queue.title': 'Warteschlange',
+    'queue.title': 'Warteliste',
     'queue.empty': 'Noch keine Songs',
     'queue.beFirst': 'Sei der Erste!',
     'queue.position': 'Position',
