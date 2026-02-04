@@ -135,20 +135,26 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       )
     )];
 
-    // Sort: priority items first (by amount paid desc), then regular items by FIFO (oldest first)
+    // Sort: priority items first (by boost_amount desc), then regular items by FIFO (oldest first)
     const sortedItems = [...allItems].sort((a, b) => {
       // Priority items come first
       if (a.is_priority && !b.is_priority) return -1;
       if (!a.is_priority && b.is_priority) return 1;
       
-      // Among priority items, sort by amount paid (highest first)
+      // Among priority items, sort by total paid (highest first)
       if (a.is_priority && b.is_priority) {
-        return b.amount_paid - a.amount_paid;
+        const aTotalPaid = (a.boost_amount || 0) + (a.amount_paid || 0);
+        const bTotalPaid = (b.boost_amount || 0) + (b.amount_paid || 0);
+        return bTotalPaid - aTotalPaid;
       }
       
       // Among regular items, sort by FIFO (oldest first)
       return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
+
+    // Show top 5 priority spots publicly, rest are just shown as "in queue"
+    const topSpots = sortedItems.filter(s => s.is_priority).slice(0, 5);
+    const regularItems = sortedItems.filter(s => !s.is_priority);
 
     return (
       <div className="w-full" id="watchlist-container">
