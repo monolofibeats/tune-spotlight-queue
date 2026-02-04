@@ -7,7 +7,7 @@ import {
   CheckCircle, 
   XCircle, 
   Trash2, 
-  DollarSign,
+  Zap,
   Link as LinkIcon,
   Mail,
   MessageSquare,
