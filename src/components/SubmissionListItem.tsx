@@ -40,12 +40,14 @@ interface Submission {
 
 interface SubmissionListItemProps {
   submission: Submission;
+  position?: number;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
+  position,
   onStatusChange, 
   onDelete 
 }: SubmissionListItemProps) {
