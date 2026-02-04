@@ -478,7 +478,7 @@ export function PreStreamSpots() {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Audio File (optional) - .wav, .mp3, .flac
+                  File Upload (optional, max 50MB)
                 </label>
                 <input
                   ref={fileInputRef}
