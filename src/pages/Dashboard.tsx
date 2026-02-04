@@ -52,6 +52,7 @@ interface Submission {
   status: string;
   feedback: string | null;
   created_at: string;
+  audio_file_url: string | null;
 }
 
 interface SpecialEvent {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -12,7 +12,11 @@ import {
   Mail,
   MessageSquare,
   Copy,
-  Check
+  Check,
+  FileAudio,
+  Download,
+  Play,
+  Pause
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +35,7 @@ interface Submission {
   status: string;
   feedback: string | null;
   created_at: string;
+  audio_file_url: string | null;
 }
 
 interface SubmissionListItemProps {
@@ -47,6 +52,8 @@ export function SubmissionListItem({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleCopyContact = async () => {
     if (submission.email) {
@@ -66,6 +73,29 @@ export function SubmissionListItem({
       title: "Copied!",
       description: "Song link copied to clipboard",
     });
+  };
+
+  const toggleAudioPlayback = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleDownloadFile = () => {
+    if (submission.audio_file_url) {
+      const link = document.createElement('a');
+      link.href = submission.audio_file_url;
+      link.download = `${submission.artist_name} - ${submission.song_title}`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
   };
 
   return (
@@ -156,6 +186,48 @@ export function SubmissionListItem({
                   <Copy className="w-3 h-3" />
                 </Button>
               </div>
+
+              {/* Audio File - if uploaded */}
+              {submission.audio_file_url && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/30">
+                  <FileAudio className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <audio 
+                      ref={audioRef} 
+                      src={submission.audio_file_url}
+                      onEnded={() => setIsPlaying(false)}
+                      className="hidden"
+                    />
+                    <p className="text-xs text-muted-foreground truncate">Uploaded audio file</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleAudioPlayback();
+                    }}
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-3.5 h-3.5" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownloadFile();
+                    }}
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
 
               {/* Message if exists */}
               {submission.message && (
