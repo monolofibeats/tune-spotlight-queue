@@ -17,6 +17,7 @@ import { MusicEmbed } from '@/components/MusicEmbed';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
