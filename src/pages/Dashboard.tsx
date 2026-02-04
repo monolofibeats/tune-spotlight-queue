@@ -430,15 +430,20 @@ const Dashboard = () => {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {['all', 'pending', 'reviewing', 'reviewed', 'skipped'].map((status) => (
+                  {[
+                    { key: 'all', label: 'Alle' },
+                    { key: 'pending', label: 'Ausstehend' },
+                    { key: 'reviewing', label: 'Überprüfen' },
+                    { key: 'reviewed', label: 'Erledigt' },
+                    { key: 'skipped', label: 'Übersprungen' }
+                  ].map(({ key, label }) => (
                     <Button
-                      key={status}
-                      variant={statusFilter === status ? 'default' : 'outline'}
+                      key={key}
+                      variant={statusFilter === key ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setStatusFilter(status)}
-                      className="capitalize"
+                      onClick={() => setStatusFilter(key)}
                     >
-                      {status}
+                      {label}
                     </Button>
                   ))}
                 </div>
