@@ -11,6 +11,7 @@ interface SubmissionItem {
   artist_name: string;
   is_priority: boolean;
   amount_paid: number;
+  boost_amount: number;
   status: string;
   created_at: string;
   isNew?: boolean;
