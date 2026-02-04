@@ -688,10 +688,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Email (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
                 <Input
                   type="email"
-                  placeholder="deine@email.com"
+                  placeholder={t('submission.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-10 text-sm bg-background/50"
@@ -699,9 +699,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Bemerkungen (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
                 <Textarea
-                  placeholder="was ist besonders an diesem Track?"
+                  placeholder={t('submission.messagePlaceholder')}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[80px] text-sm resize-none bg-background/50"
