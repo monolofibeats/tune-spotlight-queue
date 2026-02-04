@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -16,11 +16,13 @@ import {
   FileAudio,
   Download,
   Play,
-  Pause
+  Pause,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
   id: string;
@@ -53,7 +55,27 @@ export function SubmissionListItem({
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Fetch signed URL when expanded and has audio file
+  useEffect(() => {
+    const fetchAudioUrl = async () => {
+      if (isExpanded && submission.audio_file_url && !audioUrl) {
+        setIsLoadingAudio(true);
+        try {
+          const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
+          setAudioUrl(signedUrl);
+        } catch (error) {
+          console.error('Failed to get audio URL:', error);
+        } finally {
+          setIsLoadingAudio(false);
+        }
+      }
+    };
+    fetchAudioUrl();
+  }, [isExpanded, submission.audio_file_url, audioUrl]);
 
   const handleCopyContact = async () => {
     if (submission.email) {
