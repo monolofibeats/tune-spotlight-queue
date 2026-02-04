@@ -265,21 +265,13 @@ const UserDashboard = () => {
                       </div>
 
                       {submission.status === 'pending' && (
-                        <AnimatedButton
-                          variant="outline"
-                          size="sm"
-                          sound="boost"
-                          onClick={() => handleBoost(submission.id, submission.boost_amount)}
-                          disabled={boostingId === submission.id}
-                          className="shrink-0"
-                        >
-                          {boostingId === submission.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          ) : (
-                            <Zap className="w-4 h-4 mr-2" />
-                          )}
-                          Boost +€5
-                        </AnimatedButton>
+                        <div className="shrink-0 w-full md:w-48">
+                          <SubmissionBidPanel
+                            submissionId={submission.id}
+                            songTitle={submission.song_title}
+                            artistName={submission.artist_name}
+                          />
+                        </div>
                       )}
                     </div>
 
