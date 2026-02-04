@@ -200,7 +200,7 @@ export function AdminSpotManager() {
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 mr-1" />
-                Reset All Spots
+                Alle Plätze zurücksetzen
               </>
             )}
           </Button>
