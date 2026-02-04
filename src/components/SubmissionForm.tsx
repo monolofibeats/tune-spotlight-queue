@@ -758,113 +758,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         </form>
       </motion.div>
 
-      {/* Priority Payment Dialog */}
-      <Dialog open={showPriorityDialog} onOpenChange={setShowPriorityDialog}>
-        <DialogContent className="glass-strong border-border/50 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500" />
-              {t('submission.skipWaitingList')}
-            </DialogTitle>
-            <DialogDescription>
-              {t('form.priorityDesc')}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            {/* Show email input for guests, or signed-in status */}
-            {user ? (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{user.email}</span>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  Sign out
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.emailLabel')} *
-                </label>
-                <Input
-                  type="email"
-                  placeholder={t('submission.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 text-sm bg-background/50"
-                />
-              </div>
-            )}
-
-            {/* Admin Mode Banner */}
-            {isAdmin && (
-              <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
-                <Shield className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300 font-medium">
-                  Admin Mode: No payment required
-                </span>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">
-                  {isAdmin ? 'Priority Position' : t('form.yourBid')}
-                </label>
-                <div className="flex items-center gap-1 text-2xl font-bold text-amber-500">
-                  {isAdmin && (
-                    <span className="text-emerald-400">#{priorityAmount}</span>
-                  )}
-                </div>
-              </div>
-              <Slider
-                value={[priorityAmount]}
-                onValueChange={([value]) => setPriorityAmount(value)}
-                min={minAmount}
-                max={maxAmount}
-                step={step}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{isAdmin ? 'Lower priority' : 'Min'}</span>
-                <span>{isAdmin ? 'Higher priority' : 'Max'}</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm text-amber-200">
-                <strong>Song:</strong> {songTitle || 'Untitled'} by {artistName || 'Unknown Artist'}
-              </p>
-            </div>
-
-            <Button
-              onClick={handlePriorityPayment}
-              disabled={isProcessingPayment}
-              className={`w-full ${isAdmin 
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
-                : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
-              } text-white`}
-              size="lg"
-            >
-              {isProcessingPayment ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {isAdmin ? 'Submitting...' : 'Redirecting to payment...'}
-                </>
-              ) : isAdmin ? (
-                <>
-                  <Shield className="w-4 h-4" />
-                  Add Priority (Admin)
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  {t('submission.skipWaitingList')}
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Spot Bidding Dialog */}
+      <SpotBiddingDialog
+        open={showPriorityDialog}
+        onOpenChange={setShowPriorityDialog}
+        songUrl={songUrl}
+        artistName={artistName || 'Unknown Artist'}
+        songTitle={songTitle || 'Untitled'}
+        message={message}
+        email={user?.email || email}
+        platform={platform || 'other'}
+        onSuccess={() => {
+          watchlistRef?.current?.refreshList();
+          resetForm();
+        }}
+      />
     </>
   );
 }
