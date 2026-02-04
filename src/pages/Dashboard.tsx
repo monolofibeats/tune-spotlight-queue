@@ -403,10 +403,10 @@ const Dashboard = () => {
           <Tabs defaultValue="submissions" className="space-y-6">
             <TabsList className="glass p-1 rounded-xl">
               <TabsTrigger value="submissions" className="rounded-lg px-6">
-                Submissions
+                Tracks
               </TabsTrigger>
               <TabsTrigger value="stream" className="rounded-lg px-6">
-                Stream
+                Livestream
               </TabsTrigger>
               <TabsTrigger value="events" className="rounded-lg px-6">
                 Events
