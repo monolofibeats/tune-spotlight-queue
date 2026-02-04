@@ -550,7 +550,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.audioFileLabel')} (max 50MB)
+                  {t('submission.audioFileLabel')} (max 100MB)
                 </label>
                 <input
                   ref={fileInputRef}
