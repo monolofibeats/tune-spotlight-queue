@@ -128,23 +128,27 @@ export function PreStreamSpots() {
     
     setIsUploadingFile(true);
     try {
-      const fileExt = audioFile.name.split('.').pop();
+      const fileExt = audioFile.name.split('.').pop()?.toLowerCase();
       const fileName = `spots/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('song-files')
-        .upload(fileName, audioFile);
+        .upload(fileName, audioFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(uploadError.message || 'Failed to upload audio file');
+      }
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('song-files')
-        .getPublicUrl(fileName);
-      
-      return publicUrl;
+      // Return just the file path - signed URLs will be generated on demand for playback
+      return fileName;
     } catch (error) {
       console.error('File upload error:', error);
-      throw new Error('Failed to upload audio file');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload audio file';
+      throw new Error(errorMessage);
     } finally {
       setIsUploadingFile(false);
     }
