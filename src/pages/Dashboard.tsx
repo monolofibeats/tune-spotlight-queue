@@ -6,17 +6,12 @@ import {
   Search,
   Trophy,
   Plus,
-  Trash2,
   DollarSign,
-  Eye,
-  CheckCircle,
-  XCircle,
   Loader2,
   Tv,
   Video,
   Link as LinkIcon,
-  Upload,
-  Radio
+  Upload
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';

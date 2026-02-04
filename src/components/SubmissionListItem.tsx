@@ -193,6 +193,19 @@ export function SubmissionListItem({
                     >
                       {copiedContact ? (
                         <>
+                          <Check className="w-3 h-3 mr-1" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copy Contact
+                        </>
+                      )}
+                      }}
+                    >
+                      {copiedContact ? (
+                        <>
                           <Check className="w-3 h-3 mr-1 text-emerald-500" />
                           Copied!
                         </>
