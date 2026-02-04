@@ -34,7 +34,7 @@ export function BidNotificationBell() {
   const [open, setOpen] = useState(false);
 
   const fetchNotifications = async () => {
-    if (!user?.email) return;
+    if (!user?.id) return;
     
     setIsLoading(true);
     try {
@@ -47,7 +47,7 @@ export function BidNotificationBell() {
             artist_name
           )
         `)
-        .eq('email', user.email)
+        .eq('user_id', user.id)
         .eq('is_read', false)
         .order('created_at', { ascending: false })
         .limit(10);
