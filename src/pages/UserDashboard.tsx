@@ -68,14 +68,14 @@ const UserDashboard = () => {
           console.error('Bid payment verification error:', error);
         }
 
-        window.history.replaceState({}, '', '/my-songs');
+        window.history.replaceState({}, '', '/my-dashboard');
       } else if (bidPayment === 'cancelled') {
         toast({
           title: "Bid cancelled",
           description: "Your bid was not processed.",
           variant: "destructive",
         });
-        window.history.replaceState({}, '', '/my-songs');
+        window.history.replaceState({}, '', '/my-dashboard');
       }
     };
 

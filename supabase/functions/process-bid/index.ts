@@ -112,8 +112,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/my-songs?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/my-songs?bid_payment=cancelled`,
+      success_url: `${origin}/my-dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/my-dashboard?bid_payment=cancelled`,
       metadata: {
         type: "bid",
         submission_id: submissionId,
