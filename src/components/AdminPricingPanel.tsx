@@ -346,7 +346,7 @@ export function AdminPricingPanel() {
               {/* Fixed Price */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm">Submission Price</Label>
+                  <Label className="text-sm">Einsendungspreis</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
                     <Input
