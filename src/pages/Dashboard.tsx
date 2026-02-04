@@ -101,7 +101,7 @@ const Dashboard = () => {
       .select('*')
       .order('is_priority', { ascending: false })
       .order('amount_paid', { ascending: false })
-      .order('created_at', { ascending: false }); // LIFO: newest first
+      .order('created_at', { ascending: true }); // FIFO: oldest first
 
     if (!error && data) {
       setSubmissions(data);
