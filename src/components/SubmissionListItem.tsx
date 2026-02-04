@@ -108,16 +108,29 @@ export function SubmissionListItem({
     }
   };
 
-  const handleDownloadFile = () => {
-    if (submission.audio_file_url) {
-      const link = document.createElement('a');
-      link.href = submission.audio_file_url;
-      link.download = `${submission.artist_name} - ${submission.song_title}`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
+  const handleDownloadFile = async () => {
+    if (!submission.audio_file_url) return;
+    
+    try {
+      // Get a fresh signed URL for download
+      const downloadUrl = await getSignedAudioUrl(submission.audio_file_url);
+      if (downloadUrl) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${submission.artist_name} - ${submission.song_title}`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download the audio file",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
