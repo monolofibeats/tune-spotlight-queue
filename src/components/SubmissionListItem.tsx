@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -16,11 +16,13 @@ import {
   FileAudio,
   Download,
   Play,
-  Pause
+  Pause,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
   id: string;
@@ -53,7 +55,27 @@ export function SubmissionListItem({
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Fetch signed URL when expanded and has audio file
+  useEffect(() => {
+    const fetchAudioUrl = async () => {
+      if (isExpanded && submission.audio_file_url && !audioUrl) {
+        setIsLoadingAudio(true);
+        try {
+          const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
+          setAudioUrl(signedUrl);
+        } catch (error) {
+          console.error('Failed to get audio URL:', error);
+        } finally {
+          setIsLoadingAudio(false);
+        }
+      }
+    };
+    fetchAudioUrl();
+  }, [isExpanded, submission.audio_file_url, audioUrl]);
 
   const handleCopyContact = async () => {
     if (submission.email) {
@@ -86,16 +108,29 @@ export function SubmissionListItem({
     }
   };
 
-  const handleDownloadFile = () => {
-    if (submission.audio_file_url) {
-      const link = document.createElement('a');
-      link.href = submission.audio_file_url;
-      link.download = `${submission.artist_name} - ${submission.song_title}`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
+  const handleDownloadFile = async () => {
+    if (!submission.audio_file_url) return;
+    
+    try {
+      // Get a fresh signed URL for download
+      const downloadUrl = await getSignedAudioUrl(submission.audio_file_url);
+      if (downloadUrl) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${submission.artist_name} - ${submission.song_title}`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download the audio file",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -192,12 +227,14 @@ export function SubmissionListItem({
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50 border border-border/30">
                   <FileAudio className="w-4 h-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <audio 
-                      ref={audioRef} 
-                      src={submission.audio_file_url}
-                      onEnded={() => setIsPlaying(false)}
-                      className="hidden"
-                    />
+                    {audioUrl && (
+                      <audio 
+                        ref={audioRef} 
+                        src={audioUrl}
+                        onEnded={() => setIsPlaying(false)}
+                        className="hidden"
+                      />
+                    )}
                     <p className="text-xs text-muted-foreground truncate">Hochgeladene Audio Datei</p>
                   </div>
                   <Button
@@ -208,8 +245,11 @@ export function SubmissionListItem({
                       e.stopPropagation();
                       toggleAudioPlayback();
                     }}
+                    disabled={isLoadingAudio || !audioUrl}
                   >
-                    {isPlaying ? (
+                    {isLoadingAudio ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : isPlaying ? (
                       <Pause className="w-3.5 h-3.5" />
                     ) : (
                       <Play className="w-3.5 h-3.5" />
