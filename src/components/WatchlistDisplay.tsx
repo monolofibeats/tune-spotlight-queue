@@ -135,7 +135,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       )
     )];
 
-    // Sort: priority items first (by boost_amount desc), then regular items by FIFO (oldest first)
+    // Sort: priority items first (by total paid desc), then regular items by FIFO (oldest first)
     const sortedItems = [...allItems].sort((a, b) => {
       // Priority items come first
       if (a.is_priority && !b.is_priority) return -1;
@@ -145,7 +145,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       if (a.is_priority && b.is_priority) {
         const aTotalPaid = (a.boost_amount || 0) + (a.amount_paid || 0);
         const bTotalPaid = (b.boost_amount || 0) + (b.amount_paid || 0);
-        return bTotalPaid - aTotalPaid;
+        // Higher payment = higher position
+        if (aTotalPaid !== bTotalPaid) {
+          return bTotalPaid - aTotalPaid;
+        }
+        // Same payment: later submission gets higher position
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
       
       // Among regular items, sort by FIFO (oldest first)
