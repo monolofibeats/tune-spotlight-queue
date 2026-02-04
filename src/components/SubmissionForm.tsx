@@ -697,9 +697,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Message (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Bemerkungen (optional)</label>
                 <Textarea
-                  placeholder="Why should we check this out?"
+                  placeholder="was ist besonders an diesem Track?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[80px] text-sm resize-none bg-background/50"
