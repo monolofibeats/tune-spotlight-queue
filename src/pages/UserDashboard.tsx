@@ -38,7 +38,49 @@ const UserDashboard = () => {
   const { play } = useSoundEffects();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [submissions, setSubmissions] = useState<UserSubmission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Handle bid payment verification
+  useEffect(() => {
+    const verifyBidPayment = async () => {
+      const sessionId = searchParams.get('session_id');
+      const bidPayment = searchParams.get('bid_payment');
+
+      if (bidPayment === 'success' && sessionId) {
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-bid-payment', {
+            body: { sessionId },
+          });
+
+          if (error) throw error;
+
+          if (data.success) {
+            play('success');
+            toast({
+              title: "Bid placed! 🎉",
+              description: data.message,
+            });
+            fetchSubmissions();
+          }
+        } catch (error) {
+          console.error('Bid payment verification error:', error);
+        }
+
+        window.history.replaceState({}, '', '/my-songs');
+      } else if (bidPayment === 'cancelled') {
+        toast({
+          title: "Bid cancelled",
+          description: "Your bid was not processed.",
+          variant: "destructive",
+        });
+        window.history.replaceState({}, '', '/my-songs');
+      }
+    };
+
+    verifyBidPayment();
+  }, [searchParams, play]);
   const [isLoading, setIsLoading] = useState(true);
   const [boostingId, setBoostingId] = useState<string | null>(null);
 
