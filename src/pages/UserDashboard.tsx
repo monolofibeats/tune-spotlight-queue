@@ -217,7 +217,7 @@ const UserDashboard = () => {
                             submission.status === 'reviewed' ? 'default' :
                             submission.status === 'pending' ? 'queue' : 'secondary'
                           }>
-                            {submission.status}
+                            {t(`dashboard.status.${submission.status}`)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {new Date(submission.created_at).toLocaleDateString()}
