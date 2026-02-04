@@ -134,7 +134,7 @@ export function SpotBiddingDialog({
         if (submission) {
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;
           const yourPrice = Math.max(
-            minBidAmount,
+            loadedMinBid,
             Math.ceil(totalPaid * (1 + percent / 100) * 100) / 100
           );
           
@@ -146,11 +146,11 @@ export function SpotBiddingDialog({
             artistName: submission.artist_name || undefined,
           });
         } else {
-          // Empty spot - use minimum price
+          // Empty spot - use minimum price from DB
           calculatedSpots.push({
             position: i + 1,
             currentPrice: 0,
-            yourPrice: minBidAmount,
+            yourPrice: loadedMinBid,
           });
         }
       }
