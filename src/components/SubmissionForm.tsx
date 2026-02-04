@@ -17,7 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
 
