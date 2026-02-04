@@ -93,16 +93,6 @@ export function SubmissionListItem({
     });
   };
 
-  const toggleAudioPlayback = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
   const handleDownloadFile = async () => {
     if (!submission.audio_file_url) return;
