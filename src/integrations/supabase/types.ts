@@ -482,7 +482,9 @@ export type Database = {
     Views: {
       public_submissions_queue: {
         Row: {
+          amount_paid: number | null
           artist_name: string | null
+          boost_amount: number | null
           created_at: string | null
           id: string | null
           is_priority: boolean | null
@@ -491,7 +493,9 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          amount_paid?: number | null
           artist_name?: string | null
+          boost_amount?: number | null
           created_at?: string | null
           id?: string | null
           is_priority?: boolean | null
@@ -500,7 +504,9 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          amount_paid?: number | null
           artist_name?: string | null
+          boost_amount?: number | null
           created_at?: string | null
           id?: string | null
           is_priority?: boolean | null

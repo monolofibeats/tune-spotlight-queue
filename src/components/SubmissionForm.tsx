@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Sparkles, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2 } from 'lucide-react';
+import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
 import { MusicEmbed } from './MusicEmbed';
+import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { toast } from '@/hooks/use-toast';
 import { WatchlistRef } from './WatchlistDisplay';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,13 +16,6 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -52,11 +45,10 @@ interface FlyingCard {
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
   const { t } = useLanguage();
-  const { minAmount, maxAmount, step, config, isActive: skipLineActive } = usePricingConfig('skip_line');
+  const { isActive: skipLineActive } = usePricingConfig('skip_line');
   const { 
     minAmount: submissionPrice, 
     isActive: submissionPaid,
-    config: submissionConfig 
   } = usePricingConfig('submission');
   const { isActive: submissionsOpen } = usePricingConfig('submissions_open');
   
@@ -67,11 +59,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [message, setMessage] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
-  const [priorityAmount, setPriorityAmount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,13 +69,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
-
-  // Update priority amount when config changes
-  useEffect(() => {
-    if (config) {
-      setPriorityAmount(minAmount);
-    }
-  }, [config, minAmount]);
 
   // Check user auth state
   useEffect(() => {
@@ -288,101 +271,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setShowPriorityDialog(true);
   };
 
-  // Admin bypass: directly insert priority submission without payment
-  const handleAdminPrioritySubmit = async () => {
-    setIsProcessingPayment(true);
-    
-    try {
-      const { error } = await supabase.from('submissions').insert({
-        song_url: songUrl,
-        platform: platform || 'other',
-        artist_name: artistName || 'Unknown Artist',
-        song_title: songTitle || 'Untitled',
-        message: message || null,
-        email: authUser?.email || email || null,
-        amount_paid: priorityAmount, // Record the amount for sorting
-        is_priority: true,
-        user_id: authUser?.id || null,
-      });
-
-      if (error) throw error;
-
-      play('success');
-      toast({
-        title: "Priority submission added! 🎉",
-        description: "Admin bypass: No payment required",
-      });
-      
-      setShowPriorityDialog(false);
-      watchlistRef?.current?.refreshList();
-      
-      // Reset form
-      setSongUrl('');
-      setArtistName('');
-      setSongTitle('');
-      setEmail('');
-      setMessage('');
-      setPriorityAmount(5);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
-      toast({
-        title: "Submission failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
-
-  const handlePriorityPayment = async () => {
-    // Admin bypass - no payment required
-    if (isAdmin) {
-      await handleAdminPrioritySubmit();
-      return;
-    }
-
-    // Require email if not logged in
-    if (!user && !email) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessingPayment(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('create-priority-payment', {
-        body: {
-          amount: priorityAmount,
-          songUrl,
-          artistName: artistName || 'Unknown Artist',
-          songTitle: songTitle || 'Untitled',
-          message,
-          email: user?.email || email,
-          platform: platform || 'other',
-        },
-      });
-
-      if (error) throw error;
-      if (!data?.url) throw new Error('Failed to create checkout session');
-
-      // Open Stripe checkout
-      window.location.href = data.url;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process payment';
-      toast({
-        title: "Payment failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
@@ -463,7 +351,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setPriorityAmount(minAmount);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -764,113 +651,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         </form>
       </motion.div>
 
-      {/* Priority Payment Dialog */}
-      <Dialog open={showPriorityDialog} onOpenChange={setShowPriorityDialog}>
-        <DialogContent className="glass-strong border-border/50 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-500" />
-              {t('submission.skipWaitingList')}
-            </DialogTitle>
-            <DialogDescription>
-              {t('form.priorityDesc')}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            {/* Show email input for guests, or signed-in status */}
-            {user ? (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{user.email}</span>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  Sign out
-                </Button>
-              </div>
-            ) : (
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.emailLabel')} *
-                </label>
-                <Input
-                  type="email"
-                  placeholder={t('submission.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 text-sm bg-background/50"
-                />
-              </div>
-            )}
-
-            {/* Admin Mode Banner */}
-            {isAdmin && (
-              <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
-                <Shield className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300 font-medium">
-                  Admin Mode: No payment required
-                </span>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">
-                  {isAdmin ? 'Priority Position' : t('form.yourBid')}
-                </label>
-                <div className="flex items-center gap-1 text-2xl font-bold text-amber-500">
-                  {isAdmin && (
-                    <span className="text-emerald-400">#{priorityAmount}</span>
-                  )}
-                </div>
-              </div>
-              <Slider
-                value={[priorityAmount]}
-                onValueChange={([value]) => setPriorityAmount(value)}
-                min={minAmount}
-                max={maxAmount}
-                step={step}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{isAdmin ? 'Lower priority' : 'Min'}</span>
-                <span>{isAdmin ? 'Higher priority' : 'Max'}</span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm text-amber-200">
-                <strong>Song:</strong> {songTitle || 'Untitled'} by {artistName || 'Unknown Artist'}
-              </p>
-            </div>
-
-            <Button
-              onClick={handlePriorityPayment}
-              disabled={isProcessingPayment}
-              className={`w-full ${isAdmin 
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' 
-                : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
-              } text-white`}
-              size="lg"
-            >
-              {isProcessingPayment ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {isAdmin ? 'Submitting...' : 'Redirecting to payment...'}
-                </>
-              ) : isAdmin ? (
-                <>
-                  <Shield className="w-4 h-4" />
-                  Add Priority (Admin)
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  {t('submission.skipWaitingList')}
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Spot Bidding Dialog */}
+      <SpotBiddingDialog
+        open={showPriorityDialog}
+        onOpenChange={setShowPriorityDialog}
+        songUrl={songUrl}
+        artistName={artistName || 'Unknown Artist'}
+        songTitle={songTitle || 'Untitled'}
+        message={message}
+        email={user?.email || email}
+        platform={platform || 'other'}
+        onSuccess={() => {
+          watchlistRef?.current?.refreshList();
+          resetForm();
+        }}
+      />
     </>
   );
 }
