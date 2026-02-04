@@ -351,7 +351,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setPriorityAmount(minAmount);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
