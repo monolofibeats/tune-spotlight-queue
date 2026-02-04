@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -14,15 +14,13 @@ import {
   Copy,
   Check,
   FileAudio,
-  Download,
-  Play,
-  Pause,
-  Loader2
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
+import { AudioPlayer } from '@/components/AudioPlayer';
 
 interface Submission {
   id: string;
