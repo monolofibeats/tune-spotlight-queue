@@ -134,6 +134,25 @@ serve(async (req) => {
       }
     }
 
+    // Trigger email notifications for outbid users
+    try {
+      const emailResponse = await fetch(
+        `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-bid-notification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+      logStep("Email notifications triggered", { status: emailResponse.status });
+    } catch (emailError) {
+      // Don't fail the bid if emails fail
+      logStep("Email notification trigger failed", { error: String(emailError) });
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message: "Your bid has been recorded! Your song moved up in the queue." 
