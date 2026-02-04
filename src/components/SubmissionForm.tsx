@@ -268,6 +268,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
+    // Artist name and song title are required
+    if (!artistName.trim() || !songTitle.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both artist name and song title.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Either song URL or audio file is required
     if (!songUrl && !audioFile) {
       toast({
