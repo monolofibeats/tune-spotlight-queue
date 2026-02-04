@@ -452,10 +452,11 @@ const Dashboard = () => {
 
               {/* Submissions List - Compact */}
               <div className="space-y-1.5">
-                {filteredSubmissions.map((submission) => (
+                {filteredSubmissions.map((submission, index) => (
                   <SubmissionListItem
                     key={submission.id}
                     submission={submission}
+                    position={index + 1}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
                   />

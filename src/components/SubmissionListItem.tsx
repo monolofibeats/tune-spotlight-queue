@@ -40,12 +40,14 @@ interface Submission {
 
 interface SubmissionListItemProps {
   submission: Submission;
+  position?: number;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
+  position,
   onStatusChange, 
   onDelete 
 }: SubmissionListItemProps) {
@@ -135,6 +137,19 @@ export function SubmissionListItem({
         className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
+        {/* Position number */}
+        {position && (
+          <div 
+            className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${
+              submission.is_priority 
+                ? 'bg-primary text-primary-foreground' 
+                : 'bg-secondary text-muted-foreground'
+            }`}
+          >
+            {position}
+          </div>
+        )}
+
         {/* Priority indicator - no amount shown */}
         {submission.is_priority && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
