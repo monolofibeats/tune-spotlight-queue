@@ -371,7 +371,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-sm text-muted-foreground">Insgesamt</p>
                 </div>
               </div>
             </div>
@@ -382,7 +382,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.pending}</p>
-                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-sm text-muted-foreground">Ausstehend</p>
                 </div>
               </div>
             </div>
@@ -393,7 +393,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.reviewed}</p>
-                  <p className="text-sm text-muted-foreground">Reviewed</p>
+                  <p className="text-sm text-muted-foreground">Erledigt</p>
                 </div>
               </div>
             </div>
