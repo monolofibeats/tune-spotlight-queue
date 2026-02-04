@@ -51,6 +51,7 @@ interface FlyingCard {
 
 export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
+  const { t } = useLanguage();
   const { minAmount, maxAmount, step, config, isActive: skipLineActive } = usePricingConfig('skip_line');
   const { 
     minAmount: submissionPrice, 
