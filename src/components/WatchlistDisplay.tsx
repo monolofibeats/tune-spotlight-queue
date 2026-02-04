@@ -151,8 +151,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         }
       }
       
-      // Newest first (LIFO) - later submission gets higher position
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      // Oldest first (FIFO) - earlier submission gets higher position
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
     // Show top 5 priority spots publicly, rest are just shown as "in queue"
