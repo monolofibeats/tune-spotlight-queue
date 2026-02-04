@@ -55,7 +55,7 @@ export function SpotBiddingDialog({
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<number | null>(null);
   const [incrementPercent, setIncrementPercent] = useState(10);
-  const [minBidAmount, setMinBidAmount] = useState(0.5);
+  const [minBidAmount, setMinBidAmount] = useState<number | null>(null); // Start as null until loaded
 
   useEffect(() => {
     if (open) {
