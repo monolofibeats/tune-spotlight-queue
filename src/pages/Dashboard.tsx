@@ -635,11 +635,11 @@ const Dashboard = () => {
 
               {/* Events List */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Active Events</h3>
+                <h3 className="text-lg font-semibold">Aktive Events</h3>
                 {events.length === 0 ? (
                   <div className="glass rounded-2xl p-8 text-center">
                     <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">No events created yet</p>
+                    <p className="text-muted-foreground">Noch keine Events</p>
                   </div>
                 ) : (
                   events.map((event) => (
