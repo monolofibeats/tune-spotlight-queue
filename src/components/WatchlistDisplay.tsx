@@ -101,6 +101,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
           artist_name: item.artistName,
           is_priority: item.isPriority,
           amount_paid: item.amountPaid || 0,
+          boost_amount: 0,
           status: 'pending',
           created_at: new Date().toISOString(),
           isNew: true,
