@@ -259,23 +259,35 @@ export function ClipsGallery({ onClipSelect }: { onClipSelect?: (clip: Clip) => 
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {clips.map((clip) => (
-          <motion.button
+          <motion.div
             key={clip.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            className="relative rounded-lg border border-border/50 bg-card/50 p-3 hover:border-primary/30 hover:bg-card/80 transition-all cursor-pointer group"
             onClick={() => onClipSelect?.(clip)}
-            className="text-left rounded-lg border border-border/50 bg-card/50 p-3 hover:border-primary/30 hover:bg-card/80 transition-all cursor-pointer group"
           >
             <div className="flex items-center gap-2 mb-2">
               <Play className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium truncate">{clip.title}</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              {Math.floor((clip.end_time_seconds - clip.start_time_seconds) / 60)}:
-              {((clip.end_time_seconds - clip.start_time_seconds) % 60).toString().padStart(2, '0')}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Clock className="w-3 h-3" />
+                {Math.floor((clip.end_time_seconds - clip.start_time_seconds) / 60)}:
+                {((clip.end_time_seconds - clip.start_time_seconds) % 60).toString().padStart(2, '0')}
+              </div>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleDeleteClip(clip.id, e)}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              )}
             </div>
-          </motion.button>
+          </motion.div>
         ))}
       </div>
     </div>
