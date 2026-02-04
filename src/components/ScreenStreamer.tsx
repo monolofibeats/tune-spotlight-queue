@@ -308,9 +308,9 @@ export function ScreenStreamer() {
             )}
           </div>
           <div>
-            <h2 className="text-xl font-display font-semibold">Screen Share Stream</h2>
+            <h2 className="text-xl font-display font-semibold">Bildschirm live teilen</h2>
             <p className="text-sm text-muted-foreground">
-              Share your screen directly to viewers
+              Teile deinen Screen mit den Zuschauern
             </p>
           </div>
         </div>
