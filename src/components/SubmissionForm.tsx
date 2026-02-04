@@ -666,18 +666,18 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Artist</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Künstler</label>
                   <Input
-                    placeholder="Artist name"
+                    placeholder="Künstler Name"
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
                     className="h-10 text-sm bg-background/50"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Title</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Titel</label>
                   <Input
-                    placeholder="Song title"
+                    placeholder="Song Titel"
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     className="h-10 text-sm bg-background/50"
