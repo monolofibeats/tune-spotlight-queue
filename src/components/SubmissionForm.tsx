@@ -637,10 +637,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Song Link *
+                  Musiklink *
                 </label>
                 <Input
-                  placeholder="Paste Spotify, SoundCloud, or any link..."
+                  placeholder="dein Musiklink?"
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
                   className="h-10 text-sm bg-background/50"
