@@ -468,16 +468,15 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!songUrl) {
+    // Either song URL or audio file is required
+    if (!songUrl && !audioFile) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link.",
+        description: "Please enter a song link or upload an audio file.",
         variant: "destructive",
       });
       return;
     }
-
-    // If submissions are paid and user is not admin, redirect to payment
     if (submissionPaid && !isAdmin) {
       await handlePaidSubmit();
       return;
