@@ -128,7 +128,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display font-semibold text-sm flex items-center gap-2">
             <Eye className="w-4 h-4 text-primary" />
-            Queue
+            Warteliste
           </h3>
           <Badge variant="queue" className="text-xs">{sortedItems.length}</Badge>
         </div>

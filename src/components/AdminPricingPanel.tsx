@@ -172,9 +172,9 @@ export function AdminPricingPanel() {
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Pricing Controls</h3>
+            <h3 className="font-semibold">Zahlungseinstellungen</h3>
             <p className="text-xs text-muted-foreground">
-              Adjust submission and bid prices in real-time
+              Einsendungs- und Gebotspreise in Echtzeit anpassen
             </p>
           </div>
         </div>
@@ -199,12 +199,12 @@ export function AdminPricingPanel() {
           )}
           <div>
             <p className="font-medium">
-              {submissionsOpen ? 'Submissions Open' : 'Submissions Closed'}
+              {submissionsOpen ? 'Einsendungen offen' : 'Einsendungen geschlossen'}
             </p>
             <p className="text-xs text-muted-foreground">
               {submissionsOpen 
-                ? 'Users can submit songs' 
-                : 'Form is disabled for all users'}
+                ? 'Nutzer können Tracks schicken' 
+                : 'Nutzer können gerade keine Tracks schicken'}
             </p>
           </div>
         </div>
@@ -218,11 +218,11 @@ export function AdminPricingPanel() {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="skip_line" className="gap-2">
             <Zap className="w-4 h-4" />
-            Skip the Line
+            Warteliste überspringen
           </TabsTrigger>
           <TabsTrigger value="submission" className="gap-2">
             <Send className="w-4 h-4" />
-            Submissions
+            Einsendungen
           </TabsTrigger>
         </TabsList>
 
@@ -232,7 +232,7 @@ export function AdminPricingPanel() {
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
             <div className="flex items-center gap-2">
               <Settings className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Priority Bidding Active</span>
+              <span className="text-sm font-medium">Warteschlange überspringen ist aktiviert</span>
             </div>
             <Switch 
               checked={skipLine.isActive} 
@@ -243,7 +243,7 @@ export function AdminPricingPanel() {
           {/* Min Amount */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">Minimum Bid</Label>
+              <Label className="text-sm">Minimum Preis</Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">€</span>
                 <Input
@@ -269,7 +269,7 @@ export function AdminPricingPanel() {
           {/* Max Amount */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">Maximum Bid</Label>
+              <Label className="text-sm">Maximum Preis</Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">€</span>
                 <Input
@@ -294,7 +294,7 @@ export function AdminPricingPanel() {
 
           {/* Step */}
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Step Increment</Label>
+            <Label className="text-sm">Stufenweise Erhöhung</Label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">€</span>
               <Input
@@ -311,10 +311,10 @@ export function AdminPricingPanel() {
 
           {/* Preview */}
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <p className="text-sm font-medium text-amber-400 mb-2">Skip the Line Preview</p>
+            <p className="text-sm font-medium text-amber-400 mb-2">Warteliste überspringen Vorschau</p>
             <p className="text-xs text-muted-foreground">
-              Users can bid between €{skipLine.min.toFixed(2)} and €{skipLine.max.toFixed(2)} 
-              in €{skipLine.step.toFixed(2)} increments
+              Nutzer können zwischen €{skipLine.min.toFixed(2)} und €{skipLine.max.toFixed(2)} 
+              bieten in €{skipLine.step.toFixed(2)} Geboten
             </p>
           </div>
         </TabsContent>
@@ -327,12 +327,12 @@ export function AdminPricingPanel() {
           }`}>
             <div>
               <p className="text-sm font-medium">
-                {submission.isActive ? 'Paid Submissions' : 'Free Submissions'}
+                {submission.isActive ? 'Bezahlte Einsendungen' : 'Gratis Einsendungen'}
               </p>
               <p className="text-xs text-muted-foreground">
                 {submission.isActive 
-                  ? 'Users must pay to submit songs' 
-                  : 'Anyone can submit songs for free'}
+                  ? 'Nutzer müssen bezahlen wenn sie Tracks schicken wollen' 
+                  : 'Jeder kann Songs gratis einsenden'}
               </p>
             </div>
             <Switch 
@@ -346,7 +346,7 @@ export function AdminPricingPanel() {
               {/* Fixed Price */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm">Submission Price</Label>
+                  <Label className="text-sm">Einsendungspreis</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
                     <Input
@@ -378,10 +378,10 @@ export function AdminPricingPanel() {
 
               {/* Preview */}
               <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <p className="text-sm font-medium text-primary mb-2">Submission Fee Active</p>
+                <p className="text-sm font-medium text-primary mb-2">Einsendungspreis gerade</p>
                 <p className="text-2xl font-bold">€{submission.min.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Per song submission
+                  Pro Einsendung
                 </p>
               </div>
             </>
@@ -389,9 +389,9 @@ export function AdminPricingPanel() {
 
           {!submission.isActive && (
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <p className="text-sm font-medium text-emerald-400 mb-2">Free Submissions Active</p>
+              <p className="text-sm font-medium text-emerald-400 mb-2">Gratis Einsendungen aktiv</p>
               <p className="text-xs text-muted-foreground">
-                Users can submit songs without payment. Toggle on to start charging.
+                Nutzer können Tracks schicken ohne zu bezahlen. Aktiviere bezahlte Einsendungen um Geld zu verlangen.
               </p>
             </div>
           )}
@@ -421,13 +421,13 @@ export function AdminPricingPanel() {
         ) : (
           <>
             <Check className="w-4 h-4" />
-            Save All Pricing Changes
+            Alle Zahlungseinstellungen speichern
           </>
         )}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground">
-        Changes apply immediately to all users
+        Änderungen werden sofort aktiv
       </p>
     </motion.div>
   );

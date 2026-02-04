@@ -198,7 +198,7 @@ export function SubmissionListItem({
                       onEnded={() => setIsPlaying(false)}
                       className="hidden"
                     />
-                    <p className="text-xs text-muted-foreground truncate">Uploaded audio file</p>
+                    <p className="text-xs text-muted-foreground truncate">Hochgeladene Audio Datei</p>
                   </div>
                   <Button
                     variant="ghost"
@@ -251,7 +251,7 @@ export function SubmissionListItem({
                       }}
                     >
                       <Mail className="w-3 h-3 mr-1" />
-                      Show Contact
+                      Kontaktinformation
                     </Button>
                   ) : (
                     <Button
@@ -266,12 +266,12 @@ export function SubmissionListItem({
                       {copiedContact ? (
                         <>
                           <Check className="w-3 h-3 mr-1" />
-                          Copied!
+                          Kopiert!
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3 mr-1" />
-                          Copy Contact
+                          Kontaktinformation kopieren
                         </>
                       )}
                     </Button>
@@ -292,7 +292,7 @@ export function SubmissionListItem({
                   disabled={submission.status === 'reviewing'}
                 >
                   <Eye className="w-3 h-3" />
-                  Review
+                  Überprüfen
                 </Button>
                 <Button
                   variant="default"
@@ -305,7 +305,7 @@ export function SubmissionListItem({
                   disabled={submission.status === 'reviewed'}
                 >
                   <CheckCircle className="w-3 h-3" />
-                  Done
+                  Erledigt
                 </Button>
                 <Button
                   variant="ghost"
@@ -317,7 +317,7 @@ export function SubmissionListItem({
                   }}
                 >
                   <XCircle className="w-3 h-3" />
-                  Skip
+                  Überspringen
                 </Button>
                 <Button
                   variant="ghost"

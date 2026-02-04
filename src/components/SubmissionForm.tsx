@@ -631,16 +631,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-display font-semibold">Submit Your Song</h2>
+              <h2 className="text-base font-display font-semibold">Schick uns deinen Track!</h2>
             </div>
 
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Song Link *
+                  Musiklink *
                 </label>
                 <Input
-                  placeholder="Paste Spotify, SoundCloud, or any link..."
+                  placeholder="dein Musiklink?"
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
                   className="h-10 text-sm bg-background/50"
@@ -666,18 +666,18 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Artist</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Künstler</label>
                   <Input
-                    placeholder="Artist name"
+                    placeholder="Künstler Name"
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
                     className="h-10 text-sm bg-background/50"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">Title</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">Titel</label>
                   <Input
-                    placeholder="Song title"
+                    placeholder="Song Titel"
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     className="h-10 text-sm bg-background/50"
@@ -689,7 +689,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 <label className="text-xs text-muted-foreground mb-1.5 block">Email (optional)</label>
                 <Input
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="deine@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-10 text-sm bg-background/50"
@@ -697,9 +697,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">Message (optional)</label>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Bemerkungen (optional)</label>
                 <Textarea
-                  placeholder="Why should we check this out?"
+                  placeholder="was ist besonders an diesem Track?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="min-h-[80px] text-sm resize-none bg-background/50"
@@ -709,7 +709,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Audio File (optional) - .wav, .mp3, .flac
+                  Musik Datei (optional) - .wav, .mp3, .flac
                 </label>
                 <input
                   ref={fileInputRef}
@@ -747,7 +747,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     className="w-full h-10 text-sm border-dashed"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Audio File
+                    Datei hochladen
                   </Button>
                 )}
               </div>
@@ -775,12 +775,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               ) : isAdmin && submissionPaid ? (
                 <>
                   <Shield className="w-4 h-4" />
-                  Submit (Admin - Free)
+                  Abschicken (Admin - gratis)
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  Submit (Free)
+                  Abschicken (gratis)
                 </>
               )}
             </Button>
@@ -794,7 +794,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 className="w-full border-primary/30 text-primary hover:bg-primary/10"
               >
                 <Zap className="w-4 h-4" />
-                Skip the Line
+                Warteliste überspringen
               </Button>
             )}
           </div>

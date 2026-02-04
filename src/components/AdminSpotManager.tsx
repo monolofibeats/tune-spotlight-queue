@@ -184,7 +184,7 @@ export function AdminSpotManager() {
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-1" />
-                  Save Prices
+                  Preise speichern
                 </>
               )}
             </Button>
@@ -200,7 +200,7 @@ export function AdminSpotManager() {
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 mr-1" />
-                Reset All Spots
+                Alle Plätze zurücksetzen
               </>
             )}
           </Button>
@@ -251,12 +251,12 @@ export function AdminSpotManager() {
                 {spot.is_available ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-500" />
-                    <span className="text-sm text-emerald-500">Available</span>
+                    <span className="text-sm text-emerald-500">Verfügbar</span>
                   </>
                 ) : (
                   <>
                     <X className="w-4 h-4 text-red-500" />
-                    <span className="text-sm text-red-500">Sold</span>
+                    <span className="text-sm text-red-500">Verkauft</span>
                   </>
                 )}
               </div>
@@ -266,7 +266,7 @@ export function AdminSpotManager() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Adjust prices (€0.50 - €500) and click "Save Prices". Click "Reset All Spots" before each stream to make all spots available again.
+        Leg die Preise fest (0,50€ - 500€) und klick auf "Preise speichern". Klick auf "Alle Plätze zurücksetzen" vor jedem Stream damit alle Plätze wieder verfügbar werden.
       </p>
     </div>
   );

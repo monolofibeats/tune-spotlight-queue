@@ -353,11 +353,8 @@ const Dashboard = () => {
           >
             <div className="flex items-center gap-3 mb-2">
               <LayoutDashboard className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-display font-bold">Dashboard</h1>
+              <h1 className="text-3xl font-display font-bold">Live Review</h1>
             </div>
-            <p className="text-muted-foreground">
-              Manage submissions, stream settings, and special events.
-            </p>
           </motion.div>
 
           {/* Stats */}
@@ -374,7 +371,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-sm text-muted-foreground">Insgesamt</p>
                 </div>
               </div>
             </div>
@@ -385,7 +382,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.pending}</p>
-                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-sm text-muted-foreground">Ausstehend</p>
                 </div>
               </div>
             </div>
@@ -396,7 +393,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-display font-bold">{stats.reviewed}</p>
-                  <p className="text-sm text-muted-foreground">Reviewed</p>
+                  <p className="text-sm text-muted-foreground">Erledigt</p>
                 </div>
               </div>
             </div>
@@ -406,10 +403,10 @@ const Dashboard = () => {
           <Tabs defaultValue="submissions" className="space-y-6">
             <TabsList className="glass p-1 rounded-xl">
               <TabsTrigger value="submissions" className="rounded-lg px-6">
-                Submissions
+                Tracks
               </TabsTrigger>
               <TabsTrigger value="stream" className="rounded-lg px-6">
-                Stream
+                Livestream
               </TabsTrigger>
               <TabsTrigger value="events" className="rounded-lg px-6">
                 Events
@@ -426,22 +423,27 @@ const Dashboard = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    placeholder="Search songs or artists..."
+                    placeholder="Suche nach Tracks oder Künstlern..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {['all', 'pending', 'reviewing', 'reviewed', 'skipped'].map((status) => (
+                  {[
+                    { key: 'all', label: 'Alle' },
+                    { key: 'pending', label: 'Ausstehend' },
+                    { key: 'reviewing', label: 'Überprüfen' },
+                    { key: 'reviewed', label: 'Erledigt' },
+                    { key: 'skipped', label: 'Übersprungen' }
+                  ].map(({ key, label }) => (
                     <Button
-                      key={status}
-                      variant={statusFilter === status ? 'default' : 'outline'}
+                      key={key}
+                      variant={statusFilter === key ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setStatusFilter(status)}
-                      className="capitalize"
+                      onClick={() => setStatusFilter(key)}
                     >
-                      {status}
+                      {label}
                     </Button>
                   ))}
                 </div>
@@ -490,18 +492,18 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-6">
                   <Tv className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Homepage Stream Settings</h2>
+                  <h2 className="text-xl font-display font-semibold">Startseite Einstellungen</h2>
                 </div>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Stream Type</Label>
+                    <Label>Art des Streams</Label>
                     <Select value={streamType} onValueChange={setStreamType}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select stream type" />
+                        <SelectValue placeholder="Stream Typ auswählen" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">None (Hide stream)</SelectItem>
+                        <SelectItem value="none">Nichts (Livestream ist off)</SelectItem>
                         <SelectItem value="twitch">Twitch Live</SelectItem>
                         <SelectItem value="youtube">YouTube Live</SelectItem>
                         <SelectItem value="tiktok">TikTok Live</SelectItem>
@@ -565,7 +567,7 @@ const Dashboard = () => {
                     ) : (
                       <>
                         <Upload className="w-4 h-4" />
-                        Save Stream Settings
+                        Livestream Einstellungen speichern
                       </>
                     )}
                   </Button>
@@ -582,31 +584,31 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-6">
                   <Trophy className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Create Special Event</h2>
+                  <h2 className="text-xl font-display font-semibold">Event erstellen</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <Label className="mb-2 block">Event Title *</Label>
+                    <Label className="mb-2 block">Titel des Events *</Label>
                     <Input
-                      placeholder="e.g., Highest Bidder Gets Playlist Add"
+                      placeholder="z.B. der höchste Bieter bekommt einen Playlist Add"
                       value={newEventTitle}
                       onChange={(e) => setNewEventTitle(e.target.value)}
                     />
                   </div>
                   <div>
-                    <Label className="mb-2 block">Reward *</Label>
+                    <Label className="mb-2 block">Belohnung *</Label>
                     <Input
-                      placeholder="e.g., Added to Spotify playlist with 10k followers"
+                      placeholder="z.B. du wirst zu einer Spotify Playlist mit 10K Followern hinzugefügt"
                       value={newEventReward}
                       onChange={(e) => setNewEventReward(e.target.value)}
                     />
                   </div>
                 </div>
                 <div className="mb-4">
-                  <Label className="mb-2 block">Description (optional)</Label>
+                  <Label className="mb-2 block">Beschreibung (optional)</Label>
                   <Textarea
-                    placeholder="Describe the event..."
+                    placeholder="Beschreibe dein Event..."
                     value={newEventDescription}
                     onChange={(e) => setNewEventDescription(e.target.value)}
                     className="min-h-[80px]"
@@ -625,7 +627,7 @@ const Dashboard = () => {
                   ) : (
                     <>
                       <Plus className="w-4 h-4" />
-                      Create Event
+                      Event erstellen
                     </>
                   )}
                 </Button>
@@ -633,11 +635,11 @@ const Dashboard = () => {
 
               {/* Events List */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Active Events</h3>
+                <h3 className="text-lg font-semibold">Aktive Events</h3>
                 {events.length === 0 ? (
                   <div className="glass rounded-2xl p-8 text-center">
                     <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">No events created yet</p>
+                    <p className="text-muted-foreground">Noch keine Events</p>
                   </div>
                 ) : (
                   events.map((event) => (

@@ -308,9 +308,9 @@ export function ScreenStreamer() {
             )}
           </div>
           <div>
-            <h2 className="text-xl font-display font-semibold">Screen Share Stream</h2>
+            <h2 className="text-xl font-display font-semibold">Bildschirm live teilen</h2>
             <p className="text-sm text-muted-foreground">
-              Share your screen directly to viewers
+              Teile deinen Screen mit den Zuschauern
             </p>
           </div>
         </div>
@@ -471,14 +471,14 @@ export function ScreenStreamer() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            {isStarting ? 'Starting...' : 'Start Screen Share'}
+            {isStarting ? 'Startet...' : 'Bildschirm teilen'}
           </Button>
         )}
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Your browser will ask which screen, window, or tab to share.
-        Viewers will see it live on the homepage.
+        Dein Browser wird dich fragen welchen Bildschirm, Fenster oder Tab du teilen willst.
+        Zuschauer werden es dann live auf der Website sehen.
       </p>
     </motion.div>
   );
