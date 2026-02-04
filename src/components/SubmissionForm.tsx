@@ -70,7 +70,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [priorityAmount, setPriorityAmount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
-  const [highestBid, setHighestBid] = useState(0);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [user, setUser] = useState<any>(null);
