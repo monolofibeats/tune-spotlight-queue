@@ -56,11 +56,14 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
           artist_name: item.artist_name || 'Unknown Artist',
           is_priority: item.is_priority || false,
           amount_paid: Number(item.amount_paid) || 0,
+          boost_amount: Number(item.boost_amount) || 0,
           status: item.status || 'pending',
           created_at: item.created_at || new Date().toISOString(),
         }));
         setSubmissions(transformed);
+        return transformed;
       }
+      return [];
     };
 
     useEffect(() => {
