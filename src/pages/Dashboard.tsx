@@ -497,13 +497,13 @@ const Dashboard = () => {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Stream Type</Label>
+                    <Label>Art des Streams</Label>
                     <Select value={streamType} onValueChange={setStreamType}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select stream type" />
+                        <SelectValue placeholder="Stream Typ auswählen" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">None (Hide stream)</SelectItem>
+                        <SelectItem value="none">Nichts (Livestream ist off)</SelectItem>
                         <SelectItem value="twitch">Twitch Live</SelectItem>
                         <SelectItem value="youtube">YouTube Live</SelectItem>
                         <SelectItem value="tiktok">TikTok Live</SelectItem>
