@@ -243,7 +243,7 @@ export function AdminPricingPanel() {
           {/* Min Amount */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">Minimum Bid</Label>
+              <Label className="text-sm">Minimum Preis</Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">€</span>
                 <Input
