@@ -284,14 +284,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   };
 
   const handleSkipTheLine = () => {
-    if (!songUrl) {
-      toast({
-        title: "Missing information",
-        description: "Please enter a song link first.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // No longer require song URL - can skip with just audio file
     setShowPriorityDialog(true);
   };
 
