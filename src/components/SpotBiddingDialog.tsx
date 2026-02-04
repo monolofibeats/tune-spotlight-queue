@@ -78,16 +78,26 @@ export function SpotBiddingDialog({
         setIncrementPercent(bidConfig.min_amount_cents); // Stored as %
       }
 
-      // Get skip_line minimum price
-      const { data: skipConfig } = await supabase
+      // Get skip_line minimum price - REQUIRED for proper validation
+      const { data: skipConfig, error: skipError } = await supabase
         .from('pricing_config')
         .select('*')
         .eq('config_type', 'skip_line')
         .single();
 
-      if (skipConfig) {
-        setMinBidAmount(skipConfig.min_amount_cents / 100);
+      if (skipError || !skipConfig) {
+        console.error('Failed to load skip_line config:', skipError);
+        toast({
+          title: 'Error',
+          description: 'Failed to load pricing configuration',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
       }
+
+      const loadedMinBid = skipConfig.min_amount_cents / 100;
+      setMinBidAmount(loadedMinBid);
 
       // Get all pending priority submissions with their bids
       const { data: pendingSubmissions } = await supabase
