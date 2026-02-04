@@ -386,10 +386,11 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
-    if (!songUrl) {
+    // Either song URL or audio file is required
+    if (!songUrl && !audioFile) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link.",
+        description: "Please enter a song link or upload an audio file.",
         variant: "destructive",
       });
       return;
