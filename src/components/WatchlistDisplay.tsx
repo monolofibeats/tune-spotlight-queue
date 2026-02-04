@@ -156,6 +156,9 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     const topSpots = sortedItems.filter(s => s.is_priority).slice(0, 5);
     const regularItems = sortedItems.filter(s => !s.is_priority);
 
+    // Display: Top 5 priority spots with position numbers, then regular items without position
+    const displayItems = [...topSpots, ...regularItems].slice(0, 8);
+
     return (
       <div className="w-full" id="watchlist-container">
         <div className="flex items-center justify-between mb-3">
@@ -168,54 +171,59 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
 
         <div className="space-y-2">
           <AnimatePresence mode="popLayout">
-            {sortedItems.slice(0, 8).map((submission, index) => (
-              <motion.div
-                key={submission.id}
-                layout
-                initial={submission.isNew ? { opacity: 0, x: -20 } : { opacity: 0 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ 
-                  type: 'spring',
-                  stiffness: 400,
-                  damping: 30,
-                  delay: submission.isNew ? 0 : index * 0.03,
-                }}
-                className={`rounded-lg p-3 flex items-center gap-3 bg-card/50 border border-border/30 ${
-                  submission.isNew ? 'ring-1 ring-primary/50' : ''
-                } ${submission.is_priority ? 'border-primary/30' : ''}`}
-              >
-                <div 
-                  className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
-                    submission.is_priority 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-secondary text-muted-foreground'
-                  }`}
+            {displayItems.map((submission, index) => {
+              const isPrioritySpot = submission.is_priority && topSpots.includes(submission);
+              const spotNumber = isPrioritySpot ? topSpots.indexOf(submission) + 1 : null;
+              
+              return (
+                <motion.div
+                  key={submission.id}
+                  layout
+                  initial={submission.isNew ? { opacity: 0, x: -20 } : { opacity: 0 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 30,
+                    delay: submission.isNew ? 0 : index * 0.03,
+                  }}
+                  className={`rounded-lg p-3 flex items-center gap-3 bg-card/50 border border-border/30 ${
+                    submission.isNew ? 'ring-1 ring-primary/50' : ''
+                  } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
-                  {index + 1}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="font-medium text-sm truncate">
-                      {submission.song_title || 'Untitled'}
-                    </p>
-                    {submission.is_priority && (
-                      <Badge variant="premium" className="text-[10px] px-1.5 py-0">
-                        Priority
-                      </Badge>
-                    )}
+                  <div 
+                    className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
+                      submission.is_priority 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-secondary text-muted-foreground'
+                    }`}
+                  >
+                    {spotNumber || '—'}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {submission.artist_name || 'Unknown'}
-                  </p>
-                </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-medium text-sm truncate">
+                        {submission.song_title || 'Untitled'}
+                      </p>
+                      {submission.is_priority && (
+                        <Badge variant="premium" className="text-[10px] px-1.5 py-0">
+                          Priority
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {submission.artist_name || 'Unknown'}
+                    </p>
+                  </div>
 
-                <span className="text-[10px] text-muted-foreground/60 shrink-0">
-                  {formatTimeAgo(new Date(submission.created_at))}
-                </span>
-              </motion.div>
-            ))}
+                  <span className="text-[10px] text-muted-foreground/60 shrink-0">
+                    {formatTimeAgo(new Date(submission.created_at))}
+                  </span>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
 
           {sortedItems.length === 0 && (
