@@ -35,11 +35,11 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { MusicEmbed } from '@/components/MusicEmbed';
 import { SessionManager } from '@/components/SessionManager';
 import { AdminSpotManager } from '@/components/AdminSpotManager';
 import { AdminPricingPanel } from '@/components/AdminPricingPanel';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
+import { SubmissionListItem } from '@/components/SubmissionListItem';
 
 interface Submission {
   id: string;
