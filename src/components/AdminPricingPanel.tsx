@@ -218,11 +218,11 @@ export function AdminPricingPanel() {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="skip_line" className="gap-2">
             <Zap className="w-4 h-4" />
-            Skip the Line
+            Warteliste überspringen
           </TabsTrigger>
           <TabsTrigger value="submission" className="gap-2">
             <Send className="w-4 h-4" />
-            Submissions
+            Einsendungen
           </TabsTrigger>
         </TabsList>
 
