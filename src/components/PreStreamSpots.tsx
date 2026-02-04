@@ -157,15 +157,6 @@ export function PreStreamSpots() {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a .wav, .mp3, or .flac file",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
