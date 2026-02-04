@@ -41,6 +41,8 @@ export function Header() {
             
             <SocialLinks />
             
+            {user && <BidNotificationBell />}
+            
             {user && !isAdmin && (
               <Link to="/my-dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
