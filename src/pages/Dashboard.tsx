@@ -606,9 +606,9 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <Label className="mb-2 block">Description (optional)</Label>
+                  <Label className="mb-2 block">Beschreibung (optional)</Label>
                   <Textarea
-                    placeholder="Describe the event..."
+                    placeholder="Beschreibe dein Event..."
                     value={newEventDescription}
                     onChange={(e) => setNewEventDescription(e.target.value)}
                     className="min-h-[80px]"
