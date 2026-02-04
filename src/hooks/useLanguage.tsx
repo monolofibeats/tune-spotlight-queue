@@ -254,13 +254,13 @@ const translations: Record<Language, Record<string, string>> = {
     // Hero Section
     'hero.badge.live': 'Wir sind Live!',
     'hero.badge.offline': 'Live-Musikbewertungen',
-    'hero.title': 'Lass deine Musik',
-    'hero.titleHighlight': 'hören',
-    'hero.subtitle': 'Reiche Songs für Live-Bewertungen ein. Keine Anmeldung erforderlich.',
+    'hero.title': 'Show us what you',
+    'hero.titleHighlight': 'got!',
+    'hero.subtitle': 'Schick uns deine Tracks und wir werden sie live im Stream bewerten! Keine Anmeldung erforderlich.',
     
     // How It Works
-    'howItWorks.title': 'So funktioniert es',
-    'howItWorks.subtitle': 'Drei einfache Schritte, um deine Musik zu präsentieren',
+    'howItWorks.title': "So geht's",
+    'howItWorks.subtitle': 'Mach einfach nur diese 3 simplen Schritte:',
     'howItWorks.step1.title': 'Link einfügen',
     'howItWorks.step1.desc': 'Füge einen Spotify-, SoundCloud- oder beliebigen Musiklink ein',
     'howItWorks.step2.title': 'In Warteschlange',
@@ -712,7 +712,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('language');
-    return (saved as Language) || 'en';
+    return (saved as Language) || 'de';
   });
 
   const setLanguage = (lang: Language) => {
