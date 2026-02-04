@@ -17,7 +17,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
 
-const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
@@ -192,15 +191,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a .wav, .mp3, or .flac file",
-        variant: "destructive",
-      });
-      return;
-    }
     
     if (file.size > MAX_FILE_SIZE) {
       toast({
@@ -560,12 +550,11 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.audioFileLabel')} - .wav, .mp3, .flac
+                  {t('submission.audioFileLabel')} (max 50MB)
                 </label>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
                   onChange={handleFileChange}
                   className="hidden"
                   id="audio-file-input"

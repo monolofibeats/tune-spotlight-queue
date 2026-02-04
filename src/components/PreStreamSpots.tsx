@@ -35,7 +35,6 @@ const SPOT_COLORS = [
   { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
 
-const ALLOWED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/flac', 'audio/x-flac', 'audio/mp3'];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export function PreStreamSpots() {
@@ -157,15 +156,6 @@ export function PreStreamSpots() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    if (!ALLOWED_AUDIO_TYPES.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a .wav, .mp3, or .flac file",
-        variant: "destructive",
-      });
-      return;
-    }
     
     if (file.size > MAX_FILE_SIZE) {
       toast({
@@ -488,12 +478,11 @@ export function PreStreamSpots() {
               {/* Audio File Upload */}
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  Audio File (optional) - .wav, .mp3, .flac
+                  File Upload (optional, max 50MB)
                 </label>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".wav,.mp3,.flac,audio/wav,audio/mpeg,audio/flac"
                   onChange={handleFileChange}
                   className="hidden"
                   id="spot-audio-file-input"
