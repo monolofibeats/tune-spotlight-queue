@@ -198,7 +198,7 @@ export function SubmissionListItem({
                       onEnded={() => setIsPlaying(false)}
                       className="hidden"
                     />
-                    <p className="text-xs text-muted-foreground truncate">Uploaded audio file</p>
+                    <p className="text-xs text-muted-foreground truncate">Hochgeladene Audio Datei</p>
                   </div>
                   <Button
                     variant="ghost"
