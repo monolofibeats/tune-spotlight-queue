@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      bid_notifications: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_email_sent: boolean
+          is_read: boolean
+          notification_type: string
+          offer_amount_cents: number | null
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_email_sent?: boolean
+          is_read?: boolean
+          notification_type: string
+          offer_amount_cents?: number | null
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_email_sent?: boolean
+          is_read?: boolean
+          notification_type?: string
+          offer_amount_cents?: number | null
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bid_notifications_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bid_notifications_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_stream_spots: {
         Row: {
           created_at: string
@@ -303,6 +351,54 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      submission_bids: {
+        Row: {
+          bid_amount_cents: number
+          created_at: string
+          email: string
+          id: string
+          submission_id: string
+          total_paid_cents: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          bid_amount_cents?: number
+          created_at?: string
+          email: string
+          id?: string
+          submission_id: string
+          total_paid_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          bid_amount_cents?: number
+          created_at?: string
+          email?: string
+          id?: string
+          submission_id?: string
+          total_paid_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_bids_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_bids_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {

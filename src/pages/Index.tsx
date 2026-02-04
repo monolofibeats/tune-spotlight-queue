@@ -91,14 +91,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer - Minimal */}
-      <footer className="border-t border-border/30 py-6 px-4">
-        <div className="container mx-auto text-center">
-          <p className="text-xs text-muted-foreground">
-            © 2024 UpStar ⭐
-          </p>
-        </div>
-      </footer>
 
       <LanguageSwitcher />
     </div>

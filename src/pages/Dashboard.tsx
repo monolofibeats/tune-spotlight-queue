@@ -36,6 +36,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SessionManager } from '@/components/SessionManager';
 import { AdminSpotManager } from '@/components/AdminSpotManager';
 import { AdminPricingPanel } from '@/components/AdminPricingPanel';
+import { AdminBidSettings } from '@/components/AdminBidSettings';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 
@@ -481,6 +482,9 @@ const Dashboard = () => {
               
               {/* Pricing Configuration */}
               <AdminPricingPanel />
+              
+              {/* Bid Increment Settings */}
+              <AdminBidSettings />
               
               {/* Pre-Stream Spots Manager */}
               <AdminSpotManager />

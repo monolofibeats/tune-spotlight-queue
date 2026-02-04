@@ -284,14 +284,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   };
 
   const handleSkipTheLine = () => {
-    if (!songUrl) {
-      toast({
-        title: "Missing information",
-        description: "Please enter a song link first.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // No longer require song URL - can skip with just audio file
     setShowPriorityDialog(true);
   };
 
@@ -393,10 +386,11 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
-    if (!songUrl) {
+    // Either song URL or audio file is required
+    if (!songUrl && !audioFile) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link.",
+        description: "Please enter a song link or upload an audio file.",
         variant: "destructive",
       });
       return;
@@ -475,16 +469,15 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!songUrl) {
+    // Either song URL or audio file is required
+    if (!songUrl && !audioFile) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link.",
+        description: "Please enter a song link or upload an audio file.",
         variant: "destructive",
       });
       return;
     }
-
-    // If submissions are paid and user is not admin, redirect to payment
     if (submissionPaid && !isAdmin) {
       await handlePaidSubmit();
       return;
@@ -604,7 +597,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.linkLabel')} *
+                  {t('submission.linkLabel')}
                 </label>
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
@@ -723,10 +716,12 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
           {/* Submit Buttons - Stacked on mobile */}
           <div className="flex flex-col gap-2">
+            {/* Free/Default Submit Button - Dark style */}
             <Button
               type="submit"
               size="lg"
-              className={`w-full ${submissionPaid && !isAdmin ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600' : ''}`}
+              variant={submissionPaid && !isAdmin ? "default" : "secondary"}
+              className="w-full"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -752,13 +747,14 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
               )}
             </Button>
 
+            {/* Skip Line Button - Bright/Primary style */}
             {skipLineActive && (
               <Button
                 type="button"
                 onClick={handleSkipTheLine}
-                variant="outline"
+                variant="hero"
                 size="lg"
-                className="w-full border-primary/30 text-primary hover:bg-primary/10"
+                className="w-full"
               >
                 <Zap className="w-4 h-4" />
                 {t('submission.skipWaitingList')}

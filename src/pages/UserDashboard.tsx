@@ -6,19 +6,19 @@ import {
   TrendingUp, 
   Clock, 
   Loader2,
-  Zap,
-  DollarSign
+  Zap
 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { MusicEmbed } from '@/components/MusicEmbed';
+import { SubmissionBidPanel } from '@/components/SubmissionBidPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { useLanguage } from '@/hooks/useLanguage';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface UserSubmission {
   id: string;
@@ -36,10 +36,51 @@ interface UserSubmission {
 const UserDashboard = () => {
   const { user } = useAuth();
   const { play } = useSoundEffects();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [submissions, setSubmissions] = useState<UserSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [boostingId, setBoostingId] = useState<string | null>(null);
+
+  // Handle bid payment verification
+  useEffect(() => {
+    const verifyBidPayment = async () => {
+      const sessionId = searchParams.get('session_id');
+      const bidPayment = searchParams.get('bid_payment');
+
+      if (bidPayment === 'success' && sessionId) {
+        try {
+          const { data, error } = await supabase.functions.invoke('verify-bid-payment', {
+            body: { sessionId },
+          });
+
+          if (error) throw error;
+
+          if (data.success) {
+            play('success');
+            toast({
+              title: "Bid placed! 🎉",
+              description: data.message,
+            });
+            fetchSubmissions();
+          }
+        } catch (error) {
+          console.error('Bid payment verification error:', error);
+        }
+
+        window.history.replaceState({}, '', '/my-songs');
+      } else if (bidPayment === 'cancelled') {
+        toast({
+          title: "Bid cancelled",
+          description: "Your bid was not processed.",
+          variant: "destructive",
+        });
+        window.history.replaceState({}, '', '/my-songs');
+      }
+    };
+
+    verifyBidPayment();
+  }, [searchParams, play]);
 
   const fetchSubmissions = async () => {
     if (!user) return;
@@ -71,34 +112,6 @@ const UserDashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
-  const handleBoost = async (id: string, currentBoost: number) => {
-    setBoostingId(id);
-    
-    // For now, we'll just increment boost. In a real app, this would trigger a payment
-    const newBoost = currentBoost + 5;
-    
-    const { error } = await supabase
-      .from('submissions')
-      .update({ boost_amount: newBoost })
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to boost submission",
-        variant: "destructive",
-      });
-    } else {
-      play('boost');
-      toast({
-        title: "Boosted! ⚡",
-        description: "Your song has been pushed up in the queue",
-      });
-    }
-    
-    setBoostingId(null);
-  };
 
   const stats = {
     total: submissions.length,
@@ -166,7 +179,7 @@ const UserDashboard = () => {
             </div>
             <div className="rounded-xl border border-border/50 bg-card/50 p-4">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-primary" />
+                <Zap className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground">Invested</span>
               </div>
               <p className="text-2xl font-display font-bold mt-1">€{stats.totalSpent}</p>
@@ -215,7 +228,7 @@ const UserDashboard = () => {
                             submission.status === 'reviewed' ? 'default' :
                             submission.status === 'pending' ? 'queue' : 'secondary'
                           }>
-                            {submission.status}
+                            {t(`dashboard.status.${submission.status}`)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {new Date(submission.created_at).toLocaleDateString()}
@@ -224,21 +237,13 @@ const UserDashboard = () => {
                       </div>
 
                       {submission.status === 'pending' && (
-                        <AnimatedButton
-                          variant="outline"
-                          size="sm"
-                          sound="boost"
-                          onClick={() => handleBoost(submission.id, submission.boost_amount)}
-                          disabled={boostingId === submission.id}
-                          className="shrink-0"
-                        >
-                          {boostingId === submission.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          ) : (
-                            <Zap className="w-4 h-4 mr-2" />
-                          )}
-                          Boost +€5
-                        </AnimatedButton>
+                        <div className="shrink-0 w-full md:w-48">
+                          <SubmissionBidPanel
+                            submissionId={submission.id}
+                            songTitle={submission.song_title}
+                            artistName={submission.artist_name}
+                          />
+                        </div>
                       )}
                     </div>
 
