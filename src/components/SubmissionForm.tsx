@@ -268,6 +268,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
+    // Artist name and song title are required
+    if (!artistName.trim() || !songTitle.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both artist name and song title.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Either song URL or audio file is required
     if (!songUrl && !audioFile) {
       toast({
@@ -349,6 +359,16 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Artist name and song title are required
+    if (!artistName.trim() || !songTitle.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both artist name and song title.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Either song URL or audio file is required
     if (!songUrl && !audioFile) {
@@ -507,21 +527,27 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.artistLabel')}</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.artistLabel')} <span className="text-destructive">*</span>
+                  </label>
                   <Input
                     placeholder={t('submission.artistPlaceholder')}
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
                     className="h-10 text-sm bg-background/50"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.titleLabel')}</label>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.titleLabel')} <span className="text-destructive">*</span>
+                  </label>
                   <Input
                     placeholder={t('submission.titlePlaceholder')}
                     value={songTitle}
                     onChange={(e) => setSongTitle(e.target.value)}
                     className="h-10 text-sm bg-background/50"
+                    required
                   />
                 </div>
               </div>
