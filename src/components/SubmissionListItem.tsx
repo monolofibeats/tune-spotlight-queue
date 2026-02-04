@@ -305,7 +305,7 @@ export function SubmissionListItem({
                   disabled={submission.status === 'reviewed'}
                 >
                   <CheckCircle className="w-3 h-3" />
-                  Done
+                  Erledigt
                 </Button>
                 <Button
                   variant="ghost"
