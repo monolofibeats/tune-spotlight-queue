@@ -349,6 +349,44 @@ const Dashboard = () => {
     reviewed: submissions.filter(s => s.status === 'reviewed').length,
   };
 
+  const handleOpenFloatingPreview = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
+    setFloatingPreview({
+      isOpen: true,
+      submission,
+      audioUrl,
+      isLoading: isLoadingAudio,
+      position,
+    });
+  };
+
+  const handleCloseFloatingPreview = () => {
+    setFloatingPreview(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleFloatingDownload = async () => {
+    if (!floatingPreview.submission?.audio_file_url) return;
+    
+    try {
+      const downloadUrl = await getSignedAudioUrl(floatingPreview.submission.audio_file_url);
+      if (downloadUrl) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${floatingPreview.submission.artist_name} - ${floatingPreview.submission.song_title}`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download the audio file",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
