@@ -88,29 +88,34 @@ function createParticle(id: number): Particle {
   };
 }
 
-function createWaveLines(): WaveLine[] {
+function createWaveLines(isMobile: boolean): WaveLine[] {
   const lines: WaveLine[] = [];
-  const lineCount = 14;
+  const lineCount = isMobile ? 6 : 14; // Much fewer lines on mobile
+  const pointCount = isMobile ? 40 : 100; // Fewer points on mobile
   
   for (let i = 0; i < lineCount; i++) {
-    const pointCount = 100;
     const points: number[] = [];
     
     for (let j = 0; j < pointCount; j++) {
       const x = j / pointCount;
       const baseWave = Math.sin(x * Math.PI * 2.5 + i * 0.25) * 0.6;
-      const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
-      const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
-      points.push(baseWave + harmonic1 + harmonic2);
+      // Skip harmonics on mobile for simpler calculation
+      if (isMobile) {
+        points.push(baseWave);
+      } else {
+        const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
+        const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
+        points.push(baseWave + harmonic1 + harmonic2);
+      }
     }
     
-    const baseYOffset = (i - lineCount / 2) * 0.01;
+    const baseYOffset = (i - lineCount / 2) * (isMobile ? 0.015 : 0.01);
     
     lines.push({
       points,
       phase: i * 0.35,
       speed: 0.25 + Math.random() * 0.35,
-      amplitude: 0.055 + (i % 5) * 0.018,
+      amplitude: isMobile ? 0.04 : 0.055 + (i % 5) * 0.018,
       baseYOffset,
       currentYOffset: baseYOffset,
       opacity: 0.06 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.14,
