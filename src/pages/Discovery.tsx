@@ -287,7 +287,7 @@ const Discovery = () => {
                   animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 />
-                <h3 className="font-semibold text-xl">Live Now</h3>
+                <h3 className="font-semibold text-xl">{t('discovery.liveNow')}</h3>
               </motion.div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {liveStreamers.map((streamer, index) => (
