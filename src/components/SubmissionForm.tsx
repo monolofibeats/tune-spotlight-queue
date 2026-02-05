@@ -573,15 +573,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 )}
               </div>
 
-              {showPreview && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="overflow-hidden"
-                >
-                  <MusicEmbed url={songUrl} platform={platform!} />
-                </motion.div>
-              )}
 
               {/* Step 2: Audio File Upload - Right below link input */}
               <div className={getFieldGlowClass(1)}>
