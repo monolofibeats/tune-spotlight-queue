@@ -49,11 +49,12 @@ function makeHslaFromCssVar(varName: string) {
 
 function spawnFromEdge(edge: number): { x: number; y: number } {
   switch (edge) {
-    case 0: return { x: Math.random(), y: -0.08 };
-    case 1: return { x: 1.08, y: Math.random() };
-    case 2: return { x: Math.random(), y: 1.08 };
-    case 3: return { x: -0.08, y: Math.random() };
-    default: return { x: Math.random(), y: -0.08 };
+    // Spawn INSIDE the viewport so particles are always visible
+    case 0: return { x: Math.random(), y: 0.02 };
+    case 1: return { x: 0.98, y: Math.random() };
+    case 2: return { x: Math.random(), y: 0.98 };
+    case 3: return { x: 0.02, y: Math.random() };
+    default: return { x: Math.random(), y: 0.02 };
   }
 }
 
