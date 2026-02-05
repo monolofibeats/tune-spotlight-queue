@@ -130,7 +130,7 @@ const Discovery = () => {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
                 </motion.span>
-                <span className="text-sm">Music Review Platform</span>
+                <span className="text-sm">{t('discovery.badge')}</span>
               </Badge>
             </motion.div>
             
