@@ -245,7 +245,7 @@ export function SoundwaveBackgroundCanvas() {
               if (pDistX < cursorInfluenceRadius) {
                 const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
                 const waveOffsetFromCenter = wave.currentYOffset;
-                prevY += waveOffsetFromCenter * influence * 1.5;
+                prevY += waveOffsetFromCenter * influence * 0.6; // More subtle
               }
             }
             
