@@ -278,12 +278,12 @@
     border-color: transparent;
   }
   30% {
-    background: hsl(160 40% 18%);
-    border-color: hsl(160 50% 35%);
+    background: hsl(160 40% 15%);
+    border-color: hsl(160 50% 30%);
   }
   100% {
-    background: hsl(160 30% 10%);
-    border-color: hsl(160 40% 18%);
+    background: hsl(160 25% 6%);
+    border-color: hsl(160 30% 12%);
   }
 }
 
