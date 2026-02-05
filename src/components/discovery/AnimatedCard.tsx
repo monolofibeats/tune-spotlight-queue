@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ReactNode, useRef } from 'react';
+import { ReactNode, forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedCardProps {
@@ -9,23 +9,36 @@ interface AnimatedCardProps {
   delay?: number;
 }
 
-export function AnimatedCard({ children, className, glowColor = 'var(--primary)', delay = 0 }: AnimatedCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  
+export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(function AnimatedCard(
+  { children, className, glowColor = 'var(--primary)', delay = 0 },
+  forwardedRef
+) {
+  const localRef = useRef<HTMLDivElement>(null);
+
+  const setRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      localRef.current = node;
+      if (!forwardedRef) return;
+      if (typeof forwardedRef === 'function') forwardedRef(node);
+      else (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    },
+    [forwardedRef]
+  );
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  
+
   const springConfig = { damping: 25, stiffness: 150 };
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), springConfig);
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = ref.current?.getBoundingClientRect();
+    const rect = localRef.current?.getBoundingClientRect();
     if (!rect) return;
-    
+
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    
+
     mouseX.set(x);
     mouseY.set(y);
   };
@@ -37,11 +50,8 @@ export function AnimatedCard({ children, className, glowColor = 'var(--primary)'
 
   return (
     <motion.div
-      ref={ref}
-      className={cn(
-        "relative group cursor-pointer",
-        className
-      )}
+      ref={setRef}
+      className={cn('relative group cursor-pointer', className)}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
@@ -63,7 +73,7 @@ export function AnimatedCard({ children, className, glowColor = 'var(--primary)'
           background: `linear-gradient(135deg, hsl(${glowColor}) 0%, hsl(${glowColor} / 0.5) 50%, hsl(${glowColor}) 100%)`,
         }}
       />
-      
+
       {/* Card content */}
       <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
         {/* Spotlight effect */}
@@ -77,4 +87,5 @@ export function AnimatedCard({ children, className, glowColor = 'var(--primary)'
       </div>
     </motion.div>
   );
-}
+});
+

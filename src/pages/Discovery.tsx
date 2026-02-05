@@ -63,10 +63,9 @@ const Discovery = () => {
 
   return (
     <>
-      <SoundwaveBackground />
+      <SoundwaveBackgroundCanvas />
       <div className="min-h-screen relative overflow-hidden" style={{ background: 'transparent' }}>
         <CursorFollower />
-      
       {/* Header */}
       <motion.header 
         className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/20"
