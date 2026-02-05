@@ -65,6 +65,25 @@ export function PositionBadge({
         <div className="absolute inset-0 rounded-lg bg-yellow-400/30 blur-md animate-pulse" />
       )}
       
+      {/* Pop-out star for #1 - positioned to overflow */}
+      {position === 1 && (
+        <motion.img
+          src={upstarStar}
+          alt=""
+          className="absolute -top-4 -right-3 w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] z-10"
+          initial={{ scale: 0.8, rotate: -15 }}
+          animate={{ 
+            scale: [1, 1.15, 1],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        />
+      )}
+      
       <div
         className={cn(
           "relative rounded-lg flex items-center justify-center gap-1",
@@ -78,14 +97,7 @@ export function PositionBadge({
         )}
         aria-label={position ? `Position ${position}` : "No position"}
       >
-        {/* Integrated icon for top 3 */}
-        {position === 1 && (
-          <img
-            src={upstarStar}
-            alt=""
-            className="w-5 h-5 object-contain drop-shadow-md"
-          />
-        )}
+        {/* Integrated icons for 2nd and 3rd */}
         {position === 2 && (
           <Medal className="w-4 h-4 drop-shadow-sm" aria-hidden />
         )}
