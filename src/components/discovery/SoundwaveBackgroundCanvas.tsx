@@ -47,38 +47,25 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
-function spawnFromEdge(edge: number): { x: number; y: number } {
-  switch (edge) {
-    // Spawn INSIDE the viewport so particles are always visible
-    case 0: return { x: Math.random(), y: 0.02 };
-    case 1: return { x: 0.98, y: Math.random() };
-    case 2: return { x: Math.random(), y: 0.98 };
-    case 3: return { x: 0.02, y: Math.random() };
-    default: return { x: Math.random(), y: 0.02 };
-  }
-}
-
 function createParticle(id: number): Particle {
-  const spawnEdge = Math.floor(Math.random() * 4);
-  const spawn = spawnFromEdge(spawnEdge);
-  
+  // Spawn randomly across the entire screen
   return {
     id,
-    x: spawn.x,
-    y: spawn.y,
-    vx: 0,
-    vy: 0,
-    size: Math.random() * 2.5 + 2.5,
-    opacity: 0,
-    targetOpacity: Math.random() * 0.35 + 0.55,
+    x: Math.random(),
+    y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.002,
+    vy: (Math.random() - 0.5) * 0.001,
+    size: Math.random() * 6 + 4, // Length of the sprinkle line
+    opacity: Math.random() * 0.4 + 0.2,
+    targetOpacity: Math.random() * 0.5 + 0.3,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.006 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.012 + 0.006,
+    orbitSpeed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.015 + 0.008,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.00015 + 0.00005,
-    life: 1,
-    maxLife: 18 + Math.random() * 25,
-    spawnEdge,
+    driftSpeed: Math.random() * 0.0004 + 0.0002,
+    life: Math.random(), // Start at random life stage so they don't all fade together
+    maxLife: 20 + Math.random() * 30,
+    spawnEdge: 0,
   };
 }
 
@@ -213,15 +200,17 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Smooth cursor wave distortion - gaussian displacement field
+          // Smooth cursor wave distortion - gentler gaussian for round curves
           const dx = x - mouse.smoothX;
           const dy = y - mouse.smoothY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < cursorInfluenceRadius) {
             const r = dist / cursorInfluenceRadius;
-            const influence = Math.exp(-r * r * 2.6);
-            // Push away smoothly proportional to distance from cursor (no abrupt sign flip)
-            y += dy * influence * 0.95;
+            // Smoother gaussian with gentler falloff to avoid bulges
+            const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
+            // Push waves up/down based on their position relative to cursor
+            const pushDirection = y > mouse.smoothY ? 1 : -1;
+            y += pushDirection * influence * 0.08;
           }
           
           if (i === 0) {
@@ -237,8 +226,9 @@ export function SoundwaveBackgroundCanvas() {
             const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDist < cursorInfluenceRadius) {
               const r = pDist / cursorInfluenceRadius;
-              const influence = Math.exp(-r * r * 2.6);
-              prevY += pdy * influence * 0.95;
+              const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
+              const pushDirection = prevY > mouse.smoothY ? 1 : -1;
+              prevY += pushDirection * influence * 0.08;
             }
             
             const cpX = (prevX + x) / 2 * width;
@@ -255,15 +245,15 @@ export function SoundwaveBackgroundCanvas() {
         p.life -= dt / p.maxLife;
         
         if (p.life <= 0) {
-          p.spawnEdge = Math.floor(Math.random() * 4);
-          const spawn = spawnFromEdge(p.spawnEdge);
-          p.x = spawn.x;
-          p.y = spawn.y;
+          // Respawn randomly across the screen
+          p.x = Math.random();
+          p.y = Math.random();
           p.life = 1;
-          p.maxLife = 18 + Math.random() * 25;
+          p.maxLife = 20 + Math.random() * 30;
           p.opacity = 0;
-          p.vx = 0;
-          p.vy = 0;
+          p.vx = (Math.random() - 0.5) * 0.002;
+          p.vy = (Math.random() - 0.5) * 0.001;
+          p.driftAngle = Math.random() * Math.PI * 2;
         }
 
         // Faster fade-in so particles are visible immediately after load
@@ -330,19 +320,31 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.1) p.y = -0.1;
       }
 
-      // Draw particles (small sprinkles) - extremely visible
+      // Draw particles as small line sprinkles floating across the background
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.shadowBlur = 28;
-      ctx.shadowColor = hsla(1);
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = hsla(0.6);
+      ctx.lineCap = "round";
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, Math.max(0.4, p.opacity * 3));
-        ctx.fillStyle = hsla(1);
+        ctx.globalAlpha = Math.min(1, Math.max(0.25, p.opacity * 1.8));
+        ctx.strokeStyle = hsla(1);
+        ctx.lineWidth = 1.5;
+        
+        // Draw as a small line/sprinkle oriented by drift angle
+        const lineLength = p.size;
+        const angle = p.driftAngle;
+        const x = p.x * width;
+        const y = p.y * height;
+        const dx = Math.cos(angle) * lineLength;
+        const dy = Math.sin(angle) * lineLength;
+        
         ctx.beginPath();
-        ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
+        ctx.lineTo(x + dx * 0.5, y + dy * 0.5);
+        ctx.stroke();
       }
       
       ctx.restore();
