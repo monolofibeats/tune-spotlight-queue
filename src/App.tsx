@@ -51,7 +51,9 @@ const App = () => (
                       </ProtectedRoute>
                     } 
                   />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  {/* Streamer page - must be after all other routes */}
+                  <Route path="/:slug" element={<StreamerPage />} />
+                  {/* 404 catch-all */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
