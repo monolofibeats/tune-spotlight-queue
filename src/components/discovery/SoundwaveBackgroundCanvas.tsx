@@ -68,18 +68,18 @@ function createParticle(id: number): Particle {
     id,
     x: Math.random(),
     y: Math.random(),
-    vx: (Math.random() - 0.5) * 0.002,
-    vy: (Math.random() - 0.5) * 0.001,
-    size: Math.random() * 8 + 5, // Length of the sprinkle line
-    opacity: Math.random() * 0.4 + 0.2,
-    targetOpacity: Math.random() * 0.5 + 0.4,
+    vx: (Math.random() - 0.5) * 0.00012, // Ultra slow
+    vy: (Math.random() - 0.5) * 0.00008, // Ultra slow
+    size: Math.random() * 8 + 5,
+    opacity: Math.random() * 0.3 + 0.1,
+    targetOpacity: Math.random() * 0.5 + 0.3,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.02 + 0.01,
+    orbitSpeed: (Math.random() * 0.001 + 0.0005) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.012 + 0.006,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.0006 + 0.0003,
+    driftSpeed: Math.random() * 0.00003 + 0.00001, // Ultra slow drift
     life: Math.random(),
-    maxLife: 25 + Math.random() * 35,
+    maxLife: 80 + Math.random() * 100, // Very long life
     spawnEdge: 0,
     attached: false,
     attachedTime: 0,
