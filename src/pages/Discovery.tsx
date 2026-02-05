@@ -16,6 +16,7 @@ const Discovery = () => {
   const { streamers, isLoading } = useActiveStreamers();
   const { t } = useLanguage();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
