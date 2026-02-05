@@ -75,6 +75,7 @@ export type Database = {
           purchased_by: string | null
           session_id: string | null
           spot_number: number
+          streamer_id: string | null
           submission_id: string | null
         }
         Insert: {
@@ -86,6 +87,7 @@ export type Database = {
           purchased_by?: string | null
           session_id?: string | null
           spot_number: number
+          streamer_id?: string | null
           submission_id?: string | null
         }
         Update: {
@@ -97,6 +99,7 @@ export type Database = {
           purchased_by?: string | null
           session_id?: string | null
           spot_number?: number
+          streamer_id?: string | null
           submission_id?: string | null
         }
         Relationships: [
@@ -105,6 +108,13 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "stream_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pre_stream_spots_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
             referencedColumns: ["id"]
           },
           {
@@ -132,6 +142,7 @@ export type Database = {
           max_amount_cents: number
           min_amount_cents: number
           step_cents: number
+          streamer_id: string | null
           updated_at: string
         }
         Insert: {
@@ -142,6 +153,7 @@ export type Database = {
           max_amount_cents?: number
           min_amount_cents?: number
           step_cents?: number
+          streamer_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -152,9 +164,18 @@ export type Database = {
           max_amount_cents?: number
           min_amount_cents?: number
           step_cents?: number
+          streamer_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pricing_config_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       special_events: {
         Row: {
@@ -166,6 +187,7 @@ export type Database = {
           is_active: boolean
           reward: string
           start_time: string
+          streamer_id: string | null
           title: string
         }
         Insert: {
@@ -177,6 +199,7 @@ export type Database = {
           is_active?: boolean
           reward: string
           start_time?: string
+          streamer_id?: string | null
           title: string
         }
         Update: {
@@ -188,9 +211,18 @@ export type Database = {
           is_active?: boolean
           reward?: string
           start_time?: string
+          streamer_id?: string | null
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "special_events_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stream_clips: {
         Row: {
@@ -249,6 +281,7 @@ export type Database = {
           is_active: boolean
           stream_type: string
           stream_url: string | null
+          streamer_id: string | null
           updated_at: string
           video_url: string | null
         }
@@ -258,6 +291,7 @@ export type Database = {
           is_active?: boolean
           stream_type?: string
           stream_url?: string | null
+          streamer_id?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -267,10 +301,19 @@ export type Database = {
           is_active?: boolean
           stream_type?: string
           stream_url?: string | null
+          streamer_id?: string | null
           updated_at?: string
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stream_config_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stream_recordings: {
         Row: {
@@ -333,6 +376,7 @@ export type Database = {
           id: string
           is_active: boolean
           started_at: string
+          streamer_id: string | null
           title: string | null
         }
         Insert: {
@@ -342,6 +386,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           started_at?: string
+          streamer_id?: string | null
           title?: string | null
         }
         Update: {
@@ -351,7 +396,157 @@ export type Database = {
           id?: string
           is_active?: boolean
           started_at?: string
+          streamer_id?: string | null
           title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stream_sessions_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streamer_applications: {
+        Row: {
+          application_message: string | null
+          created_at: string
+          desired_slug: string
+          display_name: string
+          email: string
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["streamer_status"]
+          twitch_url: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          application_message?: string | null
+          created_at?: string
+          desired_slug: string
+          display_name: string
+          email: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["streamer_status"]
+          twitch_url?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          application_message?: string | null
+          created_at?: string
+          desired_slug?: string
+          display_name?: string
+          email?: string
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["streamer_status"]
+          twitch_url?: string | null
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      streamers: {
+        Row: {
+          accent_color: string | null
+          application_message: string | null
+          approved_at: string | null
+          avatar_url: string | null
+          background_style: string | null
+          banner_url: string | null
+          bio: string | null
+          created_at: string
+          custom_css: string | null
+          display_name: string
+          email: string
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          instagram_url: string | null
+          is_live: boolean | null
+          primary_color: string | null
+          rejection_reason: string | null
+          show_how_it_works: boolean | null
+          show_stream_embed: boolean | null
+          slug: string
+          status: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url: string | null
+          twitch_url: string | null
+          twitter_url: string | null
+          updated_at: string
+          user_id: string
+          welcome_message: string | null
+          youtube_url: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          application_message?: string | null
+          approved_at?: string | null
+          avatar_url?: string | null
+          background_style?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          custom_css?: string | null
+          display_name: string
+          email: string
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_live?: boolean | null
+          primary_color?: string | null
+          rejection_reason?: string | null
+          show_how_it_works?: boolean | null
+          show_stream_embed?: boolean | null
+          slug: string
+          status?: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url?: string | null
+          twitch_url?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          user_id: string
+          welcome_message?: string | null
+          youtube_url?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          application_message?: string | null
+          approved_at?: string | null
+          avatar_url?: string | null
+          background_style?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string
+          custom_css?: string | null
+          display_name?: string
+          email?: string
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_live?: boolean | null
+          primary_color?: string | null
+          rejection_reason?: string | null
+          show_how_it_works?: boolean | null
+          show_stream_embed?: boolean | null
+          slug?: string
+          status?: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url?: string | null
+          twitch_url?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
@@ -419,6 +614,7 @@ export type Database = {
           song_title: string
           song_url: string
           status: string
+          streamer_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -437,6 +633,7 @@ export type Database = {
           song_title?: string
           song_url: string
           status?: string
+          streamer_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -455,10 +652,19 @@ export type Database = {
           song_title?: string
           song_url?: string
           status?: string
+          streamer_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "submissions_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -494,6 +700,7 @@ export type Database = {
           platform: string | null
           song_title: string | null
           status: string | null
+          streamer_id: string | null
         }
         Insert: {
           amount_paid?: number | null
@@ -505,6 +712,7 @@ export type Database = {
           platform?: string | null
           song_title?: string | null
           status?: string | null
+          streamer_id?: string | null
         }
         Update: {
           amount_paid?: number | null
@@ -516,8 +724,17 @@ export type Database = {
           platform?: string | null
           song_title?: string | null
           status?: string | null
+          streamer_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "submissions_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -530,7 +747,8 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "streamer"
+      streamer_status: "pending" | "approved" | "rejected" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -658,7 +876,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "streamer"],
+      streamer_status: ["pending", "approved", "rejected", "suspended"],
     },
   },
 } as const
