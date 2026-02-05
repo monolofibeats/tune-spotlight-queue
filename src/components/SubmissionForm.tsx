@@ -595,7 +595,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
 
               {/* Step 2: Audio File Upload - Right below link input */}
-              <div className={getFieldGlowClass(1)}>
+              <div className={`relative ${getFieldGlowClass(1)}`}>
+                <CompletionTick fieldStep={1} />
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   {t('submission.audioFileLabel')} (max 100MB) <span className="text-destructive">*</span>
                 </label>
