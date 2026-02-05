@@ -46,27 +46,19 @@ interface BlurRevealProps {
   delay?: number;
 }
 
-export function BlurReveal({ children, className = '', delay = 0 }: BlurRevealProps) {
+export function BlurReveal({ children, className = '' }: BlurRevealProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [hasBeenViewed, setHasBeenViewed] = useState(false);
 
   return (
     <motion.span
       className={`relative inline-block cursor-pointer ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      initial={{ filter: 'blur(6px)', opacity: 0.4 }}
-      whileInView={{ 
-        filter: hasBeenViewed ? (isHovered ? 'blur(0px)' : 'blur(4px)') : 'blur(4px)', 
-        opacity: hasBeenViewed ? (isHovered ? 1 : 0.6) : 0.6,
-      }}
       animate={{ 
         filter: isHovered ? 'blur(0px)' : 'blur(4px)',
-        opacity: isHovered ? 1 : 0.6,
+        opacity: isHovered ? 1 : 0.5,
       }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      viewport={{ once: true }}
-      onViewportEnter={() => setHasBeenViewed(true)}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       {children}
     </motion.span>

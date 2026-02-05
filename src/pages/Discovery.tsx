@@ -203,25 +203,45 @@ const Discovery = () => {
 
       {/* Stats Section */}
       <section className="py-16 px-4 relative z-10">
-        <div className="container mx-auto max-w-4xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
+        <div className="container mx-auto max-w-5xl">
+          {/* Featured: Songs Reviewed Counter */}
+          <AnimatedCard delay={0} className="mb-8">
+            <div className="p-8 md:p-12 text-center">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Music className="w-12 h-12 text-primary mx-auto mb-4" />
+              </motion.div>
+              <div className="text-5xl md:text-7xl font-bold mb-2 text-primary">
+                <LiveCounter startValue={10847} suffix="+" />
+              </div>
+              <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
+              <motion.p 
+                className="text-sm text-muted-foreground/60 mt-2"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                +1 every second
+              </motion.p>
+            </div>
+          </AnimatedCard>
+
+          {/* Other Stats */}
+          <div className="grid grid-cols-3 gap-4 md:gap-6">
+            {stats.filter(s => !s.isLive).map((stat, index) => (
               <AnimatedCard key={stat.label} delay={index * 0.1} className="text-center">
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                   <motion.div
                     whileHover={{ scale: 1.2, rotate: 10 }}
                     transition={{ type: "spring", stiffness: 400 }}
                   >
-                    <stat.icon className="w-8 h-8 text-primary mx-auto mb-3" />
+                    <stat.icon className="w-6 h-6 md:w-8 md:h-8 text-primary mx-auto mb-2 md:mb-3" />
                   </motion.div>
-                  <div className="text-3xl md:text-4xl font-bold mb-1">
-                    {stat.isLive ? (
-                      <LiveCounter startValue={stat.value as number} suffix="+" />
-                    ) : (
-                      <AnimatedCounter value={stat.value} />
-                    )}
+                  <div className="text-2xl md:text-4xl font-bold mb-1">
+                    <AnimatedCounter value={stat.value} />
                   </div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-muted-foreground">{stat.label}</div>
                 </div>
               </AnimatedCard>
             ))}

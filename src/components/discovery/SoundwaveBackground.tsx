@@ -32,23 +32,23 @@ export function SoundwaveBackground() {
   const waveAmplitude = useTransform(smoothProgress, [0, 0.5, 1], [80, 50, 30]);
   const waveFrequency = useTransform(smoothProgress, [0, 1], [0.5, 2]);
   
-  // Generate particles
+  // Generate particles - more particles for better visibility
   const particles = useMemo(() => {
-    const count = 120;
+    const count = 150;
     const particleList: WaveParticle[] = [];
     
     for (let i = 0; i < count; i++) {
       particleList.push({
         id: i,
         baseX: (i / count) * 100,
-        baseY: 50 + (Math.random() - 0.5) * 60, // Scattered initially
+        baseY: 50 + (Math.random() - 0.5) * 60,
         x: (i / count) * 100,
         y: 50,
-        size: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.5 + 0.2,
+        size: Math.random() * 4 + 2,
+        opacity: Math.random() * 0.6 + 0.3,
         waveOffset: Math.random() * Math.PI * 2,
         floatOffset: Math.random() * Math.PI * 2,
-        floatSpeed: 0.5 + Math.random() * 0.5,
+        floatSpeed: 0.3 + Math.random() * 0.4,
       });
     }
     
@@ -76,7 +76,7 @@ export function SoundwaveBackground() {
     let animationId: number;
     
     const animate = () => {
-      timeRef.current += 0.016; // ~60fps
+      timeRef.current += 0.016;
       const time = timeRef.current;
       
       const formation = waveFormation.get();
@@ -92,9 +92,11 @@ export function SoundwaveBackground() {
         // Add velocity-based distortion
         const velocityDistortion = velocity * Math.sin(time * 5 + i) * 2;
         
-        // Calculate chaotic position (scattered)
-        const chaoticX = particle.baseX + Math.sin(time * particle.floatSpeed + particle.floatOffset) * 8;
-        const chaoticY = particle.baseY + Math.cos(time * particle.floatSpeed * 0.7 + particle.floatOffset) * 15;
+        // Calculate chaotic position with smooth floating
+        const floatX = Math.sin(time * particle.floatSpeed + particle.floatOffset) * 10;
+        const floatY = Math.cos(time * particle.floatSpeed * 0.7 + particle.floatOffset) * 20;
+        const chaoticX = particle.baseX + floatX;
+        const chaoticY = particle.baseY + floatY;
         
         // Interpolate between chaotic and wave based on scroll
         const x = chaoticX + (waveX - chaoticX) * formation;
@@ -102,7 +104,7 @@ export function SoundwaveBackground() {
         
         // Pulsing opacity based on formation and position
         const pulseOpacity = particle.opacity * (0.8 + Math.sin(time * 2 + i * 0.1) * 0.2);
-        const formationOpacity = pulseOpacity * (0.5 + formation * 0.5);
+        const formationOpacity = pulseOpacity * (0.6 + formation * 0.4);
         
         return {
           ...particle,
@@ -119,12 +121,12 @@ export function SoundwaveBackground() {
     return () => cancelAnimationFrame(animationId);
   }, [waveFormation, waveAmplitude, waveFrequency, smoothVelocity]);
 
-  // Background gradient that shifts with scroll
+  // Background gradient that shifts with scroll - smoother transitions
   const gradientOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.3, 0.5, 0.7]);
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {/* Animated gradient background */}
+      {/* Animated gradient background - smoother */}
       <motion.div
         className="absolute inset-0"
         style={{ opacity: gradientOpacity }}
@@ -133,14 +135,15 @@ export function SoundwaveBackground() {
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--primary) / 0.08) 0%, transparent 60%)
+              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--primary) / 0.1) 0%, transparent 60%)
             `,
           }}
           animate={{
-            scale: [1, 1.02, 1],
+            scale: [1, 1.01, 1],
+            opacity: [0.8, 1, 0.8],
           }}
           transition={{
-            duration: 10,
+            duration: 8,
             repeat: Infinity,
             ease: "easeInOut",
           }}
@@ -168,7 +171,7 @@ export function SoundwaveBackground() {
           if (distance > 3) return null;
           
           return (
-            <motion.line
+            <line
               key={`line-${particle.id}`}
               x1={`${particle.x}%`}
               y1={`${particle.y}%`}
@@ -176,14 +179,14 @@ export function SoundwaveBackground() {
               y2={`${nextParticle.y}%`}
               stroke="hsl(var(--primary))"
               strokeWidth="0.5"
-              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.3}
+              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.4}
             />
           );
         })}
         
         {/* Particles */}
         {animatedParticles.map(particle => (
-          <motion.circle
+          <circle
             key={particle.id}
             cx={`${particle.x}%`}
             cy={`${particle.y}%`}
@@ -209,10 +212,10 @@ export function SoundwaveBackground() {
 
       {/* Smooth scan line */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.015] to-transparent"
+        className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.01] to-transparent"
         style={{ height: '300%' }}
         animate={{ y: ['-200%', '0%'] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       />
     </div>
   );
