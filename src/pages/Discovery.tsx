@@ -32,32 +32,32 @@ const Discovery = () => {
   const offlineStreamers = streamers.filter(s => !s.is_live);
 
   const stats = [
-    { label: 'Active Streamers', value: streamers.length, icon: Users, isLive: false },
-    { label: 'Songs Reviewed', value: 10847, icon: Music, isLive: true },
-    { label: 'Live Now', value: liveStreamers.length, icon: Radio, isLive: false },
-    { label: 'Weekly Views', value: '50K+', icon: TrendingUp, isLive: false },
+    { label: t('discovery.activeStreamers'), value: streamers.length, icon: Users, isLive: false },
+    { label: t('discovery.songsReviewed'), value: 10847, icon: Music, isLive: true },
+    { label: t('discovery.liveNow'), value: liveStreamers.length, icon: Radio, isLive: false },
+    { label: t('discovery.weeklyViews'), value: '50K+', icon: TrendingUp, isLive: false },
   ];
 
   const faqs = [
     {
-      question: 'What is UpStar?',
-      answer: 'UpStar is a platform that connects music artists with streamers who review and react to songs live on stream. Get real-time feedback from content creators and their audiences.',
+      question: t('discovery.faq1q'),
+      answer: t('discovery.faq1a'),
     },
     {
-      question: 'How do I submit my music?',
-      answer: 'Simply visit a streamer\'s page, paste your song link (Spotify, YouTube, SoundCloud, etc.) or upload an audio file, and submit. You can optionally pay to skip the queue for priority review.',
+      question: t('discovery.faq2q'),
+      answer: t('discovery.faq2a'),
     },
     {
-      question: 'How do streamers join?',
-      answer: 'Streamers can apply to join the platform by clicking "Become a Streamer" below. Applications are reviewed within 24-48 hours. Once approved, you\'ll get your own customizable page.',
+      question: t('discovery.faq3q'),
+      answer: t('discovery.faq3a'),
     },
     {
-      question: 'Is it free to submit music?',
-      answer: 'Each streamer sets their own pricing. Some offer free submissions, while others may charge for submissions or priority queue placement. Check each streamer\'s page for their specific rates.',
+      question: t('discovery.faq4q'),
+      answer: t('discovery.faq4a'),
     },
     {
-      question: 'What platforms are supported?',
-      answer: 'We support Spotify, Apple Music, SoundCloud, YouTube, and direct file uploads (up to 100MB). If your music is hosted elsewhere, you can paste any link or upload the file directly.',
+      question: t('discovery.faq5q'),
+      answer: t('discovery.faq5a'),
     },
   ];
 
@@ -89,7 +89,7 @@ const Discovery = () => {
                   whileTap={{ scale: 0.95 }}
                   className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
                 >
-                  Library
+                  {t('nav.library')}
                   <motion.span
                     className="absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left"
                     initial={{ scaleX: 0 }}
@@ -99,7 +99,7 @@ const Discovery = () => {
               </Link>
               <Link to="/auth">
                 <GlowButton variant="primary" size="default">
-                  Sign In
+                  {t('nav.signIn')}
                 </GlowButton>
               </Link>
             </nav>
@@ -130,7 +130,7 @@ const Discovery = () => {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
                 </motion.span>
-                <span className="text-sm">Music Review Platform</span>
+                <span className="text-sm">{t('discovery.badge')}</span>
               </Badge>
             </motion.div>
             
@@ -140,7 +140,7 @@ const Discovery = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              Get Your Music{' '}
+              {t('discovery.heroTitle')}{' '}
               <motion.span 
                 className="text-primary relative inline-block"
                 animate={{ 
@@ -152,7 +152,7 @@ const Discovery = () => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                Reviewed Live
+                {t('discovery.heroHighlight')}
                 <motion.span
                   className="absolute -right-8 -top-4"
                   animate={{ rotate: [0, 20, 0], scale: [1, 1.2, 1] }}
@@ -169,9 +169,7 @@ const Discovery = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
             >
-              Submit your tracks to streamers and get real-time feedback from creators and their audiences. Join{' '}
-              <BlurReveal>thousands of artists</BlurReveal>{' '}
-              getting <GlitchText>discovered</GlitchText>.
+              {t('discovery.heroSubtitle')}
             </motion.p>
 
             <motion.div 
@@ -186,14 +184,14 @@ const Discovery = () => {
                 onClick={() => document.getElementById('streamers')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Radio className="w-5 h-5" />
-                Browse Streamers
+                {t('discovery.browseStreamers')}
               </GlowButton>
               <GlowButton 
                 variant="outline" 
                 size="lg"
                 onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Become a Streamer
+                {t('discovery.becomeStreamer')}
                 <ArrowRight className="w-5 h-5" />
               </GlowButton>
             </motion.div>
@@ -219,13 +217,13 @@ const Discovery = () => {
               >
                 <LiveCounter startValue={10847} suffix="+" />
               </div>
-              <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
+              <div className="text-lg md:text-xl text-muted-foreground">{t('discovery.songsReviewed')}</div>
               <motion.p 
                 className="text-sm text-muted-foreground/60 mt-2"
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                +1 every second (live)
+                {t('discovery.livePerSecond')}
               </motion.p>
             </div>
           </AnimatedCard>
@@ -268,10 +266,10 @@ const Discovery = () => {
                 backgroundSize: ['100% 0%', '100% 100%'],
               }}
             >
-              Active Streamers
+              {t('discovery.sectionStreamers')}
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              Find a streamer to review <BlurReveal>your music</BlurReveal>
+              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourMusic')}</BlurReveal>
             </p>
           </motion.div>
 
@@ -289,7 +287,7 @@ const Discovery = () => {
                   animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 />
-                <h3 className="font-semibold text-xl">Live Now</h3>
+                <h3 className="font-semibold text-xl">{t('discovery.liveNow')}</h3>
               </motion.div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {liveStreamers.map((streamer, index) => (
@@ -302,7 +300,7 @@ const Discovery = () => {
           {/* Offline Streamers */}
           {offlineStreamers.length > 0 && (
             <div>
-              <h3 className="font-semibold text-xl mb-6 text-muted-foreground">All Streamers</h3>
+              <h3 className="font-semibold text-xl mb-6 text-muted-foreground">{t('discovery.allStreamers')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {offlineStreamers.map((streamer, index) => (
                   <StreamerCard key={streamer.id} streamer={streamer} index={index} />
@@ -318,7 +316,7 @@ const Discovery = () => {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
-              <p className="text-muted-foreground">Loading streamers...</p>
+              <p className="text-muted-foreground">{t('discovery.loadingStreamers')}</p>
             </div>
           )}
 
@@ -331,12 +329,12 @@ const Discovery = () => {
                 >
                   <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-6" />
                 </motion.div>
-                <h3 className="text-xl font-semibold mb-3">No streamers yet</h3>
-                <p className="text-muted-foreground mb-6">Be the first to join as a streamer!</p>
+                <h3 className="text-xl font-semibold mb-3">{t('discovery.noStreamersYet')}</h3>
+                <p className="text-muted-foreground mb-6">{t('discovery.beFirstStreamer')}</p>
                 <GlowButton 
                   onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Apply Now
+                  {t('discovery.applyNow')}
                 </GlowButton>
               </div>
             </AnimatedCard>
@@ -354,18 +352,18 @@ const Discovery = () => {
             className="text-center mb-14"
           >
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
-              How It Works
+              {t('discovery.howItWorksTitle')}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Three simple steps to get your music reviewed
+              {t('discovery.howItWorksSubtitle')}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'Choose a Streamer', desc: 'Browse our active streamers and find one that matches your genre and style.' },
-              { step: '02', title: 'Submit Your Track', desc: 'Paste your song link or upload a file. Add details and optionally skip the queue.' },
-              { step: '03', title: 'Get Reviewed Live', desc: 'Watch the stream as your music gets played and receive real-time feedback.' },
+              { step: '01', title: t('discovery.step1Title'), desc: t('discovery.step1Desc') },
+              { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
+              { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
               <AnimatedCard key={item.step} delay={index * 0.15}>
                 <div className="relative p-8 text-center">
@@ -402,21 +400,21 @@ const Discovery = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">For Streamers</Badge>
+              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">{t('discovery.forStreamers')}</Badge>
               <h2 className="text-3xl md:text-5xl font-display font-bold mb-5">
-                Monetize Your Music Reviews
+                {t('discovery.monetizeTitle')}
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with{' '}
-                <BlurReveal>artists worldwide</BlurReveal>.
+                {t('discovery.monetizeSubtitle')}{' '}
+                <BlurReveal>{t('discovery.artistsWorldwide')}</BlurReveal>.
               </p>
               <ul className="space-y-4 mb-8">
                 {[
-                  'Set your own submission prices',
-                  'Fully customizable profile page',
-                  'Real-time queue management',
-                  'Built-in payment processing',
-                  'Analytics and insights',
+                  t('discovery.feature1'),
+                  t('discovery.feature2'),
+                  t('discovery.feature3'),
+                  t('discovery.feature4'),
+                  t('discovery.feature5'),
                 ].map((feature, index) => (
                   <motion.li 
                     key={feature} 
@@ -436,13 +434,13 @@ const Discovery = () => {
                 ))}
               </ul>
               <GlowButton size="lg" onClick={() => setShowApplicationForm(true)}>
-                Apply to Join
+                {t('discovery.applyToJoin')}
                 <ArrowRight className="w-5 h-5" />
               </GlowButton>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Apply to Become a Streamer</DialogTitle>
+                    <DialogTitle>{t('discovery.applyDialogTitle')}</DialogTitle>
                   </DialogHeader>
                   <StreamerApplicationForm onSuccess={() => setShowApplicationForm(false)} />
                 </DialogContent>
@@ -466,13 +464,13 @@ const Discovery = () => {
                     <AnimatedCounter value={500} />
                     <span className="text-primary">+</span>
                   </motion.div>
-                  <div className="text-muted-foreground text-lg mb-6">Average monthly earnings</div>
+                  <div className="text-muted-foreground text-lg mb-6">{t('discovery.avgMonthlyEarnings')}</div>
                   <motion.div 
                     className="text-sm text-muted-foreground p-4 rounded-lg bg-background/50 border border-border/30"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    Top streamers earn <span className="text-primary font-semibold">$2,000+</span>/month from music reviews
+                    {t('discovery.topStreamersEarn')} <span className="text-primary font-semibold">$2,000+</span>{t('discovery.perMonth')}
                   </motion.div>
                 </div>
               </motion.div>
@@ -491,10 +489,10 @@ const Discovery = () => {
             className="text-center mb-14"
           >
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
-              Frequently Asked Questions
+              {t('discovery.faqTitle')}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Everything you need to know about UpStar
+              {t('discovery.faqSubtitle')}
             </p>
           </motion.div>
 
@@ -551,6 +549,7 @@ const Discovery = () => {
 
 // Streamer Card Component
 function StreamerCard({ streamer, index, isLive = false }: { streamer: any; index: number; isLive?: boolean }) {
+  const { t } = useLanguage();
   return (
     <AnimatedCard delay={index * 0.08} glowColor={isLive ? '--destructive' : '--primary'}>
       <Link
@@ -604,7 +603,7 @@ function StreamerCard({ streamer, index, isLive = false }: { streamer: any; inde
               )}
             </div>
             <p className="text-sm text-muted-foreground truncate mb-2">
-              {streamer.bio || 'Music reviewer'}
+              {streamer.bio || t('discovery.musicReviewer')}
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {streamer.twitch_url && (
