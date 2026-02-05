@@ -189,9 +189,9 @@ export function SoundwaveBackgroundCanvas() {
       const waveHeight = 0.12; // Approximate vertical extent of wave area
       const cursorTouchingWave = Math.abs(mouse.smoothY - 0.5) < waveHeight;
       
-      // Very smooth wave expansion (only when cursor touches the wave)
-      const targetExpansion = cursorTouchingWave ? 2.0 : 1;
-      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.012;
+      // More subtle wave expansion (reduced effect)
+      const targetExpansion = cursorTouchingWave ? 1.35 : 1;
+      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
 
       // Draw flowing wave lines with smooth cursor interaction
       ctx.save();
