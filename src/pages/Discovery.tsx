@@ -118,21 +118,7 @@ const Discovery = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <Badge variant="outline" className="mb-4 gap-1.5 px-4 py-1.5 border-primary/30 bg-primary/5">
-                <motion.span
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
-                </motion.span>
-                <span className="text-sm">{t('discovery.badge')}</span>
-              </Badge>
-            </motion.div>
+            {/* Badge removed */}
             
             <motion.h1 
               className="text-4xl md:text-7xl font-display font-bold mb-6 leading-tight"
@@ -202,29 +188,27 @@ const Discovery = () => {
       {/* Stats Section */}
       <section className="py-16 px-4 relative z-10">
         <div className="container mx-auto max-w-5xl">
-          {/* Featured: Songs Reviewed Counter */}
-          <AnimatedCard delay={0} className="mb-8">
-            <div className="p-8 md:p-12 text-center">
+          {/* Featured: Songs Reviewed Counter - Compact */}
+          <AnimatedCard delay={0} className="mb-8 max-w-md mx-auto">
+            <div className="p-6 text-center">
               <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
+                whileHover={{ scale: 1.2, rotate: 15 }}
+                transition={{ type: "spring", stiffness: 300, damping: 10 }}
               >
-                <Music className="w-12 h-12 text-primary mx-auto mb-4" />
+                <Music className="w-10 h-10 text-primary mx-auto mb-3" />
               </motion.div>
-              <div
-                className="text-5xl md:text-7xl font-bold mb-2"
+              <motion.div
+                className="text-4xl md:text-5xl font-bold mb-1"
                 style={{ color: 'hsl(var(--glow-primary))' }}
+                whileHover={{ 
+                  scale: 1.05,
+                  textShadow: '0 0 30px hsl(var(--primary) / 0.8)',
+                }}
+                transition={{ type: "spring", stiffness: 200 }}
               >
-                <LiveCounter startValue={10847} suffix="+" />
-              </div>
-              <div className="text-lg md:text-xl text-muted-foreground">{t('discovery.songsReviewed')}</div>
-              <motion.p 
-                className="text-sm text-muted-foreground/60 mt-2"
-                animate={{ opacity: [0.6, 1, 0.6] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                {t('discovery.livePerSecond')}
-              </motion.p>
+                <LiveCounter startValue={10847} />
+              </motion.div>
+              <div className="text-base text-muted-foreground">{t('discovery.songsReviewed')}</div>
             </div>
           </AnimatedCard>
 
@@ -365,8 +349,8 @@ const Discovery = () => {
               { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
               { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
-              <AnimatedCard key={item.step} delay={index * 0.15}>
-                <div className="relative p-8 text-center">
+              <AnimatedCard key={item.step} delay={index * 0.15} className="h-full">
+                <div className="relative p-8 text-center h-full flex flex-col min-h-[280px]">
                   <motion.span 
                     className="absolute top-4 left-4 text-xs font-mono text-primary/50"
                     animate={{ opacity: [0.5, 1, 0.5] }}
@@ -379,10 +363,16 @@ const Discovery = () => {
                     whileHover={{ scale: 1.1, rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <span className="text-2xl font-bold text-primary">{index + 1}</span>
+                    <motion.span 
+                      className="text-2xl font-bold text-primary"
+                      whileHover={{ rotate: [0, -15, 15, 0] }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {index + 1}
+                    </motion.span>
                   </motion.div>
                   <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
                 </div>
               </AnimatedCard>
             ))}
@@ -447,7 +437,7 @@ const Discovery = () => {
               </Dialog>
             </motion.div>
 
-            <AnimatedCard className="overflow-hidden">
+            <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
               <motion.div
                 className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-10 border border-primary/20"
                 whileHover={{ scale: 1.02 }}
@@ -474,7 +464,7 @@ const Discovery = () => {
                   </motion.div>
                 </div>
               </motion.div>
-            </AnimatedCard>
+            </div>
           </div>
         </div>
       </section>
