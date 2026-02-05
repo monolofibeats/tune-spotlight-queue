@@ -468,6 +468,9 @@ const Dashboard = () => {
               <TabsTrigger value="events" className="rounded-lg px-6">
                 Events
               </TabsTrigger>
+              <TabsTrigger value="streamers" className="rounded-lg px-6">
+                Streamers
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="submissions" className="space-y-6">
