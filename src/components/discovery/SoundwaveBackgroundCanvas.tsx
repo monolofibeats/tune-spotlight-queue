@@ -418,9 +418,11 @@ export function SoundwaveBackgroundCanvas() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
