@@ -245,15 +245,15 @@ export function SoundwaveBackgroundCanvas() {
         p.life -= dt / p.maxLife;
         
         if (p.life <= 0) {
-          p.spawnEdge = Math.floor(Math.random() * 4);
-          const spawn = spawnFromEdge(p.spawnEdge);
-          p.x = spawn.x;
-          p.y = spawn.y;
+          // Respawn randomly across the screen
+          p.x = Math.random();
+          p.y = Math.random();
           p.life = 1;
-          p.maxLife = 18 + Math.random() * 25;
+          p.maxLife = 20 + Math.random() * 30;
           p.opacity = 0;
-          p.vx = 0;
-          p.vy = 0;
+          p.vx = (Math.random() - 0.5) * 0.002;
+          p.vy = (Math.random() - 0.5) * 0.001;
+          p.driftAngle = Math.random() * Math.PI * 2;
         }
 
         // Faster fade-in so particles are visible immediately after load
