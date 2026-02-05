@@ -14,13 +14,15 @@ import {
   Copy,
   Check,
   FileAudio,
-  Download
+  Download,
+  Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import upstarStar from '@/assets/upstar-star.png';
 
 interface Submission {
   id: string;
@@ -37,6 +39,36 @@ interface Submission {
   created_at: string;
   audio_file_url: string | null;
 }
+
+// Get size styling based on position (1-3 are progressively larger)
+const getPositionStyles = (position: number | undefined) => {
+  if (position === 1) {
+    return {
+      container: 'py-4 px-4 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      positionBadge: 'w-10 h-10 text-base',
+      title: 'text-base',
+    };
+  }
+  if (position === 2) {
+    return {
+      container: 'py-3.5 px-4 border-primary/30 bg-primary/5',
+      positionBadge: 'w-9 h-9 text-sm',
+      title: 'text-sm',
+    };
+  }
+  if (position === 3) {
+    return {
+      container: 'py-3 px-3 border-primary/20',
+      positionBadge: 'w-8 h-8 text-sm',
+      title: 'text-sm',
+    };
+  }
+  return {
+    container: 'py-2.5 px-3',
+    positionBadge: 'w-7 h-7 text-xs',
+    title: 'text-sm',
+  };
+};
 
 interface SubmissionListItemProps {
   submission: Submission;
