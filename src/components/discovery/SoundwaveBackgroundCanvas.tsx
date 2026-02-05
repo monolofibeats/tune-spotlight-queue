@@ -184,20 +184,26 @@ export function SoundwaveBackgroundCanvas() {
       const ps = particlesRef.current;
       const waves = waveLinesRef.current;
 
-      // Ultra smooth mouse position for wave interaction
-      mouse.smoothX += (mouse.x - mouse.smoothX) * 0.012;
-      mouse.smoothY += (mouse.y - mouse.smoothY) * 0.012;
+      // On mobile, disable cursor interactions entirely
+      const enableCursorInteraction = !isMobile;
+      
+      // Ultra smooth mouse position for wave interaction (desktop only)
+      if (enableCursorInteraction) {
+        mouse.smoothX += (mouse.x - mouse.smoothX) * 0.012;
+        mouse.smoothY += (mouse.y - mouse.smoothY) * 0.012;
+      }
 
       const cursorInfluenceRadius = 0.15;
       
-      // Check if cursor is touching the wave band
+      // Check if cursor is touching the wave band (desktop only)
       const waveHeight = 0.12;
-      const cursorTouchingWave = Math.abs(mouse.smoothY - 0.5) < waveHeight;
+      const cursorTouchingWave = enableCursorInteraction && Math.abs(mouse.smoothY - 0.5) < waveHeight;
       
-      // Smooth cursor influence transition (fade in/out)
+      // Smooth cursor influence transition (fade in/out) - always 0 on mobile
       const targetInfluence = cursorTouchingWave ? 1.0 : 0;
       cursorInfluenceRef.current += (targetInfluence - cursorInfluenceRef.current) * 0.006;
-      const cursorInfluence = cursorInfluenceRef.current;
+      const cursorInfluence = enableCursorInteraction ? cursorInfluenceRef.current : 0;
+
       
       // Smooth wave expansion
       const targetExpansion = 1 + (0.35 * cursorInfluence); // Use influence for smooth transition
