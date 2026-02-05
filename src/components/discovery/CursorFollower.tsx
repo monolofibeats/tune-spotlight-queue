@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { motion, useSpring } from 'framer-motion';
-import upstarCursor from '@/assets/upstar-cursor.png';
+import upstarStar from '@/assets/upstar-star.png';
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
 
-  const springConfig = { damping: 30, stiffness: 180, mass: 0.5 };
+  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
   const x = useSpring(0, springConfig);
   const y = useSpring(0, springConfig);
 
@@ -32,7 +32,7 @@ export function CursorFollower() {
 
   return (
     <>
-      {/* Main cursor star */}
+      {/* Main cursor star - upright like the icon */}
       <motion.div
         className="fixed pointer-events-none z-[9999]"
         style={{ x, y }}
@@ -41,18 +41,17 @@ export function CursorFollower() {
           opacity: isVisible ? 1 : 0, 
           scale: isVisible ? 1 : 0,
         }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
       >
         <motion.img
-          src={upstarCursor}
+          src={upstarStar}
           alt=""
-          className="w-8 h-8 -ml-4 -mt-4"
+          className="w-7 h-7 -ml-3.5 -mt-3.5"
           animate={{ 
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.05, 1],
+            scale: [1, 1.08, 1],
           }}
           transition={{ 
-            duration: 3, 
+            duration: 2, 
             repeat: Infinity, 
             ease: "easeInOut" 
           }}
@@ -61,17 +60,17 @@ export function CursorFollower() {
 
       {/* Subtle trailing glow - reduced */}
       <motion.div
-        className="fixed pointer-events-none z-[9998] w-24 h-24 rounded-full"
+        className="fixed pointer-events-none z-[9998] w-16 h-16 rounded-full"
         style={{
           x,
           y,
-          marginLeft: -48,
-          marginTop: -48,
-          background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
+          marginLeft: -32,
+          marginTop: -32,
+          background: 'radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isVisible ? 1 : 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       />
     </>
   );
