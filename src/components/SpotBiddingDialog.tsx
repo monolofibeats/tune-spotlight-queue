@@ -200,6 +200,7 @@ export function SpotBiddingDialog({
           amount_paid: spot.yourPrice,
           is_priority: true,
           user_id: user?.id || null,
+          audio_file_url: audioFileUrl || null,
         });
 
         if (error) throw error;
@@ -225,6 +226,7 @@ export function SpotBiddingDialog({
           email: user?.email || email,
           platform: platform || 'other',
           targetSpot: spotPosition,
+          audioFileUrl: audioFileUrl || null,
         },
       });
 
