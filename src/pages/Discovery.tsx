@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState } from 'react';
 
