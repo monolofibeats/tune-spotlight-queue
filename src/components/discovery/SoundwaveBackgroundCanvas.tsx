@@ -137,14 +137,15 @@ export function SoundwaveBackgroundCanvas() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const particleCount = 140;
+    // Simplified setup for mobile - fewer particles and simpler waves
+    const particleCount = isMobile ? 30 : 140;
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
       particles.push(createParticle(i));
     }
     particlesRef.current = particles;
-    waveLinesRef.current = createWaveLines();
+    waveLinesRef.current = createWaveLines(isMobile);
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const hsla = makeHslaFromCssVar("--primary");
