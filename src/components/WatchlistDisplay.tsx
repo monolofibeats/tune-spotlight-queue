@@ -20,6 +20,7 @@ interface SubmissionItem {
 
 interface WatchlistDisplayProps {
   onlyRealtime?: boolean;
+  streamerId?: string;
 }
 
 export interface WatchlistRef {
@@ -72,17 +73,24 @@ const getPositionStyles = (position: number | null) => {
 };
 
 export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
-  ({ onlyRealtime = false }, ref) => {
+  ({ onlyRealtime = false, streamerId }, ref) => {
     const { t } = useLanguage();
     const [submissions, setSubmissions] = useState<SubmissionItem[]>([]);
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
     const fetchSubmissions = async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('public_submissions_queue')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
+
+      // Filter by streamer if provided
+      if (streamerId) {
+        query = query.eq('streamer_id', streamerId);
+      }
+
+      const { data, error } = await query;
 
       if (!error && data) {
         const transformed: SubmissionItem[] = data.map(item => ({

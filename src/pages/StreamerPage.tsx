@@ -131,10 +131,10 @@ function StreamerPageContent() {
         <div className="container mx-auto max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <div>
-              <SubmissionForm watchlistRef={watchlistRef} />
+              <SubmissionForm watchlistRef={watchlistRef} streamerId={streamer.id} />
             </div>
             <div className="lg:sticky lg:top-20 lg:self-start">
-              <WatchlistDisplay ref={watchlistRef} />
+              <WatchlistDisplay ref={watchlistRef} streamerId={streamer.id} />
             </div>
           </div>
         </div>

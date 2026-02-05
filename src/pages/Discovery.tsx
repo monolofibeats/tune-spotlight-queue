@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState } from 'react';
 
@@ -14,6 +16,7 @@ const Discovery = () => {
   const { streamers, isLoading } = useActiveStreamers();
   const { t } = useLanguage();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
@@ -274,10 +277,20 @@ const Discovery = () => {
                   </li>
                 ))}
               </ul>
-              <Button size="lg" className="gap-2">
-                Apply to Join
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+              <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="gap-2">
+                    Apply to Join
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Apply to Become a Streamer</DialogTitle>
+                  </DialogHeader>
+                  <StreamerApplicationForm onSuccess={() => setShowApplicationForm(false)} />
+                </DialogContent>
+              </Dialog>
             </motion.div>
 
             <motion.div

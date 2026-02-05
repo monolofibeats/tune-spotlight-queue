@@ -40,6 +40,7 @@ import { AdminBidSettings } from '@/components/AdminBidSettings';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { FloatingAudioPreview } from '@/components/FloatingAudioPreview';
+import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
@@ -467,6 +468,9 @@ const Dashboard = () => {
               <TabsTrigger value="events" className="rounded-lg px-6">
                 Events
               </TabsTrigger>
+              <TabsTrigger value="streamers" className="rounded-lg px-6">
+                Streamers
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="submissions" className="space-y-6">
@@ -748,6 +752,11 @@ const Dashboard = () => {
                   ))
                 )}
               </div>
+            </TabsContent>
+
+            {/* Streamers Tab */}
+            <TabsContent value="streamers">
+              <AdminStreamerManager />
             </TabsContent>
           </Tabs>
         </div>

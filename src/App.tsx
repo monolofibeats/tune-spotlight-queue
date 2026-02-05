@@ -10,6 +10,7 @@ import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Discovery from "./pages/Discovery";
 import StreamerPage from "./pages/StreamerPage";
+import StreamerSettings from "./pages/StreamerSettings";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
@@ -48,6 +49,14 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <UserDashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/streamer/settings" 
+                    element={
+                      <ProtectedRoute>
+                        <StreamerSettings />
                       </ProtectedRoute>
                     } 
                   />
