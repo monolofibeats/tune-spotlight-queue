@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
@@ -277,13 +277,11 @@ const Discovery = () => {
                   </li>
                 ))}
               </ul>
+              <Button size="lg" className="gap-2" onClick={() => setShowApplicationForm(true)}>
+                Apply to Join
+                <ArrowRight className="w-4 h-4" />
+              </Button>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="gap-2">
-                    Apply to Join
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Apply to Become a Streamer</DialogTitle>
