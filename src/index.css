@@ -272,6 +272,15 @@
   }
 }
 
+@keyframes field-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
 /* Unfilled fields pulse to draw attention */
 .field-glow-pending,
 .field-glow-active {
@@ -281,11 +290,21 @@
   animation: field-pulse-unfilled 1.2s ease-in-out infinite;
 }
 
-/* Completed fields have solid glow - no animation */
+/* Completed fields have bright solid glow with shimmer effect */
 .field-glow-completed {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
-  background: hsl(var(--primary) / 0.06);
-  box-shadow: inset 0 0 15px hsl(var(--primary) / 0.08);
+  background: 
+    linear-gradient(
+      90deg, 
+      hsl(var(--primary) / 0.08) 0%, 
+      hsl(var(--primary) / 0.15) 25%,
+      hsl(var(--primary) / 0.25) 50%, 
+      hsl(var(--primary) / 0.15) 75%,
+      hsl(var(--primary) / 0.08) 100%
+    );
+  background-size: 200% 100%;
+  animation: field-shimmer 3s ease-in-out infinite;
+  box-shadow: inset 0 0 20px hsl(var(--primary) / 0.15);
 }
