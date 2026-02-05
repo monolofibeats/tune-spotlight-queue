@@ -549,7 +549,7 @@ const Discovery = () => {
 
 // Streamer Card Component
 function StreamerCard({ streamer, index, isLive = false }: { streamer: any; index: number; isLive?: boolean }) {
-  return (
+  const { t } = useLanguage();
     <AnimatedCard delay={index * 0.08} glowColor={isLive ? '--destructive' : '--primary'}>
       <Link
         to={`/${streamer.slug}`}
