@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion, useSpring } from 'framer-motion';
-import upstarStar from '@/assets/upstar-star-cursor.png';
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
 
-  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
+  const springConfig = { damping: 20, stiffness: 150, mass: 0.8 };
   const x = useSpring(0, springConfig);
   const y = useSpring(0, springConfig);
 
@@ -32,41 +31,43 @@ export function CursorFollower() {
 
   return (
     <>
-      {/* Main cursor star - EXACTLY as uploaded, no rotation */}
+      {/* Yellow blurry dot cursor */}
       <motion.div
-        className="fixed pointer-events-none z-[9999]"
-        style={{ x, y }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ 
-          opacity: isVisible ? 1 : 0, 
-          scale: isVisible ? 1 : 0,
-        }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-      >
-        <img
-          src={upstarStar}
-          alt=""
-          className="w-8 h-8"
-          style={{ 
-            marginLeft: '-16px',
-            marginTop: '-16px',
-          }}
-        />
-      </motion.div>
-
-      {/* Very subtle trailing glow */}
-      <motion.div
-        className="fixed pointer-events-none z-[9998] w-10 h-10 rounded-full"
+        className="fixed pointer-events-none z-[9999] rounded-full"
         style={{
           x,
           y,
-          marginLeft: -20,
-          marginTop: -20,
-          background: 'radial-gradient(circle, hsl(var(--primary) / 0.03) 0%, transparent 70%)',
+          width: 24,
+          height: 24,
+          marginLeft: -12,
+          marginTop: -12,
+          background: 'hsl(50 100% 50%)',
+          filter: 'blur(8px)',
+          boxShadow: '0 0 20px hsl(50 100% 50% / 0.8), 0 0 40px hsl(50 100% 50% / 0.4)',
+        }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ 
+          opacity: isVisible ? 0.9 : 0, 
+          scale: isVisible ? 1 : 0,
+        }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+      />
+
+      {/* Outer glow */}
+      <motion.div
+        className="fixed pointer-events-none z-[9998] rounded-full"
+        style={{
+          x,
+          y,
+          width: 60,
+          height: 60,
+          marginLeft: -30,
+          marginTop: -30,
+          background: 'radial-gradient(circle, hsl(50 100% 50% / 0.15) 0%, transparent 70%)',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isVisible ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       />
     </>
   );
