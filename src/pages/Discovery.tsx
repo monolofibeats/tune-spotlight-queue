@@ -140,7 +140,7 @@ const Discovery = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              Get Your Music{' '}
+              {t('discovery.heroTitle')}{' '}
               <motion.span 
                 className="text-primary relative inline-block"
                 animate={{ 
@@ -152,7 +152,7 @@ const Discovery = () => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                Reviewed Live
+                {t('discovery.heroHighlight')}
                 <motion.span
                   className="absolute -right-8 -top-4"
                   animate={{ rotate: [0, 20, 0], scale: [1, 1.2, 1] }}
