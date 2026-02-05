@@ -9,8 +9,9 @@ import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { CursorFollower } from '@/components/discovery/CursorFollower';
-import { InteractiveBackground } from '@/components/discovery/InteractiveBackground';
+import { SoundwaveBackground } from '@/components/discovery/SoundwaveBackground';
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
+import { LiveCounter } from '@/components/discovery/LiveCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
 import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
@@ -31,10 +32,10 @@ const Discovery = () => {
   const offlineStreamers = streamers.filter(s => !s.is_live);
 
   const stats = [
-    { label: 'Active Streamers', value: streamers.length, icon: Users },
-    { label: 'Songs Reviewed', value: '10K+', icon: Music },
-    { label: 'Live Now', value: liveStreamers.length, icon: Radio },
-    { label: 'Weekly Views', value: '50K+', icon: TrendingUp },
+    { label: 'Active Streamers', value: streamers.length, icon: Users, isLive: false },
+    { label: 'Songs Reviewed', value: 10847, icon: Music, isLive: true },
+    { label: 'Live Now', value: liveStreamers.length, icon: Radio, isLive: false },
+    { label: 'Weekly Views', value: '50K+', icon: TrendingUp, isLive: false },
   ];
 
   const faqs = [
