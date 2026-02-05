@@ -370,6 +370,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setEmail('');
     setMessage('');
     setAudioFile(null);
+    setUploadedAudioUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
