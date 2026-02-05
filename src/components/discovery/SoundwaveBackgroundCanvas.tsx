@@ -1,15 +1,13 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
-interface LineParticle {
+interface Particle {
   id: number;
   x: number;
   y: number;
   vx: number;
   vy: number;
-  length: number;
-  angle: number;
-  targetAngle: number;
+  size: number;
   opacity: number;
   targetOpacity: number;
   orbitAngle: number;
@@ -27,7 +25,8 @@ interface WaveLine {
   phase: number;
   speed: number;
   amplitude: number;
-  yOffset: number;
+  baseYOffset: number;
+  currentYOffset: number;
   opacity: number;
 }
 
@@ -58,7 +57,7 @@ function spawnFromEdge(edge: number): { x: number; y: number } {
   }
 }
 
-function createLineParticle(id: number): LineParticle {
+function createParticle(id: number): Particle {
   const spawnEdge = Math.floor(Math.random() * 4);
   const spawn = spawnFromEdge(spawnEdge);
   
@@ -68,18 +67,16 @@ function createLineParticle(id: number): LineParticle {
     y: spawn.y,
     vx: 0,
     vy: 0,
-    length: Math.random() * 12 + 6,
-    angle: Math.random() * Math.PI * 2,
-    targetAngle: 0,
+    size: Math.random() * 2 + 1,
     opacity: 0,
-    targetOpacity: Math.random() * 0.3 + 0.12,
+    targetOpacity: Math.random() * 0.25 + 0.1,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.008 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.015 + 0.008,
+    orbitSpeed: (Math.random() * 0.006 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.012 + 0.006,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.0002 + 0.00008,
+    driftSpeed: Math.random() * 0.00015 + 0.00005,
     life: 1,
-    maxLife: 15 + Math.random() * 20,
+    maxLife: 18 + Math.random() * 25,
     spawnEdge,
   };
 }
@@ -100,12 +97,15 @@ function createWaveLines(): WaveLine[] {
       points.push(baseWave + harmonic1 + harmonic2);
     }
     
+    const baseYOffset = (i - lineCount / 2) * 0.01;
+    
     lines.push({
       points,
       phase: i * 0.35,
       speed: 0.25 + Math.random() * 0.35,
       amplitude: 0.055 + (i % 5) * 0.018,
-      yOffset: (i - lineCount / 2) * 0.01,
+      baseYOffset,
+      currentYOffset: baseYOffset,
       opacity: 0.06 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.14,
     });
   }
@@ -116,17 +116,18 @@ function createWaveLines(): WaveLine[] {
 export function SoundwaveBackgroundCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5, lastMoveTime: 0 });
+  const mouseRef = useRef({ x: 0.5, y: 0.5, smoothX: 0.5, smoothY: 0.5, lastMoveTime: 0 });
   const timeRef = useRef(0);
-  const particlesRef = useRef<LineParticle[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const waveLinesRef = useRef<WaveLine[]>([]);
+  const waveExpansionRef = useRef(0);
 
   useEffect(() => {
-    const particleCount = 70;
-    const particles: LineParticle[] = [];
+    const particleCount = 80;
+    const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
-      particles.push(createLineParticle(i));
+      particles.push(createParticle(i));
     }
     particlesRef.current = particles;
     waveLinesRef.current = createWaveLines();
@@ -149,11 +150,9 @@ export function SoundwaveBackgroundCanvas() {
 
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current = {
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
-        lastMoveTime: Date.now(),
-      };
+      mouseRef.current.x = (e.clientX - rect.left) / rect.width;
+      mouseRef.current.y = (e.clientY - rect.top) / rect.height;
+      mouseRef.current.lastMoveTime = Date.now();
     };
 
     resize();
@@ -172,16 +171,33 @@ export function SoundwaveBackgroundCanvas() {
       const ps = particlesRef.current;
       const waves = waveLinesRef.current;
 
-      const timeSinceMove = Date.now() - mouse.lastMoveTime;
-      const cursorActive = timeSinceMove < 1200;
-      const cursorInfluenceRadius = 0.18;
+      // Smooth mouse position for wave interaction
+      mouse.smoothX += (mouse.x - mouse.smoothX) * 0.04;
+      mouse.smoothY += (mouse.y - mouse.smoothY) * 0.04;
 
-      // Draw flowing wave lines with cursor distortion
+      const timeSinceMove = Date.now() - mouse.lastMoveTime;
+      const cursorActive = timeSinceMove < 1500;
+      const cursorInfluenceRadius = 0.25;
+      
+      // Check if cursor is near wave center area
+      const cursorNearWave = cursorActive && Math.abs(mouse.smoothY - 0.5) < 0.2;
+      
+      // Smooth wave expansion (waves spread apart when cursor is near)
+      const targetExpansion = cursorNearWave ? 1.8 : 1;
+      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.02;
+
+      // Draw flowing wave lines with smooth cursor interaction
       ctx.save();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       
-      for (const wave of waves) {
+      for (let wi = 0; wi < waves.length; wi++) {
+        const wave = waves[wi];
+        
+        // Smoothly expand wave offset based on cursor proximity
+        const targetOffset = wave.baseYOffset * waveExpansionRef.current;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
+        
         ctx.beginPath();
         ctx.strokeStyle = hsla(wave.opacity);
         ctx.lineWidth = 1.5;
@@ -189,22 +205,24 @@ export function SoundwaveBackgroundCanvas() {
         ctx.shadowColor = hsla(wave.opacity * 0.5);
         
         const points = wave.points;
-        const centerY = 0.5 + wave.yOffset;
+        const centerY = 0.5 + wave.currentYOffset;
         
         for (let i = 0; i < points.length; i++) {
-          // Full width: 0 to 1
           const x = i / (points.length - 1);
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Cursor distortion on wave
+          // Smooth cursor wave distortion - gentle pull toward/away from cursor
           if (cursorActive) {
-            const dx = x - mouse.x;
-            const dy = y - mouse.y;
+            const dx = x - mouse.smoothX;
+            const dy = y - mouse.smoothY;
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < cursorInfluenceRadius) {
-              const push = Math.pow(1 - dist / cursorInfluenceRadius, 2) * 0.08;
-              y += dy > 0 ? push : -push;
+              // Cubic falloff for ultra smooth transition
+              const influence = Math.pow(1 - dist / cursorInfluenceRadius, 3);
+              // Expand up/down from cursor position
+              const expandDirection = y > mouse.smoothY ? 1 : -1;
+              y += expandDirection * influence * 0.06;
             }
           }
           
@@ -215,14 +233,14 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Cursor distortion on previous point
             if (cursorActive) {
-              const pdx = prevX - mouse.x;
-              const pdy = prevY - mouse.y;
+              const pdx = prevX - mouse.smoothX;
+              const pdy = prevY - mouse.smoothY;
               const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
               if (pDist < cursorInfluenceRadius) {
-                const push = Math.pow(1 - pDist / cursorInfluenceRadius, 2) * 0.08;
-                prevY += pdy > 0 ? push : -push;
+                const influence = Math.pow(1 - pDist / cursorInfluenceRadius, 3);
+                const expandDirection = prevY > mouse.smoothY ? 1 : -1;
+                prevY += expandDirection * influence * 0.06;
               }
             }
             
@@ -235,7 +253,7 @@ export function SoundwaveBackgroundCanvas() {
       }
       ctx.restore();
 
-      // Update line particles
+      // Update particles
       for (const p of ps) {
         p.life -= dt / p.maxLife;
         
@@ -245,11 +263,10 @@ export function SoundwaveBackgroundCanvas() {
           p.x = spawn.x;
           p.y = spawn.y;
           p.life = 1;
-          p.maxLife = 15 + Math.random() * 20;
+          p.maxLife = 18 + Math.random() * 25;
           p.opacity = 0;
           p.vx = 0;
           p.vy = 0;
-          p.angle = Math.random() * Math.PI * 2;
         }
 
         const lifeFade = p.life > 0.85 ? (1 - p.life) / 0.15 : p.life < 0.15 ? p.life / 0.15 : 1;
@@ -259,90 +276,69 @@ export function SoundwaveBackgroundCanvas() {
         let targetX = p.x;
         let targetY = p.y;
         
-        // Drift with slight pull toward wave center
-        p.driftAngle += p.driftSpeed * 0.3;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.0004;
-        targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.0003;
+        // Gentle drift
+        p.driftAngle += p.driftSpeed * 0.25;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.0003;
+        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.00025;
         
-        const centerPull = (0.5 - p.y) * 0.0002;
+        // Pull toward wave center band
+        const centerPull = (0.5 - p.y) * 0.00015;
         targetY += centerPull;
-        
-        // Target angle: align horizontally when in wave area, random otherwise
-        const inWaveArea = Math.abs(p.y - 0.5) < 0.15;
-        p.targetAngle = inWaveArea ? 0 : p.driftAngle;
 
         // Cursor interaction
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const attractionRadius = 0.2;
-        const orbitDistance = 0.05;
+        const attractionRadius = 0.18;
+        const orbitDistance = 0.04;
 
         if (cursorActive && dist < attractionRadius) {
           const influence = Math.pow(1 - dist / attractionRadius, 2.5);
           
           if (dist > orbitDistance) {
-            const attractStrength = 0.0001 * influence;
+            const attractStrength = 0.00008 * influence;
             targetX = p.x + dx * attractStrength * 60;
             targetY = p.y + dy * attractStrength * 60;
           } else {
-            p.orbitAngle += p.orbitSpeed * (0.3 + influence * 0.7);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.6);
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.6);
+            p.orbitAngle += p.orbitSpeed * (0.25 + influence * 0.75);
+            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.5);
+            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.5);
             targetX = mouse.x + orbitX;
             targetY = mouse.y + orbitY;
           }
-          // Point toward cursor when nearby
-          p.targetAngle = Math.atan2(dy, dx);
         }
 
-        // Smooth angle interpolation
-        let angleDiff = p.targetAngle - p.angle;
-        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-        p.angle += angleDiff * 0.03;
-
-        const cursorStrength = cursorActive && dist < attractionRadius ? 0.012 : 0.0015;
+        const cursorStrength = cursorActive && dist < attractionRadius ? 0.01 : 0.001;
         
         const targetVx = (targetX - p.x) * cursorStrength;
         const targetVy = (targetY - p.y) * cursorStrength;
         
-        p.vx += (targetVx - p.vx) * 0.018;
-        p.vy += (targetVy - p.vy) * 0.018;
-        p.vx *= 0.992;
-        p.vy *= 0.992;
+        p.vx += (targetVx - p.vx) * 0.015;
+        p.vy += (targetVy - p.vy) * 0.015;
+        p.vx *= 0.994;
+        p.vy *= 0.994;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < -0.12) p.x = 1.12;
-        if (p.x > 1.12) p.x = -0.12;
-        if (p.y < -0.12) p.y = 1.12;
-        if (p.y > 1.12) p.y = -0.12;
+        if (p.x < -0.1) p.x = 1.1;
+        if (p.x > 1.1) p.x = -0.1;
+        if (p.y < -0.1) p.y = 1.1;
+        if (p.y > 1.1) p.y = -0.1;
       }
 
-      // Draw line particles
+      // Draw particles (small sprinkles)
       ctx.save();
-      ctx.lineCap = "round";
       ctx.shadowBlur = 6;
-      ctx.shadowColor = hsla(0.25);
+      ctx.shadowColor = hsla(0.2);
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
         ctx.globalAlpha = p.opacity;
-        ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = 1.5;
-        
-        const halfLen = p.length / 2;
-        const x1 = (p.x * width) - Math.cos(p.angle) * halfLen;
-        const y1 = (p.y * height) - Math.sin(p.angle) * halfLen;
-        const x2 = (p.x * width) + Math.cos(p.angle) * halfLen;
-        const y2 = (p.y * height) + Math.sin(p.angle) * halfLen;
-        
+        ctx.fillStyle = hsla(1);
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+        ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
+        ctx.fill();
       }
       
       ctx.restore();
