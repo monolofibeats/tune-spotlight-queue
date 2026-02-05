@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2 } from 'lucide-react';
+import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -83,15 +83,17 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const currentStep = getFieldCompletionStep();
 
+  // Check if a specific field is completed
+  const isFieldCompleted = (fieldStep: number): boolean => {
+    return (fieldStep === 0 && songUrl.trim() !== '') || 
+      (fieldStep === 1 && audioFile !== null) ||
+      (fieldStep === 2 && artistName.trim() !== '') ||
+      (fieldStep === 3 && songTitle.trim() !== '');
+  };
+
   // Get glow class for a field based on whether it's the next one to fill
   const getFieldGlowClass = (fieldStep: number): string => {
-    const isCompleted = fieldStep < currentStep || 
-      (fieldStep === 0 && songUrl.trim()) || 
-      (fieldStep === 1 && audioFile) ||
-      (fieldStep === 2 && artistName.trim()) ||
-      (fieldStep === 3 && songTitle.trim());
-    
-    if (isCompleted) {
+    if (isFieldCompleted(fieldStep)) {
       return 'field-glow-completed';
     }
     
@@ -107,6 +109,23 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     
     return '';
   };
+
+  // Completion tick component
+  const CompletionTick = ({ fieldStep }: { fieldStep: number }) => (
+    <AnimatePresence>
+      {isFieldCompleted(fieldStep) && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+          className="absolute -right-1 -top-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center z-10 shadow-lg shadow-emerald-500/30"
+        >
+          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   // Check user auth state
   useEffect(() => {
@@ -554,7 +573,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="space-y-3">
               {/* Step 1: Music Link - Required field with glow */}
-              <div className={getFieldGlowClass(0)}>
+              <div className={`relative ${getFieldGlowClass(0)}`}>
+                <CompletionTick fieldStep={0} />
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   {t('submission.linkLabel')} <span className="text-destructive">*</span>
                 </label>
@@ -575,7 +595,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
 
               {/* Step 2: Audio File Upload - Right below link input */}
-              <div className={getFieldGlowClass(1)}>
+              <div className={`relative ${getFieldGlowClass(1)}`}>
+                <CompletionTick fieldStep={1} />
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   {t('submission.audioFileLabel')} (max 100MB) <span className="text-destructive">*</span>
                 </label>
@@ -624,7 +645,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               {/* Step 3 & 4: Artist Name and Song Title */}
               <div className="grid grid-cols-2 gap-3">
-                <div className={getFieldGlowClass(2)}>
+                <div className={`relative ${getFieldGlowClass(2)}`}>
+                  <CompletionTick fieldStep={2} />
                   <label className="text-xs text-muted-foreground mb-1.5 block">
                     {t('submission.artistLabel')} <span className="text-destructive">*</span>
                   </label>
@@ -636,7 +658,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     required
                   />
                 </div>
-                <div className={getFieldGlowClass(3)}>
+                <div className={`relative ${getFieldGlowClass(3)}`}>
+                  <CompletionTick fieldStep={3} />
                   <label className="text-xs text-muted-foreground mb-1.5 block">
                     {t('submission.titleLabel')} <span className="text-destructive">*</span>
                   </label>
