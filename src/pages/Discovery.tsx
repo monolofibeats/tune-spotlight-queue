@@ -243,7 +243,7 @@ const Discovery = () => {
               Active Streamers
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              Find a streamer to review your music
+              Find a streamer to review <BlurReveal>your music</BlurReveal>
             </p>
           </motion.div>
 
