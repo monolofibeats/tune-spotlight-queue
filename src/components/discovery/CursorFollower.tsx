@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion, useSpring } from 'framer-motion';
+import upstarCursor from '@/assets/upstar-cursor.png';
 
 export function CursorFollower() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
-  const springConfig = { damping: 25, stiffness: 200 };
+  const springConfig = { damping: 30, stiffness: 180, mass: 0.5 };
   const x = useSpring(0, springConfig);
   const y = useSpring(0, springConfig);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
       x.set(e.clientX);
       y.set(e.clientY);
       setIsVisible(true);
@@ -35,42 +34,44 @@ export function CursorFollower() {
     <>
       {/* Main cursor star */}
       <motion.div
-        className="fixed pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed pointer-events-none z-[9999]"
         style={{ x, y }}
         initial={{ opacity: 0, scale: 0 }}
         animate={{ 
           opacity: isVisible ? 1 : 0, 
           scale: isVisible ? 1 : 0,
         }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
       >
-        <motion.div
-          className="relative -ml-3 -mt-3"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <motion.path
-              d="M12 2L13.5 9L20 8L14.5 12L18 19L12 14.5L6 19L9.5 12L4 8L10.5 9L12 2Z"
-              fill="hsl(var(--primary))"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </svg>
-        </motion.div>
+        <motion.img
+          src={upstarCursor}
+          alt=""
+          className="w-8 h-8 -ml-4 -mt-4"
+          animate={{ 
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.05, 1],
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+        />
       </motion.div>
 
-      {/* Trailing glow */}
+      {/* Subtle trailing glow - reduced */}
       <motion.div
-        className="fixed pointer-events-none z-[9998] w-40 h-40 rounded-full"
+        className="fixed pointer-events-none z-[9998] w-24 h-24 rounded-full"
         style={{
-          x: mousePosition.x - 80,
-          y: mousePosition.y - 80,
-          background: 'radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)',
+          x,
+          y,
+          marginLeft: -48,
+          marginTop: -48,
+          background: 'radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isVisible ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       />
     </>
   );
