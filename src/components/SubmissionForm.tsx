@@ -83,15 +83,17 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const currentStep = getFieldCompletionStep();
 
+  // Check if a specific field is completed
+  const isFieldCompleted = (fieldStep: number): boolean => {
+    return (fieldStep === 0 && songUrl.trim() !== '') || 
+      (fieldStep === 1 && audioFile !== null) ||
+      (fieldStep === 2 && artistName.trim() !== '') ||
+      (fieldStep === 3 && songTitle.trim() !== '');
+  };
+
   // Get glow class for a field based on whether it's the next one to fill
   const getFieldGlowClass = (fieldStep: number): string => {
-    const isCompleted = fieldStep < currentStep || 
-      (fieldStep === 0 && songUrl.trim()) || 
-      (fieldStep === 1 && audioFile) ||
-      (fieldStep === 2 && artistName.trim()) ||
-      (fieldStep === 3 && songTitle.trim());
-    
-    if (isCompleted) {
+    if (isFieldCompleted(fieldStep)) {
       return 'field-glow-completed';
     }
     
@@ -107,6 +109,23 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     
     return '';
   };
+
+  // Completion tick component
+  const CompletionTick = ({ fieldStep }: { fieldStep: number }) => (
+    <AnimatePresence>
+      {isFieldCompleted(fieldStep) && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+          className="absolute -right-1 -top-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center z-10 shadow-lg shadow-emerald-500/30"
+        >
+          <Check className="w-3 h-3 text-white" strokeWidth={3} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   // Check user auth state
   useEffect(() => {
