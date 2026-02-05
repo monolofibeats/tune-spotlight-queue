@@ -8,6 +8,20 @@ interface LiveCounterProps {
   suffix?: string;
 }
 
+// Persistent counter that never resets - uses localStorage to track accumulated counts
+const getStoredCount = (startValue: number): number => {
+  const stored = localStorage.getItem('liveCounter_songs');
+  if (stored) {
+    const { base, timestamp } = JSON.parse(stored);
+    // Calculate how many seconds have passed and add to base
+    const secondsPassed = Math.floor((Date.now() - timestamp) / 1000);
+    return base + secondsPassed;
+  }
+  // First time: store the initial value
+  localStorage.setItem('liveCounter_songs', JSON.stringify({ base: startValue, timestamp: Date.now() }));
+  return startValue;
+};
+
 export function LiveCounter({
   startValue = 10000,
   incrementInterval = 1000,
