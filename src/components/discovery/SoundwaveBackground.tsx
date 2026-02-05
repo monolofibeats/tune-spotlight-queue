@@ -127,9 +127,7 @@ export function SoundwaveBackground() {
         <motion.div
           className="absolute inset-0"
           style={{
-            background: `
-              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--glow-primary) / 0.15) 0%, transparent 60%)
-            `,
+            background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(250, 204, 21, 0.15) 0%, transparent 60%)',
           }}
           animate={{
             scale: [1, 1.02, 1],
