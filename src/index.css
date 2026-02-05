@@ -272,14 +272,18 @@
   }
 }
 
-@keyframes field-fill-in {
+@keyframes field-success-flash {
   0% {
     background: transparent;
     border-color: transparent;
   }
+  30% {
+    background: hsl(160 40% 18%);
+    border-color: hsl(160 50% 35%);
+  }
   100% {
-    background: hsl(160 40% 12%);
-    border-color: hsl(160 50% 25%);
+    background: hsl(160 30% 10%);
+    border-color: hsl(160 40% 18%);
   }
 }
 
@@ -292,12 +296,27 @@
   animation: field-glow-slow 3s ease-in-out infinite;
 }
 
-/* Completed fields - solid dark green/teal fill with slow fade-in */
+/* Completed fields - success flash then fade to subtle */
 .field-glow-completed {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
-  background: hsl(160 40% 12%);
-  border: 1px solid hsl(160 50% 25%);
-  animation: field-fill-in 0.5s ease-out forwards;
+  background: hsl(160 30% 10%);
+  border: 1px solid hsl(160 40% 18%);
+  animation: field-success-flash 1.5s ease-out forwards;
+}
+
+/* Smooth file upload button hover */
+.file-upload-btn {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.file-upload-btn:hover {
+  transform: scale(1.02);
+  background: transparent !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.file-upload-btn:hover * {
+  transform: scale(1.05);
 }
