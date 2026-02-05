@@ -85,6 +85,21 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   
+  // Floating audio preview state
+  const [floatingPreview, setFloatingPreview] = useState<{
+    isOpen: boolean;
+    submission: Submission | null;
+    audioUrl: string | null;
+    isLoading: boolean;
+    position: number;
+  }>({
+    isOpen: false,
+    submission: null,
+    audioUrl: null,
+    isLoading: false,
+    position: 0,
+  });
+  
   // New event form
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventDescription, setNewEventDescription] = useState('');
