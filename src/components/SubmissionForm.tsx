@@ -627,7 +627,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   </Button>
                 )}
                 <p className="text-[10px] text-muted-foreground/70 mt-1">
-                  {t('submission.linkOrUpload', 'Link OR file upload required')}
+                  Link OR file upload required
                 </p>
               </div>
 
