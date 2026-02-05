@@ -88,29 +88,34 @@ function createParticle(id: number): Particle {
   };
 }
 
-function createWaveLines(): WaveLine[] {
+function createWaveLines(isMobile: boolean): WaveLine[] {
   const lines: WaveLine[] = [];
-  const lineCount = 14;
+  const lineCount = isMobile ? 6 : 14; // Much fewer lines on mobile
+  const pointCount = isMobile ? 40 : 100; // Fewer points on mobile
   
   for (let i = 0; i < lineCount; i++) {
-    const pointCount = 100;
     const points: number[] = [];
     
     for (let j = 0; j < pointCount; j++) {
       const x = j / pointCount;
       const baseWave = Math.sin(x * Math.PI * 2.5 + i * 0.25) * 0.6;
-      const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
-      const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
-      points.push(baseWave + harmonic1 + harmonic2);
+      // Skip harmonics on mobile for simpler calculation
+      if (isMobile) {
+        points.push(baseWave);
+      } else {
+        const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
+        const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
+        points.push(baseWave + harmonic1 + harmonic2);
+      }
     }
     
-    const baseYOffset = (i - lineCount / 2) * 0.01;
+    const baseYOffset = (i - lineCount / 2) * (isMobile ? 0.015 : 0.01);
     
     lines.push({
       points,
       phase: i * 0.35,
       speed: 0.25 + Math.random() * 0.35,
-      amplitude: 0.055 + (i % 5) * 0.018,
+      amplitude: isMobile ? 0.04 : 0.055 + (i % 5) * 0.018,
       baseYOffset,
       currentYOffset: baseYOffset,
       opacity: 0.06 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.14,
@@ -132,14 +137,15 @@ export function SoundwaveBackgroundCanvas() {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    const particleCount = 140;
+    // Simplified setup for mobile - fewer particles and simpler waves
+    const particleCount = isMobile ? 30 : 140;
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
       particles.push(createParticle(i));
     }
     particlesRef.current = particles;
-    waveLinesRef.current = createWaveLines();
+    waveLinesRef.current = createWaveLines(isMobile);
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const hsla = makeHslaFromCssVar("--primary");
@@ -172,10 +178,19 @@ export function SoundwaveBackgroundCanvas() {
       window.addEventListener("mousemove", handleMouseMove);
     }
 
+    let frameCount = 0;
+    
     const draw = () => {
-      timeRef.current += 1 / 60;
+      frameCount++;
+      // On mobile, skip every other frame for better performance
+      if (isMobile && frameCount % 2 !== 0) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
+      }
+      
+      timeRef.current += isMobile ? 1 / 30 : 1 / 60; // Adjust time step for frame skipping
       const t = timeRef.current;
-      const dt = 1 / 60;
+      const dt = isMobile ? 1 / 30 : 1 / 60;
 
       const { width, height } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, width, height);
@@ -209,7 +224,7 @@ export function SoundwaveBackgroundCanvas() {
       const targetExpansion = 1 + (0.35 * cursorInfluence); // Use influence for smooth transition
       waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
 
-      // Draw flowing wave lines with smooth cursor interaction
+      // Draw flowing wave lines - simplified on mobile
       ctx.save();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -217,57 +232,79 @@ export function SoundwaveBackgroundCanvas() {
       for (let wi = 0; wi < waves.length; wi++) {
         const wave = waves[wi];
         
-        // Smoothly expand wave offset based on cursor proximity
-        const targetOffset = wave.baseYOffset * waveExpansionRef.current;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
+        // Smoothly expand wave offset based on cursor proximity (desktop only)
+        if (!isMobile) {
+          const targetOffset = wave.baseYOffset * waveExpansionRef.current;
+          wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
+        }
         
         ctx.beginPath();
         ctx.strokeStyle = hsla(wave.opacity);
-        ctx.lineWidth = 1.5;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = hsla(wave.opacity * 0.5);
+        ctx.lineWidth = isMobile ? 1 : 1.5;
+        
+        // Skip shadows on mobile for performance
+        if (!isMobile) {
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = hsla(wave.opacity * 0.5);
+        }
         
         const points = wave.points;
         const centerY = 0.5 + wave.currentYOffset;
         
-        for (let i = 0; i < points.length; i++) {
-          const x = i / (points.length - 1);
-          const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
-          let y = centerY + animatedY * wave.amplitude;
-          
-          // Smooth cursor distortion using the faded influence
-          if (cursorInfluence > 0.001) {
-            const dx = x - mouse.smoothX;
-            const distX = Math.abs(dx);
-            if (distX < cursorInfluenceRadius) {
-              const spatialInfluence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
-              const waveOffsetFromCenter = wave.currentYOffset;
-              const pushAmount = waveOffsetFromCenter * spatialInfluence * cursorInfluence * 0.6;
-              y += pushAmount;
+        // Simplified drawing on mobile - use lineTo instead of quadraticCurveTo
+        if (isMobile) {
+          for (let i = 0; i < points.length; i++) {
+            const x = i / (points.length - 1);
+            const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase);
+            const y = centerY + animatedY * wave.amplitude;
+            
+            if (i === 0) {
+              ctx.moveTo(x * width, y * height);
+            } else {
+              ctx.lineTo(x * width, y * height);
             }
           }
-          
-          if (i === 0) {
-            ctx.moveTo(x * width, y * height);
-          } else {
-            const prevX = (i - 1) / (points.length - 1);
-            let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
-            let prevY = centerY + prevAnimatedY * wave.amplitude;
+        } else {
+          // Full quality desktop rendering
+          for (let i = 0; i < points.length; i++) {
+            const x = i / (points.length - 1);
+            const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
+            let y = centerY + animatedY * wave.amplitude;
             
-            // Same smooth influence for previous point
+            // Smooth cursor distortion using the faded influence
             if (cursorInfluence > 0.001) {
-              const pdx = prevX - mouse.smoothX;
-              const pDistX = Math.abs(pdx);
-              if (pDistX < cursorInfluenceRadius) {
-                const spatialInfluence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
+              const dx = x - mouse.smoothX;
+              const distX = Math.abs(dx);
+              if (distX < cursorInfluenceRadius) {
+                const spatialInfluence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
                 const waveOffsetFromCenter = wave.currentYOffset;
-                prevY += waveOffsetFromCenter * spatialInfluence * cursorInfluence * 0.6;
+                const pushAmount = waveOffsetFromCenter * spatialInfluence * cursorInfluence * 0.6;
+                y += pushAmount;
               }
             }
             
-            const cpX = (prevX + x) / 2 * width;
-            const cpY = (prevY + y) / 2 * height;
-            ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
+            if (i === 0) {
+              ctx.moveTo(x * width, y * height);
+            } else {
+              const prevX = (i - 1) / (points.length - 1);
+              let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
+              let prevY = centerY + prevAnimatedY * wave.amplitude;
+              
+              // Same smooth influence for previous point
+              if (cursorInfluence > 0.001) {
+                const pdx = prevX - mouse.smoothX;
+                const pDistX = Math.abs(pdx);
+                if (pDistX < cursorInfluenceRadius) {
+                  const spatialInfluence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
+                  const waveOffsetFromCenter = wave.currentYOffset;
+                  prevY += waveOffsetFromCenter * spatialInfluence * cursorInfluence * 0.6;
+                }
+              }
+              
+              const cpX = (prevX + x) / 2 * width;
+              const cpY = (prevY + y) / 2 * height;
+              ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
+            }
           }
         }
         ctx.stroke();
@@ -373,9 +410,11 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.08) p.y = -0.08;
       }
 
-      // Draw particles as small line sprinkles - same color as wave lines (slightly brighter)
+      // Draw particles as small line sprinkles - simplified on mobile
       ctx.save();
-      ctx.globalCompositeOperation = "lighter";
+      if (!isMobile) {
+        ctx.globalCompositeOperation = "lighter";
+      }
       ctx.lineCap = "round";
       
       for (const p of ps) {
@@ -393,12 +432,16 @@ export function SoundwaveBackgroundCanvas() {
         const distFromCenter = Math.abs(p.y - 0.5);
         const waveProximity = distFromCenter < 0.15 ? (1 - distFromCenter / 0.15) : 0;
         
-        // Same color as wave lines
+        // Same color as wave lines - simplified on mobile
         ctx.globalAlpha = Math.min(1, 0.1 + p.opacity * 0.4 + waveProximity * 0.25);
         ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = 1.5 + waveProximity * 0.5;
-        ctx.shadowBlur = 5 + waveProximity * 4;
-        ctx.shadowColor = hsla(0.3);
+        ctx.lineWidth = isMobile ? 1 : 1.5 + waveProximity * 0.5;
+        
+        // Skip shadows on mobile
+        if (!isMobile) {
+          ctx.shadowBlur = 5 + waveProximity * 4;
+          ctx.shadowColor = hsla(0.3);
+        }
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
