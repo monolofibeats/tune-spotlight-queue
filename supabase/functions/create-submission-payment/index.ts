@@ -47,8 +47,8 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { amount, songUrl, artistName, songTitle, message, email, platform } = validationResult.data;
-    logStep("Input validated", { amount, platform });
+    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl } = validationResult.data;
+    logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl });
 
     // Check if submission pricing is active
     const { data: pricingConfig, error: configError } = await supabaseClient
