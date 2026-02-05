@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Particle {
   id: number;
@@ -127,7 +128,8 @@ export function SoundwaveBackgroundCanvas() {
   const particlesRef = useRef<Particle[]>([]);
   const waveLinesRef = useRef<WaveLine[]>([]);
   const waveExpansionRef = useRef(0);
-  const cursorInfluenceRef = useRef(0); // Smooth cursor influence for transitions
+  const cursorInfluenceRef = useRef(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const particleCount = 140;
@@ -164,7 +166,11 @@ export function SoundwaveBackgroundCanvas() {
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", handleMouseMove);
+    
+    // Only add mouse tracking on desktop
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
 
     const draw = () => {
       timeRef.current += 1 / 60;
@@ -178,20 +184,26 @@ export function SoundwaveBackgroundCanvas() {
       const ps = particlesRef.current;
       const waves = waveLinesRef.current;
 
-      // Ultra smooth mouse position for wave interaction
-      mouse.smoothX += (mouse.x - mouse.smoothX) * 0.012;
-      mouse.smoothY += (mouse.y - mouse.smoothY) * 0.012;
+      // On mobile, disable cursor interactions entirely
+      const enableCursorInteraction = !isMobile;
+      
+      // Ultra smooth mouse position for wave interaction (desktop only)
+      if (enableCursorInteraction) {
+        mouse.smoothX += (mouse.x - mouse.smoothX) * 0.012;
+        mouse.smoothY += (mouse.y - mouse.smoothY) * 0.012;
+      }
 
       const cursorInfluenceRadius = 0.15;
       
-      // Check if cursor is touching the wave band
+      // Check if cursor is touching the wave band (desktop only)
       const waveHeight = 0.12;
-      const cursorTouchingWave = Math.abs(mouse.smoothY - 0.5) < waveHeight;
+      const cursorTouchingWave = enableCursorInteraction && Math.abs(mouse.smoothY - 0.5) < waveHeight;
       
-      // Smooth cursor influence transition (fade in/out)
+      // Smooth cursor influence transition (fade in/out) - always 0 on mobile
       const targetInfluence = cursorTouchingWave ? 1.0 : 0;
       cursorInfluenceRef.current += (targetInfluence - cursorInfluenceRef.current) * 0.006;
-      const cursorInfluence = cursorInfluenceRef.current;
+      const cursorInfluence = enableCursorInteraction ? cursorInfluenceRef.current : 0;
+
       
       // Smooth wave expansion
       const targetExpansion = 1 + (0.35 * cursorInfluence); // Use influence for smooth transition
@@ -302,32 +314,36 @@ export function SoundwaveBackgroundCanvas() {
           targetOp = p.targetOpacity * 0.25;
         }
         
-        // Cursor interaction - very gentle gathering
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const gatherRadius = 0.15;
-        const orbitDistance = 0.025;
-        const cursorNearby = dist < gatherRadius;
-        
-        if (cursorNearby) {
-          p.gatheredByCursor = true;
-          const influence = Math.pow(1 - dist / gatherRadius, 2);
+        // Cursor interaction - very gentle gathering (desktop only)
+        if (enableCursorInteraction) {
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const gatherRadius = 0.15;
+          const orbitDistance = 0.025;
+          const cursorNearby = dist < gatherRadius;
           
-          if (dist > orbitDistance) {
-            // Very gentle pull toward cursor
-            const attractStrength = 0.00004 * influence;
-            p.vx += dx * attractStrength;
-            p.vy += dy * attractStrength;
+          if (cursorNearby) {
+            p.gatheredByCursor = true;
+            const influence = Math.pow(1 - dist / gatherRadius, 2);
+            
+            if (dist > orbitDistance) {
+              // Very gentle pull toward cursor
+              const attractStrength = 0.00004 * influence;
+              p.vx += dx * attractStrength;
+              p.vy += dy * attractStrength;
+            } else {
+              // Very slow orbit around cursor
+              p.orbitAngle += p.orbitSpeed * (1 + influence * 0.3);
+              const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * 0.5;
+              const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * 0.5;
+              p.vx += (mouse.x + orbitX - p.x) * 0.004;
+              p.vy += (mouse.y + orbitY - p.y) * 0.004;
+            }
+            targetOp = p.targetOpacity * 1.1;
           } else {
-            // Very slow orbit around cursor
-            p.orbitAngle += p.orbitSpeed * (1 + influence * 0.3);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * 0.5;
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * 0.5;
-            p.vx += (mouse.x + orbitX - p.x) * 0.004;
-            p.vy += (mouse.y + orbitY - p.y) * 0.004;
+            p.gatheredByCursor = false;
           }
-          targetOp = p.targetOpacity * 1.1;
         } else {
           p.gatheredByCursor = false;
         }
@@ -402,9 +418,11 @@ export function SoundwaveBackgroundCanvas() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
