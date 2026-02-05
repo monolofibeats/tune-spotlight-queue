@@ -15,7 +15,7 @@ const buttonVariants = cva(
         secondary: "bg-transparent border-2 border-secondary text-secondary-foreground shadow-md shadow-black/20 hover:bg-secondary/20 hover:border-secondary/80 hover:shadow-lg active:bg-secondary/30 transition-all duration-500 ease-out",
         ghost: "hover:bg-secondary hover:text-secondary-foreground active:bg-secondary/80",
         link: "text-primary underline-offset-4 hover:underline",
-        hero: "bg-[hsl(130_45%_28%)/0.85] text-white font-semibold shadow-lg shadow-[hsl(130_40%_20%)/0.4] hover:bg-[hsl(130_45%_32%)/0.9] hover:shadow-xl hover:shadow-[hsl(130_40%_25%)/0.5] active:shadow-md active:bg-[hsl(130_45%_25%)/0.8] transition-all duration-500 ease-out",
+        hero: "bg-[hsl(130_40%_15%)/0.6] border-2 border-[hsl(130_50%_45%)] text-white font-semibold shadow-lg shadow-[hsl(130_40%_20%)/0.3] hover:bg-[hsl(130_40%_20%)/0.7] hover:border-[hsl(130_55%_50%)] hover:shadow-xl active:bg-[hsl(130_40%_12%)/0.8] transition-all duration-500 ease-out",
         "hero-outline": "border-2 border-primary/50 bg-transparent text-foreground shadow-md shadow-primary/10 hover:bg-primary/10 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-500 ease-out",
         glow: "bg-primary text-primary-foreground glow-primary hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 active:scale-100 transition-all duration-300",
         premium: "bg-primary text-primary-foreground font-semibold hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-100 transition-all duration-300",
