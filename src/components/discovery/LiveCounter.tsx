@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 
 interface LiveCounterProps {
   startValue?: number;
-  incrementInterval?: number; // ms between increments
+  incrementInterval?: number;
   className?: string;
   suffix?: string;
 }
@@ -17,8 +17,8 @@ export function LiveCounter({
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [displayValue, setDisplayValue] = useState(0);
-  const [currentValue, setCurrentValue] = useState(startValue);
   const hasAnimatedIn = useRef(false);
+  const [isIncrementing, setIsIncrementing] = useState(false);
 
   // Initial count-up animation
   useEffect(() => {
@@ -26,13 +26,12 @@ export function LiveCounter({
     hasAnimatedIn.current = true;
 
     let startTime: number;
-    const duration = 2000; // 2 seconds for initial animation
+    const duration = 2000;
     
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       
-      // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.floor(easeOutQuart * startValue));
 
@@ -40,7 +39,6 @@ export function LiveCounter({
         requestAnimationFrame(animate);
       } else {
         setDisplayValue(startValue);
-        setCurrentValue(startValue);
       }
     };
 
@@ -52,30 +50,40 @@ export function LiveCounter({
     if (!hasAnimatedIn.current || displayValue < startValue) return;
 
     const interval = setInterval(() => {
-      setCurrentValue(prev => {
-        const newValue = prev + 1;
-        setDisplayValue(newValue);
-        return newValue;
-      });
+      setIsIncrementing(true);
+      setDisplayValue(prev => prev + 1);
+      
+      // Reset the increment animation flag after a short delay
+      setTimeout(() => setIsIncrementing(false), 200);
     }, incrementInterval);
 
     return () => clearInterval(interval);
   }, [displayValue, startValue, incrementInterval]);
 
-  // Format number with commas for readability
+  // Format number with commas - full number display
   const formatNumber = (num: number) => {
-    return num.toLocaleString();
+    return num.toLocaleString('en-US');
   };
 
   return (
     <motion.span
       ref={ref}
-      className={`tabular-nums ${className}`}
+      className={`tabular-nums inline-flex items-center gap-1 ${className}`}
       initial={{ opacity: 0, scale: 0.5 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.5, type: "spring" }}
     >
-      {formatNumber(displayValue)}
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={displayValue}
+          initial={{ y: isIncrementing ? 10 : 0, opacity: isIncrementing ? 0 : 1 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -10, opacity: 0 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+        >
+          {formatNumber(displayValue)}
+        </motion.span>
+      </AnimatePresence>
       {suffix}
     </motion.span>
   );

@@ -43,22 +43,22 @@ export function TextReveal({ children, revealText, className = '' }: TextRevealP
 interface BlurRevealProps {
   children: ReactNode;
   className?: string;
-  delay?: number;
 }
 
+// BlurReveal: Text is blurred by default, reveals clearly ONLY while hovering
 export function BlurReveal({ children, className = '' }: BlurRevealProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.span
-      className={`relative inline-block cursor-pointer ${className}`}
+      className={`relative inline-block cursor-pointer transition-all ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      animate={{ 
+      style={{
         filter: isHovered ? 'blur(0px)' : 'blur(4px)',
         opacity: isHovered ? 1 : 0.5,
+        transition: 'filter 0.2s ease-out, opacity 0.2s ease-out',
       }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
     >
       {children}
     </motion.span>

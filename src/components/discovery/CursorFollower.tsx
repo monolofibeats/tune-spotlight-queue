@@ -32,7 +32,7 @@ export function CursorFollower() {
 
   return (
     <>
-      {/* Main cursor star - exact orientation from uploaded image */}
+      {/* Main cursor star - EXACTLY as uploaded, no rotation */}
       <motion.div
         className="fixed pointer-events-none z-[9999]"
         style={{ x, y }}
@@ -43,31 +43,26 @@ export function CursorFollower() {
         }}
         transition={{ duration: 0.2, ease: "easeOut" }}
       >
-        <motion.img
+        <img
           src={upstarStar}
           alt=""
-          className="w-8 h-8 -ml-4 -mt-4"
-          style={{ transform: 'rotate(0deg)' }}
-          animate={{ 
-            scale: [1, 1.05, 1],
-          }}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
+          className="w-8 h-8"
+          style={{ 
+            marginLeft: '-16px',
+            marginTop: '-16px',
           }}
         />
       </motion.div>
 
       {/* Very subtle trailing glow */}
       <motion.div
-        className="fixed pointer-events-none z-[9998] w-12 h-12 rounded-full"
+        className="fixed pointer-events-none z-[9998] w-10 h-10 rounded-full"
         style={{
           x,
           y,
-          marginLeft: -24,
-          marginTop: -24,
-          background: 'radial-gradient(circle, hsl(var(--primary) / 0.04) 0%, transparent 70%)',
+          marginLeft: -20,
+          marginTop: -20,
+          background: 'radial-gradient(circle, hsl(var(--primary) / 0.03) 0%, transparent 70%)',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: isVisible ? 1 : 0 }}
