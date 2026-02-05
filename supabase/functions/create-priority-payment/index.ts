@@ -84,7 +84,9 @@ serve(async (req) => {
         email: email || "",
         platform: platform,
         amount_paid: amount.toString(),
+        // Store both keys to be resilient against older/newer verifiers
         audio_file_url: audioFileUrl || "",
+        audioFileUrl: audioFileUrl || "",
       },
     });
 
