@@ -40,6 +40,7 @@ import { AdminBidSettings } from '@/components/AdminBidSettings';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { FloatingAudioPreview } from '@/components/FloatingAudioPreview';
+import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
