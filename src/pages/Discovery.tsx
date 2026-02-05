@@ -118,21 +118,7 @@ const Discovery = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <Badge variant="outline" className="mb-4 gap-1.5 px-4 py-1.5 border-primary/30 bg-primary/5">
-                <motion.span
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
-                </motion.span>
-                <span className="text-sm">{t('discovery.badge')}</span>
-              </Badge>
-            </motion.div>
+            {/* Badge removed */}
             
             <motion.h1 
               className="text-4xl md:text-7xl font-display font-bold mb-6 leading-tight"
