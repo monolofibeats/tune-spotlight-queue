@@ -118,7 +118,7 @@ export function SoundwaveBackground() {
   const gradientOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.4, 0.6, 0.8]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-[5]">
       {/* Animated gradient background - smoother */}
       <motion.div
         className="absolute inset-0"
