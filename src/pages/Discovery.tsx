@@ -190,8 +190,8 @@ const Discovery = () => {
               <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No streamers yet</h3>
               <p className="text-muted-foreground mb-4">Be the first to join as a streamer!</p>
-              <Button asChild>
-                <a href="#for-streamers">Apply Now</a>
+              <Button onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                Apply Now
               </Button>
             </div>
           )}
