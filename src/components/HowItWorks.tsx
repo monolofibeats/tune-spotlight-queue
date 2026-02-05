@@ -52,13 +52,17 @@ export function HowItWorks() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.03, y: -4 }}
-              className="relative p-5 rounded-xl bg-card/50 border border-border/50 text-center cursor-default transition-shadow hover:shadow-lg hover:shadow-primary/10"
+              className="group relative p-5 rounded-xl bg-card/50 border border-border/50 text-center cursor-default transition-shadow hover:shadow-lg hover:shadow-primary/10 h-[180px] flex flex-col items-center justify-center"
             >
-              <span className="absolute top-3 left-3 text-xs font-mono text-muted-foreground/50">
+              <motion.span 
+                className="absolute top-3 left-3 text-xs font-mono text-muted-foreground/50"
+                whileHover={{ rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.4 }}
+              >
                 {item.step}
-              </span>
+              </motion.span>
               <motion.div 
-                className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-3"
+                className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3"
                 whileHover={{ rotate: [0, -10, 10, 0] }}
                 transition={{ duration: 0.4 }}
               >
