@@ -8,13 +8,14 @@ import { StreamSessionProvider } from "@/hooks/useStreamSession";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import Discovery from "./pages/Discovery";
+import StreamerPage from "./pages/StreamerPage";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
- import Imprint from "./pages/Imprint";
+import Imprint from "./pages/Imprint";
 
 const queryClient = new QueryClient();
 
@@ -29,8 +30,8 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                   <Route path="/imprint" element={<Imprint />} />
+                  <Route path="/" element={<Discovery />} />
+                  <Route path="/imprint" element={<Imprint />} />
                   <Route path="/library" element={<Library />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin/login" element={<Auth />} />
@@ -50,7 +51,9 @@ const App = () => (
                       </ProtectedRoute>
                     } 
                   />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  {/* Streamer page - must be after all other routes */}
+                  <Route path="/:slug" element={<StreamerPage />} />
+                  {/* 404 catch-all */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
