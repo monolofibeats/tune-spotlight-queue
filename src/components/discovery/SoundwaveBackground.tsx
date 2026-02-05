@@ -210,7 +210,7 @@ export function SoundwaveBackground() {
         className="absolute inset-0"
         style={{
           height: '300%',
-          background: 'linear-gradient(to bottom, transparent, hsl(var(--glow-primary) / 0.02), transparent)',
+          background: 'linear-gradient(to bottom, transparent, rgba(250, 204, 21, 0.02), transparent)',
         }}
         animate={{ y: ['-200%', '0%'] }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
