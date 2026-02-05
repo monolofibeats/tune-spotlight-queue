@@ -397,18 +397,13 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.05) p.y = -0.05;
       }
 
-      // Draw particles as small line sprinkles floating across the background
+      // Draw particles as small line sprinkles - same color as wave lines (slightly brighter)
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = hsla(0.6);
       ctx.lineCap = "round";
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, Math.max(0.25, p.opacity * 1.8));
-        ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = 1.5;
         
         // Draw as a small line/sprinkle
         const lineLength = p.size;
@@ -418,13 +413,18 @@ export function SoundwaveBackgroundCanvas() {
         const dx = Math.cos(angle) * lineLength;
         const dy = Math.sin(angle) * lineLength;
         
-        // Particles near wave center are more opaque and longer (becoming part of wave)
+        // Attached particles are brighter and thicker (part of the wave)
+        const isAttached = p.attached;
         const distFromCenter = Math.abs(p.y - 0.5);
-        const inWaveZone = distFromCenter < 0.15;
-        const waveIntegration = inWaveZone ? (1 - distFromCenter / 0.15) : 0;
+        const waveIntegration = isAttached ? 1 : (distFromCenter < 0.12 ? (1 - distFromCenter / 0.12) * 0.5 : 0);
         
-        ctx.globalAlpha = Math.min(1, Math.max(0.2, p.opacity * 1.5 + waveIntegration * 0.4));
-        ctx.lineWidth = 1.5 + waveIntegration * 1;
+        // Same color as wave lines but slightly brighter
+        const baseOpacity = isAttached ? 0.25 : 0.15;
+        ctx.globalAlpha = Math.min(1, baseOpacity + p.opacity * 0.3 + waveIntegration * 0.3);
+        ctx.strokeStyle = hsla(1); // Same color as waves
+        ctx.lineWidth = 1.5 + waveIntegration * 0.8;
+        ctx.shadowBlur = isAttached ? 8 : 6;
+        ctx.shadowColor = hsla(0.4);
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
