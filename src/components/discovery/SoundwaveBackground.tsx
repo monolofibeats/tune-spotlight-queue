@@ -200,8 +200,8 @@ export function SoundwaveBackground() {
         className="absolute inset-0 mix-blend-screen opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(hsl(var(--glow-primary)) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--glow-primary)) 1px, transparent 1px)
+            linear-gradient(#facc15 1px, transparent 1px),
+            linear-gradient(90deg, #facc15 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
         }}
