@@ -39,6 +39,8 @@ import { AdminPricingPanel } from '@/components/AdminPricingPanel';
 import { AdminBidSettings } from '@/components/AdminBidSettings';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
+import { FloatingAudioPreview } from '@/components/FloatingAudioPreview';
+import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
   id: string;
@@ -82,6 +84,21 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Floating audio preview state
+  const [floatingPreview, setFloatingPreview] = useState<{
+    isOpen: boolean;
+    submission: Submission | null;
+    audioUrl: string | null;
+    isLoading: boolean;
+    position: number;
+  }>({
+    isOpen: false,
+    submission: null,
+    audioUrl: null,
+    isLoading: false,
+    position: 0,
+  });
   
   // New event form
   const [newEventTitle, setNewEventTitle] = useState('');
@@ -332,6 +349,44 @@ const Dashboard = () => {
     reviewed: submissions.filter(s => s.status === 'reviewed').length,
   };
 
+  const handleOpenFloatingPreview = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
+    setFloatingPreview({
+      isOpen: true,
+      submission,
+      audioUrl,
+      isLoading: isLoadingAudio,
+      position,
+    });
+  };
+
+  const handleCloseFloatingPreview = () => {
+    setFloatingPreview(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleFloatingDownload = async () => {
+    if (!floatingPreview.submission?.audio_file_url) return;
+    
+    try {
+      const downloadUrl = await getSignedAudioUrl(floatingPreview.submission.audio_file_url);
+      if (downloadUrl) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${floatingPreview.submission.artist_name} - ${floatingPreview.submission.song_title}`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download failed",
+        description: "Could not download the audio file",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -450,8 +505,8 @@ const Dashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Submissions List - Compact */}
-              <div className="space-y-1.5">
+              {/* Submissions List - Stacked sizing */}
+              <div className="space-y-2">
                 {filteredSubmissions.map((submission, index) => (
                   <SubmissionListItem
                     key={submission.id}
@@ -459,6 +514,7 @@ const Dashboard = () => {
                     position={index + 1}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
+                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenFloatingPreview(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
 
@@ -696,6 +752,22 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Floating Audio Preview */}
+      <FloatingAudioPreview
+        isOpen={floatingPreview.isOpen}
+        onClose={handleCloseFloatingPreview}
+        submission={floatingPreview.submission ? {
+          id: floatingPreview.submission.id,
+          song_title: floatingPreview.submission.song_title,
+          artist_name: floatingPreview.submission.artist_name,
+          is_priority: floatingPreview.submission.is_priority,
+          position: floatingPreview.position,
+        } : null}
+        audioUrl={floatingPreview.audioUrl}
+        isLoadingAudio={floatingPreview.isLoading}
+        onDownload={handleFloatingDownload}
+      />
     </div>
   );
 };

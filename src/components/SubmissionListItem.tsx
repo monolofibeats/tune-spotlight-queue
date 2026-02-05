@@ -14,13 +14,15 @@ import {
   Copy,
   Check,
   FileAudio,
-  Download
+  Download,
+  Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import upstarStar from '@/assets/upstar-star.png';
 
 interface Submission {
   id: string;
@@ -38,24 +40,58 @@ interface Submission {
   audio_file_url: string | null;
 }
 
+// Get size styling based on position (1-3 are progressively larger)
+const getPositionStyles = (position: number | undefined) => {
+  if (position === 1) {
+    return {
+      container: 'py-4 px-4 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      positionBadge: 'w-10 h-10 text-base',
+      title: 'text-base',
+    };
+  }
+  if (position === 2) {
+    return {
+      container: 'py-3.5 px-4 border-primary/30 bg-primary/5',
+      positionBadge: 'w-9 h-9 text-sm',
+      title: 'text-sm',
+    };
+  }
+  if (position === 3) {
+    return {
+      container: 'py-3 px-3 border-primary/20',
+      positionBadge: 'w-8 h-8 text-sm',
+      title: 'text-sm',
+    };
+  }
+  return {
+    container: 'py-2.5 px-3',
+    positionBadge: 'w-7 h-7 text-xs',
+    title: 'text-sm',
+  };
+};
+
 interface SubmissionListItemProps {
   submission: Submission;
   position?: number;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
   position,
   onStatusChange, 
-  onDelete 
+  onDelete,
+  onPlayAudio 
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  
+  const styles = getPositionStyles(position);
 
   // Fetch signed URL when expanded and has audio file
   useEffect(() => {
@@ -121,12 +157,34 @@ export function SubmissionListItem({
     }
   };
 
+  const handleOpenFloatingPlayer = async () => {
+    if (!submission.audio_file_url || !onPlayAudio) return;
+    
+    // If we already have the URL, use it
+    if (audioUrl) {
+      onPlayAudio(submission, audioUrl, false);
+      return;
+    }
+    
+    // Otherwise fetch it
+    setIsLoadingAudio(true);
+    try {
+      const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
+      setAudioUrl(signedUrl);
+      onPlayAudio(submission, signedUrl, false);
+    } catch (error) {
+      console.error('Failed to get audio URL:', error);
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className={`rounded-lg border transition-colors ${
+      className={`rounded-lg border transition-all duration-300 ${styles.container} ${
         submission.is_priority 
           ? 'border-primary/40 bg-primary/5' 
           : 'border-border/50 bg-card/30'
@@ -134,24 +192,32 @@ export function SubmissionListItem({
     >
       {/* Compact Header Row */}
       <div 
-        className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
+        className="flex items-center gap-3 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {/* Position number */}
+        {/* Position number - Star for #1 */}
         {position && (
           <div 
-            className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${
+            className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold shrink-0 ${
               submission.is_priority 
                 ? 'bg-primary text-primary-foreground' 
                 : 'bg-secondary text-muted-foreground'
             }`}
           >
-            {position}
+            {position === 1 ? (
+              <img 
+                src={upstarStar} 
+                alt="Star" 
+                className="w-5 h-5 object-contain"
+              />
+            ) : (
+              position
+            )}
           </div>
         )}
 
-        {/* Priority indicator - no amount shown */}
-        {submission.is_priority && (
+        {/* Priority indicator - no amount shown, hide for #1 as star shows it */}
+        {submission.is_priority && position !== 1 && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
             <Zap className="w-2.5 h-2.5" />
             Priority
@@ -160,12 +226,27 @@ export function SubmissionListItem({
 
         {/* Artist - Title */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">
+          <p className={`font-medium truncate ${styles.title}`}>
             <span className="text-muted-foreground">{submission.artist_name}</span>
             <span className="mx-1.5 text-muted-foreground/50">•</span>
             <span>{submission.song_title}</span>
           </p>
         </div>
+
+        {/* Quick play button for audio files */}
+        {submission.audio_file_url && onPlayAudio && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 shrink-0 text-primary hover:text-primary hover:bg-primary/20"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenFloatingPlayer();
+            }}
+          >
+            <Play className="w-4 h-4" />
+          </Button>
+        )}
 
         {/* Status Badge */}
         <Badge 

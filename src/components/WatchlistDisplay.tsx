@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Sparkles, Music, DollarSign } from 'lucide-react';
+import { Eye, Music } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
+import upstarStar from '@/assets/upstar-star.png';
 
 interface SubmissionItem {
   id: string;
@@ -35,6 +36,41 @@ const formatTimeAgo = (date: Date): string => {
   return `${hours}h ago`;
 };
 
+// Get size class based on position (1-3 are larger, progressively smaller)
+const getPositionStyles = (position: number | null) => {
+  if (position === 1) {
+    return {
+      container: 'p-5 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      positionBadge: 'w-10 h-10 text-base',
+      title: 'text-base font-semibold',
+      artist: 'text-sm',
+    };
+  }
+  if (position === 2) {
+    return {
+      container: 'p-4 border-primary/30 bg-primary/5',
+      positionBadge: 'w-8 h-8 text-sm',
+      title: 'text-sm font-semibold',
+      artist: 'text-xs',
+    };
+  }
+  if (position === 3) {
+    return {
+      container: 'p-3.5 border-primary/20',
+      positionBadge: 'w-7 h-7 text-xs',
+      title: 'text-sm font-medium',
+      artist: 'text-xs',
+    };
+  }
+  // Default (position 4+ or no position)
+  return {
+    container: 'p-3',
+    positionBadge: 'w-7 h-7 text-xs',
+    title: 'text-sm font-medium',
+    artist: 'text-xs',
+  };
+};
+
 export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
   ({ onlyRealtime = false }, ref) => {
     const { t } = useLanguage();
@@ -42,7 +78,6 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
     const fetchSubmissions = async () => {
-      // Use the public view to see all pending submissions (not just user's own)
       const { data, error } = await supabase
         .from('public_submissions_queue')
         .select('*')
@@ -50,7 +85,6 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        // Transform to match our interface
         const transformed: SubmissionItem[] = data.map(item => ({
           id: item.id || '',
           song_title: item.song_title || 'Untitled',
@@ -72,7 +106,6 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         fetchSubmissions();
       }
 
-      // Subscribe to realtime changes
       const channel = supabase
         .channel('submissions_changes')
         .on(
@@ -108,11 +141,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         };
         setLocalItems(prev => [newItem, ...prev]);
         
-        // Refresh the list from DB after a short delay to get the real item
-        // Keep the local item until DB sync confirms it
         setTimeout(() => {
           fetchSubmissions().then(() => {
-            // Only remove local items that now exist in DB
             setLocalItems(prev => prev.filter(localItem => {
               const existsInDb = submissions.some(dbItem => 
                 dbItem.song_title === localItem.song_title && 
@@ -128,38 +158,29 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       },
     }));
 
-    // Combine local items with database items
     const allItems = [...localItems, ...submissions.filter(
       s => !localItems.some(l => 
         l.song_title === s.song_title && l.artist_name === s.artist_name
       )
     )];
 
-    // Sort: priority items first (by total paid desc), then all items by newest first (LIFO)
     const sortedItems = [...allItems].sort((a, b) => {
-      // Priority items come first
       if (a.is_priority && !b.is_priority) return -1;
       if (!a.is_priority && b.is_priority) return 1;
       
-      // Among priority items, sort by total paid (highest first)
       if (a.is_priority && b.is_priority) {
         const aTotalPaid = (a.boost_amount || 0) + (a.amount_paid || 0);
         const bTotalPaid = (b.boost_amount || 0) + (b.amount_paid || 0);
-        // Higher payment = higher position
         if (aTotalPaid !== bTotalPaid) {
           return bTotalPaid - aTotalPaid;
         }
       }
       
-      // Oldest first (FIFO) - earlier submission gets higher position
       return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
-    // Show top 5 priority spots publicly, rest are just shown as "in queue"
     const topSpots = sortedItems.filter(s => s.is_priority).slice(0, 5);
     const regularItems = sortedItems.filter(s => !s.is_priority);
-
-    // Display: Top 5 priority spots with position numbers, then regular items without position
     const displayItems = [...topSpots, ...regularItems].slice(0, 8);
 
     return (
@@ -177,46 +198,56 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
             {displayItems.map((submission, index) => {
               const isPrioritySpot = submission.is_priority && topSpots.includes(submission);
               const spotNumber = isPrioritySpot ? topSpots.indexOf(submission) + 1 : null;
+              const styles = getPositionStyles(spotNumber);
               
               return (
                 <motion.div
                   key={submission.id}
                   layout
-                  initial={submission.isNew ? { opacity: 0, x: -20 } : { opacity: 0 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
+                  initial={submission.isNew ? { opacity: 0, x: -20, scale: 0.95 } : { opacity: 0 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 10, scale: 0.95 }}
                   transition={{ 
                     type: 'spring',
                     stiffness: 400,
                     damping: 30,
                     delay: submission.isNew ? 0 : index * 0.03,
                   }}
-                  className={`rounded-lg p-3 flex items-center gap-3 bg-card/50 border border-border/30 ${
+                  className={`rounded-lg flex items-center gap-3 bg-card/50 border border-border/30 transition-all duration-300 ${styles.container} ${
                     submission.isNew ? 'ring-1 ring-primary/50' : ''
                   } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
+                  {/* Position badge - Star for #1 */}
                   <div 
-                    className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
+                    className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold shrink-0 ${
                       submission.is_priority 
                         ? 'bg-primary text-primary-foreground' 
                         : 'bg-secondary text-muted-foreground'
                     }`}
                   >
-                    {spotNumber || '—'}
+                    {spotNumber === 1 ? (
+                      <img 
+                        src={upstarStar} 
+                        alt="Star" 
+                        className="w-5 h-5 object-contain"
+                      />
+                    ) : (
+                      spotNumber || '—'
+                    )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="font-medium text-sm truncate">
+                      <p className={`truncate ${styles.title}`}>
                         {submission.song_title || 'Untitled'}
                       </p>
-                      {submission.is_priority && (
+                      {submission.is_priority && spotNumber !== 1 && (
                         <Badge variant="premium" className="text-[10px] px-1.5 py-0">
                           Priority
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className={`text-muted-foreground truncate ${styles.artist}`}>
                       {submission.artist_name || 'Unknown'}
                     </p>
                   </div>
