@@ -226,8 +226,9 @@ export function SoundwaveBackgroundCanvas() {
             const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDist < cursorInfluenceRadius) {
               const r = pDist / cursorInfluenceRadius;
-              const influence = Math.exp(-r * r * 2.6);
-              prevY += pdy * influence * 0.95;
+              const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
+              const pushDirection = prevY > mouse.smoothY ? 1 : -1;
+              prevY += pushDirection * influence * 0.08;
             }
             
             const cpX = (prevX + x) / 2 * width;
