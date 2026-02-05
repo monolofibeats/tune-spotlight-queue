@@ -221,7 +221,7 @@ export function SoundwaveBackgroundCanvas() {
             const r = dist / cursorInfluenceRadius;
             const influence = Math.exp(-r * r * 2.6);
             // Push away smoothly proportional to distance from cursor (no abrupt sign flip)
-            y += dy * influence * 0.75;
+            y += dy * influence * 0.95;
           }
           
           if (i === 0) {
