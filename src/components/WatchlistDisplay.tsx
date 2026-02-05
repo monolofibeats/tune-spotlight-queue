@@ -20,6 +20,7 @@ interface SubmissionItem {
 
 interface WatchlistDisplayProps {
   onlyRealtime?: boolean;
+  streamerId?: string;
 }
 
 export interface WatchlistRef {

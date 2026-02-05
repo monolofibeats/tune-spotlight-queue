@@ -312,6 +312,7 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
       is_priority: false,
       user_id: user?.id || null,
       audio_file_url: audioFileUrl,
+      streamer_id: streamerId || null,
     });
 
     if (error) {
