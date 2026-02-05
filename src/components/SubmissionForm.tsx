@@ -70,6 +70,45 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
 
+  // Determine which field is the "next" one to fill (for progressive glow)
+  // Order: 0=link/file, 1=file (if no link), 2=artistName, 3=songTitle
+  const getFieldCompletionStep = (): number => {
+    const hasLinkOrFile = songUrl.trim() || audioFile;
+    if (!hasLinkOrFile) return 0; // Focus on link
+    if (!songUrl.trim() && !audioFile) return 1; // Focus on file upload
+    if (!artistName.trim()) return 2; // Focus on artist name
+    if (!songTitle.trim()) return 3; // Focus on song title
+    return 4; // All done
+  };
+
+  const currentStep = getFieldCompletionStep();
+
+  // Get glow class for a field based on whether it's the next one to fill
+  const getFieldGlowClass = (fieldStep: number): string => {
+    const isCompleted = fieldStep < currentStep || 
+      (fieldStep === 0 && songUrl.trim()) || 
+      (fieldStep === 1 && audioFile) ||
+      (fieldStep === 2 && artistName.trim()) ||
+      (fieldStep === 3 && songTitle.trim());
+    
+    if (isCompleted) {
+      return 'field-glow-completed';
+    }
+    
+    // The current step gets the bright glow
+    if (fieldStep === currentStep) {
+      return 'field-glow-active';
+    }
+    
+    // Future steps get a subtle pulse
+    if (fieldStep > currentStep) {
+      return 'field-glow-pending';
+    }
+    
+    return '';
+  };
+  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+
   // Check user auth state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
