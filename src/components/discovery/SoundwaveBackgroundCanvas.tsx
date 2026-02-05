@@ -127,6 +127,7 @@ export function SoundwaveBackgroundCanvas() {
   const particlesRef = useRef<Particle[]>([]);
   const waveLinesRef = useRef<WaveLine[]>([]);
   const waveExpansionRef = useRef(0);
+  const cursorInfluenceRef = useRef(0); // Smooth cursor influence for transitions
 
   useEffect(() => {
     const particleCount = 140;
