@@ -4,15 +4,15 @@ interface Particle {
   id: number;
   x: number;
   y: number;
+  baseX: number; // wave position (0-1)
+  baseY: number; // random offset for chaotic state
   vx: number;
   vy: number;
-  baseVx: number;
-  baseVy: number;
   size: number;
   opacity: number;
-  orbitAngle: number;
-  orbitSpeed: number;
-  orbitRadius: number;
+  waveOffset: number;
+  floatOffset: number;
+  floatSpeed: number;
 }
 
 function parseHslTriplet(input: string) {
@@ -36,24 +36,26 @@ export function SoundwaveBackgroundCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const scrollRef = useRef({ progress: 0, velocity: 0, lastY: 0 });
+  const timeRef = useRef(0);
   const particlesRef = useRef<Particle[]>([]);
 
   useEffect(() => {
-    // Initialize particles
-    const count = 60;
+    // Initialize particles spread across screen
+    const count = 100;
     particlesRef.current = Array.from({ length: count }, (_, i) => ({
       id: i,
+      baseX: i / count, // evenly distributed for wave
+      baseY: 0.3 + Math.random() * 0.4, // random y for chaotic state
       x: Math.random(),
       y: Math.random(),
       vx: 0,
       vy: 0,
-      baseVx: (Math.random() - 0.5) * 0.0015,
-      baseVy: (Math.random() - 0.5) * 0.0015,
-      size: Math.random() * 3 + 1.5,
-      opacity: Math.random() * 0.4 + 0.15,
-      orbitAngle: Math.random() * Math.PI * 2,
-      orbitSpeed: (Math.random() * 0.02 + 0.01) * (Math.random() > 0.5 ? 1 : -1),
-      orbitRadius: Math.random() * 0.03 + 0.02,
+      size: Math.random() * 4 + 2,
+      opacity: Math.random() * 0.5 + 0.3,
+      waveOffset: Math.random() * Math.PI * 2,
+      floatOffset: Math.random() * Math.PI * 2,
+      floatSpeed: 0.3 + Math.random() * 0.5,
     }));
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -80,68 +82,109 @@ export function SoundwaveBackgroundCanvas() {
       };
     };
 
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = maxScroll > 0 ? Math.min(1, scrollY / maxScroll) : 0;
+      const velocity = Math.abs(scrollY - scrollRef.current.lastY) / 20;
+      
+      scrollRef.current = {
+        progress,
+        velocity: Math.min(1, velocity),
+        lastY: scrollY,
+      };
+    };
+
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     const draw = () => {
+      timeRef.current += 1 / 60;
+      const t = timeRef.current;
+      
       const { width, height } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, width, height);
 
       const mouse = mouseRef.current;
+      const scroll = scrollRef.current;
       const ps = particlesRef.current;
+      
+      // Formation increases as user scrolls (0 = chaotic, 1 = wave)
+      const formation = scroll.progress;
+      // Wave amplitude decreases as it forms (big chaos → tight wave)
+      const waveAmplitude = 0.15 * (1 - formation * 0.6);
+      // Wave speed increases with scroll velocity
+      const waveSpeed = 2 + scroll.velocity * 5;
 
-      // Update particle positions with cursor interaction
+      // Decay scroll velocity
+      scrollRef.current.velocity *= 0.95;
+
       for (const p of ps) {
+        // Wave target position (structured soundwave)
+        const waveY = 0.5 + Math.sin(p.baseX * Math.PI * 4 + t * waveSpeed + p.waveOffset) * waveAmplitude;
+        const waveX = p.baseX;
+
+        // Chaotic floating motion
+        const floatX = Math.sin(t * p.floatSpeed + p.floatOffset) * 0.15;
+        const floatY = Math.cos(t * p.floatSpeed * 0.7 + p.floatOffset) * 0.2;
+        const chaoticX = p.baseX + floatX;
+        const chaoticY = p.baseY + floatY;
+
+        // Blend between chaotic and wave based on formation
+        let targetX = chaoticX + (waveX - chaoticX) * formation;
+        let targetY = chaoticY + (waveY - chaoticY) * formation;
+
+        // Cursor interaction (attraction when close)
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        const attractionRadius = 0.25;
-        const orbitDistance = 0.08;
-
-        let targetVx = p.baseVx;
-        let targetVy = p.baseVy;
-
-        if (distance < attractionRadius) {
-          if (distance > orbitDistance) {
-            // Attract toward cursor
-            const attractionStrength = 0.0003 * (1 - distance / attractionRadius);
-            targetVx += dx * attractionStrength;
-            targetVy += dy * attractionStrength;
-          } else {
-            // Orbit around cursor
-            p.orbitAngle += p.orbitSpeed;
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius;
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius;
-
-            const targetX = mouse.x + orbitX;
-            const targetY = mouse.y + orbitY;
-
-            targetVx = (targetX - p.x) * 0.08;
-            targetVy = (targetY - p.y) * 0.08;
-          }
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 0.2) {
+          const pull = 0.02 * (1 - dist / 0.2) * (1 - formation * 0.7);
+          targetX += dx * pull;
+          targetY += dy * pull;
         }
 
-        // Smooth velocity interpolation
-        const easing = 0.08;
-        p.vx += (targetVx - p.vx) * easing;
-        p.vy += (targetVy - p.vy) * easing;
-
+        // Smooth movement toward target
+        const easing = 0.03 + formation * 0.02;
+        p.vx += (targetX - p.x) * easing;
+        p.vy += (targetY - p.y) * easing;
+        p.vx *= 0.92;
+        p.vy *= 0.92;
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap around edges
-        if (p.x < -0.05) p.x = 1.05;
-        if (p.x > 1.05) p.x = -0.05;
-        if (p.y < -0.05) p.y = 1.05;
-        if (p.y > 1.05) p.y = -0.05;
+        // Keep in bounds
+        p.x = Math.max(0, Math.min(1, p.x));
+        p.y = Math.max(0.1, Math.min(0.9, p.y));
       }
 
-      // Draw particles
+      // Draw connection lines between adjacent particles (more visible as wave forms)
       ctx.save();
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.3 + formation * 0.4;
+      for (let i = 0; i < ps.length - 1; i++) {
+        const a = ps[i];
+        const b = ps[i + 1];
+        const dist = Math.abs(a.x - b.x);
+        if (dist < 0.05) {
+          ctx.strokeStyle = hsla(0.3);
+          ctx.beginPath();
+          ctx.moveTo(a.x * width, a.y * height);
+          ctx.lineTo(b.x * width, b.y * height);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+
+      // Draw particles with glow
+      ctx.save();
+      ctx.shadowBlur = 12 + formation * 8;
+      ctx.shadowColor = hsla(0.4);
       for (const p of ps) {
-        ctx.fillStyle = hsla(p.opacity);
+        const dynamicOpacity = p.opacity * (0.6 + formation * 0.4);
+        ctx.fillStyle = hsla(dynamicOpacity);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -159,6 +202,7 @@ export function SoundwaveBackgroundCanvas() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
