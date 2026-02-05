@@ -169,9 +169,7 @@ const Discovery = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
             >
-              Submit your tracks to streamers and get real-time feedback from creators and their audiences. Join{' '}
-              <BlurReveal>thousands of artists</BlurReveal>{' '}
-              getting <GlitchText>discovered</GlitchText>.
+              {t('discovery.heroSubtitle')}
             </motion.p>
 
             <motion.div 
