@@ -183,14 +183,15 @@ export function SoundwaveBackgroundCanvas() {
 
       // Cursor is always active when on the canvas (no timeout)
       const cursorActive = true;
-      const cursorInfluenceRadius = 0.36;
+      const cursorInfluenceRadius = 0.15; // Smaller radius - only when touching
       
-      // Check if cursor is near wave center area (wider detection zone)
-      const cursorNearWave = Math.abs(mouse.smoothY - 0.5) < 0.35;
+      // Check if cursor is actually touching the wave band (tighter detection)
+      const waveHeight = 0.12; // Approximate vertical extent of wave area
+      const cursorTouchingWave = Math.abs(mouse.smoothY - 0.5) < waveHeight;
       
-      // Very smooth wave expansion (waves spread apart when cursor is near)
-      const targetExpansion = cursorNearWave ? 2.2 : 1;
-      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
+      // Very smooth wave expansion (only when cursor touches the wave)
+      const targetExpansion = cursorTouchingWave ? 2.0 : 1;
+      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.012;
 
       // Draw flowing wave lines with smooth cursor interaction
       ctx.save();
@@ -218,16 +219,16 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Ultra-smooth cursor wave distortion using smootherstep
-          const dx = x - mouse.smoothX;
-          const distX = Math.abs(dx);
-          if (distX < cursorInfluenceRadius) {
-            // Use smootherstep for perfectly smooth falloff (no edges or corners)
-            const influence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
-            // Gentle vertical expansion based on wave's distance from cursor center
-            const waveOffsetFromCenter = wave.currentYOffset;
-            const pushAmount = waveOffsetFromCenter * influence * 1.2;
-            y += pushAmount;
+          // Only distort wave when cursor is actually touching the wave area
+          if (cursorTouchingWave) {
+            const dx = x - mouse.smoothX;
+            const distX = Math.abs(dx);
+            if (distX < cursorInfluenceRadius) {
+              const influence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
+              const waveOffsetFromCenter = wave.currentYOffset;
+              const pushAmount = waveOffsetFromCenter * influence * 1.5;
+              y += pushAmount;
+            }
           }
           
           if (i === 0) {
@@ -237,13 +238,15 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Same smootherstep for previous point
-            const pdx = prevX - mouse.smoothX;
-            const pDistX = Math.abs(pdx);
-            if (pDistX < cursorInfluenceRadius) {
-              const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
-              const waveOffsetFromCenter = wave.currentYOffset;
-              prevY += waveOffsetFromCenter * influence * 1.2;
+            // Same for previous point - only when touching
+            if (cursorTouchingWave) {
+              const pdx = prevX - mouse.smoothX;
+              const pDistX = Math.abs(pdx);
+              if (pDistX < cursorInfluenceRadius) {
+                const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
+                const waveOffsetFromCenter = wave.currentYOffset;
+                prevY += waveOffsetFromCenter * influence * 1.5;
+              }
             }
             
             const cpX = (prevX + x) / 2 * width;
@@ -260,35 +263,29 @@ export function SoundwaveBackgroundCanvas() {
         p.life -= dt / p.maxLife;
         
         if (p.life <= 0) {
-          // Respawn randomly across the screen
-          p.x = Math.random();
-          p.y = Math.random();
+          // 50% chance to spawn from wave (emerging from the line), 50% random
+          const spawnFromWave = Math.random() < 0.5;
+          if (spawnFromWave) {
+            p.x = Math.random();
+            p.y = 0.5 + (Math.random() - 0.5) * 0.08; // Near wave center
+            p.vy = (Math.random() - 0.5) * 0.012; // Float away from wave
+            p.attached = false;
+          } else {
+            p.x = Math.random();
+            p.y = Math.random();
+          }
           p.life = 1;
-          p.maxLife = 25 + Math.random() * 35;
+          p.maxLife = 15 + Math.random() * 25;
           p.opacity = 0;
-          p.vx = (Math.random() - 0.5) * 0.003;
-          p.vy = (Math.random() - 0.5) * 0.002;
+          p.vx = (Math.random() - 0.5) * 0.006;
+          p.vy = p.vy || (Math.random() - 0.5) * 0.004;
           p.driftAngle = Math.random() * Math.PI * 2;
-          p.attached = false;
           p.attachedTime = 0;
           p.gatheredByCursor = false;
         }
 
-        // Faster fade-in
-        const lifeFade =
-          p.life > 0.97
-            ? (1 - p.life) / 0.03
-            : p.life < 0.12
-              ? p.life / 0.12
-              : 1;
-        const targetOp = p.targetOpacity * lifeFade;
-        p.opacity += (targetOp - p.opacity) * 0.08;
-
-        let targetX = p.x;
-        let targetY = p.y;
-        
         // Wave zone detection
-        const waveZone = 0.12;
+        const waveZone = 0.10;
         const distFromWaveCenter = Math.abs(p.y - 0.5);
         const inWaveZone = distFromWaveCenter < waveZone;
         
@@ -296,12 +293,12 @@ export function SoundwaveBackgroundCanvas() {
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const gatherRadius = 0.22;
-        const orbitDistance = 0.06;
+        const gatherRadius = 0.25;
+        const orbitDistance = 0.05;
         const cursorNearby = dist < gatherRadius;
         
-        // Check if cursor is dragging particles to the wave
-        const cursorInWaveZone = Math.abs(mouse.y - 0.5) < waveZone;
+        // Target opacity based on state
+        let targetOp = p.targetOpacity;
         
         if (cursorNearby) {
           p.gatheredByCursor = true;
@@ -311,21 +308,22 @@ export function SoundwaveBackgroundCanvas() {
             p.attachedTime = 0;
           }
           
-          const influence = Math.pow(1 - dist / gatherRadius, 2);
+          const influence = Math.pow(1 - dist / gatherRadius, 2.5);
           
           if (dist > orbitDistance) {
-            // Pull toward cursor
-            const attractStrength = 0.0003 * influence;
-            targetX = p.x + dx * attractStrength * 80;
-            targetY = p.y + dy * attractStrength * 80;
+            // Strong pull toward cursor
+            const attractStrength = 0.0006 * influence;
+            p.vx += dx * attractStrength;
+            p.vy += dy * attractStrength;
           } else {
-            // Orbit around cursor
-            p.orbitAngle += p.orbitSpeed * (0.5 + influence * 1.5);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (1 + influence);
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (1 + influence);
-            targetX = mouse.x + orbitX;
-            targetY = mouse.y + orbitY;
+            // Fast orbit around cursor
+            p.orbitAngle += p.orbitSpeed * (1 + influence * 2);
+            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (0.8 + influence * 0.5);
+            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (0.8 + influence * 0.5);
+            p.vx += (mouse.x + orbitX - p.x) * 0.08;
+            p.vy += (mouse.y + orbitY - p.y) * 0.08;
           }
+          targetOp = p.targetOpacity * 1.3; // Brighter when gathered
         } else {
           // Not near cursor
           if (p.gatheredByCursor && inWaveZone) {
@@ -334,17 +332,21 @@ export function SoundwaveBackgroundCanvas() {
             p.attachedTime = 0;
             p.gatheredByCursor = false;
           } else if (!p.attached) {
-            // Free floating - drift around
-            p.driftAngle += p.driftSpeed * 1.2;
-            targetX = p.x + Math.cos(p.driftAngle) * 0.004;
-            targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.003;
+            // Free floating - dynamic movement like old particles
+            p.driftAngle += p.driftSpeed * 2;
             
-            // Pull toward wave center
-            const centerPull = (0.5 - p.y) * 0.003;
-            targetY += centerPull;
+            // More dynamic drift with varying speed
+            const driftX = Math.cos(p.driftAngle) * 0.006;
+            const driftY = Math.sin(p.driftAngle * 0.7) * 0.005;
+            p.vx += driftX * 0.1;
+            p.vy += driftY * 0.1;
             
-            // Auto-attach if drifting into wave zone (with some randomness)
-            if (inWaveZone && Math.random() < 0.002) {
+            // Gentle pull toward wave center
+            const centerPull = (0.5 - p.y) * 0.0008;
+            p.vy += centerPull;
+            
+            // Auto-attach if drifting into wave zone
+            if (inWaveZone && Math.random() < 0.008) {
               p.attached = true;
               p.attachedTime = 0;
             }
@@ -352,49 +354,50 @@ export function SoundwaveBackgroundCanvas() {
           p.gatheredByCursor = false;
         }
         
-        // Attached particles behavior
+        // Attached particles behavior - become part of the wave
         if (p.attached) {
           p.attachedTime += dt;
           
-          // Stay in wave zone, move horizontally with gentle wave motion
-          const waveMotion = Math.sin(t * 0.5 + p.x * 10) * 0.001;
-          targetX = p.x + 0.0005 + waveMotion; // Slow rightward drift
-          targetY = 0.5 + (p.y - 0.5) * 0.98; // Gently pull toward center line
+          // Fade in more when attached (become part of line)
+          targetOp = p.targetOpacity * 0.7;
           
-          // Align angle to horizontal
+          // Slow horizontal drift along the wave
+          const waveMotion = Math.sin(t * 0.3 + p.x * 8) * 0.0008;
+          p.vx += (0.0008 + waveMotion - p.vx) * 0.02;
+          p.vy += ((0.5 - p.y) * 0.01) * 0.05; // Pull tightly to center line
+          
+          // Align angle to horizontal smoothly
           const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
-          p.driftAngle += (targetAngle - p.driftAngle) * 0.05;
+          p.driftAngle += (targetAngle - p.driftAngle) * 0.08;
           
-          // Random detach after being attached for a while (to make room for new particles)
-          if (p.attachedTime > 8 + Math.random() * 12) {
-            if (Math.random() < 0.01) {
+          // Detach and float away after a while (dissolve effect)
+          if (p.attachedTime > 4 + Math.random() * 8) {
+            if (Math.random() < 0.015) {
               p.attached = false;
               p.attachedTime = 0;
-              // Float away
-              p.vy = (Math.random() - 0.5) * 0.008;
+              // Float away from wave
+              p.vy = (Math.random() - 0.5) * 0.015;
+              p.vx += (Math.random() - 0.5) * 0.005;
             }
           }
         }
+        
+        // Opacity fade based on state
+        const lifeFade = p.life > 0.9 ? (1 - p.life) / 0.1 : p.life < 0.15 ? p.life / 0.15 : 1;
+        p.opacity += ((targetOp * lifeFade) - p.opacity) * 0.1;
 
-        // Apply movement with smoothing
-        const moveStrength = p.attached ? 0.02 : (cursorNearby ? 0.025 : 0.008);
-        
-        const targetVx = (targetX - p.x) * moveStrength;
-        const targetVy = (targetY - p.y) * moveStrength;
-        
-        p.vx += (targetVx - p.vx) * 0.03;
-        p.vy += (targetVy - p.vy) * 0.03;
-        p.vx *= 0.985;
-        p.vy *= 0.985;
+        // Apply velocity with damping
+        p.vx *= 0.96;
+        p.vy *= 0.96;
 
         p.x += p.vx;
         p.y += p.vy;
 
         // Wrap around screen
-        if (p.x < -0.05) p.x = 1.05;
-        if (p.x > 1.05) p.x = -0.05;
-        if (p.y < -0.05) p.y = 1.05;
-        if (p.y > 1.05) p.y = -0.05;
+        if (p.x < -0.08) p.x = 1.08;
+        if (p.x > 1.08) p.x = -0.08;
+        if (p.y < -0.08) p.y = 1.08;
+        if (p.y > 1.08) p.y = -0.08;
       }
 
       // Draw particles as small line sprinkles - same color as wave lines (slightly brighter)
