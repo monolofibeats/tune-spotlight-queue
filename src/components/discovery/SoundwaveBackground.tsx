@@ -144,7 +144,7 @@ export function SoundwaveBackground() {
       </motion.div>
 
       {/* Soundwave particles - using regular div positioning for better visibility */}
-      <svg className="absolute inset-0 w-full h-full" style={{ opacity: 1 }}>
+      <svg className="absolute inset-0 w-full h-full mix-blend-screen" style={{ opacity: 1 }}>
         <defs>
           <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
