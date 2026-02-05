@@ -416,18 +416,16 @@ export function SoundwaveBackgroundCanvas() {
         const dx = Math.cos(angle) * lineLength;
         const dy = Math.sin(angle) * lineLength;
         
-        // Attached particles are brighter and thicker (part of the wave)
-        const isAttached = p.attached;
+        // Fade based on proximity to wave center
         const distFromCenter = Math.abs(p.y - 0.5);
-        const waveIntegration = isAttached ? 1 : (distFromCenter < 0.12 ? (1 - distFromCenter / 0.12) * 0.5 : 0);
+        const waveProximity = distFromCenter < 0.15 ? (1 - distFromCenter / 0.15) : 0;
         
-        // Same color as wave lines but slightly brighter
-        const baseOpacity = isAttached ? 0.25 : 0.15;
-        ctx.globalAlpha = Math.min(1, baseOpacity + p.opacity * 0.3 + waveIntegration * 0.3);
-        ctx.strokeStyle = hsla(1); // Same color as waves
-        ctx.lineWidth = 1.5 + waveIntegration * 0.8;
-        ctx.shadowBlur = isAttached ? 8 : 6;
-        ctx.shadowColor = hsla(0.4);
+        // Same color as wave lines
+        ctx.globalAlpha = Math.min(1, 0.1 + p.opacity * 0.4 + waveProximity * 0.25);
+        ctx.strokeStyle = hsla(1);
+        ctx.lineWidth = 1.5 + waveProximity * 0.5;
+        ctx.shadowBlur = 5 + waveProximity * 4;
+        ctx.shadowColor = hsla(0.3);
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
