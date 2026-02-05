@@ -224,7 +224,6 @@ export function SoundwaveBackgroundCanvas() {
             const expandDirection = y > mouse.smoothY ? 1 : -1;
             y += expandDirection * influence * 0.04;
           }
-          }
           
           if (i === 0) {
             ctx.moveTo(x * width, y * height);
