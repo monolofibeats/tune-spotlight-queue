@@ -3,7 +3,7 @@ import { X, Music, FileAudio, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
-import upstarStar from '@/assets/upstar-star.png';
+import { PositionBadge } from '@/components/queue/PositionBadge';
 
 interface FloatingAudioPreviewProps {
   isOpen: boolean;
@@ -59,25 +59,11 @@ export function FloatingAudioPreview({
             <div className="glass-strong rounded-2xl border border-primary/30 overflow-hidden shadow-2xl shadow-primary/10">
               {/* Header */}
               <div className="px-6 py-4 border-b border-border/30 flex items-center gap-4">
-              {/* Position badge with star overlay */}
-              <div className="relative shrink-0">
-                <div 
-                  className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
-                    submission.is_priority 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-secondary text-muted-foreground'
-                  }`}
-                >
-                  {submission.position || '—'}
-                </div>
-                {submission.position === 1 && (
-                  <img 
-                    src={upstarStar} 
-                    alt="Top Spot" 
-                    className="absolute -top-2 -right-2 w-7 h-7 object-contain drop-shadow-lg"
-                  />
-                )}
-              </div>
+              <PositionBadge
+                position={submission.position}
+                badgeClassName="w-14 h-14 rounded-xl flex items-center justify-center text-xl"
+                overlayClassName="w-7 h-7"
+              />
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

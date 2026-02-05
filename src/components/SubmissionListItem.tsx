@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
-import upstarStar from '@/assets/upstar-star.png';
+import { PositionBadge } from '@/components/queue/PositionBadge';
 
 interface Submission {
   id: string;
@@ -44,21 +44,21 @@ interface Submission {
 const getPositionStyles = (position: number | undefined) => {
   if (position === 1) {
     return {
-      container: 'py-4 px-4 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      container: 'py-4 px-4 border-2 border-podium-gold/50 bg-gradient-to-br from-podium-gold/10 to-transparent',
       positionBadge: 'w-10 h-10 text-base',
       title: 'text-base',
     };
   }
   if (position === 2) {
     return {
-      container: 'py-3.5 px-4 border-primary/30 bg-primary/5',
+      container: 'py-3.5 px-4 border-podium-silver/40 bg-podium-silver/10',
       positionBadge: 'w-9 h-9 text-sm',
       title: 'text-sm',
     };
   }
   if (position === 3) {
     return {
-      container: 'py-3 px-3 border-primary/20',
+      container: 'py-3 px-3 border-podium-bronze/35 bg-podium-bronze/5',
       positionBadge: 'w-8 h-8 text-sm',
       title: 'text-sm',
     };
@@ -197,24 +197,7 @@ export function SubmissionListItem({
       >
         {/* Position number - Star overlay for #1 */}
         {position && (
-          <div className="relative shrink-0">
-            <div 
-              className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold ${
-                submission.is_priority 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary text-muted-foreground'
-              }`}
-            >
-              {position}
-            </div>
-            {position === 1 && (
-              <img 
-                src={upstarStar} 
-                alt="Top Spot" 
-                className="absolute -top-2 -right-2 w-5 h-5 object-contain drop-shadow-lg"
-              />
-            )}
-          </div>
+          <PositionBadge position={position} badgeClassName={styles.positionBadge} />
         )}
 
         {/* Priority indicator */}
