@@ -40,7 +40,7 @@ const formatTimeAgo = (date: Date): string => {
 const getPositionStyles = (position: number | null) => {
   if (position === 1) {
     return {
-      container: 'p-5 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      container: 'p-5 border-2 border-podium-gold/50 bg-gradient-to-br from-podium-gold/10 to-transparent',
       positionBadge: 'w-10 h-10 text-base',
       title: 'text-base font-semibold',
       artist: 'text-sm',
@@ -48,7 +48,7 @@ const getPositionStyles = (position: number | null) => {
   }
   if (position === 2) {
     return {
-      container: 'p-4 border-primary/30 bg-primary/5',
+      container: 'p-4 border-podium-silver/40 bg-podium-silver/10',
       positionBadge: 'w-8 h-8 text-sm',
       title: 'text-sm font-semibold',
       artist: 'text-xs',
@@ -56,7 +56,7 @@ const getPositionStyles = (position: number | null) => {
   }
   if (position === 3) {
     return {
-      container: 'p-3.5 border-primary/20',
+      container: 'p-3.5 border-podium-bronze/35 bg-podium-bronze/5',
       positionBadge: 'w-7 h-7 text-xs',
       title: 'text-sm font-medium',
       artist: 'text-xs',
