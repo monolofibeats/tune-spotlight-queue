@@ -184,14 +184,14 @@ const Discovery = () => {
                 onClick={() => document.getElementById('streamers')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Radio className="w-5 h-5" />
-                Browse Streamers
+                {t('discovery.browseStreamers')}
               </GlowButton>
               <GlowButton 
                 variant="outline" 
                 size="lg"
                 onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Become a Streamer
+                {t('discovery.becomeStreamer')}
                 <ArrowRight className="w-5 h-5" />
               </GlowButton>
             </motion.div>
