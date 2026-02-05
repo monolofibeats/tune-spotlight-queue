@@ -515,9 +515,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
             </div>
 
             <div className="space-y-3">
-              <div>
+              {/* Step 1: Music Link - Required field with glow */}
+              <div className={getFieldGlowClass(0)}>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.linkLabel')}
+                  {t('submission.linkLabel')} <span className="text-destructive">*</span>
                 </label>
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
@@ -544,58 +545,10 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 </motion.div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.artistLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.artistPlaceholder')}
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.titleLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.titlePlaceholder')}
-                    value={songTitle}
-                    onChange={(e) => setSongTitle(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
-                <Input
-                  type="email"
-                  placeholder={t('submission.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 text-sm bg-background/50"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
-                <Textarea
-                  placeholder={t('submission.messagePlaceholder')}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[80px] text-sm resize-none bg-background/50"
-                />
-              </div>
-
-              {/* Audio File Upload */}
-              <div>
+              {/* Step 2: Audio File Upload - Right below link input */}
+              <div className={getFieldGlowClass(1)}>
                 <label className="text-xs text-muted-foreground mb-1.5 block">
-                  {t('submission.audioFileLabel')} (max 100MB)
+                  {t('submission.audioFileLabel')} (max 100MB) <span className="text-destructive">*</span>
                 </label>
                 <input
                   ref={fileInputRef}
@@ -635,6 +588,60 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     {t('submission.uploadFile')}
                   </Button>
                 )}
+                <p className="text-[10px] text-muted-foreground/70 mt-1">
+                  {t('submission.linkOrUpload', 'Link OR file upload required')}
+                </p>
+              </div>
+
+              {/* Step 3 & 4: Artist Name and Song Title */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className={getFieldGlowClass(2)}>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.artistLabel')} <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder={t('submission.artistPlaceholder')}
+                    value={artistName}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    className="h-10 text-sm bg-background/50"
+                    required
+                  />
+                </div>
+                <div className={getFieldGlowClass(3)}>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.titleLabel')} <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder={t('submission.titlePlaceholder')}
+                    value={songTitle}
+                    onChange={(e) => setSongTitle(e.target.value)}
+                    className="h-10 text-sm bg-background/50"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Optional: Email */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
+                <Input
+                  type="email"
+                  placeholder={t('submission.emailPlaceholder')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-10 text-sm bg-background/50"
+                />
+              </div>
+
+              {/* Optional: Message */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
+                <Textarea
+                  placeholder={t('submission.messagePlaceholder')}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="min-h-[80px] text-sm resize-none bg-background/50"
+                />
               </div>
             </div>
           </div>
