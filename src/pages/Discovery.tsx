@@ -99,17 +99,13 @@ const Discovery = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" className="gap-2" asChild>
-                <a href="#streamers">
-                  <Radio className="w-4 h-4" />
-                  Browse Streamers
-                </a>
+              <Button size="lg" className="gap-2" onClick={() => document.getElementById('streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                <Radio className="w-4 h-4" />
+                Browse Streamers
               </Button>
-              <Button variant="outline" size="lg" className="gap-2" asChild>
-                <a href="#for-streamers">
-                  Become a Streamer
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+              <Button variant="outline" size="lg" className="gap-2" onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                Become a Streamer
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </motion.div>
