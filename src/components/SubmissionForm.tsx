@@ -83,6 +83,9 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
   const currentStep = getFieldCompletionStep();
 
+  // Track which fields have shown their completion tick (to prevent re-animation)
+  const [shownTicks, setShownTicks] = useState<Set<number>>(new Set());
+
   // Check if a specific field is completed
   const isFieldCompleted = (fieldStep: number): boolean => {
     return (fieldStep === 0 && songUrl.trim() !== '') || 
@@ -90,6 +93,23 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
       (fieldStep === 2 && artistName.trim() !== '') ||
       (fieldStep === 3 && songTitle.trim() !== '');
   };
+
+  // Track when fields become completed to show tick only once
+  useEffect(() => {
+    [0, 1, 2, 3].forEach((step) => {
+      const completed = isFieldCompleted(step);
+      if (completed && !shownTicks.has(step)) {
+        setShownTicks(prev => new Set(prev).add(step));
+      } else if (!completed && shownTicks.has(step)) {
+        // Remove from set if field is cleared
+        setShownTicks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(step);
+          return newSet;
+        });
+      }
+    });
+  }, [songUrl, audioFile, artistName, songTitle]);
 
   // Get glow class for a field based on whether it's the next one to fill
   const getFieldGlowClass = (fieldStep: number): string => {
@@ -110,22 +130,28 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     return '';
   };
 
-  // Completion tick component
-  const CompletionTick = ({ fieldStep }: { fieldStep: number }) => (
-    <AnimatePresence>
-      {isFieldCompleted(fieldStep) && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 500, damping: 25 }}
-          className="absolute -right-1 -top-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center z-10 shadow-lg shadow-emerald-500/30"
-        >
-          <Check className="w-3 h-3 text-white" strokeWidth={3} />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+  // Completion tick component - only animates when first added to shownTicks
+  const CompletionTick = ({ fieldStep }: { fieldStep: number }) => {
+    const isCompleted = isFieldCompleted(fieldStep);
+    const hasBeenShown = shownTicks.has(fieldStep);
+    
+    return (
+      <AnimatePresence>
+        {isCompleted && (
+          <motion.div
+            key={`tick-${fieldStep}`}
+            initial={hasBeenShown ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            className="absolute -right-1 -top-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center z-10 shadow-lg shadow-emerald-500/30"
+          >
+            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
 
   // Check user auth state
   useEffect(() => {
