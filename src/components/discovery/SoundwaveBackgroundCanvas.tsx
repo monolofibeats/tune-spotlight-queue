@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useScroll, useSpring, useTransform, useVelocity } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 interface Particle {
   id: number;
-  baseX: number; // 0..1
-  baseY: number; // 0..1
-  x: number; // 0..1
-  y: number; // 0..1
-  size: number; // px
-  opacity: number; // 0..1
-  waveOffset: number;
-  floatOffset: number;
-  floatSpeed: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  baseVx: number;
+  baseVy: number;
+  size: number;
+  opacity: number;
+  orbitAngle: number;
+  orbitSpeed: number;
+  orbitRadius: number;
 }
 
 function parseHslTriplet(input: string) {
-  // Expected: "50 100% 50%"
   const parts = input.trim().split(/\s+/);
   if (parts.length < 3) return null;
   const h = Number(parts[0]);
@@ -35,53 +35,29 @@ function makeHslaFromCssVar(varName: string) {
 export function SoundwaveBackgroundCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
-  const timeRef = useRef(0);
-
-  const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, { damping: 50, stiffness: 100 });
-  const scrollVelocity = useVelocity(scrollYProgress);
-  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 300 });
-
-  const waveFormation = useTransform(smoothProgress, [0, 0.5, 1], [0, 0.6, 1]);
-  const waveAmplitude = useTransform(smoothProgress, [0, 0.5, 1], [80, 50, 30]);
-  const waveFrequency = useTransform(smoothProgress, [0, 1], [0.5, 2]);
-
-  const gradientOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.4, 0.6, 0.8]);
-
-  const particles = useMemo<Particle[]>(() => {
-    const count = 110;
-    const list: Particle[] = [];
-
-    for (let i = 0; i < count; i++) {
-      list.push({
-        id: i,
-        baseX: i / count,
-        baseY: 0.5 + (Math.random() - 0.5) * 0.5,
-        x: i / count,
-        y: 0.5,
-        size: Math.random() * 8 + 6,
-        opacity: Math.random() * 0.25 + 0.75,
-        waveOffset: Math.random() * Math.PI * 2,
-        floatOffset: Math.random() * Math.PI * 2,
-        floatSpeed: 0.3 + Math.random() * 0.4,
-      });
-    }
-
-    return list;
-  }, []);
-
-  const particlesRef = useRef<Particle[]>(particles);
-  const [mounted, setMounted] = useState(false);
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const particlesRef = useRef<Particle[]>([]);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
+    // Initialize particles
+    const count = 60;
+    particlesRef.current = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random(),
+      y: Math.random(),
+      vx: 0,
+      vy: 0,
+      baseVx: (Math.random() - 0.5) * 0.0015,
+      baseVy: (Math.random() - 0.5) * 0.0015,
+      size: Math.random() * 3 + 1.5,
+      opacity: Math.random() * 0.4 + 0.15,
+      orbitAngle: Math.random() * Math.PI * 2,
+      orbitSpeed: (Math.random() * 0.02 + 0.01) * (Math.random() > 0.5 ? 1 : -1),
+      orbitRadius: Math.random() * 0.03 + 0.02,
+    }));
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const hsla = makeHslaFromCssVar("--glow-primary");
+    const hsla = makeHslaFromCssVar("--primary");
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -96,90 +72,80 @@ export function SoundwaveBackgroundCanvas() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      };
+    };
+
     resize();
     window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", handleMouseMove);
 
     const draw = () => {
-      // Keep time stable
-      timeRef.current += 1 / 60;
-      const t = timeRef.current;
-
-      let formation = 0;
-      let amplitude = 60;
-      let frequency = 1;
-      let velocity = 0;
-
-      try {
-        const f = waveFormation.get();
-        const a = waveAmplitude.get();
-        const fr = waveFrequency.get();
-        const v = smoothVelocity.get();
-        formation = Number.isFinite(f) ? f : 0;
-        amplitude = Number.isFinite(a) ? a : 60;
-        frequency = Number.isFinite(fr) ? fr : 1;
-        velocity = Number.isFinite(v) ? Math.abs(v) * 50 : 0;
-      } catch {
-        // ignore
-      }
-
       const { width, height } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, width, height);
 
+      const mouse = mouseRef.current;
       const ps = particlesRef.current;
 
-      // Update particle positions (no React state updates)
-      for (let i = 0; i < ps.length; i++) {
-        const p = ps[i];
+      // Update particle positions with cursor interaction
+      for (const p of ps) {
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        const waveY = 0.5 + Math.sin(p.baseX * 0.1 * frequency + t * 2 + p.waveOffset) * (amplitude / 200);
-        const floatX = Math.sin(t * p.floatSpeed + p.floatOffset) * 0.08;
-        const floatY = Math.cos(t * p.floatSpeed * 0.7 + p.floatOffset) * 0.14;
+        const attractionRadius = 0.25;
+        const orbitDistance = 0.08;
 
-        const chaoticX = p.baseX + floatX;
-        const chaoticY = p.baseY + floatY;
+        let targetVx = p.baseVx;
+        let targetVy = p.baseVy;
 
-        const xRaw = chaoticX + (p.baseX - chaoticX) * formation;
-        const yRaw = chaoticY + (waveY - chaoticY) * formation + (velocity / 5000) * Math.sin(t * 5 + i) * 2;
-        const opRaw = p.opacity * (0.85 + Math.sin(t * 2 + i * 0.1) * 0.15) * (0.7 + formation * 0.3);
+        if (distance < attractionRadius) {
+          if (distance > orbitDistance) {
+            // Attract toward cursor
+            const attractionStrength = 0.0003 * (1 - distance / attractionRadius);
+            targetVx += dx * attractionStrength;
+            targetVy += dy * attractionStrength;
+          } else {
+            // Orbit around cursor
+            p.orbitAngle += p.orbitSpeed;
+            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius;
+            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius;
 
-        p.x = Number.isFinite(xRaw) ? Math.max(0.02, Math.min(0.98, xRaw)) : p.baseX;
-        p.y = Number.isFinite(yRaw) ? Math.max(0.1, Math.min(0.9, yRaw)) : p.baseY;
-        p.opacity = Number.isFinite(opRaw) ? Math.max(0.2, Math.min(1, opRaw)) : p.opacity;
+            const targetX = mouse.x + orbitX;
+            const targetY = mouse.y + orbitY;
+
+            targetVx = (targetX - p.x) * 0.08;
+            targetVy = (targetY - p.y) * 0.08;
+          }
+        }
+
+        // Smooth velocity interpolation
+        const easing = 0.08;
+        p.vx += (targetVx - p.vx) * easing;
+        p.vy += (targetVy - p.vy) * easing;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around edges
+        if (p.x < -0.05) p.x = 1.05;
+        if (p.x > 1.05) p.x = -0.05;
+        if (p.y < -0.05) p.y = 1.05;
+        if (p.y > 1.05) p.y = -0.05;
       }
 
-      // Connection lines
+      // Draw particles
       ctx.save();
-      ctx.lineWidth = 1;
-      ctx.globalCompositeOperation = "screen";
-
-      for (let i = 0; i < ps.length - 1; i++) {
-        const a = ps[i];
-        const b = ps[i + 1];
-        const dx = Math.abs(a.x - b.x);
-        if (dx > 0.03) continue;
-
-        ctx.strokeStyle = hsla(Math.min(a.opacity, b.opacity) * 0.45);
-        ctx.beginPath();
-        ctx.moveTo(a.x * width, a.y * height);
-        ctx.lineTo(b.x * width, b.y * height);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-
-      // Particles
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = hsla(0.55);
-
       for (const p of ps) {
         ctx.fillStyle = hsla(p.opacity);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
         ctx.fill();
       }
-
       ctx.restore();
 
       if (!prefersReducedMotion) {
@@ -187,48 +153,18 @@ export function SoundwaveBackgroundCanvas() {
       }
     };
 
-    // draw once immediately, then animate
     draw();
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [mounted, smoothVelocity, waveAmplitude, waveFormation, waveFrequency]);
+  }, []);
 
   return (
-    <div
-      className="fixed inset-0 pointer-events-none z-[2]"
-      aria-hidden="true"
-    >
-      {/* Gradient glow */}
-      <motion.div className="absolute inset-0" style={{ opacity: gradientOpacity }}>
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--glow-primary) / 0.14) 0%, transparent 60%)",
-          }}
-          animate={{ scale: [1, 1.02, 1], opacity: [0.9, 1, 0.9] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </motion.div>
-
-      {/* Canvas particles */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full mix-blend-screen"
-      />
-
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03] mix-blend-screen"
-        style={{
-          backgroundImage:
-            "linear-gradient(hsl(var(--glow-primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--glow-primary)) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
+    <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
 }
