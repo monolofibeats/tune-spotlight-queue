@@ -752,6 +752,22 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Floating Audio Preview */}
+      <FloatingAudioPreview
+        isOpen={floatingPreview.isOpen}
+        onClose={handleCloseFloatingPreview}
+        submission={floatingPreview.submission ? {
+          id: floatingPreview.submission.id,
+          song_title: floatingPreview.submission.song_title,
+          artist_name: floatingPreview.submission.artist_name,
+          is_priority: floatingPreview.submission.is_priority,
+          position: floatingPreview.position,
+        } : null}
+        audioUrl={floatingPreview.audioUrl}
+        isLoadingAudio={floatingPreview.isLoading}
+        onDownload={handleFloatingDownload}
+      />
     </div>
   );
 };
