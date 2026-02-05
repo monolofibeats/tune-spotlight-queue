@@ -17,6 +17,13 @@ interface WaveParticle {
 export function SoundwaveBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timeRef = useRef(0);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Ensure we're on client side before using scroll hooks
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const { scrollYProgress } = useScroll();
   
   // Smooth scroll progress
@@ -31,9 +38,9 @@ export function SoundwaveBackground() {
   const waveAmplitude = useTransform(smoothProgress, [0, 0.5, 1], [80, 50, 30]);
   const waveFrequency = useTransform(smoothProgress, [0, 1], [0.5, 2]);
   
-  // Generate particles - more particles with higher visibility
+  // Generate particles
   const particles = useMemo(() => {
-    const count = 180;
+    const count = 120;
     const particleList: WaveParticle[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -43,8 +50,8 @@ export function SoundwaveBackground() {
         baseY: 50 + (Math.random() - 0.5) * 60,
         x: (i / count) * 100,
         y: 50,
-        size: Math.random() * 7 + 5, // MUCH larger so it's clearly visible
-        opacity: Math.random() * 0.2 + 0.8, // Always bright
+        size: Math.random() * 6 + 4,
+        opacity: Math.random() * 0.3 + 0.7,
         waveOffset: Math.random() * Math.PI * 2,
         floatOffset: Math.random() * Math.PI * 2,
         floatSpeed: 0.3 + Math.random() * 0.4,
@@ -57,54 +64,55 @@ export function SoundwaveBackground() {
   const [animatedParticles, setAnimatedParticles] = useState(particles);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     let animationId: number;
     
     const animate = () => {
       timeRef.current += 0.016;
       const time = timeRef.current;
       
-      const formationRaw = waveFormation.get();
-      const amplitudeRaw = waveAmplitude.get();
-      const frequencyRaw = waveFrequency.get();
-      const velocityRaw = smoothVelocity.get();
+      let formation = 0;
+      let amplitude = 60;
+      let frequency = 1;
+      let velocity = 0;
 
-      const formation = Number.isFinite(formationRaw) ? formationRaw : 0;
-      const amplitude = Number.isFinite(amplitudeRaw) ? amplitudeRaw : 60;
-      const frequency = Number.isFinite(frequencyRaw) ? frequencyRaw : 1;
-      const velocity = Number.isFinite(velocityRaw) ? Math.abs(velocityRaw) * 50 : 0;
+      try {
+        const formationRaw = waveFormation.get();
+        const amplitudeRaw = waveAmplitude.get();
+        const frequencyRaw = waveFrequency.get();
+        const velocityRaw = smoothVelocity.get();
+
+        formation = Number.isFinite(formationRaw) ? formationRaw : 0;
+        amplitude = Number.isFinite(amplitudeRaw) ? amplitudeRaw : 60;
+        frequency = Number.isFinite(frequencyRaw) ? frequencyRaw : 1;
+        velocity = Number.isFinite(velocityRaw) ? Math.abs(velocityRaw) * 50 : 0;
+      } catch (e) {
+        // Fallback values already set
+      }
       
       setAnimatedParticles(prev => prev.map((particle, i) => {
-        // Calculate wave position (clean soundwave)
         const waveX = particle.baseX;
         const waveY = 50 + Math.sin((particle.baseX * 0.1 * frequency) + time * 2 + particle.waveOffset) * amplitude * 0.5;
         
-        // Add velocity-based distortion
         const velocityDistortion = velocity * Math.sin(time * 5 + i) * 2;
         
-        // Calculate chaotic position with smooth floating
         const floatX = Math.sin(time * particle.floatSpeed + particle.floatOffset) * 12;
         const floatY = Math.cos(time * particle.floatSpeed * 0.7 + particle.floatOffset) * 25;
         const chaoticX = particle.baseX + floatX;
         const chaoticY = particle.baseY + floatY;
         
-        // Interpolate between chaotic and wave based on scroll
         const xRaw = chaoticX + (waveX - chaoticX) * formation;
         const yRaw = chaoticY + (waveY - chaoticY) * formation + velocityDistortion;
 
-        // Pulsing opacity based on formation and position - keep high visibility
         const pulseOpacityRaw = particle.opacity * (0.85 + Math.sin(time * 2 + i * 0.1) * 0.15);
         const formationOpacityRaw = pulseOpacityRaw * (0.7 + formation * 0.3);
 
-        const x = Number.isFinite(xRaw) ? xRaw : particle.x;
-        const y = Number.isFinite(yRaw) ? yRaw : particle.y;
+        const x = Number.isFinite(xRaw) ? Math.max(0, Math.min(100, xRaw)) : particle.x;
+        const y = Number.isFinite(yRaw) ? Math.max(0, Math.min(100, yRaw)) : particle.y;
         const opacity = Number.isFinite(formationOpacityRaw) ? formationOpacityRaw : particle.opacity;
 
-        return {
-          ...particle,
-          x,
-          y,
-          opacity,
-        };
+        return { ...particle, x, y, opacity };
       }));
       
       animationId = requestAnimationFrame(animate);
@@ -112,21 +120,38 @@ export function SoundwaveBackground() {
     
     animationId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationId);
-  }, [waveFormation, waveAmplitude, waveFrequency, smoothVelocity]);
+  }, [isClient, waveFormation, waveAmplitude, waveFrequency, smoothVelocity]);
 
-  // Background gradient that shifts with scroll - smoother transitions
   const gradientOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.4, 0.6, 0.8]);
 
+  // Always render the container - use visibility instead of conditional render
   return (
-    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-[5]">
-      {/* Animated gradient background - smoother */}
+    <div 
+      ref={containerRef} 
+      id="soundwave-background"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        zIndex: 1,
+      }}
+    >
+      {/* Animated gradient background */}
       <motion.div
-        className="absolute inset-0"
-        style={{ opacity: gradientOpacity }}
+        style={{ 
+          position: 'absolute',
+          inset: 0,
+          opacity: gradientOpacity 
+        }}
       >
         <motion.div
-          className="absolute inset-0"
           style={{
+            position: 'absolute',
+            inset: 0,
             background: 'radial-gradient(ellipse 80% 50% at 50% 50%, rgba(250, 204, 21, 0.15) 0%, transparent 60%)',
           }}
           animate={{
@@ -141,11 +166,19 @@ export function SoundwaveBackground() {
         />
       </motion.div>
 
-      {/* Soundwave particles - using regular div positioning for better visibility */}
-      <svg className="absolute inset-0 w-full h-full mix-blend-screen" style={{ opacity: 1 }}>
+      {/* Particle SVG */}
+      <svg 
+        style={{ 
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          mixBlendMode: 'screen',
+        }}
+      >
         <defs>
-          <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <filter id="particleGlowFilter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -153,7 +186,7 @@ export function SoundwaveBackground() {
           </filter>
         </defs>
         
-        {/* Connection lines between nearby particles */}
+        {/* Connection lines */}
         {animatedParticles.map((particle, i) => {
           const nextParticle = animatedParticles[i + 1];
           if (!nextParticle) return null;
@@ -168,35 +201,34 @@ export function SoundwaveBackground() {
               y1={`${particle.y}%`}
               x2={`${nextParticle.x}%`}
               y2={`${nextParticle.y}%`}
-              style={{ 
-                stroke: '#facc15',
-                strokeWidth: 1,
-                opacity: Math.min(particle.opacity, nextParticle.opacity) * 0.55 
-              }}
+              stroke="#facc15"
+              strokeWidth="1"
+              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.5}
             />
           );
         })}
         
-        {/* Particles - larger and more visible */}
+        {/* Particles */}
         {animatedParticles.map(particle => (
           <circle
             key={particle.id}
             cx={`${particle.x}%`}
             cy={`${particle.y}%`}
             r={particle.size}
-            style={{
-              fill: '#facc15',
-              opacity: particle.opacity,
-              filter: 'url(#particleGlow)',
-            }}
+            fill="#facc15"
+            opacity={particle.opacity}
+            filter="url(#particleGlowFilter)"
           />
         ))}
       </svg>
 
       {/* Subtle grid overlay */}
       <div
-        className="absolute inset-0 mix-blend-screen opacity-[0.03]"
         style={{
+          position: 'absolute',
+          inset: 0,
+          mixBlendMode: 'screen',
+          opacity: 0.03,
           backgroundImage: `
             linear-gradient(#facc15 1px, transparent 1px),
             linear-gradient(90deg, #facc15 1px, transparent 1px)
@@ -205,10 +237,11 @@ export function SoundwaveBackground() {
         }}
       />
 
-      {/* Smooth scan line */}
+      {/* Scan line */}
       <motion.div
-        className="absolute inset-0"
         style={{
+          position: 'absolute',
+          inset: 0,
           height: '300%',
           background: 'linear-gradient(to bottom, transparent, rgba(250, 204, 21, 0.02), transparent)',
         }}
