@@ -178,10 +178,19 @@ export function SoundwaveBackgroundCanvas() {
       window.addEventListener("mousemove", handleMouseMove);
     }
 
+    let frameCount = 0;
+    
     const draw = () => {
-      timeRef.current += 1 / 60;
+      frameCount++;
+      // On mobile, skip every other frame for better performance
+      if (isMobile && frameCount % 2 !== 0) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
+      }
+      
+      timeRef.current += isMobile ? 1 / 30 : 1 / 60; // Adjust time step for frame skipping
       const t = timeRef.current;
-      const dt = 1 / 60;
+      const dt = isMobile ? 1 / 30 : 1 / 60;
 
       const { width, height } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, width, height);
