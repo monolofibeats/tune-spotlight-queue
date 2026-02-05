@@ -44,21 +44,21 @@ interface Submission {
 const getPositionStyles = (position: number | undefined) => {
   if (position === 1) {
     return {
-      container: 'py-4 px-4 border-2 border-primary/50 bg-gradient-to-br from-primary/10 to-transparent',
+      container: 'py-4 px-4 border-2 border-podium-gold/50 bg-gradient-to-br from-podium-gold/10 to-transparent',
       positionBadge: 'w-10 h-10 text-base',
       title: 'text-base',
     };
   }
   if (position === 2) {
     return {
-      container: 'py-3.5 px-4 border-primary/30 bg-primary/5',
+      container: 'py-3.5 px-4 border-podium-silver/40 bg-podium-silver/10',
       positionBadge: 'w-9 h-9 text-sm',
       title: 'text-sm',
     };
   }
   if (position === 3) {
     return {
-      container: 'py-3 px-3 border-primary/20',
+      container: 'py-3 px-3 border-podium-bronze/35 bg-podium-bronze/5',
       positionBadge: 'w-8 h-8 text-sm',
       title: 'text-sm',
     };
