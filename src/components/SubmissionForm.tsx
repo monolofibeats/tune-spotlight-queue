@@ -699,6 +699,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         message={message}
         email={user?.email || email}
         platform={platform || 'other'}
+        audioFileUrl={uploadedAudioUrl}
         onSuccess={() => {
           watchlistRef?.current?.refreshList();
           resetForm();
