@@ -267,7 +267,7 @@ export function SoundwaveBackgroundCanvas() {
 
         const lifeFade = p.life > 0.85 ? (1 - p.life) / 0.15 : p.life < 0.15 ? p.life / 0.15 : 1;
         const targetOp = p.targetOpacity * lifeFade;
-        p.opacity += (targetOp - p.opacity) * 0.02;
+        p.opacity += (targetOp - p.opacity) * 0.05;
 
         let targetX = p.x;
         let targetY = p.y;
