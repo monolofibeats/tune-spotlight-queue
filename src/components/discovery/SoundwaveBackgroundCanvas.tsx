@@ -266,9 +266,15 @@ export function SoundwaveBackgroundCanvas() {
           p.vy = 0;
         }
 
-        const lifeFade = p.life > 0.85 ? (1 - p.life) / 0.15 : p.life < 0.15 ? p.life / 0.15 : 1;
+        // Faster fade-in so particles are visible immediately after load
+        const lifeFade =
+          p.life > 0.97
+            ? (1 - p.life) / 0.03
+            : p.life < 0.12
+              ? p.life / 0.12
+              : 1;
         const targetOp = p.targetOpacity * lifeFade;
-        p.opacity += (targetOp - p.opacity) * 0.05;
+        p.opacity += (targetOp - p.opacity) * 0.08;
 
         let targetX = p.x;
         let targetY = p.y;
