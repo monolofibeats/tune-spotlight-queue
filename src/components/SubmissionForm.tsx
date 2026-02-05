@@ -31,6 +31,7 @@ const detectPlatform = (url: string): Platform => {
 
 interface SubmissionFormProps {
   watchlistRef?: React.RefObject<WatchlistRef>;
+  streamerId?: string;
 }
 
 interface FlyingCard {
@@ -41,7 +42,7 @@ interface FlyingCard {
   amount: number;
 }
 
-export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
+export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
   const { t } = useLanguage();
   const { isActive: skipLineActive } = usePricingConfig('skip_line');
