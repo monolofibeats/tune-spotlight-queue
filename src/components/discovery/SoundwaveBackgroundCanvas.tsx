@@ -184,7 +184,7 @@ export function SoundwaveBackgroundCanvas() {
       
       // Very smooth wave expansion (waves spread apart when cursor is near)
       const targetExpansion = cursorNearWave ? 2.2 : 1;
-      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.02;
+      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
 
       // Draw flowing wave lines with smooth cursor interaction
       ctx.save();
