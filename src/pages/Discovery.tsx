@@ -13,6 +13,7 @@ import { InteractiveBackground } from '@/components/discovery/InteractiveBackgro
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
+import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState } from 'react';
 
@@ -167,7 +168,9 @@ const Discovery = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.6 }}
             >
-              Submit your tracks to streamers and get real-time feedback from creators and their audiences. Join thousands of artists getting discovered.
+              Submit your tracks to streamers and get real-time feedback from creators and their audiences. Join{' '}
+              <BlurReveal>thousands of artists</BlurReveal>{' '}
+              getting <GlitchText>discovered</GlitchText>.
             </motion.p>
 
             <motion.div 
@@ -240,7 +243,7 @@ const Discovery = () => {
               Active Streamers
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              Find a streamer to review your music
+              Find a streamer to review <BlurReveal>your music</BlurReveal>
             </p>
           </motion.div>
 
@@ -376,7 +379,8 @@ const Discovery = () => {
                 Monetize Your Music Reviews
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with artists worldwide.
+                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with{' '}
+                <BlurReveal>artists worldwide</BlurReveal>.
               </p>
               <ul className="space-y-4 mb-8">
                 {[
