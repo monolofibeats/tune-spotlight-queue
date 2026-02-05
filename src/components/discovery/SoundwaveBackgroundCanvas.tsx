@@ -221,9 +221,9 @@ export function SoundwaveBackgroundCanvas() {
             // Quartic falloff for even smoother transition
             const influence = Math.pow(1 - dist / cursorInfluenceRadius, 4);
             // Expand up/down from cursor position - gentler effect
-              const expandDirection = y > mouse.smoothY ? 1 : -1;
-              y += expandDirection * influence * 0.06;
-            }
+            const expandDirection = y > mouse.smoothY ? 1 : -1;
+            y += expandDirection * influence * 0.04;
+          }
           }
           
           if (i === 0) {
