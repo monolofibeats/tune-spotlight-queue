@@ -52,6 +52,14 @@ const App = () => (
                       </ProtectedRoute>
                     } 
                   />
+                  <Route 
+                    path="/streamer/settings" 
+                    element={
+                      <ProtectedRoute>
+                        <StreamerSettings />
+                      </ProtectedRoute>
+                    } 
+                  />
                   {/* Streamer page - must be after all other routes */}
                   <Route path="/:slug" element={<StreamerPage />} />
                   {/* 404 catch-all */}
