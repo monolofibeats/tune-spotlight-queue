@@ -13,6 +13,7 @@ import { InteractiveBackground } from '@/components/discovery/InteractiveBackgro
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
+import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState } from 'react';
 
