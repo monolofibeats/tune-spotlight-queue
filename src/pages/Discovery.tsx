@@ -266,10 +266,10 @@ const Discovery = () => {
                 backgroundSize: ['100% 0%', '100% 100%'],
               }}
             >
-              Active Streamers
+              {t('discovery.sectionStreamers')}
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              Find a streamer to review <BlurReveal>your music</BlurReveal>
+              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourMusic')}</BlurReveal>
             </p>
           </motion.div>
 
