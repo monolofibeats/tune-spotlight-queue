@@ -213,7 +213,10 @@ const Discovery = () => {
               >
                 <Music className="w-12 h-12 text-primary mx-auto mb-4" />
               </motion.div>
-              <div className="text-5xl md:text-7xl font-bold mb-2 text-primary">
+              <div
+                className="text-5xl md:text-7xl font-bold mb-2"
+                style={{ color: 'hsl(var(--glow-primary))' }}
+              >
                 <LiveCounter startValue={10847} suffix="+" />
               </div>
               <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
