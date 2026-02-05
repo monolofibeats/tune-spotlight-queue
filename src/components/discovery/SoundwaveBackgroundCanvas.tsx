@@ -238,13 +238,15 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Same smootherstep for previous point
-            const pdx = prevX - mouse.smoothX;
-            const pDistX = Math.abs(pdx);
-            if (pDistX < cursorInfluenceRadius) {
-              const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
-              const waveOffsetFromCenter = wave.currentYOffset;
-              prevY += waveOffsetFromCenter * influence * 1.2;
+            // Same for previous point - only when touching
+            if (cursorTouchingWave) {
+              const pdx = prevX - mouse.smoothX;
+              const pDistX = Math.abs(pdx);
+              if (pDistX < cursorInfluenceRadius) {
+                const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
+                const waveOffsetFromCenter = wave.currentYOffset;
+                prevY += waveOffsetFromCenter * influence * 1.5;
+              }
             }
             
             const cpX = (prevX + x) / 2 * width;
