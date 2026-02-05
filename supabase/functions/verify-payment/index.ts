@@ -73,6 +73,7 @@ serve(async (req) => {
         amount_paid: amountPaid,
         is_priority: true,
         status: "pending",
+        audio_file_url: metadata.audio_file_url || null,
       })
       .select()
       .single();

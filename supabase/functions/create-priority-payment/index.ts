@@ -84,6 +84,7 @@ serve(async (req) => {
         email: email || "",
         platform: platform,
         amount_paid: amount.toString(),
+        audio_file_url: audioFileUrl || "",
       },
     });
 
