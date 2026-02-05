@@ -437,7 +437,7 @@ const Discovery = () => {
               </Dialog>
             </motion.div>
 
-            <AnimatedCard className="overflow-hidden">
+            <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
               <motion.div
                 className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-10 border border-primary/20"
                 whileHover={{ scale: 1.02 }}
@@ -464,7 +464,7 @@ const Discovery = () => {
                   </motion.div>
                 </div>
               </motion.div>
-            </AnimatedCard>
+            </div>
           </div>
         </div>
       </section>

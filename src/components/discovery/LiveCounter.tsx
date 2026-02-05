@@ -64,7 +64,12 @@ export function LiveCounter({
     if (!hasFinishedIntro) return;
 
     const id = window.setInterval(() => {
-      setDisplayValue((v) => v + 1);
+      setDisplayValue((v) => {
+        const newVal = v + 1;
+        // Update stored value periodically
+        localStorage.setItem('liveCounter_songs', JSON.stringify({ base: newVal, timestamp: Date.now() }));
+        return newVal;
+      });
     }, incrementInterval);
 
     return () => window.clearInterval(id);
