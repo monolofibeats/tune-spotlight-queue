@@ -47,38 +47,25 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
-function spawnFromEdge(edge: number): { x: number; y: number } {
-  switch (edge) {
-    // Spawn INSIDE the viewport so particles are always visible
-    case 0: return { x: Math.random(), y: 0.02 };
-    case 1: return { x: 0.98, y: Math.random() };
-    case 2: return { x: Math.random(), y: 0.98 };
-    case 3: return { x: 0.02, y: Math.random() };
-    default: return { x: Math.random(), y: 0.02 };
-  }
-}
-
 function createParticle(id: number): Particle {
-  const spawnEdge = Math.floor(Math.random() * 4);
-  const spawn = spawnFromEdge(spawnEdge);
-  
+  // Spawn randomly across the entire screen
   return {
     id,
-    x: spawn.x,
-    y: spawn.y,
-    vx: 0,
-    vy: 0,
-    size: Math.random() * 2.5 + 2.5,
-    opacity: 0,
-    targetOpacity: Math.random() * 0.35 + 0.55,
+    x: Math.random(),
+    y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.002,
+    vy: (Math.random() - 0.5) * 0.001,
+    size: Math.random() * 6 + 4, // Length of the sprinkle line
+    opacity: Math.random() * 0.4 + 0.2,
+    targetOpacity: Math.random() * 0.5 + 0.3,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.006 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.012 + 0.006,
+    orbitSpeed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.015 + 0.008,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.00015 + 0.00005,
-    life: 1,
-    maxLife: 18 + Math.random() * 25,
-    spawnEdge,
+    driftSpeed: Math.random() * 0.0004 + 0.0002,
+    life: Math.random(), // Start at random life stage so they don't all fade together
+    maxLife: 20 + Math.random() * 30,
+    spawnEdge: 0,
   };
 }
 
