@@ -18,6 +18,9 @@ interface Particle {
   life: number;
   maxLife: number;
   spawnEdge: number;
+  attached: boolean; // Whether particle is attached to the wave
+  attachedTime: number; // How long attached (for detach timing)
+  gatheredByCursor: boolean; // Whether currently gathered by cursor
 }
 
 interface WaveLine {
@@ -67,17 +70,20 @@ function createParticle(id: number): Particle {
     y: Math.random(),
     vx: (Math.random() - 0.5) * 0.002,
     vy: (Math.random() - 0.5) * 0.001,
-    size: Math.random() * 6 + 4, // Length of the sprinkle line
+    size: Math.random() * 8 + 5, // Length of the sprinkle line
     opacity: Math.random() * 0.4 + 0.2,
-    targetOpacity: Math.random() * 0.5 + 0.3,
+    targetOpacity: Math.random() * 0.5 + 0.4,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.015 + 0.008,
+    orbitSpeed: (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.02 + 0.01,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.0004 + 0.0002,
-    life: Math.random(), // Start at random life stage so they don't all fade together
-    maxLife: 20 + Math.random() * 30,
+    driftSpeed: Math.random() * 0.0006 + 0.0003,
+    life: Math.random(),
+    maxLife: 25 + Math.random() * 35,
     spawnEdge: 0,
+    attached: false,
+    attachedTime: 0,
+    gatheredByCursor: false,
   };
 }
 
@@ -258,14 +264,17 @@ export function SoundwaveBackgroundCanvas() {
           p.x = Math.random();
           p.y = Math.random();
           p.life = 1;
-          p.maxLife = 20 + Math.random() * 30;
+          p.maxLife = 25 + Math.random() * 35;
           p.opacity = 0;
-          p.vx = (Math.random() - 0.5) * 0.002;
-          p.vy = (Math.random() - 0.5) * 0.001;
+          p.vx = (Math.random() - 0.5) * 0.003;
+          p.vy = (Math.random() - 0.5) * 0.002;
           p.driftAngle = Math.random() * Math.PI * 2;
+          p.attached = false;
+          p.attachedTime = 0;
+          p.gatheredByCursor = false;
         }
 
-        // Faster fade-in so particles are visible immediately after load
+        // Faster fade-in
         const lifeFade =
           p.life > 0.97
             ? (1 - p.life) / 0.03
@@ -278,79 +287,123 @@ export function SoundwaveBackgroundCanvas() {
         let targetX = p.x;
         let targetY = p.y;
         
-        // Gentle drift + stronger movement
-        p.driftAngle += p.driftSpeed * 0.8;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.003;
-        targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.002;
-        
-        // Pull toward wave center band (stronger pull to integrate with waves)
+        // Wave zone detection
+        const waveZone = 0.12;
         const distFromWaveCenter = Math.abs(p.y - 0.5);
-        const waveZone = 0.15; // How close to center counts as "wave zone"
-        const centerPull = (0.5 - p.y) * 0.002;
-        targetY += centerPull;
+        const inWaveZone = distFromWaveCenter < waveZone;
         
-        // When near the wave zone, align sprinkle horizontally (become part of wave)
-        if (distFromWaveCenter < waveZone) {
-          const alignStrength = 1 - (distFromWaveCenter / waveZone);
-          // Smoothly rotate toward horizontal (0 or PI)
-          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
-          p.driftAngle += (targetAngle - p.driftAngle) * alignStrength * 0.02;
-        }
-
-        // Cursor interaction
+        // Cursor interaction - stronger gathering effect
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const attractionRadius = 0.18;
-        const orbitDistance = 0.04;
-
-        if (cursorActive && dist < attractionRadius) {
-          const influence = Math.pow(1 - dist / attractionRadius, 2.5);
+        const gatherRadius = 0.22;
+        const orbitDistance = 0.06;
+        const cursorNearby = dist < gatherRadius;
+        
+        // Check if cursor is dragging particles to the wave
+        const cursorInWaveZone = Math.abs(mouse.y - 0.5) < waveZone;
+        
+        if (cursorNearby) {
+          p.gatheredByCursor = true;
+          // Detach from wave if cursor grabs it
+          if (p.attached) {
+            p.attached = false;
+            p.attachedTime = 0;
+          }
+          
+          const influence = Math.pow(1 - dist / gatherRadius, 2);
           
           if (dist > orbitDistance) {
-            const attractStrength = 0.00008 * influence;
-            targetX = p.x + dx * attractStrength * 60;
-            targetY = p.y + dy * attractStrength * 60;
+            // Pull toward cursor
+            const attractStrength = 0.0003 * influence;
+            targetX = p.x + dx * attractStrength * 80;
+            targetY = p.y + dy * attractStrength * 80;
           } else {
-            p.orbitAngle += p.orbitSpeed * (0.25 + influence * 0.75);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.5);
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (1 + influence * 0.5);
+            // Orbit around cursor
+            p.orbitAngle += p.orbitSpeed * (0.5 + influence * 1.5);
+            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (1 + influence);
+            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (1 + influence);
             targetX = mouse.x + orbitX;
             targetY = mouse.y + orbitY;
           }
+        } else {
+          // Not near cursor
+          if (p.gatheredByCursor && inWaveZone) {
+            // Was gathered by cursor and now in wave zone - attach to wave!
+            p.attached = true;
+            p.attachedTime = 0;
+            p.gatheredByCursor = false;
+          } else if (!p.attached) {
+            // Free floating - drift around
+            p.driftAngle += p.driftSpeed * 1.2;
+            targetX = p.x + Math.cos(p.driftAngle) * 0.004;
+            targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.003;
+            
+            // Pull toward wave center
+            const centerPull = (0.5 - p.y) * 0.003;
+            targetY += centerPull;
+            
+            // Auto-attach if drifting into wave zone (with some randomness)
+            if (inWaveZone && Math.random() < 0.002) {
+              p.attached = true;
+              p.attachedTime = 0;
+            }
+          }
+          p.gatheredByCursor = false;
+        }
+        
+        // Attached particles behavior
+        if (p.attached) {
+          p.attachedTime += dt;
+          
+          // Stay in wave zone, move horizontally with gentle wave motion
+          const waveMotion = Math.sin(t * 0.5 + p.x * 10) * 0.001;
+          targetX = p.x + 0.0005 + waveMotion; // Slow rightward drift
+          targetY = 0.5 + (p.y - 0.5) * 0.98; // Gently pull toward center line
+          
+          // Align angle to horizontal
+          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
+          p.driftAngle += (targetAngle - p.driftAngle) * 0.05;
+          
+          // Random detach after being attached for a while (to make room for new particles)
+          if (p.attachedTime > 8 + Math.random() * 12) {
+            if (Math.random() < 0.01) {
+              p.attached = false;
+              p.attachedTime = 0;
+              // Float away
+              p.vy = (Math.random() - 0.5) * 0.008;
+            }
+          }
         }
 
-        const cursorStrength = cursorActive && dist < attractionRadius ? 0.012 : 0.003;
+        // Apply movement with smoothing
+        const moveStrength = p.attached ? 0.02 : (cursorNearby ? 0.025 : 0.008);
         
-        const targetVx = (targetX - p.x) * cursorStrength;
-        const targetVy = (targetY - p.y) * cursorStrength;
+        const targetVx = (targetX - p.x) * moveStrength;
+        const targetVy = (targetY - p.y) * moveStrength;
         
-        p.vx += (targetVx - p.vx) * 0.015;
-        p.vy += (targetVy - p.vy) * 0.015;
-        p.vx *= 0.994;
-        p.vy *= 0.994;
+        p.vx += (targetVx - p.vx) * 0.03;
+        p.vy += (targetVy - p.vy) * 0.03;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < -0.1) p.x = 1.1;
-        if (p.x > 1.1) p.x = -0.1;
-        if (p.y < -0.1) p.y = 1.1;
-        if (p.y > 1.1) p.y = -0.1;
+        // Wrap around screen
+        if (p.x < -0.05) p.x = 1.05;
+        if (p.x > 1.05) p.x = -0.05;
+        if (p.y < -0.05) p.y = 1.05;
+        if (p.y > 1.05) p.y = -0.05;
       }
 
-      // Draw particles as small line sprinkles floating across the background
+      // Draw particles as small line sprinkles - same color as wave lines (slightly brighter)
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = hsla(0.6);
       ctx.lineCap = "round";
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, Math.max(0.25, p.opacity * 1.8));
-        ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = 1.5;
         
         // Draw as a small line/sprinkle
         const lineLength = p.size;
@@ -360,13 +413,18 @@ export function SoundwaveBackgroundCanvas() {
         const dx = Math.cos(angle) * lineLength;
         const dy = Math.sin(angle) * lineLength;
         
-        // Particles near wave center are more opaque and longer (becoming part of wave)
+        // Attached particles are brighter and thicker (part of the wave)
+        const isAttached = p.attached;
         const distFromCenter = Math.abs(p.y - 0.5);
-        const inWaveZone = distFromCenter < 0.15;
-        const waveIntegration = inWaveZone ? (1 - distFromCenter / 0.15) : 0;
+        const waveIntegration = isAttached ? 1 : (distFromCenter < 0.12 ? (1 - distFromCenter / 0.12) * 0.5 : 0);
         
-        ctx.globalAlpha = Math.min(1, Math.max(0.2, p.opacity * 1.5 + waveIntegration * 0.4));
-        ctx.lineWidth = 1.5 + waveIntegration * 1;
+        // Same color as wave lines but slightly brighter
+        const baseOpacity = isAttached ? 0.25 : 0.15;
+        ctx.globalAlpha = Math.min(1, baseOpacity + p.opacity * 0.3 + waveIntegration * 0.3);
+        ctx.strokeStyle = hsla(1); // Same color as waves
+        ctx.lineWidth = 1.5 + waveIntegration * 0.8;
+        ctx.shadowBlur = isAttached ? 8 : 6;
+        ctx.shadowColor = hsla(0.4);
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
