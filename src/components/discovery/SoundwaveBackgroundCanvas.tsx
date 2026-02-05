@@ -123,7 +123,7 @@ export function SoundwaveBackgroundCanvas() {
   const waveExpansionRef = useRef(0);
 
   useEffect(() => {
-    const particleCount = 80;
+    const particleCount = 140;
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
