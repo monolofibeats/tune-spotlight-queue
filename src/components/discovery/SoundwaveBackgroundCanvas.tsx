@@ -325,12 +325,13 @@ export function SoundwaveBackgroundCanvas() {
 
       // Draw particles (small sprinkles) - more visible
       ctx.save();
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = hsla(0.6);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = hsla(0.9);
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, p.opacity * 1.5);
+        ctx.globalAlpha = Math.min(1, Math.max(0.18, p.opacity * 2));
         ctx.fillStyle = hsla(1);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
