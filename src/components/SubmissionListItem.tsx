@@ -75,19 +75,23 @@ interface SubmissionListItemProps {
   position?: number;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
   position,
   onStatusChange, 
-  onDelete 
+  onDelete,
+  onPlayAudio 
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  
+  const styles = getPositionStyles(position);
 
   // Fetch signed URL when expanded and has audio file
   useEffect(() => {
