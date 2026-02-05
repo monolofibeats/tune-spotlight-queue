@@ -753,6 +753,11 @@ const Dashboard = () => {
                 )}
               </div>
             </TabsContent>
+
+            {/* Streamers Tab */}
+            <TabsContent value="streamers">
+              <AdminStreamerManager />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
