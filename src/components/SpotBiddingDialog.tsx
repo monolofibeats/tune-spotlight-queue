@@ -32,6 +32,7 @@ interface SpotBiddingDialogProps {
   message?: string;
   email: string;
   platform: string;
+  audioFileUrl?: string | null; // Pre-uploaded audio file path
   onSuccess?: () => void;
 }
 
@@ -47,6 +48,7 @@ export function SpotBiddingDialog({
   message,
   email,
   platform,
+  audioFileUrl,
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
