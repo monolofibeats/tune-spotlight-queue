@@ -263,132 +263,85 @@ export function SoundwaveBackgroundCanvas() {
         p.life -= dt / p.maxLife;
         
         if (p.life <= 0) {
-          // 50% chance to spawn from wave (emerging from the line), 50% random
-          const spawnFromWave = Math.random() < 0.5;
-          if (spawnFromWave) {
-            p.x = Math.random();
-            p.y = 0.5 + (Math.random() - 0.5) * 0.08; // Near wave center
-            p.vy = (Math.random() - 0.5) * 0.012; // Float away from wave
-            p.attached = false;
-          } else {
-            p.x = Math.random();
-            p.y = Math.random();
-          }
+          // Spawn randomly across screen
+          p.x = Math.random();
+          p.y = Math.random();
           p.life = 1;
-          p.maxLife = 15 + Math.random() * 25;
+          p.maxLife = 80 + Math.random() * 100;
           p.opacity = 0;
-          p.vx = (Math.random() - 0.5) * 0.006;
-          p.vy = p.vy || (Math.random() - 0.5) * 0.004;
+          p.vx = (Math.random() - 0.5) * 0.0002;
+          p.vy = (Math.random() - 0.5) * 0.00015;
           p.driftAngle = Math.random() * Math.PI * 2;
           p.attachedTime = 0;
           p.gatheredByCursor = false;
+          p.attached = false;
         }
 
-        // Wave zone detection
-        const waveZone = 0.10;
+        // Wave zone detection - particles fade in/out based on proximity (no collecting)
+        const waveZone = 0.18;
         const distFromWaveCenter = Math.abs(p.y - 0.5);
         const inWaveZone = distFromWaveCenter < waveZone;
         
-        // Cursor interaction - stronger gathering effect
+        // Target opacity based on proximity to wave - just fade, no physical collecting
+        let targetOp = p.targetOpacity;
+        
+        if (inWaveZone) {
+          // Fade in when near the wave (closer = brighter)
+          const proximity = 1 - (distFromWaveCenter / waveZone);
+          targetOp = p.targetOpacity * (0.3 + proximity * 0.9);
+          
+          // Gently align angle toward horizontal when near wave
+          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
+          p.driftAngle += (targetAngle - p.driftAngle) * 0.002;
+        } else {
+          // Fade out when far from wave
+          targetOp = p.targetOpacity * 0.25;
+        }
+        
+        // Cursor interaction - very gentle gathering
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const gatherRadius = 0.25;
-        const orbitDistance = 0.05;
+        const gatherRadius = 0.15;
+        const orbitDistance = 0.025;
         const cursorNearby = dist < gatherRadius;
-        
-        // Target opacity based on state
-        let targetOp = p.targetOpacity;
         
         if (cursorNearby) {
           p.gatheredByCursor = true;
-          // Detach from wave if cursor grabs it
-          if (p.attached) {
-            p.attached = false;
-            p.attachedTime = 0;
-          }
-          
-          const influence = Math.pow(1 - dist / gatherRadius, 2.5);
+          const influence = Math.pow(1 - dist / gatherRadius, 2);
           
           if (dist > orbitDistance) {
-            // Strong pull toward cursor
-            const attractStrength = 0.0006 * influence;
+            // Very gentle pull toward cursor
+            const attractStrength = 0.00004 * influence;
             p.vx += dx * attractStrength;
             p.vy += dy * attractStrength;
           } else {
-            // Fast orbit around cursor
-            p.orbitAngle += p.orbitSpeed * (1 + influence * 2);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * (0.8 + influence * 0.5);
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * (0.8 + influence * 0.5);
-            p.vx += (mouse.x + orbitX - p.x) * 0.08;
-            p.vy += (mouse.y + orbitY - p.y) * 0.08;
+            // Very slow orbit around cursor
+            p.orbitAngle += p.orbitSpeed * (1 + influence * 0.3);
+            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * 0.5;
+            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * 0.5;
+            p.vx += (mouse.x + orbitX - p.x) * 0.004;
+            p.vy += (mouse.y + orbitY - p.y) * 0.004;
           }
-          targetOp = p.targetOpacity * 1.3; // Brighter when gathered
+          targetOp = p.targetOpacity * 1.1;
         } else {
-          // Not near cursor
-          if (p.gatheredByCursor && inWaveZone) {
-            // Was gathered by cursor and now in wave zone - attach to wave!
-            p.attached = true;
-            p.attachedTime = 0;
-            p.gatheredByCursor = false;
-          } else if (!p.attached) {
-            // Free floating - dynamic movement like old particles
-            p.driftAngle += p.driftSpeed * 2;
-            
-            // More dynamic drift with varying speed
-            const driftX = Math.cos(p.driftAngle) * 0.006;
-            const driftY = Math.sin(p.driftAngle * 0.7) * 0.005;
-            p.vx += driftX * 0.1;
-            p.vy += driftY * 0.1;
-            
-            // Gentle pull toward wave center
-            const centerPull = (0.5 - p.y) * 0.0008;
-            p.vy += centerPull;
-            
-            // Auto-attach if drifting into wave zone
-            if (inWaveZone && Math.random() < 0.008) {
-              p.attached = true;
-              p.attachedTime = 0;
-            }
-          }
           p.gatheredByCursor = false;
         }
         
-        // Attached particles behavior - become part of the wave
-        if (p.attached) {
-          p.attachedTime += dt;
-          
-          // Fade in more when attached (become part of line)
-          targetOp = p.targetOpacity * 0.7;
-          
-          // Slow horizontal drift along the wave
-          const waveMotion = Math.sin(t * 0.3 + p.x * 8) * 0.0008;
-          p.vx += (0.0008 + waveMotion - p.vx) * 0.02;
-          p.vy += ((0.5 - p.y) * 0.01) * 0.05; // Pull tightly to center line
-          
-          // Align angle to horizontal smoothly
-          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
-          p.driftAngle += (targetAngle - p.driftAngle) * 0.08;
-          
-          // Detach and float away after a while (dissolve effect)
-          if (p.attachedTime > 4 + Math.random() * 8) {
-            if (Math.random() < 0.015) {
-              p.attached = false;
-              p.attachedTime = 0;
-              // Float away from wave
-              p.vy = (Math.random() - 0.5) * 0.015;
-              p.vx += (Math.random() - 0.5) * 0.005;
-            }
-          }
-        }
+        // Ultra slow drift movement
+        p.driftAngle += p.driftSpeed;
+        const driftX = Math.cos(p.driftAngle) * 0.00008;
+        const driftY = Math.sin(p.driftAngle * 0.7) * 0.00006;
+        p.vx += driftX * 0.01;
+        p.vy += driftY * 0.01;
         
-        // Opacity fade based on state
-        const lifeFade = p.life > 0.9 ? (1 - p.life) / 0.1 : p.life < 0.15 ? p.life / 0.15 : 1;
-        p.opacity += ((targetOp * lifeFade) - p.opacity) * 0.1;
+        // Opacity fade - very smooth and slow
+        const lifeFade = p.life > 0.9 ? (1 - p.life) / 0.1 : p.life < 0.3 ? p.life / 0.3 : 1;
+        p.opacity += ((targetOp * lifeFade) - p.opacity) * 0.008;
 
-        // Apply velocity with damping
-        p.vx *= 0.96;
-        p.vy *= 0.96;
+        // Apply velocity with heavy damping for very slow movement
+        p.vx *= 0.998;
+        p.vy *= 0.998;
 
         p.x += p.vx;
         p.y += p.vy;
