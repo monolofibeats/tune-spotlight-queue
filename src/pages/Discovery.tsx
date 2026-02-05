@@ -62,9 +62,10 @@ const Discovery = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <CursorFollower />
+    <>
       <SoundwaveBackground />
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        <CursorFollower />
       
       {/* Header */}
       <motion.header 
