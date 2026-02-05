@@ -47,6 +47,18 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
+// Ultra-smooth interpolation (hermite smoothstep)
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+// Even smoother (quintic smootherstep)
+function smootherstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 function createParticle(id: number): Particle {
   // Spawn randomly across the entire screen
   return {
@@ -200,17 +212,16 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Smooth cursor wave distortion - gentler gaussian for round curves
+          // Ultra-smooth cursor wave distortion using smootherstep
           const dx = x - mouse.smoothX;
-          const dy = y - mouse.smoothY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < cursorInfluenceRadius) {
-            const r = dist / cursorInfluenceRadius;
-            // Smoother gaussian with gentler falloff to avoid bulges
-            const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
-            // Push waves up/down based on their position relative to cursor
-            const pushDirection = y > mouse.smoothY ? 1 : -1;
-            y += pushDirection * influence * 0.08;
+          const distX = Math.abs(dx);
+          if (distX < cursorInfluenceRadius) {
+            // Use smootherstep for perfectly smooth falloff (no edges or corners)
+            const influence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
+            // Gentle vertical expansion based on wave's distance from cursor center
+            const waveOffsetFromCenter = wave.currentYOffset;
+            const pushAmount = waveOffsetFromCenter * influence * 1.2;
+            y += pushAmount;
           }
           
           if (i === 0) {
@@ -220,15 +231,13 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Apply the same gaussian field to previous point for continuity
+            // Same smootherstep for previous point
             const pdx = prevX - mouse.smoothX;
-            const pdy = prevY - mouse.smoothY;
-            const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
-            if (pDist < cursorInfluenceRadius) {
-              const r = pDist / cursorInfluenceRadius;
-              const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
-              const pushDirection = prevY > mouse.smoothY ? 1 : -1;
-              prevY += pushDirection * influence * 0.08;
+            const pDistX = Math.abs(pdx);
+            if (pDistX < cursorInfluenceRadius) {
+              const influence = 1 - smootherstep(0, cursorInfluenceRadius, pDistX);
+              const waveOffsetFromCenter = wave.currentYOffset;
+              prevY += waveOffsetFromCenter * influence * 1.2;
             }
             
             const cpX = (prevX + x) / 2 * width;
@@ -269,14 +278,24 @@ export function SoundwaveBackgroundCanvas() {
         let targetX = p.x;
         let targetY = p.y;
         
-        // Gentle drift (strong enough to visibly move across the screen)
-        p.driftAngle += p.driftSpeed * 0.6;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.0022;
-        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.0018;
+        // Gentle drift + stronger movement
+        p.driftAngle += p.driftSpeed * 0.8;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.003;
+        targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.002;
         
-        // Pull toward wave center band
-        const centerPull = (0.5 - p.y) * 0.001;
+        // Pull toward wave center band (stronger pull to integrate with waves)
+        const distFromWaveCenter = Math.abs(p.y - 0.5);
+        const waveZone = 0.15; // How close to center counts as "wave zone"
+        const centerPull = (0.5 - p.y) * 0.002;
         targetY += centerPull;
+        
+        // When near the wave zone, align sprinkle horizontally (become part of wave)
+        if (distFromWaveCenter < waveZone) {
+          const alignStrength = 1 - (distFromWaveCenter / waveZone);
+          // Smoothly rotate toward horizontal (0 or PI)
+          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
+          p.driftAngle += (targetAngle - p.driftAngle) * alignStrength * 0.02;
+        }
 
         // Cursor interaction
         const dx = mouse.x - p.x;
@@ -333,13 +352,21 @@ export function SoundwaveBackgroundCanvas() {
         ctx.strokeStyle = hsla(1);
         ctx.lineWidth = 1.5;
         
-        // Draw as a small line/sprinkle oriented by drift angle
+        // Draw as a small line/sprinkle
         const lineLength = p.size;
         const angle = p.driftAngle;
         const x = p.x * width;
         const y = p.y * height;
         const dx = Math.cos(angle) * lineLength;
         const dy = Math.sin(angle) * lineLength;
+        
+        // Particles near wave center are more opaque and longer (becoming part of wave)
+        const distFromCenter = Math.abs(p.y - 0.5);
+        const inWaveZone = distFromCenter < 0.15;
+        const waveIntegration = inWaveZone ? (1 - distFromCenter / 0.15) : 0;
+        
+        ctx.globalAlpha = Math.min(1, Math.max(0.2, p.opacity * 1.5 + waveIntegration * 0.4));
+        ctx.lineWidth = 1.5 + waveIntegration * 1;
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
