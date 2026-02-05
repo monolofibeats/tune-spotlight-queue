@@ -61,8 +61,8 @@ export function FloatingAudioPreview({
               <div className="px-6 py-4 border-b border-border/30 flex items-center gap-4">
               <PositionBadge
                 position={submission.position}
-                badgeClassName="w-14 h-14 rounded-xl flex items-center justify-center text-xl"
-                overlayClassName="w-7 h-7"
+                badgeClassName="w-16 h-12 rounded-xl text-xl px-3"
+                showGlow
               />
                 
                 <div className="flex-1 min-w-0">
