@@ -242,7 +242,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                       <p className={`truncate ${styles.title}`}>
                         {submission.song_title || 'Untitled'}
                       </p>
-                      {submission.is_priority && spotNumber !== 1 && (
+                      {submission.is_priority && (
                         <Badge variant="premium" className="text-[10px] px-1.5 py-0">
                           Priority
                         </Badge>
