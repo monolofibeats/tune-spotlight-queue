@@ -89,7 +89,7 @@ const Discovery = () => {
                   whileTap={{ scale: 0.95 }}
                   className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
                 >
-                  Library
+                  {t('nav.library')}
                   <motion.span
                     className="absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left"
                     initial={{ scaleX: 0 }}
@@ -99,7 +99,7 @@ const Discovery = () => {
               </Link>
               <Link to="/auth">
                 <GlowButton variant="primary" size="default">
-                  Sign In
+                  {t('nav.signIn')}
                 </GlowButton>
               </Link>
             </nav>
