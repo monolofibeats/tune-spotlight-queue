@@ -40,24 +40,24 @@ const formatTimeAgo = (date: Date): string => {
 const getPositionStyles = (position: number | null) => {
   if (position === 1) {
     return {
-      container: 'p-5 border-2 border-podium-gold/50 bg-gradient-to-br from-podium-gold/10 to-transparent',
-      positionBadge: 'w-10 h-10 text-base',
+      container: 'p-5 border-2 border-yellow-500/40 bg-gradient-to-r from-yellow-500/15 via-amber-500/10 to-transparent shadow-lg shadow-yellow-500/10',
+      positionBadge: 'w-14 h-10 text-base px-2',
       title: 'text-base font-semibold',
       artist: 'text-sm',
     };
   }
   if (position === 2) {
     return {
-      container: 'p-4 border-podium-silver/40 bg-podium-silver/10',
-      positionBadge: 'w-8 h-8 text-sm',
+      container: 'p-4 border border-slate-400/30 bg-gradient-to-r from-slate-400/10 to-transparent',
+      positionBadge: 'w-12 h-8 text-sm px-1.5',
       title: 'text-sm font-semibold',
       artist: 'text-xs',
     };
   }
   if (position === 3) {
     return {
-      container: 'p-3.5 border-podium-bronze/35 bg-podium-bronze/5',
-      positionBadge: 'w-7 h-7 text-xs',
+      container: 'p-3.5 border border-amber-600/25 bg-gradient-to-r from-amber-600/8 to-transparent',
+      positionBadge: 'w-11 h-7 text-xs px-1.5',
       title: 'text-sm font-medium',
       artist: 'text-xs',
     };
@@ -65,7 +65,7 @@ const getPositionStyles = (position: number | null) => {
   // Default (position 4+ or no position)
   return {
     container: 'p-3',
-    positionBadge: 'w-7 h-7 text-xs',
+    positionBadge: 'w-8 h-7 text-xs px-1',
     title: 'text-sm font-medium',
     artist: 'text-xs',
   };
@@ -217,7 +217,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     submission.isNew ? 'ring-1 ring-primary/50' : ''
                   } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
-                  <PositionBadge position={spotNumber} badgeClassName={styles.positionBadge} />
+                  <PositionBadge position={spotNumber} badgeClassName={styles.positionBadge} showGlow={spotNumber === 1} />
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">

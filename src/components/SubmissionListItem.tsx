@@ -44,28 +44,28 @@ interface Submission {
 const getPositionStyles = (position: number | undefined) => {
   if (position === 1) {
     return {
-      container: 'py-4 px-4 border-2 border-podium-gold/50 bg-gradient-to-br from-podium-gold/10 to-transparent',
-      positionBadge: 'w-10 h-10 text-base',
+      container: 'py-4 px-4 border-2 border-yellow-500/40 bg-gradient-to-r from-yellow-500/15 via-amber-500/10 to-transparent shadow-lg shadow-yellow-500/10',
+      positionBadge: 'w-14 h-10 text-base px-2',
       title: 'text-base',
     };
   }
   if (position === 2) {
     return {
-      container: 'py-3.5 px-4 border-podium-silver/40 bg-podium-silver/10',
-      positionBadge: 'w-9 h-9 text-sm',
+      container: 'py-3.5 px-4 border border-slate-400/30 bg-gradient-to-r from-slate-400/10 to-transparent',
+      positionBadge: 'w-12 h-9 text-sm px-1.5',
       title: 'text-sm',
     };
   }
   if (position === 3) {
     return {
-      container: 'py-3 px-3 border-podium-bronze/35 bg-podium-bronze/5',
-      positionBadge: 'w-8 h-8 text-sm',
+      container: 'py-3 px-3 border border-amber-600/25 bg-gradient-to-r from-amber-600/8 to-transparent',
+      positionBadge: 'w-11 h-8 text-sm px-1.5',
       title: 'text-sm',
     };
   }
   return {
     container: 'py-2.5 px-3',
-    positionBadge: 'w-7 h-7 text-xs',
+    positionBadge: 'w-8 h-7 text-xs px-1',
     title: 'text-sm',
   };
 };
@@ -197,7 +197,7 @@ export function SubmissionListItem({
       >
         {/* Position number - Star overlay for #1 */}
         {position && (
-          <PositionBadge position={position} badgeClassName={styles.positionBadge} />
+          <PositionBadge position={position} badgeClassName={styles.positionBadge} showGlow={position === 1} />
         )}
 
         {/* Priority indicator */}
