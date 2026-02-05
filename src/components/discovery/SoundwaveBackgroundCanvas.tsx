@@ -49,11 +49,12 @@ function makeHslaFromCssVar(varName: string) {
 
 function spawnFromEdge(edge: number): { x: number; y: number } {
   switch (edge) {
-    case 0: return { x: Math.random(), y: -0.08 };
-    case 1: return { x: 1.08, y: Math.random() };
-    case 2: return { x: Math.random(), y: 1.08 };
-    case 3: return { x: -0.08, y: Math.random() };
-    default: return { x: Math.random(), y: -0.08 };
+    // Spawn INSIDE the viewport so particles are always visible
+    case 0: return { x: Math.random(), y: 0.02 };
+    case 1: return { x: 0.98, y: Math.random() };
+    case 2: return { x: Math.random(), y: 0.98 };
+    case 3: return { x: 0.02, y: Math.random() };
+    default: return { x: Math.random(), y: 0.02 };
   }
 }
 
@@ -67,9 +68,9 @@ function createParticle(id: number): Particle {
     y: spawn.y,
     vx: 0,
     vy: 0,
-    size: Math.random() * 3 + 2,
+    size: Math.random() * 2.5 + 2.5,
     opacity: 0,
-    targetOpacity: Math.random() * 0.5 + 0.3,
+    targetOpacity: Math.random() * 0.35 + 0.55,
     orbitAngle: Math.random() * Math.PI * 2,
     orbitSpeed: (Math.random() * 0.006 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
     orbitRadius: Math.random() * 0.012 + 0.006,
@@ -177,7 +178,7 @@ export function SoundwaveBackgroundCanvas() {
 
       // Cursor is always active when on the canvas (no timeout)
       const cursorActive = true;
-      const cursorInfluenceRadius = 0.3;
+      const cursorInfluenceRadius = 0.36;
       
       // Check if cursor is near wave center area (wider detection zone)
       const cursorNearWave = Math.abs(mouse.smoothY - 0.5) < 0.35;
@@ -218,9 +219,9 @@ export function SoundwaveBackgroundCanvas() {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < cursorInfluenceRadius) {
             const r = dist / cursorInfluenceRadius;
-            const influence = Math.exp(-r * r * 3.5);
+            const influence = Math.exp(-r * r * 2.6);
             // Push away smoothly proportional to distance from cursor (no abrupt sign flip)
-            y += dy * influence * 0.35;
+            y += dy * influence * 0.95;
           }
           
           if (i === 0) {
@@ -236,8 +237,8 @@ export function SoundwaveBackgroundCanvas() {
             const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDist < cursorInfluenceRadius) {
               const r = pDist / cursorInfluenceRadius;
-              const influence = Math.exp(-r * r * 3.5);
-              prevY += pdy * influence * 0.35;
+              const influence = Math.exp(-r * r * 2.6);
+              prevY += pdy * influence * 0.95;
             }
             
             const cpX = (prevX + x) / 2 * width;
@@ -265,20 +266,26 @@ export function SoundwaveBackgroundCanvas() {
           p.vy = 0;
         }
 
-        const lifeFade = p.life > 0.85 ? (1 - p.life) / 0.15 : p.life < 0.15 ? p.life / 0.15 : 1;
+        // Faster fade-in so particles are visible immediately after load
+        const lifeFade =
+          p.life > 0.97
+            ? (1 - p.life) / 0.03
+            : p.life < 0.12
+              ? p.life / 0.12
+              : 1;
         const targetOp = p.targetOpacity * lifeFade;
-        p.opacity += (targetOp - p.opacity) * 0.05;
+        p.opacity += (targetOp - p.opacity) * 0.08;
 
         let targetX = p.x;
         let targetY = p.y;
         
-        // Gentle drift
-        p.driftAngle += p.driftSpeed * 0.25;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.0003;
-        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.00025;
+        // Gentle drift (strong enough to visibly move across the screen)
+        p.driftAngle += p.driftSpeed * 0.6;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.0022;
+        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.0018;
         
         // Pull toward wave center band
-        const centerPull = (0.5 - p.y) * 0.00015;
+        const centerPull = (0.5 - p.y) * 0.001;
         targetY += centerPull;
 
         // Cursor interaction
@@ -304,7 +311,7 @@ export function SoundwaveBackgroundCanvas() {
           }
         }
 
-        const cursorStrength = cursorActive && dist < attractionRadius ? 0.01 : 0.001;
+        const cursorStrength = cursorActive && dist < attractionRadius ? 0.012 : 0.003;
         
         const targetVx = (targetX - p.x) * cursorStrength;
         const targetVy = (targetY - p.y) * cursorStrength;
@@ -323,15 +330,15 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.1) p.y = -0.1;
       }
 
-      // Draw particles (small sprinkles) - more visible
+      // Draw particles (small sprinkles) - extremely visible
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = hsla(0.9);
+      ctx.shadowBlur = 28;
+      ctx.shadowColor = hsla(1);
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, Math.max(0.18, p.opacity * 2));
+        ctx.globalAlpha = Math.min(1, Math.max(0.4, p.opacity * 3));
         ctx.fillStyle = hsla(1);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
