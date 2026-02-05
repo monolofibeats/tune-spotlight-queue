@@ -13,15 +13,21 @@ interface Particle {
   orbitAngle: number;
   orbitSpeed: number;
   orbitRadius: number;
-  waveX: number;
-  waveIndex: number;
-  waveLayer: number; // 0-2 for multiple wave lines
   isWaveParticle: boolean;
   driftAngle: number;
   driftSpeed: number;
   life: number;
   maxLife: number;
-  spawnEdge: number; // 0=top, 1=right, 2=bottom, 3=left
+  spawnEdge: number;
+}
+
+interface WaveLine {
+  points: number[];
+  phase: number;
+  speed: number;
+  amplitude: number;
+  yOffset: number;
+  opacity: number;
 }
 
 function parseHslTriplet(input: string) {
@@ -41,30 +47,19 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
-function generateWaveAmplitudes(count: number): number[] {
-  const amplitudes: number[] = [];
-  for (let i = 0; i < count; i++) {
-    const base = Math.sin(i * 0.2) * 0.4 + 0.5;
-    const noise = Math.random() * 0.3;
-    const envelope = Math.sin((i / count) * Math.PI);
-    amplitudes.push((base + noise) * envelope * 0.25 + 0.05);
-  }
-  return amplitudes;
-}
-
 function spawnFromEdge(edge: number): { x: number; y: number } {
   switch (edge) {
-    case 0: return { x: Math.random(), y: -0.05 }; // top
-    case 1: return { x: 1.05, y: Math.random() }; // right
-    case 2: return { x: Math.random(), y: 1.05 }; // bottom
-    case 3: return { x: -0.05, y: Math.random() }; // left
+    case 0: return { x: Math.random(), y: -0.05 };
+    case 1: return { x: 1.05, y: Math.random() };
+    case 2: return { x: Math.random(), y: 1.05 };
+    case 3: return { x: -0.05, y: Math.random() };
     default: return { x: Math.random(), y: -0.05 };
   }
 }
 
-function createParticle(id: number, isWave: boolean, waveIndex: number, waveX: number, waveLayer: number): Particle {
+function createParticle(id: number): Particle {
   const spawnEdge = Math.floor(Math.random() * 4);
-  const spawn = isWave ? { x: waveX, y: Math.random() * 0.4 + 0.3 } : spawnFromEdge(spawnEdge);
+  const spawn = spawnFromEdge(spawnEdge);
   
   return {
     id,
@@ -72,22 +67,51 @@ function createParticle(id: number, isWave: boolean, waveIndex: number, waveX: n
     y: spawn.y,
     vx: 0,
     vy: 0,
-    size: Math.random() * 3 + (isWave ? 2 : 1.5),
+    size: Math.random() * 2.5 + 1,
     opacity: 0,
-    targetOpacity: Math.random() * 0.3 + (isWave ? 0.2 : 0.1),
+    targetOpacity: Math.random() * 0.25 + 0.08,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.012 + 0.004) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.02 + 0.01,
-    waveX,
-    waveIndex,
-    waveLayer,
-    isWaveParticle: isWave,
+    orbitSpeed: (Math.random() * 0.01 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.018 + 0.008,
+    isWaveParticle: false,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.0004 + 0.0001,
+    driftSpeed: Math.random() * 0.0003 + 0.0001,
     life: 1,
-    maxLife: isWave ? 18 + Math.random() * 25 : 10 + Math.random() * 15,
+    maxLife: 12 + Math.random() * 18,
     spawnEdge,
   };
+}
+
+function createWaveLines(): WaveLine[] {
+  const lines: WaveLine[] = [];
+  const lineCount = 12;
+  
+  for (let i = 0; i < lineCount; i++) {
+    const pointCount = 80;
+    const points: number[] = [];
+    
+    // Generate smooth wave with multiple frequencies
+    for (let j = 0; j < pointCount; j++) {
+      const x = j / pointCount;
+      // Combine multiple sine waves for organic shape
+      const baseWave = Math.sin(x * Math.PI * 2 + i * 0.3) * 0.5;
+      const harmonic1 = Math.sin(x * Math.PI * 4 + i * 0.5) * 0.25;
+      const harmonic2 = Math.sin(x * Math.PI * 6 + i * 0.7) * 0.15;
+      const envelope = Math.sin(x * Math.PI); // Fade at edges
+      points.push((baseWave + harmonic1 + harmonic2) * envelope);
+    }
+    
+    lines.push({
+      points,
+      phase: i * 0.4,
+      speed: 0.3 + Math.random() * 0.4,
+      amplitude: 0.06 + (i % 4) * 0.025,
+      yOffset: (i - lineCount / 2) * 0.012,
+      opacity: 0.08 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.15,
+    });
+  }
+  
+  return lines;
 }
 
 export function SoundwaveBackgroundCanvas() {
@@ -96,36 +120,17 @@ export function SoundwaveBackgroundCanvas() {
   const mouseRef = useRef({ x: 0.5, y: 0.5, lastMoveTime: 0 });
   const timeRef = useRef(0);
   const particlesRef = useRef<Particle[]>([]);
-  const waveAmplitudesRef = useRef<number[][]>([]);
+  const waveLinesRef = useRef<WaveLine[]>([]);
 
   useEffect(() => {
-    const waveLayers = 3;
-    const waveCountPerLayer = 40;
-    const ambientCount = 50;
-    
-    // Generate different amplitudes for each wave layer
-    const allAmplitudes: number[][] = [];
-    for (let layer = 0; layer < waveLayers; layer++) {
-      allAmplitudes.push(generateWaveAmplitudes(waveCountPerLayer));
-    }
-    waveAmplitudesRef.current = allAmplitudes;
-
+    const ambientCount = 60;
     const particles: Particle[] = [];
     
-    // Wave particles for each layer
-    for (let layer = 0; layer < waveLayers; layer++) {
-      for (let i = 0; i < waveCountPerLayer; i++) {
-        const waveX = 0.05 + (i / waveCountPerLayer) * 0.9;
-        particles.push(createParticle(layer * waveCountPerLayer + i, true, i, waveX, layer));
-      }
-    }
-    
-    // Ambient floating particles
     for (let i = 0; i < ambientCount; i++) {
-      particles.push(createParticle(waveLayers * waveCountPerLayer + i, false, -1, Math.random(), -1));
+      particles.push(createParticle(i));
     }
-
     particlesRef.current = particles;
+    waveLinesRef.current = createWaveLines();
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const hsla = makeHslaFromCssVar("--primary");
@@ -166,24 +171,60 @@ export function SoundwaveBackgroundCanvas() {
 
       const mouse = mouseRef.current;
       const ps = particlesRef.current;
-      const allAmps = waveAmplitudesRef.current;
+      const waves = waveLinesRef.current;
 
       const timeSinceMove = Date.now() - mouse.lastMoveTime;
       const cursorActive = timeSinceMove < 1000;
 
+      // Draw flowing wave lines
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      
+      for (const wave of waves) {
+        ctx.beginPath();
+        ctx.strokeStyle = hsla(wave.opacity);
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = hsla(wave.opacity * 0.6);
+        
+        const points = wave.points;
+        const centerY = 0.5 + wave.yOffset;
+        
+        for (let i = 0; i < points.length; i++) {
+          const x = 0.05 + (i / points.length) * 0.9;
+          // Animate the wave with time
+          const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.05);
+          const y = centerY + animatedY * wave.amplitude;
+          
+          if (i === 0) {
+            ctx.moveTo(x * width, y * height);
+          } else {
+            // Use quadratic curves for smoothness
+            const prevX = 0.05 + ((i - 1) / points.length) * 0.9;
+            const prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.05);
+            const prevY = centerY + prevAnimatedY * wave.amplitude;
+            
+            const cpX = (prevX + x) / 2 * width;
+            const cpY = (prevY + y) / 2 * height;
+            ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
+          }
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Update and draw particles
       for (const p of ps) {
         p.life -= dt / p.maxLife;
         
         if (p.life <= 0) {
-          // Respawn from edges
           p.spawnEdge = Math.floor(Math.random() * 4);
-          const spawn = p.isWaveParticle 
-            ? { x: p.waveX + (Math.random() - 0.5) * 0.1, y: Math.random() > 0.5 ? -0.05 : 1.05 }
-            : spawnFromEdge(p.spawnEdge);
+          const spawn = spawnFromEdge(p.spawnEdge);
           p.x = spawn.x;
           p.y = spawn.y;
           p.life = 1;
-          p.maxLife = p.isWaveParticle ? 18 + Math.random() * 25 : 10 + Math.random() * 15;
+          p.maxLife = 12 + Math.random() * 18;
           p.opacity = 0;
           p.vx = 0;
           p.vy = 0;
@@ -193,36 +234,30 @@ export function SoundwaveBackgroundCanvas() {
         const targetOp = p.targetOpacity * lifeFade;
         p.opacity += (targetOp - p.opacity) * 0.025;
 
+        // Drift toward wave center area
         let targetX = p.x;
         let targetY = p.y;
-
-        if (p.isWaveParticle && p.waveLayer >= 0) {
-          const amps = allAmps[p.waveLayer] || [];
-          const amplitude = amps[p.waveIndex] || 0.12;
-          // Each layer has different phase and y-offset
-          const layerOffset = (p.waveLayer - 1) * 0.08;
-          const phaseOffset = p.waveLayer * 0.8;
-          const waveY = 0.5 + layerOffset + Math.sin(t * 1.2 + p.waveIndex * 0.12 + phaseOffset) * amplitude;
-          targetX = p.waveX;
-          targetY = waveY;
-        } else {
-          p.driftAngle += p.driftSpeed * 0.4;
-          targetX = p.x + Math.cos(p.driftAngle) * 0.0006;
-          targetY = p.y + Math.sin(p.driftAngle * 0.6) * 0.0005;
-        }
+        
+        p.driftAngle += p.driftSpeed * 0.4;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.0005;
+        targetY = p.y + Math.sin(p.driftAngle * 0.6) * 0.0004;
+        
+        // Gentle pull toward center band
+        const centerPull = (0.5 - p.y) * 0.0003;
+        targetY += centerPull;
 
         // Cursor interaction
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const attractionRadius = 0.22;
-        const orbitDistance = 0.06;
+        const attractionRadius = 0.2;
+        const orbitDistance = 0.05;
 
         if (cursorActive && dist < attractionRadius) {
           const influence = Math.pow(1 - dist / attractionRadius, 2.5);
           
           if (dist > orbitDistance) {
-            const attractStrength = 0.00015 * influence;
+            const attractStrength = 0.00012 * influence;
             targetX = p.x + dx * attractStrength * 60;
             targetY = p.y + dy * attractStrength * 60;
           } else {
@@ -234,30 +269,29 @@ export function SoundwaveBackgroundCanvas() {
           }
         }
 
-        const returnStrength = p.isWaveParticle ? 0.006 : 0.002;
-        const cursorStrength = cursorActive && dist < attractionRadius ? 0.018 : returnStrength;
+        const cursorStrength = cursorActive && dist < attractionRadius ? 0.015 : 0.002;
         
         const targetVx = (targetX - p.x) * cursorStrength;
         const targetVy = (targetY - p.y) * cursorStrength;
         
-        p.vx += (targetVx - p.vx) * 0.025;
-        p.vy += (targetVy - p.vy) * 0.025;
-        p.vx *= 0.988;
-        p.vy *= 0.988;
+        p.vx += (targetVx - p.vx) * 0.02;
+        p.vy += (targetVy - p.vy) * 0.02;
+        p.vx *= 0.99;
+        p.vy *= 0.99;
 
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < -0.15) p.x = 1.15;
-        if (p.x > 1.15) p.x = -0.15;
-        if (p.y < -0.15) p.y = 1.15;
-        if (p.y > 1.15) p.y = -0.15;
+        if (p.x < -0.1) p.x = 1.1;
+        if (p.x > 1.1) p.x = -0.1;
+        if (p.y < -0.1) p.y = 1.1;
+        if (p.y > 1.1) p.y = -0.1;
       }
 
       // Draw particles
       ctx.save();
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = hsla(0.35);
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = hsla(0.3);
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
@@ -345,7 +379,7 @@ export function SoundwaveBackgroundCanvas() {
         }}
       />
 
-      {/* Canvas particles */}
+      {/* Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
