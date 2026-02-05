@@ -62,17 +62,15 @@ export function LiveCounter({
     return () => clearInterval(interval);
   }, [displayValue, startValue, incrementInterval]);
 
+  // Format number with commas for readability
   const formatNumber = (num: number) => {
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return num.toString();
+    return num.toLocaleString();
   };
 
   return (
     <motion.span
       ref={ref}
-      className={className}
+      className={`tabular-nums ${className}`}
       initial={{ opacity: 0, scale: 0.5 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.5, type: "spring" }}
