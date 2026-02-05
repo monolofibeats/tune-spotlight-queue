@@ -171,19 +171,19 @@ export function SoundwaveBackgroundCanvas() {
       const ps = particlesRef.current;
       const waves = waveLinesRef.current;
 
-      // Smooth mouse position for wave interaction
-      mouse.smoothX += (mouse.x - mouse.smoothX) * 0.04;
-      mouse.smoothY += (mouse.y - mouse.smoothY) * 0.04;
+      // Smooth mouse position for wave interaction - very slow for ultra smooth effect
+      mouse.smoothX += (mouse.x - mouse.smoothX) * 0.02;
+      mouse.smoothY += (mouse.y - mouse.smoothY) * 0.02;
 
-      const timeSinceMove = Date.now() - mouse.lastMoveTime;
-      const cursorActive = timeSinceMove < 1500;
-      const cursorInfluenceRadius = 0.25;
+      // Cursor is always active when on the canvas (no timeout)
+      const cursorActive = true;
+      const cursorInfluenceRadius = 0.3;
       
-      // Check if cursor is near wave center area
-      const cursorNearWave = cursorActive && Math.abs(mouse.smoothY - 0.5) < 0.2;
+      // Check if cursor is near wave center area (wider detection zone)
+      const cursorNearWave = Math.abs(mouse.smoothY - 0.5) < 0.35;
       
-      // Smooth wave expansion (waves spread apart when cursor is near)
-      const targetExpansion = cursorNearWave ? 1.8 : 1;
+      // Very smooth wave expansion (waves spread apart when cursor is near)
+      const targetExpansion = cursorNearWave ? 2.2 : 1;
       waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.02;
 
       // Draw flowing wave lines with smooth cursor interaction
