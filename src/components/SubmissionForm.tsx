@@ -107,7 +107,6 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     
     return '';
   };
-  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
 
   // Check user auth state
   useEffect(() => {
