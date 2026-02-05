@@ -32,32 +32,32 @@ const Discovery = () => {
   const offlineStreamers = streamers.filter(s => !s.is_live);
 
   const stats = [
-    { label: 'Active Streamers', value: streamers.length, icon: Users, isLive: false },
-    { label: 'Songs Reviewed', value: 10847, icon: Music, isLive: true },
-    { label: 'Live Now', value: liveStreamers.length, icon: Radio, isLive: false },
-    { label: 'Weekly Views', value: '50K+', icon: TrendingUp, isLive: false },
+    { label: t('discovery.activeStreamers'), value: streamers.length, icon: Users, isLive: false },
+    { label: t('discovery.songsReviewed'), value: 10847, icon: Music, isLive: true },
+    { label: t('discovery.liveNow'), value: liveStreamers.length, icon: Radio, isLive: false },
+    { label: t('discovery.weeklyViews'), value: '50K+', icon: TrendingUp, isLive: false },
   ];
 
   const faqs = [
     {
-      question: 'What is UpStar?',
-      answer: 'UpStar is a platform that connects music artists with streamers who review and react to songs live on stream. Get real-time feedback from content creators and their audiences.',
+      question: t('discovery.faq1q'),
+      answer: t('discovery.faq1a'),
     },
     {
-      question: 'How do I submit my music?',
-      answer: 'Simply visit a streamer\'s page, paste your song link (Spotify, YouTube, SoundCloud, etc.) or upload an audio file, and submit. You can optionally pay to skip the queue for priority review.',
+      question: t('discovery.faq2q'),
+      answer: t('discovery.faq2a'),
     },
     {
-      question: 'How do streamers join?',
-      answer: 'Streamers can apply to join the platform by clicking "Become a Streamer" below. Applications are reviewed within 24-48 hours. Once approved, you\'ll get your own customizable page.',
+      question: t('discovery.faq3q'),
+      answer: t('discovery.faq3a'),
     },
     {
-      question: 'Is it free to submit music?',
-      answer: 'Each streamer sets their own pricing. Some offer free submissions, while others may charge for submissions or priority queue placement. Check each streamer\'s page for their specific rates.',
+      question: t('discovery.faq4q'),
+      answer: t('discovery.faq4a'),
     },
     {
-      question: 'What platforms are supported?',
-      answer: 'We support Spotify, Apple Music, SoundCloud, YouTube, and direct file uploads (up to 100MB). If your music is hosted elsewhere, you can paste any link or upload the file directly.',
+      question: t('discovery.faq5q'),
+      answer: t('discovery.faq5a'),
     },
   ];
 
