@@ -261,8 +261,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     });
   };
 
-  const handleSkipTheLine = () => {
-    // No longer require song URL - can skip with just audio file
+  const handleSkipTheLine = async () => {
+    // Upload audio file first if present (before opening dialog)
+    if (audioFile && !uploadedAudioUrl) {
+      try {
+        const url = await uploadAudioFile();
+        setUploadedAudioUrl(url);
+      } catch (error) {
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload audio file",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     setShowPriorityDialog(true);
   };
 
