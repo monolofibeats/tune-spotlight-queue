@@ -349,8 +349,8 @@ const Discovery = () => {
               { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
               { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
-              <AnimatedCard key={item.step} delay={index * 0.15}>
-                <div className="relative p-8 text-center">
+              <AnimatedCard key={item.step} delay={index * 0.15} className="h-full">
+                <div className="relative p-8 text-center h-full flex flex-col min-h-[280px]">
                   <motion.span 
                     className="absolute top-4 left-4 text-xs font-mono text-primary/50"
                     animate={{ opacity: [0.5, 1, 0.5] }}
@@ -363,10 +363,16 @@ const Discovery = () => {
                     whileHover={{ scale: 1.1, rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <span className="text-2xl font-bold text-primary">{index + 1}</span>
+                    <motion.span 
+                      className="text-2xl font-bold text-primary"
+                      whileHover={{ rotate: [0, -15, 15, 0] }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      {index + 1}
+                    </motion.span>
                   </motion.div>
                   <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
                 </div>
               </AnimatedCard>
             ))}
