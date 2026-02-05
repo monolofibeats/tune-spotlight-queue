@@ -70,17 +70,20 @@ function createParticle(id: number): Particle {
     y: Math.random(),
     vx: (Math.random() - 0.5) * 0.002,
     vy: (Math.random() - 0.5) * 0.001,
-    size: Math.random() * 6 + 4, // Length of the sprinkle line
+    size: Math.random() * 8 + 5, // Length of the sprinkle line
     opacity: Math.random() * 0.4 + 0.2,
-    targetOpacity: Math.random() * 0.5 + 0.3,
+    targetOpacity: Math.random() * 0.5 + 0.4,
     orbitAngle: Math.random() * Math.PI * 2,
-    orbitSpeed: (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
-    orbitRadius: Math.random() * 0.015 + 0.008,
+    orbitSpeed: (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+    orbitRadius: Math.random() * 0.02 + 0.01,
     driftAngle: Math.random() * Math.PI * 2,
-    driftSpeed: Math.random() * 0.0004 + 0.0002,
-    life: Math.random(), // Start at random life stage so they don't all fade together
-    maxLife: 20 + Math.random() * 30,
+    driftSpeed: Math.random() * 0.0006 + 0.0003,
+    life: Math.random(),
+    maxLife: 25 + Math.random() * 35,
     spawnEdge: 0,
+    attached: false,
+    attachedTime: 0,
+    gatheredByCursor: false,
   };
 }
 
