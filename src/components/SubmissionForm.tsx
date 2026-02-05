@@ -573,7 +573,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
             <div className="space-y-3">
               {/* Step 1: Music Link - Required field with glow */}
-              <div className={getFieldGlowClass(0)}>
+              <div className={`relative ${getFieldGlowClass(0)}`}>
+                <CompletionTick fieldStep={0} />
                 <label className="text-xs text-muted-foreground mb-1.5 block">
                   {t('submission.linkLabel')} <span className="text-destructive">*</span>
                 </label>
