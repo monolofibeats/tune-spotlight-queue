@@ -320,19 +320,31 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.1) p.y = -0.1;
       }
 
-      // Draw particles (small sprinkles) - extremely visible
+      // Draw particles as small line sprinkles floating across the background
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.shadowBlur = 28;
-      ctx.shadowColor = hsla(1);
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = hsla(0.6);
+      ctx.lineCap = "round";
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, Math.max(0.4, p.opacity * 3));
-        ctx.fillStyle = hsla(1);
+        ctx.globalAlpha = Math.min(1, Math.max(0.25, p.opacity * 1.8));
+        ctx.strokeStyle = hsla(1);
+        ctx.lineWidth = 1.5;
+        
+        // Draw as a small line/sprinkle oriented by drift angle
+        const lineLength = p.size;
+        const angle = p.driftAngle;
+        const x = p.x * width;
+        const y = p.y * height;
+        const dx = Math.cos(angle) * lineLength;
+        const dy = Math.sin(angle) * lineLength;
+        
         ctx.beginPath();
-        ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
+        ctx.lineTo(x + dx * 0.5, y + dy * 0.5);
+        ctx.stroke();
       }
       
       ctx.restore();
