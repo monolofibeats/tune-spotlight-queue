@@ -410,9 +410,11 @@ export function SoundwaveBackgroundCanvas() {
         if (p.y > 1.08) p.y = -0.08;
       }
 
-      // Draw particles as small line sprinkles - same color as wave lines (slightly brighter)
+      // Draw particles as small line sprinkles - simplified on mobile
       ctx.save();
-      ctx.globalCompositeOperation = "lighter";
+      if (!isMobile) {
+        ctx.globalCompositeOperation = "lighter";
+      }
       ctx.lineCap = "round";
       
       for (const p of ps) {
@@ -430,12 +432,16 @@ export function SoundwaveBackgroundCanvas() {
         const distFromCenter = Math.abs(p.y - 0.5);
         const waveProximity = distFromCenter < 0.15 ? (1 - distFromCenter / 0.15) : 0;
         
-        // Same color as wave lines
+        // Same color as wave lines - simplified on mobile
         ctx.globalAlpha = Math.min(1, 0.1 + p.opacity * 0.4 + waveProximity * 0.25);
         ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = 1.5 + waveProximity * 0.5;
-        ctx.shadowBlur = 5 + waveProximity * 4;
-        ctx.shadowColor = hsla(0.3);
+        ctx.lineWidth = isMobile ? 1 : 1.5 + waveProximity * 0.5;
+        
+        // Skip shadows on mobile
+        if (!isMobile) {
+          ctx.shadowBlur = 5 + waveProximity * 4;
+          ctx.shadowColor = hsla(0.3);
+        }
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
