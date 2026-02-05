@@ -277,13 +277,11 @@ const Discovery = () => {
                   </li>
                 ))}
               </ul>
+              <Button size="lg" className="gap-2" onClick={() => setShowApplicationForm(true)}>
+                Apply to Join
+                <ArrowRight className="w-4 h-4" />
+              </Button>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="gap-2">
-                    Apply to Join
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Apply to Become a Streamer</DialogTitle>
