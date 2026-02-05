@@ -62,6 +62,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+
+        podium: {
+          gold: {
+            DEFAULT: "hsl(var(--podium-gold))",
+            foreground: "hsl(var(--podium-gold-foreground))",
+          },
+          silver: {
+            DEFAULT: "hsl(var(--podium-silver))",
+            foreground: "hsl(var(--podium-silver-foreground))",
+          },
+          bronze: {
+            DEFAULT: "hsl(var(--podium-bronze))",
+            foreground: "hsl(var(--podium-bronze-foreground))",
+          },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
