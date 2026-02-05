@@ -379,7 +379,8 @@ const Discovery = () => {
                 Monetize Your Music Reviews
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with artists worldwide.
+                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with{' '}
+                <BlurReveal>artists worldwide</BlurReveal>.
               </p>
               <ul className="space-y-4 mb-8">
                 {[
