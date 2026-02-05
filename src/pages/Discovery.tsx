@@ -9,7 +9,7 @@ import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { CursorFollower } from '@/components/discovery/CursorFollower';
-import { SoundwaveBackground } from '@/components/discovery/SoundwaveBackground';
+import { SoundwaveBackgroundCanvas } from '@/components/discovery/SoundwaveBackgroundCanvas';
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { LiveCounter } from '@/components/discovery/LiveCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
@@ -63,10 +63,9 @@ const Discovery = () => {
 
   return (
     <>
-      <SoundwaveBackground />
+      <SoundwaveBackgroundCanvas />
       <div className="min-h-screen relative overflow-hidden" style={{ background: 'transparent' }}>
         <CursorFollower />
-      
       {/* Header */}
       <motion.header 
         className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/20"
