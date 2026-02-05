@@ -8,13 +8,14 @@ import { StreamSessionProvider } from "@/hooks/useStreamSession";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import Discovery from "./pages/Discovery";
+import StreamerPage from "./pages/StreamerPage";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
- import Imprint from "./pages/Imprint";
+import Imprint from "./pages/Imprint";
 
 const queryClient = new QueryClient();
 
