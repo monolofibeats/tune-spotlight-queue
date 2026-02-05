@@ -217,13 +217,13 @@ const Discovery = () => {
               >
                 <LiveCounter startValue={10847} suffix="+" />
               </div>
-              <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
+              <div className="text-lg md:text-xl text-muted-foreground">{t('discovery.songsReviewed')}</div>
               <motion.p 
                 className="text-sm text-muted-foreground/60 mt-2"
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                +1 every second (live)
+                {t('discovery.livePerSecond')}
               </motion.p>
             </div>
           </AnimatedCard>
