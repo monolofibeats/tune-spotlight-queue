@@ -464,13 +464,13 @@ const Discovery = () => {
                     <AnimatedCounter value={500} />
                     <span className="text-primary">+</span>
                   </motion.div>
-                  <div className="text-muted-foreground text-lg mb-6">Average monthly earnings</div>
+                  <div className="text-muted-foreground text-lg mb-6">{t('discovery.avgMonthlyEarnings')}</div>
                   <motion.div 
                     className="text-sm text-muted-foreground p-4 rounded-lg bg-background/50 border border-border/30"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    Top streamers earn <span className="text-primary font-semibold">$2,000+</span>/month from music reviews
+                    {t('discovery.topStreamersEarn')} <span className="text-primary font-semibold">$2,000+</span>{t('discovery.perMonth')}
                   </motion.div>
                 </div>
               </motion.div>
