@@ -352,13 +352,21 @@ export function SoundwaveBackgroundCanvas() {
         ctx.strokeStyle = hsla(1);
         ctx.lineWidth = 1.5;
         
-        // Draw as a small line/sprinkle oriented by drift angle
+        // Draw as a small line/sprinkle
         const lineLength = p.size;
         const angle = p.driftAngle;
         const x = p.x * width;
         const y = p.y * height;
         const dx = Math.cos(angle) * lineLength;
         const dy = Math.sin(angle) * lineLength;
+        
+        // Particles near wave center are more opaque and longer (becoming part of wave)
+        const distFromCenter = Math.abs(p.y - 0.5);
+        const inWaveZone = distFromCenter < 0.15;
+        const waveIntegration = inWaveZone ? (1 - distFromCenter / 0.15) : 0;
+        
+        ctx.globalAlpha = Math.min(1, Math.max(0.2, p.opacity * 1.5 + waveIntegration * 0.4));
+        ctx.lineWidth = 1.5 + waveIntegration * 1;
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
