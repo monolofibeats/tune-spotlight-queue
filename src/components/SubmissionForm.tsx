@@ -57,6 +57,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
