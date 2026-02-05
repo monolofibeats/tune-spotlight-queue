@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, useSpring } from 'framer-motion';
-import upstarStar from '@/assets/upstar-star.png';
+import upstarStar from '@/assets/upstar-star-cursor.png';
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);

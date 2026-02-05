@@ -88,18 +88,22 @@ export function SoundwaveBackground() {
         const chaoticY = particle.baseY + floatY;
         
         // Interpolate between chaotic and wave based on scroll
-        const x = chaoticX + (waveX - chaoticX) * formation;
-        const y = chaoticY + (waveY - chaoticY) * formation + velocityDistortion;
-        
+        const xRaw = chaoticX + (waveX - chaoticX) * formation;
+        const yRaw = chaoticY + (waveY - chaoticY) * formation + velocityDistortion;
+
         // Pulsing opacity based on formation and position - keep high visibility
-        const pulseOpacity = particle.opacity * (0.85 + Math.sin(time * 2 + i * 0.1) * 0.15);
-        const formationOpacity = pulseOpacity * (0.7 + formation * 0.3);
-        
+        const pulseOpacityRaw = particle.opacity * (0.85 + Math.sin(time * 2 + i * 0.1) * 0.15);
+        const formationOpacityRaw = pulseOpacityRaw * (0.7 + formation * 0.3);
+
+        const x = Number.isFinite(xRaw) ? xRaw : particle.x;
+        const y = Number.isFinite(yRaw) ? yRaw : particle.y;
+        const opacity = Number.isFinite(formationOpacityRaw) ? formationOpacityRaw : particle.opacity;
+
         return {
           ...particle,
           x,
           y,
-          opacity: formationOpacity,
+          opacity,
         };
       }));
       
