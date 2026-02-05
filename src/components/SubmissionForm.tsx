@@ -612,7 +612,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                 />
                 {platform && (
                   <div className="mt-1.5">
-                    <Badge variant="queue" className="text-xs">
+                    <Badge variant="platform" className="text-xs">
                       {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
                     </Badge>
                   </div>
