@@ -197,7 +197,7 @@ export function SubmissionListItem({
       >
         {/* Position number - Star overlay for #1 */}
         {position && (
-          <PositionBadge position={position} badgeClassName={styles.positionBadge} />
+          <PositionBadge position={position} badgeClassName={styles.positionBadge} showGlow={position === 1} />
         )}
 
         {/* Priority indicator */}

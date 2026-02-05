@@ -217,7 +217,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     submission.isNew ? 'ring-1 ring-primary/50' : ''
                   } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
-                  <PositionBadge position={spotNumber} badgeClassName={styles.positionBadge} />
+                  <PositionBadge position={spotNumber} badgeClassName={styles.positionBadge} showGlow={spotNumber === 1} />
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
