@@ -545,7 +545,8 @@ const Discovery = () => {
 
       <LanguageSwitcher />
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 
