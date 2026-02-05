@@ -130,6 +130,7 @@ serve(async (req) => {
         message: message || "",
         platform: platform,
         email: customerEmail || "",
+        audio_file_url: audioFileUrl || "",
       },
     });
 

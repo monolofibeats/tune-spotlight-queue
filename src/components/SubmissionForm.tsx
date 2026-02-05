@@ -316,15 +316,19 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Upload audio file FIRST before redirecting to Stripe
+      const audioFileUrl = await uploadAudioFile();
+      
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
           amount: submissionPrice,
-          songUrl,
+          songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
           message,
           email: user?.email || email,
           platform: platform || 'other',
+          audioFileUrl, // Pass the uploaded file path
         },
       });
 
