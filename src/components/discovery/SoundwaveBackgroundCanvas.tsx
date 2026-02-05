@@ -223,14 +223,14 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Only distort wave when cursor is actually touching the wave area
-          if (cursorTouchingWave) {
+          // Smooth cursor distortion using the faded influence
+          if (cursorInfluence > 0.001) {
             const dx = x - mouse.smoothX;
             const distX = Math.abs(dx);
             if (distX < cursorInfluenceRadius) {
-              const influence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
+              const spatialInfluence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
               const waveOffsetFromCenter = wave.currentYOffset;
-              const pushAmount = waveOffsetFromCenter * influence * 0.6; // More subtle
+              const pushAmount = waveOffsetFromCenter * spatialInfluence * cursorInfluence * 0.6;
               y += pushAmount;
             }
           }
