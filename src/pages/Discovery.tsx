@@ -9,7 +9,7 @@ import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { CursorFollower } from '@/components/discovery/CursorFollower';
-import { SoundwaveBackground } from '@/components/discovery/SoundwaveBackground';
+import { SoundwaveBackgroundCanvas } from '@/components/discovery/SoundwaveBackgroundCanvas';
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { LiveCounter } from '@/components/discovery/LiveCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
