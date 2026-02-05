@@ -230,14 +230,14 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Always apply to previous point too for consistency
+            // Apply the same gaussian field to previous point for continuity
             const pdx = prevX - mouse.smoothX;
             const pdy = prevY - mouse.smoothY;
             const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDist < cursorInfluenceRadius) {
-              const influence = Math.pow(1 - pDist / cursorInfluenceRadius, 4);
-              const expandDirection = prevY > mouse.smoothY ? 1 : -1;
-              prevY += expandDirection * influence * 0.04;
+              const r = pDist / cursorInfluenceRadius;
+              const influence = Math.exp(-r * r * 3.5);
+              prevY += pdy * influence * 0.35;
             }
             
             const cpX = (prevX + x) / 2 * width;
