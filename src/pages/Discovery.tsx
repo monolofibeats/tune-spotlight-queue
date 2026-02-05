@@ -489,10 +489,10 @@ const Discovery = () => {
             className="text-center mb-14"
           >
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
-              Frequently Asked Questions
+              {t('discovery.faqTitle')}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Everything you need to know about UpStar
+              {t('discovery.faqSubtitle')}
             </p>
           </motion.div>
 
