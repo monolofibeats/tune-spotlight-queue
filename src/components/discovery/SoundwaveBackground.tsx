@@ -35,7 +35,7 @@ export function SoundwaveBackground() {
   const particles = useMemo(() => {
     const count = 180;
     const particleList: WaveParticle[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       particleList.push({
         id: i,
@@ -43,14 +43,14 @@ export function SoundwaveBackground() {
         baseY: 50 + (Math.random() - 0.5) * 60,
         x: (i / count) * 100,
         y: 50,
-        size: Math.random() * 5 + 3, // Larger particles
-        opacity: Math.random() * 0.5 + 0.5, // Higher base opacity
+        size: Math.random() * 7 + 5, // MUCH larger so it's clearly visible
+        opacity: Math.random() * 0.2 + 0.8, // Always bright
         waveOffset: Math.random() * Math.PI * 2,
         floatOffset: Math.random() * Math.PI * 2,
         floatSpeed: 0.3 + Math.random() * 0.4,
       });
     }
-    
+
     return particleList;
   }, []);
 
