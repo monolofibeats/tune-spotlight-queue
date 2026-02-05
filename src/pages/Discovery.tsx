@@ -316,7 +316,7 @@ const Discovery = () => {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
-              <p className="text-muted-foreground">Loading streamers...</p>
+              <p className="text-muted-foreground">{t('discovery.loadingStreamers')}</p>
             </div>
           )}
 
