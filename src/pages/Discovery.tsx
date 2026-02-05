@@ -329,12 +329,12 @@ const Discovery = () => {
                 >
                   <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-6" />
                 </motion.div>
-                <h3 className="text-xl font-semibold mb-3">No streamers yet</h3>
-                <p className="text-muted-foreground mb-6">Be the first to join as a streamer!</p>
+                <h3 className="text-xl font-semibold mb-3">{t('discovery.noStreamersYet')}</h3>
+                <p className="text-muted-foreground mb-6">{t('discovery.beFirstStreamer')}</p>
                 <GlowButton 
                   onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Apply Now
+                  {t('discovery.applyNow')}
                 </GlowButton>
               </div>
             </AnimatedCard>
