@@ -14,6 +14,7 @@ import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+ import Imprint from "./pages/Imprint";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                   <Route path="/imprint" element={<Imprint />} />
                   <Route path="/library" element={<Library />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin/login" element={<Auth />} />
