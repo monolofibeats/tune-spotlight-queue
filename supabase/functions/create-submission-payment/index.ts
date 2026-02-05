@@ -130,7 +130,9 @@ serve(async (req) => {
         message: message || "",
         platform: platform,
         email: customerEmail || "",
+        // Store both keys to be resilient across verifier versions
         audio_file_url: audioFileUrl || "",
+        audioFileUrl: audioFileUrl || "",
       },
     });
 
