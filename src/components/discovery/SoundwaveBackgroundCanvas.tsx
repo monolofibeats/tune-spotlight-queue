@@ -314,32 +314,36 @@ export function SoundwaveBackgroundCanvas() {
           targetOp = p.targetOpacity * 0.25;
         }
         
-        // Cursor interaction - very gentle gathering
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const gatherRadius = 0.15;
-        const orbitDistance = 0.025;
-        const cursorNearby = dist < gatherRadius;
-        
-        if (cursorNearby) {
-          p.gatheredByCursor = true;
-          const influence = Math.pow(1 - dist / gatherRadius, 2);
+        // Cursor interaction - very gentle gathering (desktop only)
+        if (enableCursorInteraction) {
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const gatherRadius = 0.15;
+          const orbitDistance = 0.025;
+          const cursorNearby = dist < gatherRadius;
           
-          if (dist > orbitDistance) {
-            // Very gentle pull toward cursor
-            const attractStrength = 0.00004 * influence;
-            p.vx += dx * attractStrength;
-            p.vy += dy * attractStrength;
+          if (cursorNearby) {
+            p.gatheredByCursor = true;
+            const influence = Math.pow(1 - dist / gatherRadius, 2);
+            
+            if (dist > orbitDistance) {
+              // Very gentle pull toward cursor
+              const attractStrength = 0.00004 * influence;
+              p.vx += dx * attractStrength;
+              p.vy += dy * attractStrength;
+            } else {
+              // Very slow orbit around cursor
+              p.orbitAngle += p.orbitSpeed * (1 + influence * 0.3);
+              const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * 0.5;
+              const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * 0.5;
+              p.vx += (mouse.x + orbitX - p.x) * 0.004;
+              p.vy += (mouse.y + orbitY - p.y) * 0.004;
+            }
+            targetOp = p.targetOpacity * 1.1;
           } else {
-            // Very slow orbit around cursor
-            p.orbitAngle += p.orbitSpeed * (1 + influence * 0.3);
-            const orbitX = Math.cos(p.orbitAngle) * p.orbitRadius * 0.5;
-            const orbitY = Math.sin(p.orbitAngle) * p.orbitRadius * 0.5;
-            p.vx += (mouse.x + orbitX - p.x) * 0.004;
-            p.vy += (mouse.y + orbitY - p.y) * 0.004;
+            p.gatheredByCursor = false;
           }
-          targetOp = p.targetOpacity * 1.1;
         } else {
           p.gatheredByCursor = false;
         }
