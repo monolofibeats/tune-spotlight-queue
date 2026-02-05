@@ -183,14 +183,15 @@ export function SoundwaveBackgroundCanvas() {
 
       // Cursor is always active when on the canvas (no timeout)
       const cursorActive = true;
-      const cursorInfluenceRadius = 0.36;
+      const cursorInfluenceRadius = 0.15; // Smaller radius - only when touching
       
-      // Check if cursor is near wave center area (wider detection zone)
-      const cursorNearWave = Math.abs(mouse.smoothY - 0.5) < 0.35;
+      // Check if cursor is actually touching the wave band (tighter detection)
+      const waveHeight = 0.12; // Approximate vertical extent of wave area
+      const cursorTouchingWave = Math.abs(mouse.smoothY - 0.5) < waveHeight;
       
-      // Very smooth wave expansion (waves spread apart when cursor is near)
-      const targetExpansion = cursorNearWave ? 2.2 : 1;
-      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
+      // Very smooth wave expansion (only when cursor touches the wave)
+      const targetExpansion = cursorTouchingWave ? 2.0 : 1;
+      waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.012;
 
       // Draw flowing wave lines with smooth cursor interaction
       ctx.save();
