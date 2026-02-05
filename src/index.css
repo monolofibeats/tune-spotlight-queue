@@ -51,6 +51,14 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 15%;
     --sidebar-ring: 50 100% 50%;
+
+    /* Podium tokens (Top 3 queue spots) */
+    --podium-gold: var(--primary);
+    --podium-gold-foreground: var(--primary-foreground);
+    --podium-silver: 0 0% 78%;
+    --podium-silver-foreground: 0 0% 2%;
+    --podium-bronze: 28 80% 55%;
+    --podium-bronze-foreground: 0 0% 2%;
   }
 
   .dark {
