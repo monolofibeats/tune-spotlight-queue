@@ -37,7 +37,7 @@ interface SpotBiddingDialogProps {
 }
 
 const SPOT_ICONS = [Crown, Medal, Award];
-const SPOT_COLORS = ['text-yellow-500', 'text-slate-400', 'text-amber-600'];
+const SPOT_COLORS = ['text-podium-gold', 'text-podium-silver', 'text-podium-bronze'];
 
 export function SpotBiddingDialog({
   open,
