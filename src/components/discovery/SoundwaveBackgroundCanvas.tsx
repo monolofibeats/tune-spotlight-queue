@@ -212,17 +212,16 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Smooth cursor wave distortion - gentler gaussian for round curves
+          // Ultra-smooth cursor wave distortion using smootherstep
           const dx = x - mouse.smoothX;
-          const dy = y - mouse.smoothY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < cursorInfluenceRadius) {
-            const r = dist / cursorInfluenceRadius;
-            // Smoother gaussian with gentler falloff to avoid bulges
-            const influence = Math.exp(-r * r * 4.0) * (1 - r * r);
-            // Push waves up/down based on their position relative to cursor
-            const pushDirection = y > mouse.smoothY ? 1 : -1;
-            y += pushDirection * influence * 0.08;
+          const distX = Math.abs(dx);
+          if (distX < cursorInfluenceRadius) {
+            // Use smootherstep for perfectly smooth falloff (no edges or corners)
+            const influence = 1 - smootherstep(0, cursorInfluenceRadius, distX);
+            // Gentle vertical expansion based on wave's distance from cursor center
+            const waveOffsetFromCenter = wave.currentYOffset;
+            const pushAmount = waveOffsetFromCenter * influence * 1.2;
+            y += pushAmount;
           }
           
           if (i === 0) {
