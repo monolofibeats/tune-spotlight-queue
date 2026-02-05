@@ -11,6 +11,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
+ import { Footer } from '@/components/Footer';
 
 const Index = () => {
   const watchlistRef = useRef<WatchlistRef>(null);
@@ -93,6 +94,7 @@ const Index = () => {
 
 
       <LanguageSwitcher />
+       <Footer />
     </div>
   );
 };
