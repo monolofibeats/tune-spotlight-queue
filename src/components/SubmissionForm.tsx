@@ -634,8 +634,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                   id="audio-file-input"
                 />
                 {audioFile ? (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                    <Music2 className="w-5 h-5 text-primary shrink-0" />
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                    <Music2 className="w-5 h-5 text-emerald-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{audioFile.name}</p>
                       <p className="text-xs text-muted-foreground">
