@@ -261,38 +261,43 @@
 }
 
 /* Form field progressive glow effects */
-@keyframes field-pulse-unfilled {
-  0%, 85%, 100% {
+@keyframes field-glow-slow {
+  0%, 100% {
     box-shadow: none;
     background: transparent;
   }
-  92% {
-    box-shadow: 0 0 15px hsl(var(--primary) / 0.4);
-    background: hsl(var(--primary) / 0.03);
+  40%, 60% {
+    box-shadow: 0 0 18px hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) / 0.05);
   }
 }
 
-/* Unfilled fields - normal look with occasional soft pulse */
+@keyframes field-fill-in {
+  0% {
+    background: transparent;
+    border-color: transparent;
+  }
+  100% {
+    background: hsl(160 40% 12%);
+    border-color: hsl(160 50% 25%);
+  }
+}
+
+/* Unfilled fields - slow build up, slow fade off every 3s */
 .field-glow-pending,
 .field-glow-active {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
-  animation: field-pulse-unfilled 3s ease-in-out infinite;
+  animation: field-glow-slow 3s ease-in-out infinite;
 }
 
-/* Completed fields - solid bright golden fill, shiny appearance */
+/* Completed fields - solid dark green/teal fill with slow fade-in */
 .field-glow-completed {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary) / 0.15) 0%,
-    hsl(var(--primary) / 0.25) 50%,
-    hsl(var(--primary) / 0.15) 100%
-  );
-  box-shadow: 
-    0 0 20px hsl(var(--primary) / 0.3),
-    inset 0 1px 0 hsl(var(--primary) / 0.4);
+  background: hsl(160 40% 12%);
+  border: 1px solid hsl(160 50% 25%);
+  animation: field-fill-in 0.5s ease-out forwards;
 }
