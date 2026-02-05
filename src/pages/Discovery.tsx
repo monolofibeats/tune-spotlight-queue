@@ -215,7 +215,11 @@ const Discovery = () => {
                     <stat.icon className="w-8 h-8 text-primary mx-auto mb-3" />
                   </motion.div>
                   <div className="text-3xl md:text-4xl font-bold mb-1">
-                    <AnimatedCounter value={stat.value} />
+                    {stat.isLive ? (
+                      <LiveCounter startValue={stat.value as number} suffix="+" />
+                    ) : (
+                      <AnimatedCounter value={stat.value} />
+                    )}
                   </div>
                   <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </div>
