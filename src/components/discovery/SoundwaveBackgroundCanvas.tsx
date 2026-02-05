@@ -305,7 +305,7 @@ export function SoundwaveBackgroundCanvas() {
           }
         }
 
-        const cursorStrength = cursorActive && dist < attractionRadius ? 0.01 : 0.001;
+        const cursorStrength = cursorActive && dist < attractionRadius ? 0.012 : 0.003;
         
         const targetVx = (targetX - p.x) * cursorStrength;
         const targetVy = (targetY - p.y) * cursorStrength;
