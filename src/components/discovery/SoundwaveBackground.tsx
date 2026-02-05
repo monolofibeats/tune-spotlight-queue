@@ -35,7 +35,7 @@ export function SoundwaveBackground() {
   const particles = useMemo(() => {
     const count = 180;
     const particleList: WaveParticle[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       particleList.push({
         id: i,
@@ -43,14 +43,14 @@ export function SoundwaveBackground() {
         baseY: 50 + (Math.random() - 0.5) * 60,
         x: (i / count) * 100,
         y: 50,
-        size: Math.random() * 5 + 3, // Larger particles
-        opacity: Math.random() * 0.5 + 0.5, // Higher base opacity
+        size: Math.random() * 7 + 5, // MUCH larger so it's clearly visible
+        opacity: Math.random() * 0.2 + 0.8, // Always bright
         waveOffset: Math.random() * Math.PI * 2,
         floatOffset: Math.random() * Math.PI * 2,
         floatSpeed: 0.3 + Math.random() * 0.4,
       });
     }
-    
+
     return particleList;
   }, []);
 
@@ -118,7 +118,7 @@ export function SoundwaveBackground() {
   const gradientOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.4, 0.6, 0.8]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-[5]">
       {/* Animated gradient background - smoother */}
       <motion.div
         className="absolute inset-0"
@@ -128,7 +128,7 @@ export function SoundwaveBackground() {
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--primary) / 0.15) 0%, transparent 60%)
+              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--glow-primary) / 0.15) 0%, transparent 60%)
             `,
           }}
           animate={{
@@ -144,7 +144,7 @@ export function SoundwaveBackground() {
       </motion.div>
 
       {/* Soundwave particles - using regular div positioning for better visibility */}
-      <svg className="absolute inset-0 w-full h-full" style={{ opacity: 1 }}>
+      <svg className="absolute inset-0 w-full h-full mix-blend-screen" style={{ opacity: 1 }}>
         <defs>
           <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -170,9 +170,9 @@ export function SoundwaveBackground() {
               y1={`${particle.y}%`}
               x2={`${nextParticle.x}%`}
               y2={`${nextParticle.y}%`}
-              stroke="hsl(var(--primary))"
+              stroke="hsl(var(--glow-primary))"
               strokeWidth="1"
-              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.5}
+              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.55}
             />
           );
         })}
@@ -184,7 +184,7 @@ export function SoundwaveBackground() {
             cx={`${particle.x}%`}
             cy={`${particle.y}%`}
             r={particle.size}
-            fill="hsl(var(--primary))"
+            fill="hsl(var(--glow-primary))"
             opacity={particle.opacity}
             filter="url(#particleGlow)"
           />
@@ -193,11 +193,11 @@ export function SoundwaveBackground() {
 
       {/* Subtle grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 mix-blend-screen opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+            linear-gradient(hsl(var(--glow-primary)) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--glow-primary)) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
         }}
@@ -205,8 +205,11 @@ export function SoundwaveBackground() {
 
       {/* Smooth scan line */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent"
-        style={{ height: '300%' }}
+        className="absolute inset-0"
+        style={{
+          height: '300%',
+          background: 'linear-gradient(to bottom, transparent, hsl(var(--glow-primary) / 0.02), transparent)',
+        }}
         animate={{ y: ['-200%', '0%'] }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />

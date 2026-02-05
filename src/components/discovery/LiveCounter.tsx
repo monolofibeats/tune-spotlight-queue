@@ -24,7 +24,7 @@ export function LiveCounter({
     if (!isInView || hasFinishedIntro) return;
 
     let startTime: number | undefined;
-    const duration = 2000;
+    const duration = 800; // faster so the live counting starts quickly
 
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;

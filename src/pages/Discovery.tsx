@@ -213,16 +213,19 @@ const Discovery = () => {
               >
                 <Music className="w-12 h-12 text-primary mx-auto mb-4" />
               </motion.div>
-              <div className="text-5xl md:text-7xl font-bold mb-2 text-primary">
+              <div
+                className="text-5xl md:text-7xl font-bold mb-2"
+                style={{ color: 'hsl(var(--glow-primary))' }}
+              >
                 <LiveCounter startValue={10847} suffix="+" />
               </div>
               <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
               <motion.p 
                 className="text-sm text-muted-foreground/60 mt-2"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 1, repeat: Infinity }}
               >
-                +1 every second
+                +1 every second (live)
               </motion.p>
             </div>
           </AnimatedCard>
