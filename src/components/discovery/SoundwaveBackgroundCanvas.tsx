@@ -47,6 +47,18 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
+// Ultra-smooth interpolation (hermite smoothstep)
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+// Even smoother (quintic smootherstep)
+function smootherstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 function createParticle(id: number): Particle {
   // Spawn randomly across the entire screen
   return {
