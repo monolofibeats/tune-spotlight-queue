@@ -178,7 +178,7 @@ export function SoundwaveBackgroundCanvas() {
 
       // Cursor is always active when on the canvas (no timeout)
       const cursorActive = true;
-      const cursorInfluenceRadius = 0.3;
+      const cursorInfluenceRadius = 0.36;
       
       // Check if cursor is near wave center area (wider detection zone)
       const cursorNearWave = Math.abs(mouse.smoothY - 0.5) < 0.35;
