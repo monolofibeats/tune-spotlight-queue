@@ -123,7 +123,7 @@ export function SoundwaveBackgroundCanvas() {
   const waveExpansionRef = useRef(0);
 
   useEffect(() => {
-    const particleCount = 80;
+    const particleCount = 140;
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
@@ -212,17 +212,15 @@ export function SoundwaveBackgroundCanvas() {
           const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
           let y = centerY + animatedY * wave.amplitude;
           
-          // Smooth cursor wave distortion - gentle pull toward/away from cursor
-          // Always apply cursor influence when near
+          // Smooth cursor wave distortion - gaussian displacement field
           const dx = x - mouse.smoothX;
           const dy = y - mouse.smoothY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < cursorInfluenceRadius) {
-            // Quartic falloff for even smoother transition
-            const influence = Math.pow(1 - dist / cursorInfluenceRadius, 4);
-            // Expand up/down from cursor position - gentler effect
-            const expandDirection = y > mouse.smoothY ? 1 : -1;
-            y += expandDirection * influence * 0.04;
+            const r = dist / cursorInfluenceRadius;
+            const influence = Math.exp(-r * r * 3.5);
+            // Push away smoothly proportional to distance from cursor (no abrupt sign flip)
+            y += dy * influence * 0.35;
           }
           
           if (i === 0) {
@@ -232,14 +230,14 @@ export function SoundwaveBackgroundCanvas() {
             let prevAnimatedY = points[i - 1] * Math.sin(t * wave.speed + wave.phase + (i - 1) * 0.04);
             let prevY = centerY + prevAnimatedY * wave.amplitude;
             
-            // Always apply to previous point too for consistency
+            // Apply the same gaussian field to previous point for continuity
             const pdx = prevX - mouse.smoothX;
             const pdy = prevY - mouse.smoothY;
             const pDist = Math.sqrt(pdx * pdx + pdy * pdy);
             if (pDist < cursorInfluenceRadius) {
-              const influence = Math.pow(1 - pDist / cursorInfluenceRadius, 4);
-              const expandDirection = prevY > mouse.smoothY ? 1 : -1;
-              prevY += expandDirection * influence * 0.04;
+              const r = pDist / cursorInfluenceRadius;
+              const influence = Math.exp(-r * r * 3.5);
+              prevY += pdy * influence * 0.35;
             }
             
             const cpX = (prevX + x) / 2 * width;
@@ -269,7 +267,7 @@ export function SoundwaveBackgroundCanvas() {
 
         const lifeFade = p.life > 0.85 ? (1 - p.life) / 0.15 : p.life < 0.15 ? p.life / 0.15 : 1;
         const targetOp = p.targetOpacity * lifeFade;
-        p.opacity += (targetOp - p.opacity) * 0.02;
+        p.opacity += (targetOp - p.opacity) * 0.05;
 
         let targetX = p.x;
         let targetY = p.y;
@@ -327,12 +325,13 @@ export function SoundwaveBackgroundCanvas() {
 
       // Draw particles (small sprinkles) - more visible
       ctx.save();
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = hsla(0.6);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = hsla(0.9);
       
       for (const p of ps) {
         if (p.opacity < 0.01) continue;
-        ctx.globalAlpha = Math.min(1, p.opacity * 1.5);
+        ctx.globalAlpha = Math.min(1, Math.max(0.18, p.opacity * 2));
         ctx.fillStyle = hsla(1);
         ctx.beginPath();
         ctx.arc(p.x * width, p.y * height, p.size, 0, Math.PI * 2);
