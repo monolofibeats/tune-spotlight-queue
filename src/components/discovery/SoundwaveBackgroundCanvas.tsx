@@ -166,7 +166,11 @@ export function SoundwaveBackgroundCanvas() {
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("mousemove", handleMouseMove);
+    
+    // Only add mouse tracking on desktop
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
 
     const draw = () => {
       timeRef.current += 1 / 60;
