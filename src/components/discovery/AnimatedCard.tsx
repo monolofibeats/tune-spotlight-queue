@@ -75,7 +75,7 @@ export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(functi
       />
 
       {/* Card content */}
-      <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
+      <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden h-full">
         {/* Spotlight effect */}
         <motion.div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
