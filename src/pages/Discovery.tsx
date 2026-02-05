@@ -352,18 +352,18 @@ const Discovery = () => {
             className="text-center mb-14"
           >
             <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
-              How It Works
+              {t('discovery.howItWorksTitle')}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Three simple steps to get your music reviewed
+              {t('discovery.howItWorksSubtitle')}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'Choose a Streamer', desc: 'Browse our active streamers and find one that matches your genre and style.' },
-              { step: '02', title: 'Submit Your Track', desc: 'Paste your song link or upload a file. Add details and optionally skip the queue.' },
-              { step: '03', title: 'Get Reviewed Live', desc: 'Watch the stream as your music gets played and receive real-time feedback.' },
+              { step: '01', title: t('discovery.step1Title'), desc: t('discovery.step1Desc') },
+              { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
+              { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
               <AnimatedCard key={item.step} delay={index * 0.15}>
                 <div className="relative p-8 text-center">
