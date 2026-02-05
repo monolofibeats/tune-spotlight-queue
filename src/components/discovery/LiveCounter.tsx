@@ -31,8 +31,10 @@ export function LiveCounter({
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
+  const persistedValue = getStoredCount(startValue);
   const [displayValue, setDisplayValue] = useState(0);
   const [hasFinishedIntro, setHasFinishedIntro] = useState(false);
+  const [targetValue, setTargetValue] = useState(persistedValue);
 
   useEffect(() => {
     if (!isInView || hasFinishedIntro) return;
@@ -45,18 +47,18 @@ export function LiveCounter({
       const progress = Math.min((timestamp - startTime) / duration, 1);
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
 
-      setDisplayValue(Math.floor(easeOutQuart * startValue));
+      setDisplayValue(Math.floor(easeOutQuart * targetValue));
 
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        setDisplayValue(startValue);
+        setDisplayValue(targetValue);
         setHasFinishedIntro(true);
       }
     };
 
     requestAnimationFrame(animate);
-  }, [isInView, hasFinishedIntro, startValue]);
+  }, [isInView, hasFinishedIntro, targetValue]);
 
   useEffect(() => {
     if (!hasFinishedIntro) return;
