@@ -128,7 +128,7 @@ export function SoundwaveBackground() {
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--primary) / 0.15) 0%, transparent 60%)
+              radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--glow-primary) / 0.15) 0%, transparent 60%)
             `,
           }}
           animate={{
@@ -170,9 +170,9 @@ export function SoundwaveBackground() {
               y1={`${particle.y}%`}
               x2={`${nextParticle.x}%`}
               y2={`${nextParticle.y}%`}
-              stroke="hsl(var(--primary))"
+              stroke="hsl(var(--glow-primary))"
               strokeWidth="1"
-              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.5}
+              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.55}
             />
           );
         })}
@@ -184,7 +184,7 @@ export function SoundwaveBackground() {
             cx={`${particle.x}%`}
             cy={`${particle.y}%`}
             r={particle.size}
-            fill="hsl(var(--primary))"
+            fill="hsl(var(--glow-primary))"
             opacity={particle.opacity}
             filter="url(#particleGlow)"
           />
@@ -196,8 +196,8 @@ export function SoundwaveBackground() {
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
+            linear-gradient(hsl(var(--glow-primary)) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--glow-primary)) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
         }}
@@ -205,8 +205,11 @@ export function SoundwaveBackground() {
 
       {/* Smooth scan line */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent"
-        style={{ height: '300%' }}
+        className="absolute inset-0"
+        style={{
+          height: '300%',
+          background: 'linear-gradient(to bottom, transparent, hsl(var(--glow-primary) / 0.02), transparent)',
+        }}
         animate={{ y: ['-200%', '0%'] }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />

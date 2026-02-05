@@ -222,10 +222,10 @@ const Discovery = () => {
               <div className="text-lg md:text-xl text-muted-foreground">Songs Reviewed</div>
               <motion.p 
                 className="text-sm text-muted-foreground/60 mt-2"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 1, repeat: Infinity }}
               >
-                +1 every second
+                +1 every second (live)
               </motion.p>
             </div>
           </AnimatedCard>
