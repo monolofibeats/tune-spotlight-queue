@@ -99,17 +99,13 @@ const Discovery = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" className="gap-2" asChild>
-                <a href="#streamers">
-                  <Radio className="w-4 h-4" />
-                  Browse Streamers
-                </a>
+              <Button size="lg" className="gap-2" onClick={() => document.getElementById('streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                <Radio className="w-4 h-4" />
+                Browse Streamers
               </Button>
-              <Button variant="outline" size="lg" className="gap-2" asChild>
-                <a href="#for-streamers">
-                  Become a Streamer
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+              <Button variant="outline" size="lg" className="gap-2" onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                Become a Streamer
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </motion.div>
@@ -194,8 +190,8 @@ const Discovery = () => {
               <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No streamers yet</h3>
               <p className="text-muted-foreground mb-4">Be the first to join as a streamer!</p>
-              <Button asChild>
-                <a href="#for-streamers">Apply Now</a>
+              <Button onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}>
+                Apply Now
               </Button>
             </div>
           )}
