@@ -18,6 +18,9 @@ interface Particle {
   life: number;
   maxLife: number;
   spawnEdge: number;
+  attached: boolean; // Whether particle is attached to the wave
+  attachedTime: number; // How long attached (for detach timing)
+  gatheredByCursor: boolean; // Whether currently gathered by cursor
 }
 
 interface WaveLine {
