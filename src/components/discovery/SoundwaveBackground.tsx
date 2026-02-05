@@ -193,7 +193,7 @@ export function SoundwaveBackground() {
 
       {/* Subtle grid overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 mix-blend-screen opacity-[0.03]"
         style={{
           backgroundImage: `
             linear-gradient(hsl(var(--glow-primary)) 1px, transparent 1px),
