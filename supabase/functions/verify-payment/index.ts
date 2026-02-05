@@ -53,6 +53,7 @@ serve(async (req) => {
     // Extract metadata
     const metadata = session.metadata || {};
     const amountPaid = parseFloat(metadata.amount_paid || "0");
+    const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 
     logStep("Creating submission", { metadata, amountPaid });
 
@@ -73,7 +74,7 @@ serve(async (req) => {
         amount_paid: amountPaid,
         is_priority: true,
         status: "pending",
-        audio_file_url: metadata.audio_file_url || null,
+        audio_file_url: audioFileUrl || null,
       })
       .select()
       .single();
