@@ -170,9 +170,11 @@ export function SoundwaveBackground() {
               y1={`${particle.y}%`}
               x2={`${nextParticle.x}%`}
               y2={`${nextParticle.y}%`}
-              stroke="hsl(var(--glow-primary))"
-              strokeWidth="1"
-              opacity={Math.min(particle.opacity, nextParticle.opacity) * 0.55}
+              style={{ 
+                stroke: '#facc15',
+                strokeWidth: 1,
+                opacity: Math.min(particle.opacity, nextParticle.opacity) * 0.55 
+              }}
             />
           );
         })}
@@ -184,9 +186,11 @@ export function SoundwaveBackground() {
             cx={`${particle.x}%`}
             cy={`${particle.y}%`}
             r={particle.size}
-            fill="hsl(var(--glow-primary))"
-            opacity={particle.opacity}
-            filter="url(#particleGlow)"
+            style={{
+              fill: '#facc15',
+              opacity: particle.opacity,
+              filter: 'url(#particleGlow)',
+            }}
           />
         ))}
       </svg>
