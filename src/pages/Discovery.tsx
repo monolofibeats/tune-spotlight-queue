@@ -343,37 +343,55 @@ const Discovery = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
             {[
               { step: '01', title: t('discovery.step1Title'), desc: t('discovery.step1Desc') },
               { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
               { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
               <AnimatedCard key={item.step} delay={index * 0.15} className="h-full">
-                <div className="relative p-8 text-center h-full flex flex-col min-h-[280px]">
-                  <motion.span 
+                <motion.div
+                  className="relative p-8 text-center h-full flex flex-col min-h-[320px]"
+                  initial="rest"
+                  animate="rest"
+                  whileHover="hover"
+                >
+                  <motion.span
                     className="absolute top-4 left-4 text-xs font-mono text-primary/50"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
                   >
                     {item.step}
                   </motion.span>
-                  <motion.div 
+
+                  <motion.div
                     className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 border border-primary/20"
-                    whileHover={{ scale: 1.1, rotate: 360 }}
-                    transition={{ duration: 0.5 }}
+                    variants={{
+                      rest: { scale: 1, rotate: 0 },
+                      hover: {
+                        scale: 1.1,
+                        rotate: 360,
+                        transition: { duration: 0.6, ease: 'easeInOut' },
+                      },
+                    }}
                   >
-                    <motion.span 
+                    <motion.span
                       className="text-2xl font-bold text-primary"
-                      whileHover={{ rotate: [0, -15, 15, 0] }}
-                      transition={{ duration: 0.4 }}
+                      variants={{
+                        rest: { rotate: 0 },
+                        hover: {
+                          rotate: [0, -15, 15, 0],
+                          transition: { duration: 0.45, ease: 'easeInOut' },
+                        },
+                      }}
                     >
                       {index + 1}
                     </motion.span>
                   </motion.div>
+
                   <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
-                </div>
+                </motion.div>
               </AnimatedCard>
             ))}
           </div>
