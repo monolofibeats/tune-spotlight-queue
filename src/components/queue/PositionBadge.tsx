@@ -15,10 +15,10 @@ type PositionBadgeProps = {
 const getPodiumStyles = (position?: number | null) => {
   if (position === 1) {
     return {
-      bg: "bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600",
-      text: "text-black",
-      shadow: "shadow-lg shadow-yellow-500/40",
-      ring: "ring-2 ring-yellow-400/50",
+      bg: "bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800",
+      text: "text-amber-100",
+      shadow: "shadow-lg shadow-amber-600/40",
+      ring: "ring-2 ring-amber-500/50",
     };
   }
   if (position === 2) {
