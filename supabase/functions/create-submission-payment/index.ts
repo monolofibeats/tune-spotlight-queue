@@ -11,12 +11,13 @@ const corsHeaders = {
 // Input validation schema
 const requestSchema = z.object({
   amount: z.number().min(0.5).max(100),
-  songUrl: z.string().url().max(2000),
+  songUrl: z.string().max(2000),
   artistName: z.string().max(200).optional().default('Unknown Artist'),
   songTitle: z.string().max(200).optional().default('Untitled'),
   message: z.string().max(1000).optional(),
   email: z.string().email().max(255).optional(),
   platform: z.string().max(50).optional().default('other'),
+  audioFileUrl: z.string().max(500).optional().nullable(),
 });
 
 const logStep = (step: string, details?: unknown) => {
