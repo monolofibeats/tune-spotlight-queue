@@ -645,7 +645,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
 
               {/* Step 3 & 4: Artist Name and Song Title */}
               <div className="grid grid-cols-2 gap-3">
-                <div className={getFieldGlowClass(2)}>
+                <div className={`relative ${getFieldGlowClass(2)}`}>
+                  <CompletionTick fieldStep={2} />
                   <label className="text-xs text-muted-foreground mb-1.5 block">
                     {t('submission.artistLabel')} <span className="text-destructive">*</span>
                   </label>
@@ -657,7 +658,8 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
                     required
                   />
                 </div>
-                <div className={getFieldGlowClass(3)}>
+                <div className={`relative ${getFieldGlowClass(3)}`}>
+                  <CompletionTick fieldStep={3} />
                   <label className="text-xs text-muted-foreground mb-1.5 block">
                     {t('submission.titleLabel')} <span className="text-destructive">*</span>
                   </label>
