@@ -273,13 +273,13 @@ export function SoundwaveBackgroundCanvas() {
         let targetX = p.x;
         let targetY = p.y;
         
-        // Gentle drift
-        p.driftAngle += p.driftSpeed * 0.25;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.0003;
-        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.00025;
+        // Gentle drift (strong enough to visibly move across the screen)
+        p.driftAngle += p.driftSpeed * 0.6;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.0022;
+        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.0018;
         
         // Pull toward wave center band
-        const centerPull = (0.5 - p.y) * 0.00015;
+        const centerPull = (0.5 - p.y) * 0.001;
         targetY += centerPull;
 
         // Cursor interaction
