@@ -11,7 +11,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
- import { Footer } from '@/components/Footer';
+import { Footer } from '@/components/Footer';
 
 const Index = () => {
   const watchlistRef = useRef<WatchlistRef>(null);
@@ -23,7 +23,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section - Minimal */}
-      <section className="pt-24 pb-8 md:pt-32 md:pb-12 px-4">
+      <section className="pt-24 pb-6 md:pt-32 md:pb-8 px-4">
         <div className="container mx-auto max-w-2xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -46,6 +46,23 @@ const Index = () => {
               {t('hero.subtitle')}
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Main Content - Submission Form + Watchlist - RIGHT AFTER HERO */}
+      <section className="pb-8 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Submission Form */}
+            <div>
+              <SubmissionForm watchlistRef={watchlistRef} />
+            </div>
+
+            {/* Watchlist Display */}
+            <div className="lg:sticky lg:top-20 lg:self-start">
+              <WatchlistDisplay ref={watchlistRef} />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -75,26 +92,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Main Content - Stacked on mobile */}
-      <section className="pb-16 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Submission Form */}
-            <div>
-              <SubmissionForm watchlistRef={watchlistRef} />
-            </div>
-
-            {/* Watchlist Display */}
-            <div className="lg:sticky lg:top-20 lg:self-start">
-              <WatchlistDisplay ref={watchlistRef} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-
       <LanguageSwitcher />
-       <Footer />
+      <Footer />
     </div>
   );
 };
