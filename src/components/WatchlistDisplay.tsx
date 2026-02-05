@@ -217,22 +217,23 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     submission.isNew ? 'ring-1 ring-primary/50' : ''
                   } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
-                  {/* Position badge - Star for #1 */}
-                  <div 
-                    className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold shrink-0 ${
-                      submission.is_priority 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'bg-secondary text-muted-foreground'
-                    }`}
-                  >
-                    {spotNumber === 1 ? (
+                  {/* Position badge - Star overlay for #1 */}
+                  <div className="relative shrink-0">
+                    <div 
+                      className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold ${
+                        submission.is_priority 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-secondary text-muted-foreground'
+                      }`}
+                    >
+                      {spotNumber || '—'}
+                    </div>
+                    {spotNumber === 1 && (
                       <img 
                         src={upstarStar} 
-                        alt="Star" 
-                        className="w-5 h-5 object-contain"
+                        alt="Top Spot" 
+                        className="absolute -top-2 -right-2 w-5 h-5 object-contain drop-shadow-lg"
                       />
-                    ) : (
-                      spotNumber || '—'
                     )}
                   </div>
                   
@@ -241,7 +242,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                       <p className={`truncate ${styles.title}`}>
                         {submission.song_title || 'Untitled'}
                       </p>
-                      {submission.is_priority && spotNumber !== 1 && (
+                      {submission.is_priority && (
                         <Badge variant="premium" className="text-[10px] px-1.5 py-0">
                           Priority
                         </Badge>

@@ -57,6 +57,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
@@ -260,8 +261,21 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     });
   };
 
-  const handleSkipTheLine = () => {
-    // No longer require song URL - can skip with just audio file
+  const handleSkipTheLine = async () => {
+    // Upload audio file first if present (before opening dialog)
+    if (audioFile && !uploadedAudioUrl) {
+      try {
+        const url = await uploadAudioFile();
+        setUploadedAudioUrl(url);
+      } catch (error) {
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload audio file",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     setShowPriorityDialog(true);
   };
 
@@ -316,15 +330,19 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setIsSubmitting(true);
 
     try {
+      // Upload audio file FIRST before redirecting to Stripe
+      const audioFileUrl = await uploadAudioFile();
+      
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
           amount: submissionPrice,
-          songUrl,
+          songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
           message,
           email: user?.email || email,
           platform: platform || 'other',
+          audioFileUrl, // Pass the uploaded file path
         },
       });
 
@@ -352,6 +370,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
     setEmail('');
     setMessage('');
     setAudioFile(null);
+    setUploadedAudioUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -680,6 +699,7 @@ export function SubmissionForm({ watchlistRef }: SubmissionFormProps) {
         message={message}
         email={user?.email || email}
         platform={platform || 'other'}
+        audioFileUrl={uploadedAudioUrl}
         onSuccess={() => {
           watchlistRef?.current?.refreshList();
           resetForm();

@@ -87,6 +87,7 @@ serve(async (req) => {
         is_priority: false,
         user_id: session.metadata.user_id || null,
         status: 'pending',
+        audio_file_url: session.metadata.audio_file_url || null,
       })
       .select()
       .single();

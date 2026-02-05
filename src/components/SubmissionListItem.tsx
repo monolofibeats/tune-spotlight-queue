@@ -195,29 +195,30 @@ export function SubmissionListItem({
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {/* Position number - Star for #1 */}
+        {/* Position number - Star overlay for #1 */}
         {position && (
-          <div 
-            className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold shrink-0 ${
-              submission.is_priority 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-secondary text-muted-foreground'
-            }`}
-          >
-            {position === 1 ? (
+          <div className="relative shrink-0">
+            <div 
+              className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold ${
+                submission.is_priority 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-secondary text-muted-foreground'
+              }`}
+            >
+              {position}
+            </div>
+            {position === 1 && (
               <img 
                 src={upstarStar} 
-                alt="Star" 
-                className="w-5 h-5 object-contain"
+                alt="Top Spot" 
+                className="absolute -top-2 -right-2 w-5 h-5 object-contain drop-shadow-lg"
               />
-            ) : (
-              position
             )}
           </div>
         )}
 
-        {/* Priority indicator - no amount shown, hide for #1 as star shows it */}
-        {submission.is_priority && position !== 1 && (
+        {/* Priority indicator */}
+        {submission.is_priority && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
             <Zap className="w-2.5 h-2.5" />
             Priority
