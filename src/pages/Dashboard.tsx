@@ -505,8 +505,8 @@ const Dashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Submissions List - Compact */}
-              <div className="space-y-1.5">
+              {/* Submissions List - Stacked sizing */}
+              <div className="space-y-2">
                 {filteredSubmissions.map((submission, index) => (
                   <SubmissionListItem
                     key={submission.id}
@@ -514,6 +514,7 @@ const Dashboard = () => {
                     position={index + 1}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
+                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenFloatingPreview(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
 
