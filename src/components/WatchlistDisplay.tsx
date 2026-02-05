@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
-import upstarStar from '@/assets/upstar-star.png';
+import { PositionBadge } from '@/components/queue/PositionBadge';
 
 interface SubmissionItem {
   id: string;
@@ -217,25 +217,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
                     submission.isNew ? 'ring-1 ring-primary/50' : ''
                   } ${submission.is_priority ? 'border-primary/30' : ''}`}
                 >
-                  {/* Position badge - Star overlay for #1 */}
-                  <div className="relative shrink-0">
-                    <div 
-                      className={`${styles.positionBadge} rounded-md flex items-center justify-center font-bold ${
-                        submission.is_priority 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-secondary text-muted-foreground'
-                      }`}
-                    >
-                      {spotNumber || '—'}
-                    </div>
-                    {spotNumber === 1 && (
-                      <img 
-                        src={upstarStar} 
-                        alt="Top Spot" 
-                        className="absolute -top-2 -right-2 w-5 h-5 object-contain drop-shadow-lg"
-                      />
-                    )}
-                  </div>
+                  <PositionBadge position={spotNumber} badgeClassName={styles.positionBadge} />
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
