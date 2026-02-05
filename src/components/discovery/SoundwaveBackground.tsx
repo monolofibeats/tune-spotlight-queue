@@ -63,10 +63,15 @@ export function SoundwaveBackground() {
       timeRef.current += 0.016;
       const time = timeRef.current;
       
-      const formation = waveFormation.get();
-      const amplitude = waveAmplitude.get();
-      const frequency = waveFrequency.get();
-      const velocity = Math.abs(smoothVelocity.get()) * 50;
+      const formationRaw = waveFormation.get();
+      const amplitudeRaw = waveAmplitude.get();
+      const frequencyRaw = waveFrequency.get();
+      const velocityRaw = smoothVelocity.get();
+
+      const formation = Number.isFinite(formationRaw) ? formationRaw : 0;
+      const amplitude = Number.isFinite(amplitudeRaw) ? amplitudeRaw : 60;
+      const frequency = Number.isFinite(frequencyRaw) ? frequencyRaw : 1;
+      const velocity = Number.isFinite(velocityRaw) ? Math.abs(velocityRaw) * 50 : 0;
       
       setAnimatedParticles(prev => prev.map((particle, i) => {
         // Calculate wave position (clean soundwave)
