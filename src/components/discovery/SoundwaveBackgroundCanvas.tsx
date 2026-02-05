@@ -278,14 +278,24 @@ export function SoundwaveBackgroundCanvas() {
         let targetX = p.x;
         let targetY = p.y;
         
-        // Gentle drift (strong enough to visibly move across the screen)
-        p.driftAngle += p.driftSpeed * 0.6;
-        targetX = p.x + Math.cos(p.driftAngle) * 0.0022;
-        targetY = p.y + Math.sin(p.driftAngle * 0.4) * 0.0018;
+        // Gentle drift + stronger movement
+        p.driftAngle += p.driftSpeed * 0.8;
+        targetX = p.x + Math.cos(p.driftAngle) * 0.003;
+        targetY = p.y + Math.sin(p.driftAngle * 0.5) * 0.002;
         
-        // Pull toward wave center band
-        const centerPull = (0.5 - p.y) * 0.001;
+        // Pull toward wave center band (stronger pull to integrate with waves)
+        const distFromWaveCenter = Math.abs(p.y - 0.5);
+        const waveZone = 0.15; // How close to center counts as "wave zone"
+        const centerPull = (0.5 - p.y) * 0.002;
         targetY += centerPull;
+        
+        // When near the wave zone, align sprinkle horizontally (become part of wave)
+        if (distFromWaveCenter < waveZone) {
+          const alignStrength = 1 - (distFromWaveCenter / waveZone);
+          // Smoothly rotate toward horizontal (0 or PI)
+          const targetAngle = p.driftAngle > Math.PI ? Math.PI * 2 : 0;
+          p.driftAngle += (targetAngle - p.driftAngle) * alignStrength * 0.02;
+        }
 
         // Cursor interaction
         const dx = mouse.x - p.x;
