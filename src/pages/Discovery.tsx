@@ -400,21 +400,21 @@ const Discovery = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">For Streamers</Badge>
+              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">{t('discovery.forStreamers')}</Badge>
               <h2 className="text-3xl md:text-5xl font-display font-bold mb-5">
-                Monetize Your Music Reviews
+                {t('discovery.monetizeTitle')}
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                Join UpStar as a streamer and create a new revenue stream. Set your own prices, customize your page, and engage with{' '}
-                <BlurReveal>artists worldwide</BlurReveal>.
+                {t('discovery.monetizeSubtitle')}{' '}
+                <BlurReveal>{t('discovery.artistsWorldwide')}</BlurReveal>.
               </p>
               <ul className="space-y-4 mb-8">
                 {[
-                  'Set your own submission prices',
-                  'Fully customizable profile page',
-                  'Real-time queue management',
-                  'Built-in payment processing',
-                  'Analytics and insights',
+                  t('discovery.feature1'),
+                  t('discovery.feature2'),
+                  t('discovery.feature3'),
+                  t('discovery.feature4'),
+                  t('discovery.feature5'),
                 ].map((feature, index) => (
                   <motion.li 
                     key={feature} 
@@ -434,13 +434,13 @@ const Discovery = () => {
                 ))}
               </ul>
               <GlowButton size="lg" onClick={() => setShowApplicationForm(true)}>
-                Apply to Join
+                {t('discovery.applyToJoin')}
                 <ArrowRight className="w-5 h-5" />
               </GlowButton>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Apply to Become a Streamer</DialogTitle>
+                    <DialogTitle>{t('discovery.applyDialogTitle')}</DialogTitle>
                   </DialogHeader>
                   <StreamerApplicationForm onSuccess={() => setShowApplicationForm(false)} />
                 </DialogContent>
