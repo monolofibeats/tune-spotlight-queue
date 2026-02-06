@@ -261,26 +261,15 @@
 }
 
 /* Form field progressive glow effects */
-/* Smooth glow animation - directly animates box-shadow for smooth interpolation */
-@keyframes field-glow-smooth {
-  0%, 100% {
-    box-shadow: 0 0 0 transparent;
-    background: transparent;
-  }
-  50% {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
-    background: hsl(var(--primary) / 0.06);
-  }
-}
+/* Key idea: keep ONE continuous animation running on every field wrapper.
+   We only toggle intensity (CSS variables) so clearing/retyping never restarts rhythm. */
 
-@keyframes field-glow-smooth-pending {
+@keyframes field-glow-phase {
   0%, 100% {
-    box-shadow: 0 0 0 transparent;
-    background: transparent;
+    opacity: 0;
   }
   50% {
-    box-shadow: 0 0 14px hsl(var(--primary) / 0.35);
-    background: hsl(var(--primary) / 0.03);
+    opacity: var(--field-glow-intensity);
   }
 }
 
@@ -299,36 +288,60 @@
   }
 }
 
-/* Unfilled fields - synced glow every 5s */
-/* All fields use a shared --glow-sync-delay variable set by JS to stay in sync */
-.field-glow-active,
-.field-glow-pending {
+/* Base wrapper: always animates (never removed), so it never desyncs */
+.field-glow {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
+
+  /* Defaults = off */
+  --field-glow-intensity: 0;
+  --field-glow-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  --field-glow-bg: hsl(var(--primary) / 0.06);
+
+  isolation: isolate;
 }
 
+.field-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+
+  box-shadow: var(--field-glow-shadow);
+  background: var(--field-glow-bg);
+
+  opacity: 0;
+  animation: field-glow-phase 5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.field-glow > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Modifiers: ONLY set variables / visuals (do not add/remove the pulse animation) */
 .field-glow-active {
-  animation: field-glow-smooth 5s ease-in-out infinite;
-  animation-delay: var(--glow-sync-delay, 0s);
+  --field-glow-intensity: 1;
+  --field-glow-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  --field-glow-bg: hsl(var(--primary) / 0.06);
 }
 
 .field-glow-pending {
-  animation: field-glow-smooth-pending 5s ease-in-out infinite;
-  animation-delay: var(--glow-sync-delay, 0s);
+  --field-glow-intensity: 0.75;
+  --field-glow-shadow: 0 0 14px hsl(var(--primary) / 0.35);
+  --field-glow-bg: hsl(var(--primary) / 0.03);
 }
 
-/* Parent container marker (no visual effect, just for JS targeting) */
+/* Marker class kept for backwards compatibility; no behavior needed now. */
 .field-glow-sync {
-  /* Marker class for JS to find and sync children */
 }
 
-
-/* Completed fields - GREEN flash then fade to subtle */
 .field-glow-completed {
-  position: relative;
-  border-radius: 0.75rem;
-  padding: 2px;
+  --field-glow-intensity: 0;
   background: hsl(130 30% 8%);
   border: 1px solid hsl(130 40% 20%);
   animation: field-success-flash 1.5s ease-out forwards;
