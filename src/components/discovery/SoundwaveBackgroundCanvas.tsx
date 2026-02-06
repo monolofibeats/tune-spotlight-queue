@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePerformanceMode } from "@/hooks/usePerformanceMode";
 import { MobileBackground } from "./MobileBackground";
 
 interface Particle {
@@ -450,15 +451,16 @@ function DesktopSoundwaveCanvas() {
   );
 }
 
-// Main export - switches between mobile and desktop backgrounds
+// Main export - switches between mobile, light mode, and desktop backgrounds
 export function SoundwaveBackgroundCanvas() {
   const isMobile = useIsMobile();
+  const { mode } = usePerformanceMode();
   
-  // On mobile, use the simple gradient background
-  if (isMobile) {
+  // On mobile or light performance mode, use the simple gradient background
+  if (isMobile || mode === 'light') {
     return <MobileBackground />;
   }
   
-  // On desktop, use the full canvas animation
+  // On desktop with heavy mode, use the full canvas animation
   return <DesktopSoundwaveCanvas />;
 }
