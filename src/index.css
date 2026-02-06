@@ -288,12 +288,16 @@
 }
 
 /* Unfilled fields - slow build up with YELLOW glow every 3s */
+/* All fields sync to the same animation rhythm using a global CSS animation */
 .field-glow-pending,
 .field-glow-active {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
+  /* Use animation tied to document timeline so all fields pulse together */
   animation: field-glow-slow 3s ease-in-out infinite;
+  /* Sync animation to a fixed timeline - delay is negative to start from current cycle position */
+  animation-delay: calc(-1 * mod(var(--global-time, 0s), 3s));
 }
 
 /* Completed fields - GREEN flash then fade to subtle */
