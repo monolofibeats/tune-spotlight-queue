@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink, Star } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useActiveStreamers } from '@/hooks/useStreamer';
