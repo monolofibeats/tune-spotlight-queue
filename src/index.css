@@ -288,12 +288,15 @@
 }
 
 /* Unfilled fields - slow build up with YELLOW glow every 3s */
+/* All fields sync to the same animation rhythm using a synced animation delay */
 .field-glow-pending,
 .field-glow-active {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
   animation: field-glow-slow 3s ease-in-out infinite;
+  /* Animation delay synced via JS-set CSS variable --glow-sync-delay */
+  animation-delay: var(--glow-sync-delay, 0s);
 }
 
 /* Completed fields - GREEN flash then fade to subtle */
