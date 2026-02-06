@@ -274,8 +274,8 @@ function DesktopSoundwaveCanvas() {
               ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
             }
           }
-        }
         ctx.stroke();
+      }
       }
       ctx.restore();
 
