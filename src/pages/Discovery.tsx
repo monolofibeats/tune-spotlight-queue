@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
@@ -15,6 +16,7 @@ import { LiveCounter } from '@/components/discovery/LiveCounter';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
 import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
+import { PerformanceToggle } from '@/components/PerformanceToggle';
 import upstarLogo from '@/assets/upstar-logo.png';
 import upstarHeroStar from '@/assets/upstar-hero-star.png';
 import { useState } from 'react';
@@ -103,6 +105,9 @@ const Discovery = () => {
                   {t('nav.signIn')}
                 </GlowButton>
               </Link>
+              <TooltipProvider>
+                <PerformanceToggle />
+              </TooltipProvider>
             </nav>
           </div>
         </div>
