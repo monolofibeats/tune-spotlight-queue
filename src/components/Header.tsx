@@ -46,12 +46,19 @@ export function Header() {
             {user && <BidNotificationBell />}
             
             {user && !isAdmin && (
-              <Link to="/my-dashboard">
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                  <User className="w-3.5 h-3.5" />
-                  {t('nav.mySongs')}
-                </Button>
-              </Link>
+              <>
+                <Link to="/my-dashboard">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <User className="w-3.5 h-3.5" />
+                    {t('nav.mySongs')}
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Settings className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </>
             )}
             
             {isAdmin ? (
@@ -62,14 +69,15 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
-                  <LogOut className="w-3.5 h-3.5" />
-                </Button>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Settings className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+                <SignOutDialog variant="icon" />
               </>
             ) : user ? (
-              <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
-                <LogOut className="w-3.5 h-3.5" />
-              </Button>
+              <SignOutDialog variant="icon" />
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="h-8 text-xs px-3">
