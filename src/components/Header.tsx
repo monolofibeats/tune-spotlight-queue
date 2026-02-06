@@ -125,12 +125,20 @@ export function Header() {
             </div>
             
             {user && !isAdmin && (
-              <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                  <User className="w-4 h-4" />
-                  {t('nav.mySongs')}
-                </Button>
-              </Link>
+              <>
+                <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <User className="w-4 h-4" />
+                    {t('nav.mySongs')}
+                  </Button>
+                </Link>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Button>
+                </Link>
+              </>
             )}
             
             {isAdmin ? (
@@ -141,32 +149,16 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start gap-2 h-9 text-sm" 
-                  onClick={() => {
-                    signOut();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="w-4 h-4" />
-                  {t('nav.logout')}
-                </Button>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Button>
+                </Link>
+                <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
               </>
             ) : user ? (
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 h-9 text-sm" 
-                onClick={() => {
-                  signOut();
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <LogOut className="w-4 h-4" />
-                {t('nav.logout')}
-              </Button>
+              <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button size="sm" className="w-full h-9 text-sm">
