@@ -9,7 +9,7 @@ interface SongMetadata {
 
 /**
  * Fetch Spotify track metadata using oEmbed API
- * Returns title in format "Song Title" by "Artist Name"
+ * The oEmbed response includes title (song name) and the iframe HTML which contains "by Artist"
  */
 export const fetchSpotifyMetadata = async (url: string): Promise<SongMetadata> => {
   try {
@@ -17,27 +17,41 @@ export const fetchSpotifyMetadata = async (url: string): Promise<SongMetadata> =
     if (!response.ok) return {};
     
     const data = await response.json();
-    // oEmbed title format is typically: "Song Title" or the track name
-    // The HTML contains more info, but title is what we can parse
+    console.log('Spotify oEmbed response:', data);
+    
+    let songTitle: string | undefined;
+    let artistName: string | undefined;
+    
+    // The title field contains the song name
     if (data.title) {
-      // Title format varies, but often it's just the song name
-      // We need to check the HTML for artist info
-      const htmlMatch = data.html?.match(/title="([^"]+)"/);
-      if (htmlMatch) {
-        const fullTitle = htmlMatch[1];
-        // Format is often "Song by Artist on Spotify"
+      songTitle = data.title;
+    }
+    
+    // The HTML iframe contains a title attribute with format "Song by Artist on Spotify"
+    // Example: <iframe ... title="Blinding Lights by The Weeknd on Spotify" ...>
+    if (data.html) {
+      const titleMatch = data.html.match(/title="([^"]+)"/);
+      if (titleMatch) {
+        const fullTitle = titleMatch[1];
+        console.log('Extracted iframe title:', fullTitle);
+        
+        // Parse "Song by Artist on Spotify" or "Song by Artist"
         const byMatch = fullTitle.match(/^(.+?)\s+by\s+(.+?)(?:\s+on\s+Spotify)?$/i);
         if (byMatch) {
-          return {
-            songTitle: byMatch[1].trim(),
-            artistName: byMatch[2].trim(),
-          };
+          songTitle = byMatch[1].trim();
+          artistName = byMatch[2].trim();
+          console.log('Parsed - Song:', songTitle, 'Artist:', artistName);
         }
       }
-      
-      // Fallback: just use the title as song name
-      return { songTitle: data.title };
     }
+    
+    // Also check provider_name for confirmation it's Spotify
+    // And use the "author_name" field if available (some responses include it)
+    if (data.author_name && !artistName) {
+      artistName = data.author_name;
+    }
+    
+    return { songTitle, artistName };
   } catch (e) {
     console.error('Failed to fetch Spotify metadata:', e);
   }
