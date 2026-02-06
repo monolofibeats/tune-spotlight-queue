@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useSpring } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
   const [isOverInteractive, setIsOverInteractive] = useState(false);
   const lastTargetRef = useRef<Element | null>(null);
+  const isMobile = useIsMobile();
 
   const springConfig = { damping: 20, stiffness: 150, mass: 0.8 };
   const x = useSpring(0, springConfig);
@@ -65,6 +67,11 @@ export function CursorFollower() {
       document.body.removeEventListener('mouseenter', handleMouseEnter);
     };
   }, [x, y]);
+
+  // Don't show on mobile
+  if (isMobile) {
+    return null;
+  }
 
   const showCursor = isVisible && !isOverInteractive;
 
