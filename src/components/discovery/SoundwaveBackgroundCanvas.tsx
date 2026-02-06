@@ -126,7 +126,9 @@ function createWaveLines(isMobile: boolean): WaveLine[] {
   return lines;
 }
 
-export function SoundwaveBackgroundCanvas() {
+
+// Desktop-only canvas animation component
+function DesktopSoundwaveCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5, smoothX: 0.5, smoothY: 0.5, lastMoveTime: 0 });
@@ -135,14 +137,7 @@ export function SoundwaveBackgroundCanvas() {
   const waveLinesRef = useRef<WaveLine[]>([]);
   const waveExpansionRef = useRef(0);
   const cursorInfluenceRef = useRef(0);
-  const isMobile = useIsMobile();
 
-  // On mobile, return a simple gradient background instead of complex canvas animation
-  if (isMobile) {
-    return <MobileBackground />;
-  }
-
-  // Desktop-only canvas animation continues below
   useEffect(() => {
     const particleCount = 140;
     const particles: Particle[] = [];
