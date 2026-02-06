@@ -74,6 +74,8 @@ export function CursorFollower() {
   }
 
   const showCursor = isVisible && !isOverInteractive;
+
+  return (
     <>
       {/* Yellow blurry dot cursor */}
       <motion.div
