@@ -378,11 +378,9 @@ function DesktopSoundwaveCanvas() {
         if (p.y > 1.08) p.y = -0.08;
       }
 
-      // Draw particles as small line sprinkles - simplified on mobile
+      // Draw particles as small line sprinkles
       ctx.save();
-      if (!isMobile) {
-        ctx.globalCompositeOperation = "lighter";
-      }
+      ctx.globalCompositeOperation = "lighter";
       ctx.lineCap = "round";
       
       for (const p of ps) {
@@ -400,16 +398,12 @@ function DesktopSoundwaveCanvas() {
         const distFromCenter = Math.abs(p.y - 0.5);
         const waveProximity = distFromCenter < 0.15 ? (1 - distFromCenter / 0.15) : 0;
         
-        // Same color as wave lines - simplified on mobile
+        // Same color as wave lines
         ctx.globalAlpha = Math.min(1, 0.1 + p.opacity * 0.4 + waveProximity * 0.25);
         ctx.strokeStyle = hsla(1);
-        ctx.lineWidth = isMobile ? 1 : 1.5 + waveProximity * 0.5;
-        
-        // Skip shadows on mobile
-        if (!isMobile) {
-          ctx.shadowBlur = 5 + waveProximity * 4;
-          ctx.shadowColor = hsla(0.3);
-        }
+        ctx.lineWidth = 1.5 + waveProximity * 0.5;
+        ctx.shadowBlur = 5 + waveProximity * 4;
+        ctx.shadowColor = hsla(0.3);
         
         ctx.beginPath();
         ctx.moveTo(x - dx * 0.5, y - dy * 0.5);
@@ -429,11 +423,9 @@ function DesktopSoundwaveCanvas() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
-      if (!isMobile) {
-        window.removeEventListener("mousemove", handleMouseMove);
-      }
+      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [isMobile]);
+  }, []);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
