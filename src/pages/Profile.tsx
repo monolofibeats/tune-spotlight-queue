@@ -240,12 +240,10 @@ export default function Profile() {
                   onChange={handleAvatarUpload}
                   className="hidden"
                 />
-                <Button variant="outline" size="sm" className="gap-2" asChild>
-                  <span>
-                    <Camera className="w-4 h-4" />
-                    Change Avatar
-                  </span>
-                </Button>
+                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-border bg-transparent hover:bg-secondary hover:text-secondary-foreground h-9 px-3 transition-colors cursor-pointer">
+                  <Camera className="w-4 h-4" />
+                  Change Avatar
+                </div>
               </label>
             </div>
 
