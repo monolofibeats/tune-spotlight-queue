@@ -643,31 +643,45 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const url = e.target.value;
                     setSongUrl(url);
-                    
-                    // Auto-fill from URL when pasting a link
-                    if (url.includes('http')) {
-                      // Check if it's a Spotify link - use async fetch
-                      if (url.includes('spotify.com')) {
-                        const metadata = await fetchSpotifyMetadata(url);
-                        if (metadata.artistName && !artistName.trim()) {
-                          setArtistName(metadata.artistName);
-                        }
-                        if (metadata.songTitle && !songTitle.trim()) {
-                          setSongTitle(metadata.songTitle);
-                        }
-                      } else {
-                        // Other platforms - use sync parsing
-                        const metadata = parseUrlMetadata(url);
-                        if (metadata.artistName && !artistName.trim()) {
-                          setArtistName(metadata.artistName);
-                        }
-                        if (metadata.songTitle && !songTitle.trim()) {
-                          setSongTitle(metadata.songTitle);
-                        }
+
+                    // Non-Spotify: best-effort sync parsing
+                    if (url.includes('http') && !url.includes('spotify.com')) {
+                      const metadata = parseUrlMetadata(url);
+                      if (metadata.artistName && !artistName.trim()) {
+                        setArtistName(metadata.artistName);
                       }
+                      if (metadata.songTitle && !songTitle.trim()) {
+                        setSongTitle(metadata.songTitle);
+                      }
+                    }
+                  }}
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData('text');
+                    if (!pasted || !pasted.includes('http')) return;
+
+                    // Replace whatever was in the input with the pasted URL (more reliable)
+                    e.preventDefault();
+                    setSongUrl(pasted);
+
+                    if (pasted.includes('spotify.com')) {
+                      void autofillFromSpotify(pasted);
+                      return;
+                    }
+
+                    const metadata = parseUrlMetadata(pasted);
+                    if (metadata.artistName && !artistName.trim()) {
+                      setArtistName(metadata.artistName);
+                    }
+                    if (metadata.songTitle && !songTitle.trim()) {
+                      setSongTitle(metadata.songTitle);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (songUrl.includes('spotify.com')) {
+                      void autofillFromSpotify(songUrl);
                     }
                   }}
                   className="h-10 text-sm bg-background/50"
