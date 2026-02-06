@@ -137,28 +137,9 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     });
   }, [songUrl, audioFile, artistName, songTitle]);
 
-  // Sync glow animation across all fields by setting a CSS variable
-  // This ensures fields added/removed from glow state stay in rhythm
-  useEffect(() => {
-    const CYCLE_DURATION = 3000; // 3s animation cycle
-    const startTime = performance.now();
-    
-    const updateSyncDelay = () => {
-      const elapsed = performance.now() - startTime;
-      const cyclePosition = elapsed % CYCLE_DURATION;
-      // Negative delay to sync to current cycle position
-      const delay = -cyclePosition / 1000;
-      document.documentElement.style.setProperty('--glow-sync-delay', `${delay}s`);
-    };
-    
-    // Update immediately and then on a slower interval
-    updateSyncDelay();
-    const interval = setInterval(updateSyncDelay, 100);
-    
-    return () => clearInterval(interval);
-  }, []);
 
   // Get glow class for a field based on whether it's the next one to fill
+
   const getFieldGlowClass = (fieldStep: number): string => {
     if (isFieldCompleted(fieldStep)) {
       return 'field-glow-completed';
@@ -632,7 +613,7 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div 
-            className={`rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50 relative ${
+            className={`field-glow-sync rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50 relative ${
               !submissionsOpen ? 'opacity-50 pointer-events-none' : ''
             }`}
           >
