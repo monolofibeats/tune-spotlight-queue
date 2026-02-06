@@ -16,7 +16,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
-import { parseUrlMetadata, parseFilename, fetchSpotifyMetadata } from '@/lib/songMetadataParser';
+import { parseUrlMetadata, parseFilename } from '@/lib/songMetadataParser';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -71,6 +71,30 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+
+  const autofillFromSpotify = async (url: string) => {
+    // Browser fetch to Spotify pages is often blocked by CORS; use backend function instead.
+    if (!url.includes('spotify.com') || !url.includes('/track/')) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-spotify-metadata', {
+        body: { url },
+      });
+      if (error) return;
+
+      const meta = data as { songTitle?: string; artistName?: string } | null;
+      if (!meta) return;
+
+      if (meta.artistName && !artistName.trim()) {
+        setArtistName(meta.artistName);
+      }
+      if (meta.songTitle && !songTitle.trim()) {
+        setSongTitle(meta.songTitle);
+      }
+    } catch {
+      // Ignore autofill errors (user can always type manually)
+    }
+  };
 
   // Determine which field is the "next" one to fill (for progressive glow)
   // Order: 0=link/file, 1=file (if no link), 2=artistName, 3=songTitle
@@ -619,31 +643,45 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
-                  onChange={async (e) => {
+                  onChange={(e) => {
                     const url = e.target.value;
                     setSongUrl(url);
-                    
-                    // Auto-fill from URL when pasting a link
-                    if (url.includes('http')) {
-                      // Check if it's a Spotify link - use async fetch
-                      if (url.includes('spotify.com')) {
-                        const metadata = await fetchSpotifyMetadata(url);
-                        if (metadata.artistName && !artistName.trim()) {
-                          setArtistName(metadata.artistName);
-                        }
-                        if (metadata.songTitle && !songTitle.trim()) {
-                          setSongTitle(metadata.songTitle);
-                        }
-                      } else {
-                        // Other platforms - use sync parsing
-                        const metadata = parseUrlMetadata(url);
-                        if (metadata.artistName && !artistName.trim()) {
-                          setArtistName(metadata.artistName);
-                        }
-                        if (metadata.songTitle && !songTitle.trim()) {
-                          setSongTitle(metadata.songTitle);
-                        }
+
+                    // Non-Spotify: best-effort sync parsing
+                    if (url.includes('http') && !url.includes('spotify.com')) {
+                      const metadata = parseUrlMetadata(url);
+                      if (metadata.artistName && !artistName.trim()) {
+                        setArtistName(metadata.artistName);
                       }
+                      if (metadata.songTitle && !songTitle.trim()) {
+                        setSongTitle(metadata.songTitle);
+                      }
+                    }
+                  }}
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData('text');
+                    if (!pasted || !pasted.includes('http')) return;
+
+                    // Replace whatever was in the input with the pasted URL (more reliable)
+                    e.preventDefault();
+                    setSongUrl(pasted);
+
+                    if (pasted.includes('spotify.com')) {
+                      void autofillFromSpotify(pasted);
+                      return;
+                    }
+
+                    const metadata = parseUrlMetadata(pasted);
+                    if (metadata.artistName && !artistName.trim()) {
+                      setArtistName(metadata.artistName);
+                    }
+                    if (metadata.songTitle && !songTitle.trim()) {
+                      setSongTitle(metadata.songTitle);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (songUrl.includes('spotify.com')) {
+                      void autofillFromSpotify(songUrl);
                     }
                   }}
                   className="h-10 text-sm bg-background/50"
