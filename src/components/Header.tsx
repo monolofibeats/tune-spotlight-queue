@@ -42,8 +42,6 @@ export function Header() {
             
             <SocialLinks />
             
-            <PerformanceToggle />
-            
             {user && <BidNotificationBell />}
             
             {user && !isAdmin && (
@@ -78,6 +76,11 @@ export function Header() {
                 </Button>
               </Link>
             )}
+            
+            {/* Performance toggle - always visible at the end */}
+            <div className="border-l border-border/30 pl-3 ml-1">
+              <PerformanceToggle />
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
