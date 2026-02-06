@@ -105,6 +105,9 @@ const Discovery = () => {
                   {t('nav.signIn')}
                 </GlowButton>
               </Link>
+              <TooltipProvider>
+                <PerformanceToggle />
+              </TooltipProvider>
             </nav>
           </div>
         </div>
