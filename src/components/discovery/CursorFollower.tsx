@@ -68,9 +68,12 @@ export function CursorFollower() {
     };
   }, [x, y]);
 
-  const showCursor = isVisible && !isOverInteractive;
+  // Don't show on mobile
+  if (isMobile) {
+    return null;
+  }
 
-  return (
+  const showCursor = isVisible && !isOverInteractive;
     <>
       {/* Yellow blurry dot cursor */}
       <motion.div
