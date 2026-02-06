@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePerformanceMode } from "@/hooks/usePerformanceMode";
 import { MobileBackground } from "./MobileBackground";
 
 interface Particle {
