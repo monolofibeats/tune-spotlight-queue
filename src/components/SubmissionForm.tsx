@@ -288,6 +288,15 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     }
     
     setAudioFile(file);
+    
+    // Auto-fill artist and song title from filename
+    const metadata = parseFilename(file.name);
+    if (metadata.artistName && !artistName.trim()) {
+      setArtistName(metadata.artistName);
+    }
+    if (metadata.songTitle && !songTitle.trim()) {
+      setSongTitle(metadata.songTitle);
+    }
   };
 
   const removeAudioFile = () => {
