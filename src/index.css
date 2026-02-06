@@ -284,13 +284,6 @@
   }
 }
 
-/* Parent container runs a hidden "clock" animation that all children inherit timing from */
-.field-glow-sync {
-  /* This doesn't do anything visible, but syncs the animation timeline */
-  animation: field-glow-smooth 5s ease-in-out infinite;
-  animation-fill-mode: both;
-}
-
 @keyframes field-success-flash {
   0% {
     background: transparent;
@@ -307,6 +300,7 @@
 }
 
 /* Unfilled fields - synced glow every 5s */
+/* All fields use a shared --glow-sync-delay variable set by JS to stay in sync */
 .field-glow-active,
 .field-glow-pending {
   position: relative;
@@ -316,10 +310,17 @@
 
 .field-glow-active {
   animation: field-glow-smooth 5s ease-in-out infinite;
+  animation-delay: var(--glow-sync-delay, 0s);
 }
 
 .field-glow-pending {
   animation: field-glow-smooth-pending 5s ease-in-out infinite;
+  animation-delay: var(--glow-sync-delay, 0s);
+}
+
+/* Parent container marker (no visual effect, just for JS targeting) */
+.field-glow-sync {
+  /* Marker class for JS to find and sync children */
 }
 
 
