@@ -8,47 +8,56 @@ interface SongMetadata {
 }
 
 /**
- * Fetch Spotify track metadata using oEmbed API
- * The oEmbed response includes title (song name) and the iframe HTML which contains "by Artist"
+ * Fetch Spotify track metadata using oEmbed API + embed page scraping
+ * The oEmbed gives us the song title, but we need to fetch the embed page for artist
  */
 export const fetchSpotifyMetadata = async (url: string): Promise<SongMetadata> => {
   try {
-    const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
-    if (!response.ok) return {};
+    // First get basic info from oEmbed
+    const oembedResponse = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+    if (!oembedResponse.ok) return {};
     
-    const data = await response.json();
-    console.log('Spotify oEmbed response:', data);
+    const oembedData = await oembedResponse.json();
     
-    let songTitle: string | undefined;
+    let songTitle: string | undefined = oembedData.title;
     let artistName: string | undefined;
     
-    // The title field contains the song name
-    if (data.title) {
-      songTitle = data.title;
-    }
-    
-    // The HTML iframe contains a title attribute with format "Song by Artist on Spotify"
-    // Example: <iframe ... title="Blinding Lights by The Weeknd on Spotify" ...>
-    if (data.html) {
-      const titleMatch = data.html.match(/title="([^"]+)"/);
-      if (titleMatch) {
-        const fullTitle = titleMatch[1];
-        console.log('Extracted iframe title:', fullTitle);
-        
-        // Parse "Song by Artist on Spotify" or "Song by Artist"
-        const byMatch = fullTitle.match(/^(.+?)\s+by\s+(.+?)(?:\s+on\s+Spotify)?$/i);
-        if (byMatch) {
-          songTitle = byMatch[1].trim();
-          artistName = byMatch[2].trim();
-          console.log('Parsed - Song:', songTitle, 'Artist:', artistName);
+    // Try to get artist from the embed iframe page
+    // The embed URL contains metadata we can parse
+    if (oembedData.iframe_url) {
+      try {
+        const embedResponse = await fetch(oembedData.iframe_url);
+        if (embedResponse.ok) {
+          const embedHtml = await embedResponse.text();
+          
+          // Look for artist in meta tags or JSON data
+          // The embed page has structured data with artist info
+          // Pattern: "artists":[{"name":"Artist Name"
+          const artistMatch = embedHtml.match(/"artists":\s*\[\s*\{\s*"name"\s*:\s*"([^"]+)"/);
+          if (artistMatch) {
+            artistName = artistMatch[1];
+          }
+          
+          // Alternative: look for <meta property="og:description" content="Song · Artist">
+          const ogDescMatch = embedHtml.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/);
+          if (ogDescMatch && !artistName) {
+            const desc = ogDescMatch[1];
+            // Format is often "Song · Artist" or similar
+            const parts = desc.split(/\s*[·•]\s*/);
+            if (parts.length >= 2) {
+              artistName = parts[1].trim();
+            }
+          }
+          
+          // Another pattern: look for artist link text
+          const artistLinkMatch = embedHtml.match(/data-testid="creator-link"[^>]*>([^<]+)</);
+          if (artistLinkMatch && !artistName) {
+            artistName = artistLinkMatch[1].trim();
+          }
         }
+      } catch (e) {
+        console.log('Could not fetch embed page for artist info');
       }
-    }
-    
-    // Also check provider_name for confirmation it's Spotify
-    // And use the "author_name" field if available (some responses include it)
-    if (data.author_name && !artistName) {
-      artistName = data.author_name;
     }
     
     return { songTitle, artistName };
