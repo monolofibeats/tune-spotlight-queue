@@ -110,8 +110,9 @@ export function Header() {
               </Button>
             </Link>
             
-            <div className="flex justify-center pb-2 border-b border-border/30">
+            <div className="flex items-center justify-between pb-2 border-b border-border/30">
               <SocialLinks />
+              <PerformanceToggle />
             </div>
             
             {user && !isAdmin && (
