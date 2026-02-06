@@ -187,8 +187,8 @@ function DesktopSoundwaveCanvas() {
       const ps = particlesRef.current;
       const waves = waveLinesRef.current;
 
-      // On mobile, disable cursor interactions entirely
-      const enableCursorInteraction = !isMobile;
+      // Desktop cursor interactions
+      const enableCursorInteraction = true;
       
       // Ultra smooth mouse position for wave interaction (desktop only)
       if (enableCursorInteraction) {
