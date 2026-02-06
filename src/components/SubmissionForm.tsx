@@ -16,6 +16,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
+import { parseUrlMetadata, parseFilename } from '@/lib/songMetadataParser';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -287,6 +288,15 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     }
     
     setAudioFile(file);
+    
+    // Auto-fill artist and song title from filename
+    const metadata = parseFilename(file.name);
+    if (metadata.artistName && !artistName.trim()) {
+      setArtistName(metadata.artistName);
+    }
+    if (metadata.songTitle && !songTitle.trim()) {
+      setSongTitle(metadata.songTitle);
+    }
   };
 
   const removeAudioFile = () => {
@@ -609,7 +619,21 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
-                  onChange={(e) => setSongUrl(e.target.value)}
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    setSongUrl(url);
+                    
+                    // Auto-fill from URL when pasting a link
+                    if (url.includes('http')) {
+                      const metadata = parseUrlMetadata(url);
+                      if (metadata.artistName && !artistName.trim()) {
+                        setArtistName(metadata.artistName);
+                      }
+                      if (metadata.songTitle && !songTitle.trim()) {
+                        setSongTitle(metadata.songTitle);
+                      }
+                    }
+                  }}
                   className="h-10 text-sm bg-background/50"
                 />
                 {platform && (
