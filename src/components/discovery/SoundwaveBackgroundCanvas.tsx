@@ -137,16 +137,21 @@ export function SoundwaveBackgroundCanvas() {
   const cursorInfluenceRef = useRef(0);
   const isMobile = useIsMobile();
 
+  // On mobile, return a simple gradient background instead of complex canvas animation
+  if (isMobile) {
+    return <MobileBackground />;
+  }
+
+  // Desktop-only canvas animation continues below
   useEffect(() => {
-    // Simplified setup for mobile - fewer particles and simpler waves
-    const particleCount = isMobile ? 30 : 140;
+    const particleCount = 140;
     const particles: Particle[] = [];
     
     for (let i = 0; i < particleCount; i++) {
       particles.push(createParticle(i));
     }
     particlesRef.current = particles;
-    waveLinesRef.current = createWaveLines(isMobile);
+    waveLinesRef.current = createWaveLines(false);
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const hsla = makeHslaFromCssVar("--primary");
