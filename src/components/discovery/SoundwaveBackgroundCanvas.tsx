@@ -212,7 +212,7 @@ function DesktopSoundwaveCanvas() {
       const targetExpansion = 1 + (0.35 * cursorInfluence); // Use influence for smooth transition
       waveExpansionRef.current += (targetExpansion - waveExpansionRef.current) * 0.008;
 
-      // Draw flowing wave lines - simplified on mobile
+      // Draw flowing wave lines
       ctx.save();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -220,44 +220,24 @@ function DesktopSoundwaveCanvas() {
       for (let wi = 0; wi < waves.length; wi++) {
         const wave = waves[wi];
         
-        // Smoothly expand wave offset based on cursor proximity (desktop only)
-        if (!isMobile) {
-          const targetOffset = wave.baseYOffset * waveExpansionRef.current;
-          wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
-        }
+        // Smoothly expand wave offset based on cursor proximity
+        const targetOffset = wave.baseYOffset * waveExpansionRef.current;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
         
         ctx.beginPath();
         ctx.strokeStyle = hsla(wave.opacity);
-        ctx.lineWidth = isMobile ? 1 : 1.5;
-        
-        // Skip shadows on mobile for performance
-        if (!isMobile) {
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = hsla(wave.opacity * 0.5);
-        }
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = hsla(wave.opacity * 0.5);
         
         const points = wave.points;
         const centerY = 0.5 + wave.currentYOffset;
         
-        // Simplified drawing on mobile - use lineTo instead of quadraticCurveTo
-        if (isMobile) {
-          for (let i = 0; i < points.length; i++) {
-            const x = i / (points.length - 1);
-            const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase);
-            const y = centerY + animatedY * wave.amplitude;
-            
-            if (i === 0) {
-              ctx.moveTo(x * width, y * height);
-            } else {
-              ctx.lineTo(x * width, y * height);
-            }
-          }
-        } else {
-          // Full quality desktop rendering
-          for (let i = 0; i < points.length; i++) {
-            const x = i / (points.length - 1);
-            const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
-            let y = centerY + animatedY * wave.amplitude;
+        // Full quality desktop rendering
+        for (let i = 0; i < points.length; i++) {
+          const x = i / (points.length - 1);
+          const animatedY = points[i] * Math.sin(t * wave.speed + wave.phase + i * 0.04);
+          let y = centerY + animatedY * wave.amplitude;
             
             // Smooth cursor distortion using the faded influence
             if (cursorInfluence > 0.001) {
