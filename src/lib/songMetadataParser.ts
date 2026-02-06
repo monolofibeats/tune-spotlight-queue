@@ -8,6 +8,43 @@ interface SongMetadata {
 }
 
 /**
+ * Fetch Spotify track metadata using oEmbed API
+ * Returns title in format "Song Title" by "Artist Name"
+ */
+export const fetchSpotifyMetadata = async (url: string): Promise<SongMetadata> => {
+  try {
+    const response = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`);
+    if (!response.ok) return {};
+    
+    const data = await response.json();
+    // oEmbed title format is typically: "Song Title" or the track name
+    // The HTML contains more info, but title is what we can parse
+    if (data.title) {
+      // Title format varies, but often it's just the song name
+      // We need to check the HTML for artist info
+      const htmlMatch = data.html?.match(/title="([^"]+)"/);
+      if (htmlMatch) {
+        const fullTitle = htmlMatch[1];
+        // Format is often "Song by Artist on Spotify"
+        const byMatch = fullTitle.match(/^(.+?)\s+by\s+(.+?)(?:\s+on\s+Spotify)?$/i);
+        if (byMatch) {
+          return {
+            songTitle: byMatch[1].trim(),
+            artistName: byMatch[2].trim(),
+          };
+        }
+      }
+      
+      // Fallback: just use the title as song name
+      return { songTitle: data.title };
+    }
+  } catch (e) {
+    console.error('Failed to fetch Spotify metadata:', e);
+  }
+  return {};
+};
+
+/**
  * Parse Spotify URL to extract track info from the URL path
  * Spotify URLs don't contain metadata in URL, but we can detect the platform
  */
