@@ -72,6 +72,30 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
 
+  const autofillFromSpotify = async (url: string) => {
+    // Browser fetch to Spotify pages is often blocked by CORS; use backend function instead.
+    if (!url.includes('spotify.com') || !url.includes('/track/')) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-spotify-metadata', {
+        body: { url },
+      });
+      if (error) return;
+
+      const meta = data as { songTitle?: string; artistName?: string } | null;
+      if (!meta) return;
+
+      if (meta.artistName && !artistName.trim()) {
+        setArtistName(meta.artistName);
+      }
+      if (meta.songTitle && !songTitle.trim()) {
+        setSongTitle(meta.songTitle);
+      }
+    } catch {
+      // Ignore autofill errors (user can always type manually)
+    }
+  };
+
   // Determine which field is the "next" one to fill (for progressive glow)
   // Order: 0=link/file, 1=file (if no link), 2=artistName, 3=songTitle
   const getFieldCompletionStep = (): number => {
