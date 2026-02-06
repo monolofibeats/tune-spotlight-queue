@@ -70,8 +70,8 @@ export function CursorFollower() {
     };
   }, [x, y]);
 
-  // Don't show on mobile
-  if (isMobile) {
+  // Don't show on mobile or in light performance mode
+  if (isMobile || mode === 'light') {
     return null;
   }
 
