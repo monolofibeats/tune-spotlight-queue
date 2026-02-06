@@ -619,7 +619,21 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 <Input
                   placeholder={t('submission.linkPlaceholder')}
                   value={songUrl}
-                  onChange={(e) => setSongUrl(e.target.value)}
+                  onChange={(e) => {
+                    const url = e.target.value;
+                    setSongUrl(url);
+                    
+                    // Auto-fill from URL when pasting a link
+                    if (url.includes('http')) {
+                      const metadata = parseUrlMetadata(url);
+                      if (metadata.artistName && !artistName.trim()) {
+                        setArtistName(metadata.artistName);
+                      }
+                      if (metadata.songTitle && !songTitle.trim()) {
+                        setSongTitle(metadata.songTitle);
+                      }
+                    }
+                  }}
                   className="h-10 text-sm bg-background/50"
                 />
                 {platform && (
