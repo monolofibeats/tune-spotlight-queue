@@ -493,3 +493,16 @@ function DesktopSoundwaveCanvas() {
     </div>
   );
 }
+
+// Main export - switches between mobile and desktop backgrounds
+export function SoundwaveBackgroundCanvas() {
+  const isMobile = useIsMobile();
+  
+  // On mobile, use the simple gradient background
+  if (isMobile) {
+    return <MobileBackground />;
+  }
+  
+  // On desktop, use the full canvas animation
+  return <DesktopSoundwaveCanvas />;
+}
