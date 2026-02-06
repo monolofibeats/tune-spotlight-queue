@@ -391,3 +391,29 @@
   transform: translateX(-100%) skewX(-15deg);
   pointer-events: none;
 }
+
+/* Performance light mode - reduce animations */
+.performance-light * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.15s !important;
+}
+
+/* Allow essential animations in light mode */
+.performance-light .allow-animation {
+  animation-duration: initial !important;
+  animation-iteration-count: initial !important;
+}
+
+/* Disable heavy effects */
+.performance-light .glow-primary,
+.performance-light .glow-accent,
+.performance-light .glow-soft {
+  box-shadow: none !important;
+}
+
+.performance-light .glass,
+.performance-light .glass-strong {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
