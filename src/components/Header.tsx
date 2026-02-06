@@ -1,19 +1,20 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, LogOut, User, Film } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User, Film, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
 import { LiveIndicator } from './LiveIndicator';
 import { BidNotificationBell } from './BidNotificationBell';
 import { PerformanceToggle } from './PerformanceToggle';
+import { SignOutDialog } from './SignOutDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t } = useLanguage();
 
   return (
@@ -45,12 +46,19 @@ export function Header() {
             {user && <BidNotificationBell />}
             
             {user && !isAdmin && (
-              <Link to="/my-dashboard">
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                  <User className="w-3.5 h-3.5" />
-                  {t('nav.mySongs')}
-                </Button>
-              </Link>
+              <>
+                <Link to="/my-dashboard">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <User className="w-3.5 h-3.5" />
+                    {t('nav.mySongs')}
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Settings className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </>
             )}
             
             {isAdmin ? (
@@ -61,14 +69,15 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
-                  <LogOut className="w-3.5 h-3.5" />
-                </Button>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Settings className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+                <SignOutDialog variant="icon" />
               </>
             ) : user ? (
-              <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" onClick={signOut}>
-                <LogOut className="w-3.5 h-3.5" />
-              </Button>
+              <SignOutDialog variant="icon" />
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="h-8 text-xs px-3">
@@ -116,12 +125,20 @@ export function Header() {
             </div>
             
             {user && !isAdmin && (
-              <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                  <User className="w-4 h-4" />
-                  {t('nav.mySongs')}
-                </Button>
-              </Link>
+              <>
+                <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <User className="w-4 h-4" />
+                    {t('nav.mySongs')}
+                  </Button>
+                </Link>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Button>
+                </Link>
+              </>
             )}
             
             {isAdmin ? (
@@ -132,32 +149,16 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start gap-2 h-9 text-sm" 
-                  onClick={() => {
-                    signOut();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="w-4 h-4" />
-                  {t('nav.logout')}
-                </Button>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Button>
+                </Link>
+                <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
               </>
             ) : user ? (
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 h-9 text-sm" 
-                onClick={() => {
-                  signOut();
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <LogOut className="w-4 h-4" />
-                {t('nav.logout')}
-              </Button>
+              <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
             ) : (
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <Button size="sm" className="w-full h-9 text-sm">

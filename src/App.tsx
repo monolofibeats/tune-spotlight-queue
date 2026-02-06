@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Imprint from "./pages/Imprint";
 
@@ -61,6 +62,14 @@ const App = () => (
                       element={
                         <ProtectedRoute>
                           <StreamerSettings />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/profile" 
+                      element={
+                        <ProtectedRoute>
+                          <Profile />
                         </ProtectedRoute>
                       } 
                     />
