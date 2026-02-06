@@ -137,45 +137,24 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     });
   }, [songUrl, audioFile, artistName, songTitle]);
 
-  // Sync glow animation across all fields using a shared negative delay
-  // This ensures fields added/removed stay in the same rhythm
-  useEffect(() => {
-    const CYCLE_DURATION = 5000; // 5s animation cycle (matches CSS)
-    
-    const updateSyncDelay = () => {
-      // Calculate how far into the current cycle we are
-      const now = performance.now();
-      const cyclePosition = now % CYCLE_DURATION;
-      // Negative delay syncs new elements to the current cycle position
-      const delay = -cyclePosition / 1000;
-      document.documentElement.style.setProperty('--glow-sync-delay', `${delay}s`);
-    };
-    
-    // Update sync delay frequently to keep new elements in phase
-    updateSyncDelay();
-    const interval = setInterval(updateSyncDelay, 50);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   // Get glow class for a field based on whether it's the next one to fill
-
   const getFieldGlowClass = (fieldStep: number): string => {
     if (isFieldCompleted(fieldStep)) {
-      return 'field-glow-completed';
+      return 'field-glow field-glow-completed';
     }
-    
+
     // The current step gets the bright glow
     if (fieldStep === currentStep) {
-      return 'field-glow-active';
+      return 'field-glow field-glow-active';
     }
-    
+
     // Future steps get a subtle pulse
     if (fieldStep > currentStep) {
-      return 'field-glow-pending';
+      return 'field-glow field-glow-pending';
     }
-    
-    return '';
+
+    // Past steps: keep animation running but invisible (prevents future desync)
+    return 'field-glow';
   };
 
   // Completion tick component - only animates when first added to shownTicks
