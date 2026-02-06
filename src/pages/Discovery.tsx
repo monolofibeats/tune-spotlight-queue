@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink, Star } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useActiveStreamers } from '@/hooks/useStreamer';
@@ -16,6 +16,7 @@ import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
 import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
 import upstarLogo from '@/assets/upstar-logo.png';
+import upstarHeroStar from '@/assets/upstar-hero-star.png';
 import { useState } from 'react';
 
 const Discovery = () => {
@@ -140,11 +141,11 @@ const Discovery = () => {
               >
                 {t('discovery.heroHighlight')}
                 <motion.span
-                  className="absolute -right-8 -top-4"
-                  animate={{ rotate: [0, 20, 0], scale: [1, 1.2, 1] }}
+                  className="absolute -right-10 -top-6"
+                  animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <Star className="w-6 h-6 text-primary fill-primary" />
+                  <img src={upstarHeroStar} alt="" className="w-10 h-10 object-contain" />
                 </motion.span>
               </motion.span>
             </motion.h1>
