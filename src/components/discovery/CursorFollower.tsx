@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useSpring } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePerformanceMode } from '@/hooks/usePerformanceMode';
 
 export function CursorFollower() {
   const [isVisible, setIsVisible] = useState(false);
   const [isOverInteractive, setIsOverInteractive] = useState(false);
   const lastTargetRef = useRef<Element | null>(null);
   const isMobile = useIsMobile();
+  const { mode } = usePerformanceMode();
 
   const springConfig = { damping: 20, stiffness: 150, mass: 0.8 };
   const x = useSpring(0, springConfig);
