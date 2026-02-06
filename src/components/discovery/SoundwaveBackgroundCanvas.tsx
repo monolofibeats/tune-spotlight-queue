@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileBackground } from "./MobileBackground";
 
 interface Particle {
   id: number;
