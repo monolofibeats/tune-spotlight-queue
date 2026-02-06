@@ -141,11 +141,11 @@ const Discovery = () => {
               >
                 {t('discovery.heroHighlight')}
                 <motion.span
-                  className="absolute -right-8 -top-4"
-                  animate={{ rotate: [0, 20, 0], scale: [1, 1.2, 1] }}
+                  className="absolute -right-10 -top-6"
+                  animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
-                  <Star className="w-6 h-6 text-primary fill-primary" />
+                  <img src={upstarHeroStar} alt="" className="w-10 h-10 object-contain" />
                 </motion.span>
               </motion.span>
             </motion.h1>
