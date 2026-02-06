@@ -42,6 +42,8 @@ export function Header() {
             
             <SocialLinks />
             
+            <PerformanceToggle />
+            
             {user && <BidNotificationBell />}
             
             {user && !isAdmin && (
