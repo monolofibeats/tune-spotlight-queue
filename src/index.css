@@ -261,15 +261,26 @@
 }
 
 /* Form field progressive glow effects */
-@keyframes field-glow-slow {
+/* Single shared pulse clock for all glowing fields (prevents desync on re-render) */
+@property --field-glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes field-glow-sync {
   0%, 100% {
-    box-shadow: none;
-    background: transparent;
+    --field-glow: 0;
   }
   40%, 60% {
-    box-shadow: 0 0 18px hsl(var(--primary) / 0.5);
-    background: hsl(var(--primary) / 0.05);
+    --field-glow: 1;
   }
+}
+
+/* Add this class to a parent wrapper so all children share the same pulse */
+.field-glow-sync {
+  --field-glow: 0;
+  animation: field-glow-sync 5s ease-in-out infinite;
 }
 
 @keyframes field-success-flash {
@@ -287,17 +298,24 @@
   }
 }
 
-/* Unfilled fields - slow build up with YELLOW glow every 3s */
-/* All fields sync to the same animation rhythm using a synced animation delay */
-.field-glow-pending,
-.field-glow-active {
+/* Unfilled fields - synced glow every 5s */
+.field-glow-active,
+.field-glow-pending {
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
-  animation: field-glow-slow 3s ease-in-out infinite;
-  /* Animation delay synced via JS-set CSS variable --glow-sync-delay */
-  animation-delay: var(--glow-sync-delay, 0s);
 }
+
+.field-glow-active {
+  box-shadow: 0 0 calc(18px * var(--field-glow)) hsl(var(--primary) / 0.55);
+  background: hsl(var(--primary) / calc(0.06 * var(--field-glow)));
+}
+
+.field-glow-pending {
+  box-shadow: 0 0 calc(12px * var(--field-glow)) hsl(var(--primary) / 0.35);
+  background: hsl(var(--primary) / calc(0.03 * var(--field-glow)));
+}
+
 
 /* Completed fields - GREEN flash then fade to subtle */
 .field-glow-completed {
