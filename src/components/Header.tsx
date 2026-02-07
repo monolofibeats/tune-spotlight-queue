@@ -14,7 +14,7 @@ import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isStreamer } = useAuth();
   const { t } = useLanguage();
 
   return (
