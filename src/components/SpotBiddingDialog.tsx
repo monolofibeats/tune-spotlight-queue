@@ -34,6 +34,7 @@ interface SpotBiddingDialogProps {
   platform: string;
   audioFileUrl?: string | null; // Pre-uploaded audio file path
   streamerId?: string | null; // Streamer context for marketplace
+  streamerSlug?: string | null; // Streamer slug for redirect after payment
   onSuccess?: () => void;
 }
 
