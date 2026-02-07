@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Loader2, User, Mail, Link as LinkIcon, MessageSquare, Check } from 'lucide-react';
+import { Send, Loader2, User, Mail, Link as LinkIcon, MessageSquare, Check, Instagram, Music, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
   const [desiredSlug, setDesiredSlug] = useState('');
   const [twitchUrl, setTwitchUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [spotifyUrl, setSpotifyUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [applicationMessage, setApplicationMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
