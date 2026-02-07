@@ -104,12 +104,20 @@ export function SpotBiddingDialog({
       setMinBidAmount(loadedMinBid);
 
       // Get all pending priority submissions with their bids
-      const { data: pendingSubmissions } = await supabase
+      // Filter by streamerId if provided, otherwise get global queue
+      let query = supabase
         .from('public_submissions_queue')
         .select('*')
         .eq('status', 'pending')
-        .eq('is_priority', true)
-        .order('amount_paid', { ascending: false });
+        .eq('is_priority', true);
+      
+      if (streamerId) {
+        query = query.eq('streamer_id', streamerId);
+      } else {
+        query = query.is('streamer_id', null);
+      }
+      
+      const { data: pendingSubmissions } = await query.order('amount_paid', { ascending: false });
 
       // Get bids for these submissions
       const submissionIds = pendingSubmissions?.map(s => s.id) || [];
