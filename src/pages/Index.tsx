@@ -1,8 +1,6 @@
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
-import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -14,7 +12,6 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 
 const Index = () => {
-  const watchlistRef = useRef<WatchlistRef>(null);
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
 
