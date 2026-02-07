@@ -33,6 +33,7 @@ interface SpotBiddingDialogProps {
   email: string;
   platform: string;
   audioFileUrl?: string | null; // Pre-uploaded audio file path
+  streamerId?: string | null; // Streamer context for marketplace
   onSuccess?: () => void;
 }
 
