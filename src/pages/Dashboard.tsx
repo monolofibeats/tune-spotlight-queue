@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -85,6 +85,9 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Ref for scrolling to Now Playing panel
+  const nowPlayingRef = useRef<HTMLDivElement>(null);
   
   // Now Playing panel state
   const [nowPlaying, setNowPlaying] = useState<{
@@ -355,6 +358,11 @@ const Dashboard = () => {
       isLoading: isLoadingAudio,
       position,
     });
+    
+    // Scroll to Now Playing panel after a brief delay for render
+    setTimeout(() => {
+      nowPlayingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleCloseNowPlaying = () => {
@@ -507,14 +515,16 @@ const Dashboard = () => {
               </motion.div>
 
               {/* Now Playing Panel - Above the list */}
-              <NowPlayingPanel
-                submission={nowPlaying.submission}
-                audioUrl={nowPlaying.audioUrl}
-                isLoadingAudio={nowPlaying.isLoading}
-                position={nowPlaying.position}
-                onClose={handleCloseNowPlaying}
-                onDownload={handleNowPlayingDownload}
-              />
+              <div ref={nowPlayingRef}>
+                <NowPlayingPanel
+                  submission={nowPlaying.submission}
+                  audioUrl={nowPlaying.audioUrl}
+                  isLoadingAudio={nowPlaying.isLoading}
+                  position={nowPlaying.position}
+                  onClose={handleCloseNowPlaying}
+                  onDownload={handleNowPlayingDownload}
+                />
+              </div>
 
               {/* Submissions List - Stacked sizing */}
               <div className="space-y-2">
