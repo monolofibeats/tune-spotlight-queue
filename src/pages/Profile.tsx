@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Camera, CreditCard, Save, Loader2, ArrowLeft } from 'lucide-react';
+import { User, Mail, Camera, Save, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -35,7 +34,6 @@ export default function Profile() {
   const [username, setUsername] = useState('');
   const [displayEmail, setDisplayEmail] = useState('');
   const [bio, setBio] = useState('');
-  const [preferredPayment, setPreferredPayment] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
@@ -68,7 +66,6 @@ export default function Profile() {
         setUsername(data.username || '');
         setDisplayEmail(data.display_email || user.email || '');
         setBio(data.bio || '');
-        setPreferredPayment(data.preferred_payment_method || '');
         setAvatarUrl(data.avatar_url || '');
       } else {
         // No profile yet, use defaults
@@ -97,7 +94,6 @@ export default function Profile() {
         username: username || null,
         display_email: displayEmail || null,
         bio: bio || null,
-        preferred_payment_method: preferredPayment || null,
         avatar_url: avatarUrl || null,
         updated_at: new Date().toISOString(),
       };
@@ -290,23 +286,6 @@ export default function Profile() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="payment" className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Preferred Payment Method
-                </Label>
-                <Select value={preferredPayment} onValueChange={setPreferredPayment}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="card">Credit/Debit Card</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="apple_pay">Apple Pay</SelectItem>
-                    <SelectItem value="google_pay">Google Pay</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Save Button */}
