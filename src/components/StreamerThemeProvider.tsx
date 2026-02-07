@@ -36,6 +36,14 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
     const body = document.body;
     const cleanup: (() => void)[] = [];
 
+    console.log("[StreamerTheme] Applying theme for:", streamer.slug, {
+      button_style: streamer.button_style,
+      font_family: streamer.font_family,
+      animation_style: streamer.animation_style,
+      card_style: streamer.card_style,
+      background_type: streamer.background_type,
+    });
+
     // CRITICAL: Remove global theme classes that override streamer colors
     root.classList.remove("stream-active", "stream-inactive");
     cleanup.push(() => {
