@@ -293,6 +293,7 @@
   position: relative;
   border-radius: 0.75rem;
   padding: 2px;
+  overflow: hidden; /* Clips glow edges to match rounded corners */
 
   /* Defaults = off */
   --field-glow-intensity: 0;
