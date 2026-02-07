@@ -16,7 +16,8 @@ import {
   FileAudio,
   Download,
   Play,
-  ExternalLink
+  ExternalLink,
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,7 @@ import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
+import { SubmissionEditForm } from '@/components/submission/SubmissionEditForm';
 
 // Check if URL is a playable embed (Spotify, SoundCloud)
 const isPlayableEmbed = (url: string) => {
