@@ -28,7 +28,6 @@ interface SpotifyMetadata {
   artistId?: string;
   artistUrl?: string;
   albumName?: string;
-  // Artist profile data
   artistImage?: string;
   artistBio?: string;
   artistTopTracks?: TopTrack[];
@@ -43,17 +42,17 @@ const extractDataFromEmbedHtml = (html: string): Partial<SpotifyMetadata> => {
   const byTestId = html.match(/data-testid="creator-link"[^>]*>([^<]+)</i);
   if (byTestId?.[1]) result.artistName = byTestId[1].trim();
 
-  // Generic: first artist link
+  // Generic: first artist link - clean up the ID
   if (!result.artistName) {
-    const byArtistHref = html.match(/href="https:\/\/open\.spotify\.com\/artist\/([^"]+)"[^>]*>([^<]+)<\/a>/i);
+    const byArtistHref = html.match(/href="https:\/\/open\.spotify\.com\/artist\/([a-zA-Z0-9]+)[^"]*"[^>]*>([^<]+)<\/a>/i);
     if (byArtistHref?.[2]) {
       result.artistName = byArtistHref[2].trim();
-      result.artistId = byArtistHref[1].split('?')[0];
-      result.artistUrl = `https://open.spotify.com/artist/${byArtistHref[1].split('?')[0]}`;
+      result.artistId = byArtistHref[1]; // Only the clean ID
+      result.artistUrl = `https://open.spotify.com/artist/${byArtistHref[1]}`;
     }
   }
 
-  // Extract artist ID if not already found
+  // Extract artist ID if not already found - ensure clean ID
   if (!result.artistId) {
     const artistIdMatch = html.match(/href="https:\/\/open\.spotify\.com\/artist\/([a-zA-Z0-9]+)/i);
     if (artistIdMatch?.[1]) {
@@ -75,164 +74,6 @@ const extractDataFromEmbedHtml = (html: string): Partial<SpotifyMetadata> => {
   // Extract album name
   const albumMatch = html.match(/"album"\s*:\s*\{\s*"name"\s*:\s*"([^"]+)"/i);
   if (albumMatch?.[1]) result.albumName = albumMatch[1].trim();
-
-  return result;
-};
-
-const fetchArtistPageData = async (artistId: string): Promise<Partial<SpotifyMetadata>> => {
-  const result: Partial<SpotifyMetadata> = {};
-  
-  try {
-    // Fetch the artist page
-    const artistPageUrl = `https://open.spotify.com/artist/${artistId}`;
-    const response = await fetch(artistPageUrl, {
-      headers: {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "accept-language": "en-US,en;q=0.9",
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`Failed to fetch artist page: ${response.status}`);
-      return result;
-    }
-
-    const html = await response.text();
-
-    // Extract artist image from og:image
-    const artistImageMatch = html.match(/property="og:image"\s+content="([^"]+)"/i) ||
-                             html.match(/name="og:image"\s+content="([^"]+)"/i);
-    if (artistImageMatch?.[1]) {
-      result.artistImage = artistImageMatch[1];
-    }
-
-    // Extract monthly listeners
-    const listenersMatch = html.match(/(\d[\d,\.]+)\s*monthly\s*listeners/i);
-    if (listenersMatch?.[1]) {
-      result.monthlyListeners = listenersMatch[1];
-    }
-
-    // Try to extract data from embedded JSON in the page
-    const scriptDataMatch = html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([^<]+)<\/script>/i) ||
-                            html.match(/<script[^>]*type="application\/json"[^>]*>([^<]+)<\/script>/i);
-    
-    if (scriptDataMatch?.[1]) {
-      try {
-        const jsonData = JSON.parse(scriptDataMatch[1]);
-        
-        // Try to find artist data in various possible locations
-        const findArtistData = (obj: any): any => {
-          if (!obj || typeof obj !== 'object') return null;
-          
-          // Look for artist profile
-          if (obj.profile && obj.profile.biography) {
-            return obj;
-          }
-          if (obj.artistUnion || obj.artist) {
-            return obj.artistUnion || obj.artist;
-          }
-          
-          // Recursive search
-          for (const key of Object.keys(obj)) {
-            const found = findArtistData(obj[key]);
-            if (found) return found;
-          }
-          return null;
-        };
-
-        const artistData = findArtistData(jsonData);
-        
-        if (artistData) {
-          // Extract biography
-          if (artistData.profile?.biography?.text) {
-            result.artistBio = artistData.profile.biography.text;
-          } else if (artistData.biography) {
-            result.artistBio = typeof artistData.biography === 'string' 
-              ? artistData.biography 
-              : artistData.biography.text;
-          }
-
-          // Extract top tracks
-          if (artistData.discography?.topTracks?.items) {
-            result.artistTopTracks = artistData.discography.topTracks.items
-              .slice(0, 5)
-              .map((track: any) => ({
-                name: track.track?.name || track.name,
-                url: track.track?.uri 
-                  ? `https://open.spotify.com/track/${track.track.uri.split(':').pop()}`
-                  : `https://open.spotify.com/track/${track.id}`,
-              }));
-          }
-
-          // Extract external links / social links
-          if (artistData.profile?.externalLinks?.items) {
-            result.artistSocialLinks = artistData.profile.externalLinks.items.map((link: any) => ({
-              platform: link.name || detectPlatform(link.url),
-              url: link.url,
-            }));
-          } else if (artistData.externalLinks) {
-            result.artistSocialLinks = artistData.externalLinks.map((link: any) => ({
-              platform: link.name || detectPlatform(link.url),
-              url: link.url,
-            }));
-          }
-
-          // Get artist image from profile if available
-          if (artistData.visuals?.avatarImage?.sources?.[0]?.url) {
-            result.artistImage = artistData.visuals.avatarImage.sources[0].url;
-          } else if (artistData.images?.[0]?.url) {
-            result.artistImage = artistData.images[0].url;
-          }
-
-          // Monthly listeners
-          if (artistData.stats?.monthlyListeners) {
-            result.monthlyListeners = formatNumber(artistData.stats.monthlyListeners);
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse JSON data:', e);
-      }
-    }
-
-    // Alternative: Try to extract social links from meta tags or visible HTML
-    if (!result.artistSocialLinks || result.artistSocialLinks.length === 0) {
-      const socialLinks: SocialLink[] = [];
-      
-      // Look for common social media patterns in the HTML
-      const instagramMatch = html.match(/href="(https?:\/\/(www\.)?instagram\.com\/[^"]+)"/i);
-      if (instagramMatch?.[1]) {
-        socialLinks.push({ platform: 'Instagram', url: instagramMatch[1] });
-      }
-      
-      const twitterMatch = html.match(/href="(https?:\/\/(www\.)?(twitter|x)\.com\/[^"]+)"/i);
-      if (twitterMatch?.[1]) {
-        socialLinks.push({ platform: 'Twitter', url: twitterMatch[1] });
-      }
-      
-      const facebookMatch = html.match(/href="(https?:\/\/(www\.)?facebook\.com\/[^"]+)"/i);
-      if (facebookMatch?.[1]) {
-        socialLinks.push({ platform: 'Facebook', url: facebookMatch[1] });
-      }
-      
-      const youtubeMatch = html.match(/href="(https?:\/\/(www\.)?youtube\.com\/[^"]+)"/i);
-      if (youtubeMatch?.[1]) {
-        socialLinks.push({ platform: 'YouTube', url: youtubeMatch[1] });
-      }
-      
-      const tiktokMatch = html.match(/href="(https?:\/\/(www\.)?tiktok\.com\/[^"]+)"/i);
-      if (tiktokMatch?.[1]) {
-        socialLinks.push({ platform: 'TikTok', url: tiktokMatch[1] });
-      }
-
-      if (socialLinks.length > 0) {
-        result.artistSocialLinks = socialLinks;
-      }
-    }
-
-  } catch (error) {
-    console.error('Error fetching artist page:', error);
-  }
 
   return result;
 };
@@ -259,6 +100,148 @@ const formatNumber = (num: number): string => {
   return num.toString();
 };
 
+// Try to fetch artist data from Spotify's embed endpoint
+const fetchArtistFromEmbed = async (artistId: string): Promise<Partial<SpotifyMetadata>> => {
+  const result: Partial<SpotifyMetadata> = {};
+  
+  try {
+    // Try the artist embed page - this sometimes contains more data
+    const artistEmbedUrl = `https://open.spotify.com/embed/artist/${artistId}`;
+    console.log(`Fetching artist embed: ${artistEmbedUrl}`);
+    
+    const response = await fetch(artistEmbedUrl, {
+      headers: {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "accept-language": "en-US,en;q=0.9",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch artist embed: ${response.status}`);
+      return result;
+    }
+
+    const html = await response.text();
+    
+    // Extract artist image from og:image
+    const artistImageMatch = html.match(/property="og:image"\s+content="([^"]+)"/i) ||
+                             html.match(/name="og:image"\s+content="([^"]+)"/i);
+    if (artistImageMatch?.[1]) {
+      result.artistImage = artistImageMatch[1];
+      console.log(`Found artist image: ${result.artistImage}`);
+    }
+
+    // Try to find embedded resource data
+    const resourceMatch = html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([^<]+)<\/script>/i);
+    if (resourceMatch?.[1]) {
+      try {
+        const jsonData = JSON.parse(resourceMatch[1]);
+        console.log('Found __NEXT_DATA__ in artist embed');
+        
+        // Navigate through the JSON to find artist data
+        const props = jsonData?.props?.pageProps;
+        if (props?.state?.data?.entity) {
+          const entity = props.state.data.entity;
+          
+          // Artist name
+          if (entity.name) {
+            result.artistName = entity.name;
+          }
+          
+          // Profile image
+          if (entity.visuals?.avatarImage?.sources?.[0]?.url) {
+            result.artistImage = entity.visuals.avatarImage.sources[0].url;
+          }
+          
+          // Biography
+          if (entity.profile?.biography?.text) {
+            result.artistBio = entity.profile.biography.text;
+          }
+          
+          // Monthly listeners
+          if (entity.stats?.monthlyListeners) {
+            result.monthlyListeners = formatNumber(entity.stats.monthlyListeners);
+          }
+          
+          // Top tracks
+          if (entity.discography?.topTracks?.items) {
+            result.artistTopTracks = entity.discography.topTracks.items.slice(0, 5).map((item: any) => ({
+              name: item.track?.name || item.name,
+              url: `https://open.spotify.com/track/${(item.track?.uri || item.uri || '').split(':').pop()}`,
+            }));
+          }
+          
+          // External links
+          if (entity.profile?.externalLinks?.items) {
+            result.artistSocialLinks = entity.profile.externalLinks.items.map((link: any) => ({
+              platform: link.name || detectPlatform(link.url),
+              url: link.url,
+            }));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse artist embed JSON:', e);
+      }
+    }
+
+    // Also look for inline script data
+    const inlineDataMatch = html.match(/Spotify\.Entity\s*=\s*({[^;]+});/i) ||
+                            html.match(/"entity"\s*:\s*({[^}]+})/i);
+    if (inlineDataMatch?.[1] && !result.artistBio) {
+      try {
+        const entityData = JSON.parse(inlineDataMatch[1]);
+        if (entityData.biography) {
+          result.artistBio = typeof entityData.biography === 'string' 
+            ? entityData.biography 
+            : entityData.biography.text;
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+  } catch (error) {
+    console.error('Error fetching artist embed:', error);
+  }
+
+  return result;
+};
+
+// Fetch from Spotify's oEmbed for artist
+const fetchArtistOembed = async (artistId: string): Promise<Partial<SpotifyMetadata>> => {
+  const result: Partial<SpotifyMetadata> = {};
+  
+  try {
+    const artistUrl = `https://open.spotify.com/artist/${artistId}`;
+    const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(artistUrl)}`;
+    console.log(`Fetching artist oEmbed: ${oembedUrl}`);
+    
+    const response = await fetch(oembedUrl, {
+      headers: {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "accept": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Artist oEmbed response:', JSON.stringify(data));
+      
+      if (data.thumbnail_url) {
+        result.artistImage = data.thumbnail_url;
+      }
+      if (data.title) {
+        result.artistName = data.title;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching artist oEmbed:', error);
+  }
+
+  return result;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -279,6 +262,8 @@ serve(async (req) => {
 
     // 1) oEmbed: provides title + thumbnail_url + iframe_url
     const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`;
+    console.log(`Fetching track oEmbed: ${oembedUrl}`);
+    
     const oembedRes = await fetch(oembedUrl, {
       headers: {
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -296,14 +281,14 @@ serve(async (req) => {
     const oembed = await oembedRes.json();
     result.songTitle = oembed?.title;
     
-    // oEmbed provides a thumbnail which is usually the album art
     if (oembed?.thumbnail_url) {
       result.albumArt = oembed.thumbnail_url;
     }
 
-    // 2) Fetch embed HTML to get more artist data
+    // 2) Fetch embed HTML to get artist ID
     const iframeUrl: string | undefined = oembed?.iframe_url;
     if (iframeUrl) {
+      console.log(`Fetching track embed: ${iframeUrl}`);
       const embedRes = await fetch(iframeUrl, {
         headers: {
           "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -315,7 +300,6 @@ serve(async (req) => {
         const embedHtml = await embedRes.text();
         const extracted = extractDataFromEmbedHtml(embedHtml);
         
-        // Merge extracted data
         if (extracted.artistName) result.artistName = extracted.artistName;
         if (extracted.artistId) result.artistId = extracted.artistId;
         if (extracted.artistUrl) result.artistUrl = extracted.artistUrl;
@@ -324,18 +308,24 @@ serve(async (req) => {
       }
     }
 
-    // 3) Fetch artist page for profile picture, bio, top tracks, and social links
+    // 3) Fetch additional artist data
     if (result.artistId) {
       console.log(`Fetching artist data for: ${result.artistId}`);
-      const artistData = await fetchArtistPageData(result.artistId);
       
-      if (artistData.artistImage) result.artistImage = artistData.artistImage;
-      if (artistData.artistBio) result.artistBio = artistData.artistBio;
-      if (artistData.artistTopTracks) result.artistTopTracks = artistData.artistTopTracks;
-      if (artistData.artistSocialLinks) result.artistSocialLinks = artistData.artistSocialLinks;
-      if (artistData.monthlyListeners) result.monthlyListeners = artistData.monthlyListeners;
+      // Try oEmbed for artist image first (most reliable)
+      const artistOembed = await fetchArtistOembed(result.artistId);
+      if (artistOembed.artistImage) result.artistImage = artistOembed.artistImage;
+      
+      // Try embed page for more detailed data
+      const artistEmbed = await fetchArtistFromEmbed(result.artistId);
+      if (artistEmbed.artistImage && !result.artistImage) result.artistImage = artistEmbed.artistImage;
+      if (artistEmbed.artistBio) result.artistBio = artistEmbed.artistBio;
+      if (artistEmbed.artistTopTracks) result.artistTopTracks = artistEmbed.artistTopTracks;
+      if (artistEmbed.artistSocialLinks) result.artistSocialLinks = artistEmbed.artistSocialLinks;
+      if (artistEmbed.monthlyListeners) result.monthlyListeners = artistEmbed.monthlyListeners;
     }
 
+    console.log('Final result:', JSON.stringify(result));
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
