@@ -356,6 +356,35 @@ export function NowPlayingPanel({
                     </div>
                   )}
 
+                  {/* SoundCloud Embed - for SoundCloud links */}
+                  {submission.platform === 'soundcloud' && submission.song_url && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl overflow-hidden border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-1">
+                        <iframe
+                          width="100%"
+                          height="166"
+                          scrolling="no"
+                          frameBorder="no"
+                          allow="autoplay"
+                          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(submission.song_url)}&color=%23f97316&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=true`}
+                          loading="lazy"
+                          className="rounded-lg"
+                        />
+                      </div>
+                      
+                      {/* Open in SoundCloud */}
+                      <a
+                        href={submission.song_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-500/90 text-white font-medium text-sm transition-colors"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open in SoundCloud
+                      </a>
+                    </div>
+                  )}
+
                   {/* Message */}
                   {submission.message && (
                     <div className="p-4 rounded-xl bg-secondary/30 border border-border/30">
