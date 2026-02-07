@@ -43,14 +43,31 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
     // Only show shine effect for non-asChild buttons with secondary/hero variants
-    const showShine = !asChild && (variant === 'secondary' || variant === 'hero');
-    
+    const showShine = !asChild && (variant === "secondary" || variant === "hero");
+
+    // Radix Slot (asChild) requires exactly ONE ReactElement child.
+    // In some JSX formatting cases, `children` may include whitespace strings; we strip non-elements.
+    const elementChildren = React.Children.toArray(children).filter(
+      (child): child is React.ReactElement => React.isValidElement(child),
+    );
+    const slotChild = elementChildren[0] ?? null;
+    const useSlot = asChild && slotChild !== null;
+
+    if (asChild && elementChildren.length !== 1) {
+      // eslint-disable-next-line no-console
+      console.error(
+        "[Button] asChild=true expects exactly one React element child. Received:",
+        React.Children.toArray(children),
+      );
+    }
+
+    const Comp = useSlot ? Slot : "button";
+
     return (
       <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
         {showShine ? <span className="btn-shine" /> : null}
-        {children}
+        {useSlot ? slotChild : children}
       </Comp>
     );
   },
