@@ -367,11 +367,11 @@ const Dashboard = () => {
     if (!nowPlaying.submission?.audio_file_url) return;
     
     try {
-      const downloadUrl = await getSignedAudioUrl(floatingPreview.submission.audio_file_url);
+      const downloadUrl = await getSignedAudioUrl(nowPlaying.submission.audio_file_url);
       if (downloadUrl) {
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = `${floatingPreview.submission.artist_name} - ${floatingPreview.submission.song_title}`;
+        link.download = `${nowPlaying.submission.artist_name} - ${nowPlaying.submission.song_title}`;
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
