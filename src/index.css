@@ -163,13 +163,14 @@
 }
 
 /* Stream active/inactive theme states */
-.stream-active {
+/* IMPORTANT: These are disabled when a streamer theme is active */
+html:not(:has(body[data-streamer-theme="active"])) .stream-active {
   --primary: 50 100% 50%;
   --accent: 50 100% 50%;
   --ring: 50 100% 50%;
 }
 
-.stream-inactive {
+html:not(:has(body[data-streamer-theme="active"])) .stream-inactive {
   --primary: 0 0% 50%;
   --accent: 0 0% 50%;
   --ring: 0 0% 50%;
