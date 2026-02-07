@@ -94,7 +94,6 @@ export default function Profile() {
         username: username || null,
         display_email: displayEmail || null,
         bio: bio || null,
-        preferred_payment_method: preferredPayment || null,
         avatar_url: avatarUrl || null,
         updated_at: new Date().toISOString(),
       };
