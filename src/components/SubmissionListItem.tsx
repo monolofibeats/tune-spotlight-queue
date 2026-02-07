@@ -157,25 +157,29 @@ export function SubmissionListItem({
     }
   };
 
-  const handleOpenFloatingPlayer = async () => {
-    if (!submission.audio_file_url || !onPlayAudio) return;
+  const handleOpenNowPlaying = async () => {
+    if (!onPlayAudio) return;
     
-    // If we already have the URL, use it
-    if (audioUrl) {
-      onPlayAudio(submission, audioUrl, false);
-      return;
-    }
-    
-    // Otherwise fetch it
-    setIsLoadingAudio(true);
-    try {
-      const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
-      setAudioUrl(signedUrl);
-      onPlayAudio(submission, signedUrl, false);
-    } catch (error) {
-      console.error('Failed to get audio URL:', error);
-    } finally {
-      setIsLoadingAudio(false);
+    // For audio files, fetch signed URL
+    if (submission.audio_file_url) {
+      if (audioUrl) {
+        onPlayAudio(submission, audioUrl, false);
+        return;
+      }
+      
+      setIsLoadingAudio(true);
+      try {
+        const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
+        setAudioUrl(signedUrl);
+        onPlayAudio(submission, signedUrl, false);
+      } catch (error) {
+        console.error('Failed to get audio URL:', error);
+      } finally {
+        setIsLoadingAudio(false);
+      }
+    } else {
+      // For links (Spotify, SoundCloud, etc.), just open the panel
+      onPlayAudio(submission, null, false);
     }
   };
 
@@ -217,15 +221,15 @@ export function SubmissionListItem({
           </p>
         </div>
 
-        {/* Quick play button for audio files */}
-        {submission.audio_file_url && onPlayAudio && (
+        {/* Quick play button - for audio files OR playable links */}
+        {onPlayAudio && (
           <Button
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 shrink-0 text-primary hover:text-primary hover:bg-primary/20"
             onClick={(e) => {
               e.stopPropagation();
-              handleOpenFloatingPlayer();
+              handleOpenNowPlaying();
             }}
           >
             <Play className="w-4 h-4" />
