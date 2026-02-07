@@ -42,8 +42,6 @@ import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { getSignedAudioUrl } from '@/lib/storage';
-import { AdminStreamerManager } from '@/components/AdminStreamerManager';
-import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
   id: string;
