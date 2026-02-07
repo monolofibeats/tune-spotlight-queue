@@ -644,6 +644,17 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       
       setFlyingCard(cardData);
       
+      // Store song data before resetting form (for post-submit offer)
+      const submittedSongData = {
+        songUrl: songUrl || 'direct-upload',
+        artistName: cardData.artistName,
+        songTitle: cardData.songTitle,
+        message: message || '',
+        email: email || '',
+        platform: platform || 'other',
+        audioFileUrl: uploadedAudioUrl,
+      };
+
       await handleFreeSubmit();
       
       setTimeout(() => {
@@ -666,6 +677,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       });
       
       resetForm();
+
+      // Show skip the line offer after successful free submission (if feature is active)
+      if (skipLineActive && !isAdmin) {
+        setLastSubmittedSong(submittedSongData);
+        setTimeout(() => {
+          setShowPostSubmitOffer(true);
+        }, 1000); // Small delay for better UX
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
       toast({
