@@ -39,7 +39,7 @@ import { AdminPricingPanel } from '@/components/AdminPricingPanel';
 import { AdminBidSettings } from '@/components/AdminBidSettings';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
-import { FloatingAudioPreview } from '@/components/FloatingAudioPreview';
+import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { getSignedAudioUrl } from '@/lib/storage';
 
@@ -86,15 +86,13 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   
-  // Floating audio preview state
-  const [floatingPreview, setFloatingPreview] = useState<{
-    isOpen: boolean;
+  // Now Playing panel state
+  const [nowPlaying, setNowPlaying] = useState<{
     submission: Submission | null;
     audioUrl: string | null;
     isLoading: boolean;
     position: number;
   }>({
-    isOpen: false,
     submission: null,
     audioUrl: null,
     isLoading: false,
@@ -350,9 +348,8 @@ const Dashboard = () => {
     reviewed: submissions.filter(s => s.status === 'reviewed').length,
   };
 
-  const handleOpenFloatingPreview = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
-    setFloatingPreview({
-      isOpen: true,
+  const handleOpenNowPlaying = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
+    setNowPlaying({
       submission,
       audioUrl,
       isLoading: isLoadingAudio,
@@ -360,19 +357,19 @@ const Dashboard = () => {
     });
   };
 
-  const handleCloseFloatingPreview = () => {
-    setFloatingPreview(prev => ({ ...prev, isOpen: false }));
+  const handleCloseNowPlaying = () => {
+    setNowPlaying(prev => ({ ...prev, submission: null }));
   };
 
-  const handleFloatingDownload = async () => {
-    if (!floatingPreview.submission?.audio_file_url) return;
+  const handleNowPlayingDownload = async () => {
+    if (!nowPlaying.submission?.audio_file_url) return;
     
     try {
-      const downloadUrl = await getSignedAudioUrl(floatingPreview.submission.audio_file_url);
+      const downloadUrl = await getSignedAudioUrl(nowPlaying.submission.audio_file_url);
       if (downloadUrl) {
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = `${floatingPreview.submission.artist_name} - ${floatingPreview.submission.song_title}`;
+        link.download = `${nowPlaying.submission.artist_name} - ${nowPlaying.submission.song_title}`;
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
@@ -509,6 +506,16 @@ const Dashboard = () => {
                 </div>
               </motion.div>
 
+              {/* Now Playing Panel - Above the list */}
+              <NowPlayingPanel
+                submission={nowPlaying.submission}
+                audioUrl={nowPlaying.audioUrl}
+                isLoadingAudio={nowPlaying.isLoading}
+                position={nowPlaying.position}
+                onClose={handleCloseNowPlaying}
+                onDownload={handleNowPlayingDownload}
+              />
+
               {/* Submissions List - Stacked sizing */}
               <div className="space-y-2">
                 {filteredSubmissions.map((submission, index) => (
@@ -518,7 +525,7 @@ const Dashboard = () => {
                     position={index + 1}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
-                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenFloatingPreview(sub, audioUrl, isLoading, index + 1)}
+                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
 
@@ -762,21 +769,6 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {/* Floating Audio Preview */}
-      <FloatingAudioPreview
-        isOpen={floatingPreview.isOpen}
-        onClose={handleCloseFloatingPreview}
-        submission={floatingPreview.submission ? {
-          id: floatingPreview.submission.id,
-          song_title: floatingPreview.submission.song_title,
-          artist_name: floatingPreview.submission.artist_name,
-          is_priority: floatingPreview.submission.is_priority,
-          position: floatingPreview.position,
-        } : null}
-        audioUrl={floatingPreview.audioUrl}
-        isLoadingAudio={floatingPreview.isLoading}
-        onDownload={handleFloatingDownload}
-      />
     </div>
   );
 };
