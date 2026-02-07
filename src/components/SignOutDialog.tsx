@@ -28,19 +28,21 @@ export function SignOutDialog({ variant = 'icon', onSignOut }: SignOutDialogProp
     onSignOut?.();
   };
 
+  const triggerButton = variant === 'icon' ? (
+    <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+      <LogOut className="w-3.5 h-3.5" />
+    </Button>
+  ) : (
+    <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+      <LogOut className="w-4 h-4" />
+      {t('nav.logout')}
+    </Button>
+  );
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        {variant === 'icon' ? (
-          <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-            <LogOut className="w-3.5 h-3.5" />
-          </Button>
-        ) : (
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-            <LogOut className="w-4 h-4" />
-            {t('nav.logout')}
-          </Button>
-        )}
+        {triggerButton}
       </AlertDialogTrigger>
       <AlertDialogContent className="glass-strong">
         <AlertDialogHeader>
