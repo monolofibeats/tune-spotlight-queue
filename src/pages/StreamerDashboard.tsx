@@ -409,8 +409,10 @@ const StreamerDashboard = () => {
                     key={submission.id}
                     submission={submission}
                     position={index + 1}
+                    isAdmin={true}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
+                    onUpdate={handleUpdateSubmission}
                     onPlayAudio={(sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
