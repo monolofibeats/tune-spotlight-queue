@@ -186,7 +186,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('streamers')
         .update({
           // Profile
@@ -232,21 +232,16 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           // Language
           page_language: pageLanguage,
         })
-        .eq('id', streamer.id);
+        .eq('id', streamer.id)
+        .select('*')
+        .single();
 
       if (error) throw error;
 
-      // Update local streamer state with new values
-      const updatedStreamer = {
-        ...streamer,
-        display_name: displayName,
-        hero_title: heroTitle,
-        hero_subtitle: heroSubtitle,
-        welcome_message: welcomeMessage,
-        banner_text: bannerText,
-      };
-      setStreamer(updatedStreamer);
-      onUpdate(updatedStreamer);
+      if (data) {
+        setStreamer(data as ExtendedStreamer);
+        onUpdate(data as Streamer);
+      }
 
       toast({
         title: "Settings saved! ✨",
