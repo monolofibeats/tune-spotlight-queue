@@ -57,13 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer admin check with setTimeout to avoid deadlock
+        // Defer role check with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            checkAdminRole(session.user.id).then(setIsAdmin);
+            checkRoles(session.user.id).then(({ isAdmin, isStreamer }) => {
+              setIsAdmin(isAdmin);
+              setIsStreamer(isStreamer);
+            });
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsStreamer(false);
         }
       }
     );
@@ -74,8 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminRole(session.user.id).then((isAdminResult) => {
-          setIsAdmin(isAdminResult);
+        checkRoles(session.user.id).then(({ isAdmin, isStreamer }) => {
+          setIsAdmin(isAdmin);
+          setIsStreamer(isStreamer);
           setIsLoading(false);
         });
       } else {
@@ -91,10 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
+    setIsStreamer(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
