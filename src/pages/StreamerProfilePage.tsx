@@ -32,7 +32,8 @@ function StreamerProfilePageContent() {
   ].filter(Boolean) as Array<{ label: string; href: string; icon: ReactNode }>;
 
   return (
-    <div className="min-h-screen bg-background">
+    <StreamerThemeProvider streamer={streamer}>
+      <div className="min-h-screen bg-background">
       <Header />
 
       {/* Banner */}
