@@ -86,6 +86,9 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   
+  // Ref for scrolling to Now Playing panel
+  const nowPlayingRef = useRef<HTMLDivElement>(null);
+  
   // Now Playing panel state
   const [nowPlaying, setNowPlaying] = useState<{
     submission: Submission | null;
