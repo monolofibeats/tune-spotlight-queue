@@ -286,23 +286,6 @@ export default function Profile() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="payment" className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Preferred Payment Method
-                </Label>
-                <Select value={preferredPayment} onValueChange={setPreferredPayment}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="card">Credit/Debit Card</SelectItem>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="apple_pay">Apple Pay</SelectItem>
-                    <SelectItem value="google_pay">Google Pay</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Save Button */}
