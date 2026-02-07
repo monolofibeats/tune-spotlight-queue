@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
+import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
 import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
@@ -20,16 +21,6 @@ function StreamerPageContent() {
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
-
-  // Apply custom streamer styles
-  useEffect(() => {
-    if (streamer?.primary_color) {
-      document.documentElement.style.setProperty('--streamer-primary', streamer.primary_color);
-    }
-    return () => {
-      document.documentElement.style.removeProperty('--streamer-primary');
-    };
-  }, [streamer?.primary_color]);
 
   if (isLoading) {
     return (
@@ -59,8 +50,9 @@ function StreamerPageContent() {
   const isStreamerLive = streamer.is_live || isLive;
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <Header />
+    <StreamerThemeProvider streamer={streamer}>
+      <div className="min-h-screen bg-background relative">
+        <Header />
       
       {/* Streamer Banner */}
       {streamer.banner_url && (
@@ -171,11 +163,12 @@ function StreamerPageContent() {
       <LanguageSwitcher />
       <Footer />
 
-      {/* Custom CSS */}
-      {streamer.custom_css && (
-        <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />
-      )}
-    </div>
+        {/* Custom CSS */}
+        {streamer.custom_css && (
+          <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />
+        )}
+      </div>
+    </StreamerThemeProvider>
   );
 }
 
