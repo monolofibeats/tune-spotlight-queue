@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { Loader2, Link as LinkIcon, Twitch, Youtube, Instagram } from "lucide-react";
 import { Header } from "@/components/Header";
