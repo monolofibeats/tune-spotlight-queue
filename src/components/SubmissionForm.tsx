@@ -642,136 +642,136 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 </p>
               )}
 
-              {/* Step 1: Music Link - Collapses when audio file is uploaded */}
-              <AnimatePresence mode="wait">
-                {!audioFile && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={`relative ${getFieldGlowClass(0)}`}>
-                      <CompletionTick fieldStep={0} />
-                      <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {t('submission.linkLabel')} <span className="text-destructive">*</span>
-                      </label>
-                      <Input
-                        placeholder={t('submission.linkPlaceholder')}
-                        value={songUrl}
-                        onChange={(e) => {
-                          const url = e.target.value;
-                          setSongUrl(url);
+              {/* Step 1: Music Link - stays mounted (so glow rhythm stays globally in sync) */}
+              <motion.div
+                initial={false}
+                animate={
+                  audioFile
+                    ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
+                    : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
+                }
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden' }}
+                aria-hidden={!!audioFile}
+              >
+                <div className={`relative ${getFieldGlowClass(0)}`}>
+                  <CompletionTick fieldStep={0} />
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.linkLabel')} <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder={t('submission.linkPlaceholder')}
+                    value={songUrl}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      setSongUrl(url);
 
-                          // Non-Spotify: best-effort sync parsing
-                          if (url.includes('http') && !url.includes('spotify.com')) {
-                            const metadata = parseUrlMetadata(url);
-                            if (metadata.artistName && !artistName.trim()) {
-                              setArtistName(metadata.artistName);
-                            }
-                            if (metadata.songTitle && !songTitle.trim()) {
-                              setSongTitle(metadata.songTitle);
-                            }
-                          }
-                        }}
-                        onPaste={(e) => {
-                          const pasted = e.clipboardData.getData('text');
-                          if (!pasted || !pasted.includes('http')) return;
+                      // Non-Spotify: best-effort sync parsing
+                      if (url.includes('http') && !url.includes('spotify.com')) {
+                        const metadata = parseUrlMetadata(url);
+                        if (metadata.artistName && !artistName.trim()) {
+                          setArtistName(metadata.artistName);
+                        }
+                        if (metadata.songTitle && !songTitle.trim()) {
+                          setSongTitle(metadata.songTitle);
+                        }
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const pasted = e.clipboardData.getData('text');
+                      if (!pasted || !pasted.includes('http')) return;
 
-                          // Replace whatever was in the input with the pasted URL (more reliable)
-                          e.preventDefault();
-                          setSongUrl(pasted);
+                      // Replace whatever was in the input with the pasted URL (more reliable)
+                      e.preventDefault();
+                      setSongUrl(pasted);
 
-                          if (pasted.includes('spotify.com')) {
-                            void autofillFromSpotify(pasted);
-                            return;
-                          }
+                      if (pasted.includes('spotify.com')) {
+                        void autofillFromSpotify(pasted);
+                        return;
+                      }
 
-                          const metadata = parseUrlMetadata(pasted);
-                          if (metadata.artistName && !artistName.trim()) {
-                            setArtistName(metadata.artistName);
-                          }
-                          if (metadata.songTitle && !songTitle.trim()) {
-                            setSongTitle(metadata.songTitle);
-                          }
-                        }}
-                        onBlur={() => {
-                          if (songUrl.includes('spotify.com')) {
-                            void autofillFromSpotify(songUrl);
-                          }
-                        }}
-                        className="h-10 text-sm bg-background/50"
-                      />
-                      {platform && (
-                        <div className="mt-1.5">
-                          <Badge variant="platform" className="text-xs">
-                            {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
-                          </Badge>
-                        </div>
-                      )}
+                      const metadata = parseUrlMetadata(pasted);
+                      if (metadata.artistName && !artistName.trim()) {
+                        setArtistName(metadata.artistName);
+                      }
+                      if (metadata.songTitle && !songTitle.trim()) {
+                        setSongTitle(metadata.songTitle);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (songUrl.includes('spotify.com')) {
+                        void autofillFromSpotify(songUrl);
+                      }
+                    }}
+                    className="h-10 text-sm bg-background/50"
+                  />
+                  {platform && (
+                    <div className="mt-1.5">
+                      <Badge variant="platform" className="text-xs">
+                        {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                      </Badge>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  )}
+                </div>
+              </motion.div>
 
-              {/* Step 2: Audio File Upload - Collapses when link is provided */}
-              <AnimatePresence mode="wait">
-                {!songUrl && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={`relative ${getFieldGlowClass(1)}`}>
-                      <CompletionTick fieldStep={1} />
-                      <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {t('submission.audioFileLabel')} (max 100MB) <span className="text-destructive">*</span>
-                      </label>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="audio-file-input"
-                      />
-                      {audioFile ? (
-                        <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                          <Music2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{audioFile.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={removeAudioFile}
-                            className="shrink-0 h-8 w-8 p-0"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full h-10 text-sm border border-dashed border-border/50 bg-transparent hover:bg-transparent hover:border-border transition-all duration-200 hover:scale-[1.01] group"
-                        >
-                          <Upload className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
-                          <span className="transition-transform duration-200 group-hover:scale-105">{t('submission.uploadFile')}</span>
-                        </Button>
-                      )}
+              {/* Step 2: Audio File Upload - stays mounted (so glow rhythm stays globally in sync) */}
+              <motion.div
+                initial={false}
+                animate={
+                  songUrl
+                    ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
+                    : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
+                }
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden' }}
+                aria-hidden={!!songUrl}
+              >
+                <div className={`relative ${getFieldGlowClass(1)}`}>
+                  <CompletionTick fieldStep={1} />
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {t('submission.audioFileLabel')} (max 100MB) <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="audio-file-input"
+                  />
+                  {audioFile ? (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                      <Music2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{audioFile.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeAudioFile}
+                        className="shrink-0 h-8 w-8 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-10 text-sm border border-dashed border-border/50 bg-transparent hover:bg-transparent hover:border-border transition-all duration-200 hover:scale-[1.01] group"
+                    >
+                      <Upload className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
+                      <span className="transition-transform duration-200 group-hover:scale-105">{t('submission.uploadFile')}</span>
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
 
               {/* Show selected input method indicator when one is chosen */}
               <AnimatePresence>
