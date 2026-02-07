@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Loader2, User, Mail, Link as LinkIcon, MessageSquare, Check } from 'lucide-react';
+import { Send, Loader2, User, Mail, Link as LinkIcon, MessageSquare, Check, Instagram, Music, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
   const [desiredSlug, setDesiredSlug] = useState('');
   const [twitchUrl, setTwitchUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [spotifyUrl, setSpotifyUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [applicationMessage, setApplicationMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -50,10 +55,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
       return;
     }
 
-    if (!twitchUrl && !youtubeUrl) {
+    const hasAtLeastOnePlatform = twitchUrl || youtubeUrl || tiktokUrl || instagramUrl || spotifyUrl || twitterUrl || websiteUrl;
+    if (!hasAtLeastOnePlatform) {
       toast({
         title: "Platform required",
-        description: "Please provide at least one streaming platform link (Twitch or YouTube).",
+        description: "Please provide at least one social or streaming platform link.",
         variant: "destructive",
       });
       return;
@@ -70,6 +76,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
           desired_slug: desiredSlug.trim().toLowerCase(),
           twitch_url: twitchUrl.trim() || null,
           youtube_url: youtubeUrl.trim() || null,
+          tiktok_url: tiktokUrl.trim() || null,
+          instagram_url: instagramUrl.trim() || null,
+          spotify_url: spotifyUrl.trim() || null,
+          twitter_url: twitterUrl.trim() || null,
+          website_url: websiteUrl.trim() || null,
           application_message: applicationMessage.trim() || null,
         });
 
@@ -175,14 +186,18 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
         </p>
       </div>
 
-      {/* Streaming Platforms */}
+      {/* Streaming & Social Platforms */}
       <div className="space-y-4">
-        <Label>Streaming Platforms (at least one required)</Label>
+        <Label>Platforms & Social Links (at least one required)</Label>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Twitch */}
           <div className="space-y-2">
-            <Label htmlFor="twitch" className="text-sm text-muted-foreground">
-              Twitch Channel URL
+            <Label htmlFor="twitch" className="text-sm text-muted-foreground flex items-center gap-2">
+              <svg className="w-4 h-4 text-purple-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+              </svg>
+              Twitch
             </Label>
             <Input
               id="twitch"
@@ -192,15 +207,93 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
             />
           </div>
 
+          {/* YouTube */}
           <div className="space-y-2">
-            <Label htmlFor="youtube" className="text-sm text-muted-foreground">
-              YouTube Channel URL
+            <Label htmlFor="youtube" className="text-sm text-muted-foreground flex items-center gap-2">
+              <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              YouTube
             </Label>
             <Input
               id="youtube"
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
               placeholder="https://youtube.com/@yourname"
+            />
+          </div>
+
+          {/* TikTok */}
+          <div className="space-y-2">
+            <Label htmlFor="tiktok" className="text-sm text-muted-foreground flex items-center gap-2">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+              </svg>
+              TikTok
+            </Label>
+            <Input
+              id="tiktok"
+              value={tiktokUrl}
+              onChange={(e) => setTiktokUrl(e.target.value)}
+              placeholder="https://tiktok.com/@yourname"
+            />
+          </div>
+
+          {/* Instagram */}
+          <div className="space-y-2">
+            <Label htmlFor="instagram" className="text-sm text-muted-foreground flex items-center gap-2">
+              <Instagram className="w-4 h-4 text-pink-500" />
+              Instagram
+            </Label>
+            <Input
+              id="instagram"
+              value={instagramUrl}
+              onChange={(e) => setInstagramUrl(e.target.value)}
+              placeholder="https://instagram.com/yourname"
+            />
+          </div>
+
+          {/* Spotify */}
+          <div className="space-y-2">
+            <Label htmlFor="spotify" className="text-sm text-muted-foreground flex items-center gap-2">
+              <Music className="w-4 h-4 text-green-500" />
+              Spotify
+            </Label>
+            <Input
+              id="spotify"
+              value={spotifyUrl}
+              onChange={(e) => setSpotifyUrl(e.target.value)}
+              placeholder="https://open.spotify.com/artist/..."
+            />
+          </div>
+
+          {/* Twitter/X */}
+          <div className="space-y-2">
+            <Label htmlFor="twitter" className="text-sm text-muted-foreground flex items-center gap-2">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              X (Twitter)
+            </Label>
+            <Input
+              id="twitter"
+              value={twitterUrl}
+              onChange={(e) => setTwitterUrl(e.target.value)}
+              placeholder="https://x.com/yourname"
+            />
+          </div>
+
+          {/* Website */}
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="website" className="text-sm text-muted-foreground flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-500" />
+              Website / Other
+            </Label>
+            <Input
+              id="website"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              placeholder="https://yourwebsite.com"
             />
           </div>
         </div>
