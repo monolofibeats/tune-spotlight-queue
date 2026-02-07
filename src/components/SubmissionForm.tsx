@@ -731,7 +731,13 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
               {/* Input method toggle hint */}
               {!songUrl && !audioFile && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Provide a music link <span className="font-semibold">or</span> upload an audio file
+                  {showSongUrl ? (
+                    <>
+                      Provide a music link <span className="font-semibold">or</span> upload an audio file
+                    </>
+                  ) : (
+                    <>Upload an audio file</>
+                  )}
                 </p>
               )}
 
