@@ -418,3 +418,70 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* ========================================
+   STREAMER CUSTOMIZATION STYLES
+   These respond to data attributes set by StreamerThemeProvider
+   ======================================== */
+
+/* Button Styles - applied via [data-button-style] on body */
+body[data-button-style="pill"] button,
+body[data-button-style="pill"] .btn,
+body[data-button-style="pill"] [role="button"] {
+  border-radius: 9999px !important;
+}
+
+body[data-button-style="sharp"] button,
+body[data-button-style="sharp"] .btn,
+body[data-button-style="sharp"] [role="button"] {
+  border-radius: 0 !important;
+}
+
+body[data-button-style="soft"] button,
+body[data-button-style="soft"] .btn,
+body[data-button-style="soft"] [role="button"] {
+  border-radius: 1rem !important;
+}
+
+/* Card Styles - applied via [data-card-style] on body */
+body[data-card-style="solid"] .glass,
+body[data-card-style="solid"] .glass-strong,
+body[data-card-style="solid"] .bg-card\/50 {
+  background: hsl(var(--card)) !important;
+  backdrop-filter: none !important;
+}
+
+body[data-card-style="outlined"] .glass,
+body[data-card-style="outlined"] .glass-strong,
+body[data-card-style="outlined"] .bg-card\/50 {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border-width: 2px !important;
+}
+
+body[data-card-style="gradient"] .glass,
+body[data-card-style="gradient"] .glass-strong,
+body[data-card-style="gradient"] .bg-card\/50 {
+  background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted))) !important;
+  backdrop-filter: none !important;
+}
+
+/* Animation Styles - applied via [data-anim-style] on body */
+body[data-anim-style="none"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
+body[data-anim-style="subtle"] * {
+  animation-duration: 0.5s !important;
+  transition-duration: 0.3s !important;
+}
+
+body[data-anim-style="playful"] * {
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+}
+
+body[data-anim-style="elegant"] * {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

@@ -43,6 +43,31 @@ export function useStreamerFormFields(streamerId?: string) {
 
     void fetchFields();
 
+    // Subscribe to realtime updates for this streamer's form fields
+    if (streamerId) {
+      const channel = supabase
+        .channel(`form-fields-${streamerId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "streamer_form_fields",
+            filter: `streamer_id=eq.${streamerId}`,
+          },
+          () => {
+            // Refetch on any change
+            void fetchFields();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        isMounted = false;
+        supabase.removeChannel(channel);
+      };
+    }
+
     return () => {
       isMounted = false;
     };
