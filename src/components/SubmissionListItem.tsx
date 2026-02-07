@@ -15,7 +15,8 @@ import {
   Check,
   FileAudio,
   Download,
-  Play
+  Play,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,12 @@ import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
+
+// Check if URL is a playable embed (Spotify, SoundCloud)
+const isPlayableEmbed = (url: string) => {
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('spotify.com') || lowerUrl.includes('soundcloud.com');
+};
 
 interface Submission {
   id: string;
@@ -221,20 +228,6 @@ export function SubmissionListItem({
           </p>
         </div>
 
-        {/* Quick play button - for audio files OR playable links */}
-        {onPlayAudio && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 shrink-0 text-primary hover:text-primary hover:bg-primary/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenNowPlaying();
-            }}
-          >
-            <Play className="w-4 h-4" />
-          </Button>
-        )}
 
         {/* Status Badge */}
         <Badge 
@@ -269,16 +262,31 @@ export function SubmissionListItem({
             <div className="px-3 pb-3 pt-1 border-t border-border/30 space-y-3">
               {/* Song Link */}
               <div className="flex items-center gap-2">
-                <a 
-                  href={submission.song_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <LinkIcon className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{submission.song_url}</span>
-                </a>
+                {isPlayableEmbed(submission.song_url) ? (
+                  // For Spotify/SoundCloud: open in Now Playing panel
+                  <button 
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1 text-left"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenNowPlaying();
+                    }}
+                  >
+                    <Play className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{submission.song_url}</span>
+                  </button>
+                ) : (
+                  // For other links: open in new tab
+                  <a 
+                    href={submission.song_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{submission.song_url}</span>
+                  </a>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -300,23 +308,33 @@ export function SubmissionListItem({
                       <FileAudio className="w-4 h-4 text-primary shrink-0" />
                       <p className="text-xs text-muted-foreground">Hochgeladene Audio Datei</p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownloadFile();
-                      }}
-                    >
-                      <Download className="w-3.5 h-3.5 mr-1" />
-                      Download
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenNowPlaying();
+                        }}
+                      >
+                        <Play className="w-3.5 h-3.5 mr-1" />
+                        Play
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadFile();
+                        }}
+                      >
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
-                  <AudioPlayer 
-                    src={audioUrl} 
-                    isLoading={isLoadingAudio}
-                  />
                 </div>
               )}
 
