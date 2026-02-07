@@ -1,8 +1,6 @@
-import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
-import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -14,7 +12,6 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 
 const Index = () => {
-  const watchlistRef = useRef<WatchlistRef>(null);
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
 
@@ -49,20 +46,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Main Content - Submission Form + Watchlist - RIGHT AFTER HERO */}
+      {/* Main Content - Submission Form */}
       <section className="pb-8 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Submission Form */}
-            <div>
-              <SubmissionForm watchlistRef={watchlistRef} />
-            </div>
-            
-            {/* Watchlist Display */}
-            <div className="lg:sticky lg:top-20 lg:self-start">
-              <WatchlistDisplay ref={watchlistRef} />
-            </div>
-          </div>
+        <div className="container mx-auto max-w-xl">
+          <SubmissionForm />
         </div>
       </section>
 

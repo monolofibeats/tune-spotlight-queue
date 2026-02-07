@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
@@ -7,7 +6,6 @@ import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
-import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -18,7 +16,6 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
 
 function StreamerPageContent() {
-  const watchlistRef = useRef<WatchlistRef>(null);
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
@@ -122,20 +119,10 @@ function StreamerPageContent() {
         </div>
       </section>
 
-      {/* Main Content - Submission Form + Watchlist */}
+      {/* Main Content - Submission Form */}
       <section className="pb-8 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Submission Form */}
-            <div>
-              <SubmissionForm watchlistRef={watchlistRef} streamerId={streamer.id} />
-            </div>
-            
-            {/* Watchlist Display */}
-            <div className="lg:sticky lg:top-20 lg:self-start">
-              <WatchlistDisplay ref={watchlistRef} streamerId={streamer.id} />
-            </div>
-          </div>
+        <div className="container mx-auto max-w-xl">
+          <SubmissionForm streamerId={streamer.id} />
         </div>
       </section>
 
