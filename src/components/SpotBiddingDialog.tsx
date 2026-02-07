@@ -52,6 +52,7 @@ export function SpotBiddingDialog({
   platform,
   audioFileUrl,
   streamerId,
+  streamerSlug,
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
