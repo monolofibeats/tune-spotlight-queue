@@ -53,6 +53,9 @@ function StreamerPageContent() {
   return (
     <StreamerThemeProvider streamer={streamer}>
       <div className="min-h-screen bg-background relative">
+        {/* Streamer Announcement Banner - at very top */}
+        <StreamerAnnouncementBanner streamer={streamer} />
+        
         <Header />
       
       {/* Streamer Banner */}
