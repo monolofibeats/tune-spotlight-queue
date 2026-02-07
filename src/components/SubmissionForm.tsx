@@ -274,6 +274,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       const paymentStatus = searchParams.get('payment');
       const submissionPayment = searchParams.get('submission_payment');
 
+      // Get current path without query params for history replacement
+      const currentPath = window.location.pathname;
+
       // Handle priority payment verification
       if (paymentStatus === 'success' && sessionId) {
         try {
@@ -295,14 +298,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
           console.error('Payment verification error:', error);
         }
 
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', currentPath);
       } else if (paymentStatus === 'cancelled') {
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
           variant: "destructive",
         });
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', currentPath);
       }
 
       // Handle submission payment verification
@@ -326,14 +329,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
           console.error('Submission payment verification error:', error);
         }
 
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', currentPath);
       } else if (submissionPayment === 'cancelled') {
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
           variant: "destructive",
         });
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', currentPath);
       }
     };
 
