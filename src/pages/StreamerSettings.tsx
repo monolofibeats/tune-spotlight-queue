@@ -224,7 +224,7 @@ const StreamerSettings = () => {
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('streamers')
         .update({
           // Profile
@@ -270,18 +270,15 @@ const StreamerSettings = () => {
           // Language
           page_language: pageLanguage,
         })
-        .eq('id', streamer.id);
+        .eq('id', streamer.id)
+        .select('*')
+        .single();
 
       if (error) throw error;
 
-      // Update local streamer state with new values
-      setStreamer({
-        ...streamer,
-        hero_title: heroTitle,
-        hero_subtitle: heroSubtitle,
-        welcome_message: welcomeMessage,
-        banner_text: bannerText,
-      });
+      if (data) {
+        setStreamer(data as ExtendedStreamer);
+      }
 
       toast({
         title: "Settings saved! ✨",
