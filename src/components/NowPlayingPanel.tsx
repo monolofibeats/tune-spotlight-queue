@@ -271,10 +271,10 @@ export function NowPlayingPanel({
                   {/* Spotify Embed - for Spotify links */}
                   {submission.platform === 'spotify' && submission.song_url && (
                     <div className="space-y-3">
-                      <div className="rounded-xl overflow-hidden border border-green-500/20 bg-gradient-to-br from-green-500/5 to-transparent p-1">
+                      <div className="rounded-xl overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-1">
                         {isLoadingSpotify ? (
                           <div className="flex items-center justify-center py-12 bg-card/50 rounded-lg">
-                            <Loader2 className="w-6 h-6 animate-spin text-green-500" />
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
                           </div>
                         ) : (
                           <iframe
@@ -295,7 +295,7 @@ export function NowPlayingPanel({
                           href={submission.song_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-500 hover:bg-green-400 text-black font-medium text-sm transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
                           Open in Spotify
