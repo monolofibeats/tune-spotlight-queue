@@ -119,20 +119,10 @@ function StreamerPageContent() {
         </div>
       </section>
 
-      {/* Main Content - Submission Form + Watchlist */}
+      {/* Main Content - Submission Form */}
       <section className="pb-8 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Submission Form */}
-            <div>
-              <SubmissionForm watchlistRef={watchlistRef} streamerId={streamer.id} />
-            </div>
-            
-            {/* Watchlist Display */}
-            <div className="lg:sticky lg:top-20 lg:self-start">
-              <WatchlistDisplay ref={watchlistRef} streamerId={streamer.id} />
-            </div>
-          </div>
+        <div className="container mx-auto max-w-xl">
+          <SubmissionForm streamerId={streamer.id} />
         </div>
       </section>
 
