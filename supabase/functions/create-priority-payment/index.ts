@@ -38,6 +38,7 @@ serve(async (req) => {
       platform,
       audioFileUrl,
       streamerId,
+      streamerSlug, // New: slug for redirect URL
     } = await req.json();
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId });
