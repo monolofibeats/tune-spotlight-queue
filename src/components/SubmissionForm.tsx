@@ -1058,6 +1058,32 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
           resetForm();
         }}
       />
+
+      {/* Post-Submit Skip Line Offer Dialog */}
+      {lastSubmittedSong && (
+        <SpotBiddingDialog
+          open={showPostSubmitOffer}
+          onOpenChange={(open) => {
+            setShowPostSubmitOffer(open);
+            if (!open) {
+              setLastSubmittedSong(null);
+            }
+          }}
+          songUrl={lastSubmittedSong.songUrl}
+          artistName={lastSubmittedSong.artistName}
+          songTitle={lastSubmittedSong.songTitle}
+          message={lastSubmittedSong.message}
+          email={lastSubmittedSong.email}
+          platform={lastSubmittedSong.platform}
+          audioFileUrl={lastSubmittedSong.audioFileUrl}
+          streamerId={streamerId}
+          streamerSlug={streamerSlug}
+          onSuccess={() => {
+            watchlistRef?.current?.refreshList();
+            setLastSubmittedSong(null);
+          }}
+        />
+      )}
     </>
   );
 }
