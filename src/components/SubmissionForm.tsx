@@ -473,21 +473,32 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
-    // Artist name and song title are required
-    if (!artistName.trim() || !songTitle.trim()) {
+    // Required fields
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter both artist name and song title.",
+        description: "Please fill out the required fields.",
         variant: "destructive",
       });
       return;
     }
-    
-    // Either song URL or audio file is required
-    if (!songUrl && !audioFile) {
+
+    if ((requireEmail && !email.trim()) || (requireMessage && !message.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link or upload an audio file.",
+        description: "Please fill out the required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Either song URL or audio file is required (depending on config)
+    if ((showSongUrl && !songUrl && !audioFile) || (!showSongUrl && !audioFile)) {
+      toast({
+        title: "Missing information",
+        description: showSongUrl
+          ? "Please enter a song link or upload an audio file."
+          : "Please upload an audio file.",
         variant: "destructive",
       });
       return;
