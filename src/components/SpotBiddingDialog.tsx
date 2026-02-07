@@ -232,6 +232,7 @@ export function SpotBiddingDialog({
           targetSpot: spotPosition,
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
+          streamerSlug: streamerSlug || null,
         },
       });
 
