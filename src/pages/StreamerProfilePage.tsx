@@ -102,11 +102,12 @@ function StreamerProfilePageContent() {
         </section>
       </main>
 
-      <Footer />
+        <Footer />
 
-      {/* Custom CSS */}
-      {streamer.custom_css && <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />}
-    </div>
+        {/* Custom CSS */}
+        {streamer.custom_css && <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />}
+      </div>
+    </StreamerThemeProvider>
   );
 }
 
