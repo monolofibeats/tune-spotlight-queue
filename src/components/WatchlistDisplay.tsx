@@ -219,8 +219,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         <div className="space-y-2">
           <AnimatePresence mode="popLayout">
             {displayItems.map((submission, index) => {
-              const isPrioritySpot = submission.is_priority && topSpots.includes(submission);
-              const spotNumber = isPrioritySpot ? topSpots.indexOf(submission) + 1 : null;
+              const isPrioritySpot = submission.is_priority && topPrioritySpots.includes(submission);
+              const spotNumber = isPrioritySpot ? topPrioritySpots.indexOf(submission) + 1 : null;
               const styles = getPositionStyles(spotNumber);
               
               return (
