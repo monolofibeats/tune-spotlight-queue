@@ -82,16 +82,26 @@ const getPositionStyles = (position: number | undefined) => {
 interface SubmissionListItemProps {
   submission: Submission;
   position?: number;
+  isAdmin?: boolean;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onUpdate?: (id: string, updates: {
+    song_url: string;
+    artist_name: string;
+    song_title: string;
+    message: string | null;
+    email: string | null;
+  }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
   position,
+  isAdmin = false,
   onStatusChange, 
   onDelete,
+  onUpdate,
   onPlayAudio 
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
