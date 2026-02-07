@@ -262,16 +262,31 @@ export function SubmissionListItem({
             <div className="px-3 pb-3 pt-1 border-t border-border/30 space-y-3">
               {/* Song Link */}
               <div className="flex items-center gap-2">
-                <a 
-                  href={submission.song_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <LinkIcon className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{submission.song_url}</span>
-                </a>
+                {isPlayableEmbed(submission.song_url) ? (
+                  // For Spotify/SoundCloud: open in Now Playing panel
+                  <button 
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1 text-left"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenNowPlaying();
+                    }}
+                  >
+                    <Play className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{submission.song_url}</span>
+                  </button>
+                ) : (
+                  // For other links: open in new tab
+                  <a 
+                    href={submission.song_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{submission.song_url}</span>
+                  </a>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
