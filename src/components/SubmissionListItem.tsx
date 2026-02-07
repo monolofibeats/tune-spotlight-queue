@@ -15,7 +15,8 @@ import {
   Check,
   FileAudio,
   Download,
-  Play
+  Play,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,12 @@ import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
+
+// Check if URL is a playable embed (Spotify, SoundCloud)
+const isPlayableEmbed = (url: string) => {
+  const lowerUrl = url.toLowerCase();
+  return lowerUrl.includes('spotify.com') || lowerUrl.includes('soundcloud.com');
+};
 
 interface Submission {
   id: string;
