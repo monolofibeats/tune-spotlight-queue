@@ -874,43 +874,6 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 </div>
               </motion.div>
 
-              {/* Show selected input method indicator when one is chosen */}
-              <AnimatePresence>
-                {(songUrl || audioFile) && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center gap-2"
-                  >
-                    {songUrl && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>Using link</span>
-                        <button
-                          type="button"
-                          onClick={() => setSongUrl('')}
-                          className="text-primary hover:text-primary/80 underline"
-                        >
-                          Switch to file upload
-                        </button>
-                      </div>
-                    )}
-                    {audioFile && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>Using file: <span className="font-medium text-foreground">{audioFile.name}</span></span>
-                        <button
-                          type="button"
-                          onClick={removeAudioFile}
-                          className="text-primary hover:text-primary/80 underline"
-                        >
-                          Switch to link
-                        </button>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Artist + Title */}
               {(showArtist || showTitle) && (
