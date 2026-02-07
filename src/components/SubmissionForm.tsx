@@ -113,6 +113,16 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
+  const [showPostSubmitOffer, setShowPostSubmitOffer] = useState(false);
+  const [lastSubmittedSong, setLastSubmittedSong] = useState<{
+    songUrl: string;
+    artistName: string;
+    songTitle: string;
+    message: string;
+    email: string;
+    platform: string;
+    audioFileUrl: string | null;
+  } | null>(null);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -634,6 +644,17 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       
       setFlyingCard(cardData);
       
+      // Store song data before resetting form (for post-submit offer)
+      const submittedSongData = {
+        songUrl: songUrl || 'direct-upload',
+        artistName: cardData.artistName,
+        songTitle: cardData.songTitle,
+        message: message || '',
+        email: email || '',
+        platform: platform || 'other',
+        audioFileUrl: uploadedAudioUrl,
+      };
+
       await handleFreeSubmit();
       
       setTimeout(() => {
@@ -656,6 +677,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       });
       
       resetForm();
+
+      // Show skip the line offer after successful free submission (if feature is active)
+      if (skipLineActive && !isAdmin) {
+        setLastSubmittedSong(submittedSongData);
+        setTimeout(() => {
+          setShowPostSubmitOffer(true);
+        }, 1000); // Small delay for better UX
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
       toast({
@@ -1029,6 +1058,32 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
           resetForm();
         }}
       />
+
+      {/* Post-Submit Skip Line Offer Dialog */}
+      {lastSubmittedSong && (
+        <SpotBiddingDialog
+          open={showPostSubmitOffer}
+          onOpenChange={(open) => {
+            setShowPostSubmitOffer(open);
+            if (!open) {
+              setLastSubmittedSong(null);
+            }
+          }}
+          songUrl={lastSubmittedSong.songUrl}
+          artistName={lastSubmittedSong.artistName}
+          songTitle={lastSubmittedSong.songTitle}
+          message={lastSubmittedSong.message}
+          email={lastSubmittedSong.email}
+          platform={lastSubmittedSong.platform}
+          audioFileUrl={lastSubmittedSong.audioFileUrl}
+          streamerId={streamerId}
+          streamerSlug={streamerSlug}
+          onSuccess={() => {
+            watchlistRef?.current?.refreshList();
+            setLastSubmittedSong(null);
+          }}
+        />
+      )}
     </>
   );
 }
