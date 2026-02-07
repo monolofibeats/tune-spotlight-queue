@@ -10,13 +10,18 @@ import {
   Send, 
   Zap,
   Loader2,
-  Link as LinkIcon
+  Copy,
+  Check,
+  Disc3,
+  Users,
+  Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface Submission {
   id: string;
@@ -42,12 +47,28 @@ interface SubmitterStats {
   total_submissions: number;
 }
 
+interface TopTrack {
+  name: string;
+  url: string;
+}
+
+interface SocialLink {
+  platform: string;
+  url: string;
+}
+
 interface SpotifyMetadata {
   artistName?: string;
   songTitle?: string;
   albumArt?: string;
+  artistId?: string;
+  artistUrl?: string;
+  albumName?: string;
   artistImage?: string;
-  previewUrl?: string;
+  artistBio?: string;
+  artistTopTracks?: TopTrack[];
+  artistSocialLinks?: SocialLink[];
+  monthlyListeners?: string;
 }
 
 interface NowPlayingPanelProps {
@@ -58,6 +79,19 @@ interface NowPlayingPanelProps {
   onClose: () => void;
   onDownload: () => void;
 }
+
+// Social platform icons mapping
+const getSocialIcon = (platform: string) => {
+  const lowerPlatform = platform.toLowerCase();
+  if (lowerPlatform.includes('instagram')) return '📸';
+  if (lowerPlatform.includes('twitter') || lowerPlatform.includes('x')) return '𝕏';
+  if (lowerPlatform.includes('facebook')) return '📘';
+  if (lowerPlatform.includes('youtube')) return '▶️';
+  if (lowerPlatform.includes('tiktok')) return '🎵';
+  if (lowerPlatform.includes('soundcloud')) return '☁️';
+  if (lowerPlatform.includes('wikipedia')) return '📖';
+  return '🔗';
+};
 
 export function NowPlayingPanel({
   submission,
@@ -71,6 +105,7 @@ export function NowPlayingPanel({
   const [spotifyMeta, setSpotifyMeta] = useState<SpotifyMetadata | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingSpotify, setIsLoadingSpotify] = useState(false);
+  const [copiedContact, setCopiedContact] = useState(false);
 
   // Fetch submitter profile stats
   useEffect(() => {
@@ -158,6 +193,25 @@ export function NowPlayingPanel({
       case 'apple-music': return 'bg-pink-500/20 text-pink-400 border-pink-500/30';
       default: return 'bg-secondary text-muted-foreground';
     }
+  };
+
+  const handleCopyContact = async () => {
+    if (submission?.email) {
+      await navigator.clipboard.writeText(submission.email);
+      setCopiedContact(true);
+      toast({
+        title: "Copied!",
+        description: "Contact email copied to clipboard",
+      });
+      setTimeout(() => setCopiedContact(false), 2000);
+    }
+  };
+
+  // Decode HTML entities in artist name
+  const decodeHtmlEntities = (text: string) => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
   };
 
   return (
@@ -317,12 +371,126 @@ export function NowPlayingPanel({
                   )}
                 </div>
 
-                {/* Right: Submitter Stats */}
+                {/* Right: Spotify Artist Info OR Submitter Stats */}
                 <div className="space-y-4">
+                  {/* Spotify Artist Card - if Spotify submission */}
+                  {submission.platform === 'spotify' && (
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
+                      <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                        <Disc3 className="w-4 h-4 text-green-400" />
+                        Artist Profile
+                      </h3>
+                      
+                      {isLoadingSpotify ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="w-5 h-5 animate-spin text-green-400" />
+                        </div>
+                      ) : spotifyMeta ? (
+                        <div className="space-y-4">
+                          {/* Artist Profile Picture */}
+                          {spotifyMeta.artistImage && (
+                            <div className="aspect-square rounded-full overflow-hidden border-2 border-green-500/30 shadow-lg mx-auto w-24 h-24">
+                              <img
+                                src={spotifyMeta.artistImage}
+                                alt={`${spotifyMeta.artistName || submission.artist_name}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Artist Name & Monthly Listeners */}
+                          <div className="text-center">
+                            <p className="font-semibold text-green-400 text-lg">
+                              {spotifyMeta.artistName 
+                                ? decodeHtmlEntities(spotifyMeta.artistName) 
+                                : submission.artist_name}
+                            </p>
+                            {spotifyMeta.monthlyListeners && (
+                              <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                                <Users className="w-3 h-3" />
+                                {spotifyMeta.monthlyListeners} monthly listeners
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Artist Bio */}
+                          {spotifyMeta.artistBio && (
+                            <div className="p-3 rounded-lg bg-card/50 border border-border/30">
+                              <p className="text-xs text-muted-foreground line-clamp-4">
+                                {spotifyMeta.artistBio}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Top Tracks */}
+                          {spotifyMeta.artistTopTracks && spotifyMeta.artistTopTracks.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">Top Tracks</p>
+                              <div className="space-y-1">
+                                {spotifyMeta.artistTopTracks.slice(0, 5).map((track, index) => (
+                                  <a
+                                    key={index}
+                                    href={track.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-1.5 rounded-md hover:bg-green-500/10 transition-colors group"
+                                  >
+                                    <span className="text-[10px] text-muted-foreground w-4">{index + 1}</span>
+                                    <Play className="w-3 h-3 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <span className="text-xs truncate flex-1">{track.name}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Social Links */}
+                          {spotifyMeta.artistSocialLinks && spotifyMeta.artistSocialLinks.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">Links</p>
+                              <div className="flex flex-wrap gap-2">
+                                {spotifyMeta.artistSocialLinks.map((link, index) => (
+                                  <a
+                                    key={index}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-card/50 border border-border/30 hover:border-green-500/30 hover:bg-green-500/10 transition-colors text-xs"
+                                  >
+                                    <span>{getSocialIcon(link.platform)}</span>
+                                    <span>{link.platform}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* View on Spotify */}
+                          {spotifyMeta.artistUrl && (
+                            <a
+                              href={spotifyMeta.artistUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-center gap-1.5 text-xs text-green-400 hover:underline mt-2"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              View Artist on Spotify
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          No artist data available
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Submitter Stats */}
                   <div className="p-4 rounded-xl bg-card/50 border border-border/30">
                     <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
                       <User className="w-4 h-4 text-primary" />
-                      Submitter Info
+                      Submitter Insights
                     </h3>
                     
                     {isLoadingStats ? (
@@ -348,13 +516,30 @@ export function NowPlayingPanel({
                             <p className="font-medium">
                               {submitterStats?.username || submission.email?.split('@')[0] || 'Anonymous'}
                             </p>
-                            {submission.email && (
-                              <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                                {submission.email}
-                              </p>
-                            )}
                           </div>
                         </div>
+
+                        {/* Contact - Hidden by default, click to copy */}
+                        {submission.email && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start text-xs"
+                            onClick={handleCopyContact}
+                          >
+                            {copiedContact ? (
+                              <>
+                                <Check className="w-3 h-3 mr-2 text-green-500" />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3 mr-2" />
+                                Copy Contact
+                              </>
+                            )}
+                          </Button>
+                        )}
 
                         {/* Stats */}
                         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/30">
@@ -376,49 +561,7 @@ export function NowPlayingPanel({
                             <p className="text-[10px] text-muted-foreground">Submitted</p>
                           </div>
                         </div>
-
-                        {/* Amount Paid */}
-                        {submission.amount_paid > 0 && (
-                          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-center">
-                            <p className="text-xs text-muted-foreground">Amount Paid</p>
-                            <p className="text-lg font-bold text-primary">
-                              €{submission.amount_paid.toFixed(2)}
-                            </p>
-                          </div>
-                        )}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="p-4 rounded-xl bg-card/50 border border-border/30 space-y-2">
-                    <h3 className="text-sm font-semibold mb-3">Quick Links</h3>
-                    
-                    {submission.song_url && submission.song_url !== 'direct-upload' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <a href={submission.song_url} target="_blank" rel="noopener noreferrer">
-                          <LinkIcon className="w-4 h-4 mr-2" />
-                          Open in {submission.platform === 'apple-music' ? 'Apple Music' : 
-                                   submission.platform.charAt(0).toUpperCase() + submission.platform.slice(1)}
-                        </a>
-                      </Button>
-                    )}
-                    
-                    {submission.audio_file_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        onClick={onDownload}
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Audio
-                      </Button>
                     )}
                   </div>
                 </div>
