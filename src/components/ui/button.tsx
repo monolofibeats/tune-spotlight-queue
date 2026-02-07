@@ -11,14 +11,18 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 active:shadow-md",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80",
-        outline: "border border-border bg-transparent hover:bg-secondary hover:text-secondary-foreground active:bg-secondary/80",
-        secondary: "bg-[hsl(0_0%_12%)] border-2 border-[hsl(0_0%_25%)] text-secondary-foreground shadow-md shadow-black/20 hover:bg-[hsl(0_0%_15%)] hover:border-[hsl(0_0%_35%)] hover:shadow-lg active:bg-[hsl(0_0%_10%)] transition-all duration-500 ease-out group overflow-hidden relative",
+        outline:
+          "border border-border bg-transparent hover:bg-secondary hover:text-secondary-foreground active:bg-secondary/80",
+        secondary:
+          "bg-[hsl(0_0%_12%)] border-2 border-[hsl(0_0%_25%)] text-secondary-foreground shadow-md shadow-black/20 hover:bg-[hsl(0_0%_15%)] hover:border-[hsl(0_0%_35%)] hover:shadow-lg active:bg-[hsl(0_0%_10%)] transition-all duration-500 ease-out group overflow-hidden relative",
         ghost: "hover:bg-secondary hover:text-secondary-foreground active:bg-secondary/80",
         link: "text-primary underline-offset-4 hover:underline",
         hero: "bg-[hsl(45_80%_12%)] border-2 border-[hsl(45_90%_50%)] text-white font-semibold shadow-lg shadow-[hsl(45_80%_30%)/0.3] hover:bg-[hsl(45_80%_16%)] hover:border-[hsl(45_95%_55%)] hover:shadow-xl active:bg-[hsl(45_80%_10%)] transition-all duration-500 ease-out group overflow-hidden relative",
-        "hero-outline": "border-2 border-primary/50 bg-transparent text-foreground shadow-md shadow-primary/10 hover:bg-primary/10 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-500 ease-out",
+        "hero-outline":
+          "border-2 border-primary/50 bg-transparent text-foreground shadow-md shadow-primary/10 hover:bg-primary/10 hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all duration-500 ease-out",
         glow: "bg-primary text-primary-foreground glow-primary hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 active:scale-100 transition-all duration-300",
-        premium: "bg-primary text-primary-foreground font-semibold hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-100 transition-all duration-300",
+        premium:
+          "bg-primary text-primary-foreground font-semibold hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-100 transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -47,10 +51,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const showShine = !asChild && (variant === "secondary" || variant === "hero");
 
     // Radix Slot (asChild) requires exactly ONE ReactElement child.
-    // In some JSX formatting cases, `children` may include whitespace strings; we strip non-elements.
+    // Some JSX formatting may introduce whitespace strings; strip non-elements.
     const elementChildren = React.Children.toArray(children).filter(
       (child): child is React.ReactElement => React.isValidElement(child),
     );
+
     const slotChild = elementChildren[0] ?? null;
     const useSlot = asChild && slotChild !== null;
 
@@ -62,13 +67,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
-    const Comp = useSlot ? Slot : "button";
+    // IMPORTANT: When using Slot, render ONLY the slotted child (no extra null/false siblings),
+    // otherwise Slot/React.Children.only can throw.
+    if (useSlot) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...props}
+        >
+          {slotChild}
+        </Slot>
+      );
+    }
 
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
+      <button
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      >
         {showShine ? <span className="btn-shine" /> : null}
-        {useSlot ? slotChild : children}
-      </Comp>
+        {children}
+      </button>
     );
   },
 );
