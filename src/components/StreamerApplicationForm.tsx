@@ -55,10 +55,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
       return;
     }
 
-    if (!twitchUrl && !youtubeUrl) {
+    const hasAtLeastOnePlatform = twitchUrl || youtubeUrl || tiktokUrl || instagramUrl || spotifyUrl || twitterUrl || websiteUrl;
+    if (!hasAtLeastOnePlatform) {
       toast({
         title: "Platform required",
-        description: "Please provide at least one streaming platform link (Twitch or YouTube).",
+        description: "Please provide at least one social or streaming platform link.",
         variant: "destructive",
       });
       return;
