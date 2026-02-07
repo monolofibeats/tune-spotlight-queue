@@ -66,7 +66,6 @@ export default function Profile() {
         setUsername(data.username || '');
         setDisplayEmail(data.display_email || user.email || '');
         setBio(data.bio || '');
-        setPreferredPayment(data.preferred_payment_method || '');
         setAvatarUrl(data.avatar_url || '');
       } else {
         // No profile yet, use defaults
