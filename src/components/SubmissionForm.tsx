@@ -126,6 +126,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Store the uploaded URL directly for immediate use (avoid React state timing issues)
+  const uploadedAudioUrlRef = useRef<string | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -466,11 +468,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     });
   };
 
+
   const handleSkipTheLine = async () => {
     // Upload audio file first if present (before opening dialog)
-    if (audioFile && !uploadedAudioUrl) {
+    if (audioFile && !uploadedAudioUrl && !uploadedAudioUrlRef.current) {
       try {
         const url = await uploadAudioFile();
+        uploadedAudioUrlRef.current = url;
         setUploadedAudioUrl(url);
       } catch (error) {
         toast({
@@ -483,6 +487,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     }
     setShowPriorityDialog(true);
   };
+
+  // Sync ref with state for cases where state is set elsewhere
+  useEffect(() => {
+    uploadedAudioUrlRef.current = uploadedAudioUrl;
+  }, [uploadedAudioUrl]);
 
 
   // Handle paid submission via Stripe
@@ -587,6 +596,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     setMessage('');
     setAudioFile(null);
     setUploadedAudioUrl(null);
+    uploadedAudioUrlRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -1050,7 +1060,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
         message={message}
         email={user?.email || email}
         platform={platform || 'other'}
-        audioFileUrl={uploadedAudioUrl}
+        audioFileUrl={uploadedAudioUrl || uploadedAudioUrlRef.current}
         streamerId={streamerId}
         streamerSlug={streamerSlug}
         onSuccess={() => {
