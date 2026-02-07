@@ -453,11 +453,16 @@ export type Database = {
           display_name: string
           email: string
           id: string
+          instagram_url: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          spotify_url: string | null
           status: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url: string | null
           twitch_url: string | null
+          twitter_url: string | null
+          website_url: string | null
           youtube_url: string | null
         }
         Insert: {
@@ -467,11 +472,16 @@ export type Database = {
           display_name: string
           email: string
           id?: string
+          instagram_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          spotify_url?: string | null
           status?: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url?: string | null
           twitch_url?: string | null
+          twitter_url?: string | null
+          website_url?: string | null
           youtube_url?: string | null
         }
         Update: {
@@ -481,11 +491,16 @@ export type Database = {
           display_name?: string
           email?: string
           id?: string
+          instagram_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          spotify_url?: string | null
           status?: Database["public"]["Enums"]["streamer_status"]
+          tiktok_url?: string | null
           twitch_url?: string | null
+          twitter_url?: string | null
+          website_url?: string | null
           youtube_url?: string | null
         }
         Relationships: []
