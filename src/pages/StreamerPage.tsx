@@ -122,7 +122,7 @@ function StreamerPageContent() {
       {/* Main Content - Submission Form */}
       <section className="pb-8 px-4">
         <div className="container mx-auto max-w-xl">
-          <SubmissionForm streamerId={streamer.id} />
+          <SubmissionForm streamerId={streamer.id} streamerSlug={streamer.slug} />
         </div>
       </section>
 
