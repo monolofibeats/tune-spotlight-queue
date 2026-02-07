@@ -468,8 +468,6 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     });
   };
 
-  // Store the uploaded URL directly for immediate use (avoid React state timing issues)
-  const uploadedAudioUrlRef = useRef<string | null>(null);
 
   const handleSkipTheLine = async () => {
     // Upload audio file first if present (before opening dialog)
