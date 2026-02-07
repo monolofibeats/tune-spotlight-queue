@@ -37,35 +37,47 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
     const cleanup: (() => void)[] = [];
 
     console.log("[StreamerTheme] Applying theme for:", streamer.slug, {
+      primary_color: streamer.primary_color,
+      accent_color: streamer.accent_color,
       button_style: streamer.button_style,
       font_family: streamer.font_family,
       animation_style: streamer.animation_style,
       card_style: streamer.card_style,
       background_type: streamer.background_type,
+      background_gradient: streamer.background_gradient,
     });
 
     // CRITICAL: Remove global theme classes that override streamer colors
+    // These classes apply gray colors when stream is "inactive" - we don't want that on streamer pages
     root.classList.remove("stream-active", "stream-inactive");
+    body.classList.remove("stream-live", "stream-offline");
+    
+    // Mark body as having streamer theme applied
+    body.dataset.streamerTheme = "active";
     cleanup.push(() => {
-      // Don't restore - let ThemeWrapper handle it when navigating away
+      delete body.dataset.streamerTheme;
     });
 
     // Apply primary color (HSL values like "217 91% 60%")
     if (streamer.primary_color) {
-      root.style.setProperty("--primary", streamer.primary_color);
-      root.style.setProperty("--ring", streamer.primary_color);
-      root.style.setProperty("--glow-primary", streamer.primary_color);
+      const color = streamer.primary_color.trim();
+      root.style.setProperty("--primary", color);
+      root.style.setProperty("--ring", color);
+      root.style.setProperty("--glow-primary", color);
+      root.style.setProperty("--sidebar-primary", color);
       cleanup.push(() => {
         root.style.removeProperty("--primary");
         root.style.removeProperty("--ring");
         root.style.removeProperty("--glow-primary");
+        root.style.removeProperty("--sidebar-primary");
       });
     }
 
     // Apply accent color
     if (streamer.accent_color) {
-      root.style.setProperty("--accent", streamer.accent_color);
-      root.style.setProperty("--glow-accent", streamer.accent_color);
+      const color = streamer.accent_color.trim();
+      root.style.setProperty("--accent", color);
+      root.style.setProperty("--glow-accent", color);
       cleanup.push(() => {
         root.style.removeProperty("--accent");
         root.style.removeProperty("--glow-accent");
@@ -93,22 +105,22 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
       body.style.fontFamily = "";
     });
 
-    // Apply background style
+    // Apply background style - use cssText to override Tailwind's bg-background
     if (streamer.background_type === "gradient" && streamer.background_gradient) {
-      body.style.background = streamer.background_gradient;
+      body.style.setProperty("background", streamer.background_gradient, "important");
       cleanup.push(() => {
-        body.style.background = "";
+        body.style.removeProperty("background");
       });
     } else if (streamer.background_type === "image" && streamer.background_image_url) {
-      body.style.backgroundImage = `url(${streamer.background_image_url})`;
-      body.style.backgroundSize = "cover";
-      body.style.backgroundPosition = "center";
-      body.style.backgroundAttachment = "fixed";
+      body.style.setProperty("background-image", `url(${streamer.background_image_url})`, "important");
+      body.style.setProperty("background-size", "cover", "important");
+      body.style.setProperty("background-position", "center", "important");
+      body.style.setProperty("background-attachment", "fixed", "important");
       cleanup.push(() => {
-        body.style.backgroundImage = "";
-        body.style.backgroundSize = "";
-        body.style.backgroundPosition = "";
-        body.style.backgroundAttachment = "";
+        body.style.removeProperty("background-image");
+        body.style.removeProperty("background-size");
+        body.style.removeProperty("background-position");
+        body.style.removeProperty("background-attachment");
       });
     }
 
@@ -116,16 +128,19 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
     if (streamer.animation_style && streamer.animation_style !== "none") {
       body.dataset.animStyle = streamer.animation_style;
       cleanup.push(() => delete body.dataset.animStyle);
+    } else if (streamer.animation_style === "none") {
+      body.dataset.animStyle = "none";
+      cleanup.push(() => delete body.dataset.animStyle);
     }
 
     // Apply button style (used by CSS selectors)
-    if (streamer.button_style && streamer.button_style !== "default") {
+    if (streamer.button_style && streamer.button_style !== "rounded") {
       body.dataset.buttonStyle = streamer.button_style;
       cleanup.push(() => delete body.dataset.buttonStyle);
     }
 
     // Apply card style
-    if (streamer.card_style && streamer.card_style !== "default") {
+    if (streamer.card_style && streamer.card_style !== "glass") {
       body.dataset.cardStyle = streamer.card_style;
       cleanup.push(() => delete body.dataset.cardStyle);
     }
@@ -134,6 +149,7 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
       cleanup.forEach((fn) => fn());
     };
   }, [
+    streamer.slug,
     streamer.primary_color,
     streamer.accent_color,
     streamer.font_family,
