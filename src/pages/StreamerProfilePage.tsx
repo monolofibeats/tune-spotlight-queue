@@ -38,7 +38,7 @@ function StreamerProfilePageContent() {
     streamer.youtube_url ? { label: "YouTube", href: streamer.youtube_url, icon: <Youtube className="w-4 h-4" /> } : null,
     streamer.instagram_url ? { label: "Instagram", href: streamer.instagram_url, icon: <Instagram className="w-4 h-4" /> } : null,
     streamer.twitter_url ? { label: "Website", href: streamer.twitter_url, icon: <LinkIcon className="w-4 h-4" /> } : null,
-  ].filter(Boolean) as Array<{ label: string; href: string; icon: React.ReactNode }>;
+  ].filter(Boolean) as Array<{ label: string; href: string; icon: ReactNode }>;
 
   return (
     <div className="min-h-screen bg-background">

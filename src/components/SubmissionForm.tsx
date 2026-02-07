@@ -950,27 +950,37 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
               )}
 
               {/* Optional: Email */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
-                <Input
-                  type="email"
-                  placeholder={t('submission.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 text-sm bg-background/50"
-                />
-              </div>
+              {showEmail && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {emailLabel} {requireEmail && <span className="text-destructive">*</span>}
+                  </label>
+                  <Input
+                    type="email"
+                    placeholder={emailPlaceholder}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-10 text-sm bg-background/50"
+                    required={requireEmail}
+                  />
+                </div>
+              )}
 
               {/* Optional: Message */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
-                <Textarea
-                  placeholder={t('submission.messagePlaceholder')}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[80px] text-sm resize-none bg-background/50"
-                />
-              </div>
+              {showMessage && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {messageLabel} {requireMessage && <span className="text-destructive">*</span>}
+                  </label>
+                  <Textarea
+                    placeholder={messagePlaceholder}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="min-h-[80px] text-sm resize-none bg-background/50"
+                    required={requireMessage}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
