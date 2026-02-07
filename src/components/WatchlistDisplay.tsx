@@ -79,20 +79,27 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
     const fetchSubmissions = async () => {
+      // Fetch all pending submissions - sorting will be done client-side for proper priority ordering
       let query = supabase
         .from('public_submissions_queue')
         .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .eq('status', 'pending');
 
-      // Filter by streamer if provided
+      // Filter by streamer if provided, otherwise get global submissions (null streamer_id)
       if (streamerId) {
         query = query.eq('streamer_id', streamerId);
+      } else {
+        query = query.is('streamer_id', null);
       }
 
       const { data, error } = await query;
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        return [];
+      }
+
+      if (data) {
         const transformed: SubmissionItem[] = data.map(item => ({
           id: item.id || '',
           song_title: item.song_title || 'Untitled',
@@ -110,12 +117,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     };
 
     useEffect(() => {
-      if (!onlyRealtime) {
-        fetchSubmissions();
-      }
+      // Always fetch on mount
+      fetchSubmissions();
 
+      // Subscribe to realtime changes
       const channel = supabase
-        .channel('submissions_changes')
+        .channel(`submissions_changes_${streamerId || 'global'}`)
         .on(
           'postgres_changes',
           {
@@ -132,7 +139,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       return () => {
         supabase.removeChannel(channel);
       };
-    }, [onlyRealtime]);
+    }, [streamerId]);
 
     useImperativeHandle(ref, () => ({
       addNewItem: (item) => {
@@ -187,9 +194,17 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
-    const topSpots = sortedItems.filter(s => s.is_priority).slice(0, 5);
+    // Priority submissions always come first, sorted by total paid (highest first)
+    // Within same payment tier, earlier submissions come first (FIFO)
+    const priorityItems = sortedItems.filter(s => s.is_priority);
     const regularItems = sortedItems.filter(s => !s.is_priority);
-    const displayItems = [...topSpots, ...regularItems].slice(0, 8);
+    
+    // Show top 5 priority spots with positions, then all regular items
+    const topPrioritySpots = priorityItems.slice(0, 5);
+    const remainingPriority = priorityItems.slice(5);
+    
+    // Display: top 5 priority (with position badges) + remaining priority + regular items
+    const displayItems = [...topPrioritySpots, ...remainingPriority, ...regularItems];
 
     return (
       <div className="w-full" id="watchlist-container">
@@ -204,8 +219,8 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
         <div className="space-y-2">
           <AnimatePresence mode="popLayout">
             {displayItems.map((submission, index) => {
-              const isPrioritySpot = submission.is_priority && topSpots.includes(submission);
-              const spotNumber = isPrioritySpot ? topSpots.indexOf(submission) + 1 : null;
+              const isPrioritySpot = submission.is_priority && topPrioritySpots.includes(submission);
+              const spotNumber = isPrioritySpot ? topPrioritySpots.indexOf(submission) + 1 : null;
               const styles = getPositionStyles(spotNumber);
               
               return (
