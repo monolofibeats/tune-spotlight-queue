@@ -270,22 +270,40 @@ export function NowPlayingPanel({
 
                   {/* Spotify Embed - for Spotify links */}
                   {submission.platform === 'spotify' && submission.song_url && (
-                    <div className="rounded-xl overflow-hidden">
-                      {isLoadingSpotify ? (
-                        <div className="flex items-center justify-center py-8 bg-card/50 rounded-xl">
-                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                        </div>
-                      ) : (
-                        <iframe
-                          src={`https://open.spotify.com/embed/track/${submission.song_url.match(/track\/([a-zA-Z0-9]+)/)?.[1]}?utm_source=generator&theme=0`}
-                          width="100%"
-                          height="152"
-                          frameBorder="0"
-                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                          loading="lazy"
-                          className="rounded-xl"
-                        />
-                      )}
+                    <div className="space-y-3">
+                      <div className="rounded-xl overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-1">
+                        {isLoadingSpotify ? (
+                          <div className="flex items-center justify-center py-12 bg-card/50 rounded-lg">
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          </div>
+                        ) : (
+                          <iframe
+                            src={`https://open.spotify.com/embed/track/${submission.song_url.match(/track\/([a-zA-Z0-9]+)/)?.[1]}?utm_source=generator&theme=0`}
+                            width="100%"
+                            height="232"
+                            frameBorder="0"
+                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            loading="lazy"
+                            className="rounded-lg"
+                          />
+                        )}
+                      </div>
+                      
+                      {/* Open in Spotify Web Player */}
+                      <div className="flex items-center gap-3">
+                        <a
+                          href={submission.song_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Open in Spotify
+                        </a>
+                        <span className="text-xs text-muted-foreground">
+                          Log in to Spotify for full playback
+                        </span>
+                      </div>
                     </div>
                   )}
 
