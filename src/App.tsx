@@ -61,6 +61,14 @@ const App = () => (
                         }
                       />
                       <Route
+                        path="/streamer/dashboard"
+                        element={
+                          <ProtectedRoute>
+                            <StreamerDashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
                         path="/streamer/settings"
                         element={
                           <ProtectedRoute>
