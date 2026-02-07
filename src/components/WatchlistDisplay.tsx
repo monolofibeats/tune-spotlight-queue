@@ -194,9 +194,17 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     });
 
-    const topSpots = sortedItems.filter(s => s.is_priority).slice(0, 5);
+    // Priority submissions always come first, sorted by total paid (highest first)
+    // Within same payment tier, earlier submissions come first (FIFO)
+    const priorityItems = sortedItems.filter(s => s.is_priority);
     const regularItems = sortedItems.filter(s => !s.is_priority);
-    const displayItems = [...topSpots, ...regularItems].slice(0, 8);
+    
+    // Show top 5 priority spots with positions, then all regular items
+    const topPrioritySpots = priorityItems.slice(0, 5);
+    const remainingPriority = priorityItems.slice(5);
+    
+    // Display: top 5 priority (with position badges) + remaining priority + regular items
+    const displayItems = [...topPrioritySpots, ...remainingPriority, ...regularItems];
 
     return (
       <div className="w-full" id="watchlist-container">
