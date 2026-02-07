@@ -358,6 +358,11 @@ const Dashboard = () => {
       isLoading: isLoadingAudio,
       position,
     });
+    
+    // Scroll to Now Playing panel after a brief delay for render
+    setTimeout(() => {
+      nowPlayingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleCloseNowPlaying = () => {
