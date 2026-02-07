@@ -418,3 +418,64 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* ========================================
+   STREAMER CUSTOMIZATION STYLES
+   These respond to data attributes set by StreamerThemeProvider
+   ======================================== */
+
+/* Button Styles - applied via [data-button-style] */
+[data-button-style="pill"] .btn,
+[data-button-style="pill"] button:not([class*="rounded-"]) {
+  border-radius: 9999px !important;
+}
+
+[data-button-style="sharp"] .btn,
+[data-button-style="sharp"] button:not([class*="rounded-"]) {
+  border-radius: 0 !important;
+}
+
+[data-button-style="soft"] .btn,
+[data-button-style="soft"] button:not([class*="rounded-"]) {
+  border-radius: 1rem !important;
+}
+
+/* Card Styles - applied via [data-card-style] */
+[data-card-style="solid"] .glass,
+[data-card-style="solid"] .glass-strong {
+  background: hsl(var(--card)) !important;
+  backdrop-filter: none !important;
+}
+
+[data-card-style="outlined"] .glass,
+[data-card-style="outlined"] .glass-strong {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border-width: 2px !important;
+}
+
+[data-card-style="gradient"] .glass,
+[data-card-style="gradient"] .glass-strong {
+  background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted))) !important;
+  backdrop-filter: none !important;
+}
+
+/* Animation Styles - applied via [data-anim-style] */
+[data-anim-style="none"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
+[data-anim-style="subtle"] * {
+  animation-duration: 0.5s !important;
+  transition-duration: 0.3s !important;
+}
+
+[data-anim-style="playful"] * {
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+}
+
+[data-anim-style="elegant"] * {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
