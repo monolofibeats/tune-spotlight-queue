@@ -194,6 +194,7 @@ export function SpotBiddingDialog({
           is_priority: true,
           user_id: user?.id || null,
           audio_file_url: audioFileUrl || null,
+          streamer_id: streamerId || null,
         });
 
         if (error) throw error;
