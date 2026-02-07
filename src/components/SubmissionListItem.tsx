@@ -308,23 +308,33 @@ export function SubmissionListItem({
                       <FileAudio className="w-4 h-4 text-primary shrink-0" />
                       <p className="text-xs text-muted-foreground">Hochgeladene Audio Datei</p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownloadFile();
-                      }}
-                    >
-                      <Download className="w-3.5 h-3.5 mr-1" />
-                      Download
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenNowPlaying();
+                        }}
+                      >
+                        <Play className="w-3.5 h-3.5 mr-1" />
+                        Play
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadFile();
+                        }}
+                      >
+                        <Download className="w-3.5 h-3.5 mr-1" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
-                  <AudioPlayer 
-                    src={audioUrl} 
-                    isLoading={isLoadingAudio}
-                  />
                 </div>
               )}
 
