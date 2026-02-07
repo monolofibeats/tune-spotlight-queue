@@ -34,7 +34,6 @@ export default function Profile() {
   const [username, setUsername] = useState('');
   const [displayEmail, setDisplayEmail] = useState('');
   const [bio, setBio] = useState('');
-  const [preferredPayment, setPreferredPayment] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
