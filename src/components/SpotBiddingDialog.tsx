@@ -221,6 +221,7 @@ export function SpotBiddingDialog({
           platform: platform || 'other',
           targetSpot: spotPosition,
           audioFileUrl: audioFileUrl || null,
+          streamerId: streamerId || null,
         },
       });
 
