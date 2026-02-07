@@ -741,78 +741,80 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 </p>
               )}
 
-              {/* Step 1: Music Link - stays mounted (so glow rhythm stays globally in sync) */}
-              <motion.div
-                initial={false}
-                animate={
-                  audioFile
-                    ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
-                    : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
-                }
-                transition={{ duration: 0.2 }}
-                style={{ overflow: 'hidden' }}
-                aria-hidden={!!audioFile}
-              >
-                <div className={`relative ${getFieldGlowClass(0)}`}>
-                  <CompletionTick fieldStep={0} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.linkLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.linkPlaceholder')}
-                    value={songUrl}
-                    onChange={(e) => {
-                      const url = e.target.value;
-                      setSongUrl(url);
+              {/* Step 1: Music Link */}
+              {showSongUrl && (
+                <motion.div
+                  initial={false}
+                  animate={
+                    audioFile
+                      ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
+                      : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
+                  }
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
+                  aria-hidden={!!audioFile}
+                >
+                  <div className={`relative ${getFieldGlowClass(0)}`}>
+                    <CompletionTick fieldStep={0} />
+                    <label className="text-xs text-muted-foreground mb-1.5 block">
+                      {songUrlLabel} {(showSongUrl ? <span className="text-destructive">*</span> : null)}
+                    </label>
+                    <Input
+                      placeholder={songUrlPlaceholder}
+                      value={songUrl}
+                      onChange={(e) => {
+                        const url = e.target.value;
+                        setSongUrl(url);
 
-                      // Non-Spotify: best-effort sync parsing
-                      if (url.includes('http') && !url.includes('spotify.com')) {
-                        const metadata = parseUrlMetadata(url);
+                        // Non-Spotify: best-effort sync parsing
+                        if (url.includes('http') && !url.includes('spotify.com')) {
+                          const metadata = parseUrlMetadata(url);
+                          if (metadata.artistName && !artistName.trim()) {
+                            setArtistName(metadata.artistName);
+                          }
+                          if (metadata.songTitle && !songTitle.trim()) {
+                            setSongTitle(metadata.songTitle);
+                          }
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const pasted = e.clipboardData.getData('text');
+                        if (!pasted || !pasted.includes('http')) return;
+
+                        // Replace whatever was in the input with the pasted URL (more reliable)
+                        e.preventDefault();
+                        setSongUrl(pasted);
+
+                        if (pasted.includes('spotify.com')) {
+                          void autofillFromSpotify(pasted);
+                          return;
+                        }
+
+                        const metadata = parseUrlMetadata(pasted);
                         if (metadata.artistName && !artistName.trim()) {
                           setArtistName(metadata.artistName);
                         }
                         if (metadata.songTitle && !songTitle.trim()) {
                           setSongTitle(metadata.songTitle);
                         }
-                      }
-                    }}
-                    onPaste={(e) => {
-                      const pasted = e.clipboardData.getData('text');
-                      if (!pasted || !pasted.includes('http')) return;
-
-                      // Replace whatever was in the input with the pasted URL (more reliable)
-                      e.preventDefault();
-                      setSongUrl(pasted);
-
-                      if (pasted.includes('spotify.com')) {
-                        void autofillFromSpotify(pasted);
-                        return;
-                      }
-
-                      const metadata = parseUrlMetadata(pasted);
-                      if (metadata.artistName && !artistName.trim()) {
-                        setArtistName(metadata.artistName);
-                      }
-                      if (metadata.songTitle && !songTitle.trim()) {
-                        setSongTitle(metadata.songTitle);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (songUrl.includes('spotify.com')) {
-                        void autofillFromSpotify(songUrl);
-                      }
-                    }}
-                    className="h-10 text-sm bg-background/50"
-                  />
-                  {platform && (
-                    <div className="mt-1.5">
-                      <Badge variant="platform" className="text-xs">
-                        {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+                      }}
+                      onBlur={() => {
+                        if (songUrl.includes('spotify.com')) {
+                          void autofillFromSpotify(songUrl);
+                        }
+                      }}
+                      className="h-10 text-sm bg-background/50"
+                    />
+                    {platform && (
+                      <div className="mt-1.5">
+                        <Badge variant="platform" className="text-xs">
+                          {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Step 2: Audio File Upload - stays mounted (so glow rhythm stays globally in sync) */}
               <motion.div
