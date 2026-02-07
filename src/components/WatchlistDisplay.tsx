@@ -79,20 +79,27 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     const [localItems, setLocalItems] = useState<SubmissionItem[]>([]);
 
     const fetchSubmissions = async () => {
+      // Fetch all pending submissions - sorting will be done client-side for proper priority ordering
       let query = supabase
         .from('public_submissions_queue')
         .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .eq('status', 'pending');
 
-      // Filter by streamer if provided
+      // Filter by streamer if provided, otherwise get global submissions (null streamer_id)
       if (streamerId) {
         query = query.eq('streamer_id', streamerId);
+      } else {
+        query = query.is('streamer_id', null);
       }
 
       const { data, error } = await query;
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        return [];
+      }
+
+      if (data) {
         const transformed: SubmissionItem[] = data.map(item => ({
           id: item.id || '',
           song_title: item.song_title || 'Untitled',
