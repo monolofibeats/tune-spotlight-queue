@@ -13,6 +13,7 @@ import { PerformancePrompt } from "@/components/PerformancePrompt";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import Discovery from "./pages/Discovery";
 import StreamerPage from "./pages/StreamerPage";
+import StreamerProfilePage from "./pages/StreamerProfilePage";
 import StreamerSettings from "./pages/StreamerSettings";
 import StreamerDashboard from "./pages/StreamerDashboard";
 import Dashboard from "./pages/Dashboard";
