@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { Loader2, Link as LinkIcon, Twitch, Youtube, Instagram } from "lucide-react";
@@ -6,20 +5,12 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { StreamerProvider, useStreamer } from "@/hooks/useStreamer";
+import { StreamerThemeProvider } from "@/components/StreamerThemeProvider";
 import { useLanguage } from "@/hooks/useLanguage";
 
 function StreamerProfilePageContent() {
   const { streamer, isLoading, error } = useStreamer();
   const { t } = useLanguage();
-
-  useEffect(() => {
-    if (streamer?.primary_color) {
-      document.documentElement.style.setProperty("--streamer-primary", streamer.primary_color);
-    }
-    return () => {
-      document.documentElement.style.removeProperty("--streamer-primary");
-    };
-  }, [streamer?.primary_color]);
 
   if (isLoading) {
     return (
