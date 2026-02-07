@@ -515,14 +515,16 @@ const Dashboard = () => {
               </motion.div>
 
               {/* Now Playing Panel - Above the list */}
-              <NowPlayingPanel
-                submission={nowPlaying.submission}
-                audioUrl={nowPlaying.audioUrl}
-                isLoadingAudio={nowPlaying.isLoading}
-                position={nowPlaying.position}
-                onClose={handleCloseNowPlaying}
-                onDownload={handleNowPlayingDownload}
-              />
+              <div ref={nowPlayingRef}>
+                <NowPlayingPanel
+                  submission={nowPlaying.submission}
+                  audioUrl={nowPlaying.audioUrl}
+                  isLoadingAudio={nowPlaying.isLoading}
+                  position={nowPlaying.position}
+                  onClose={handleCloseNowPlaying}
+                  onDownload={handleNowPlayingDownload}
+                />
+              </div>
 
               {/* Submissions List - Stacked sizing */}
               <div className="space-y-2">
