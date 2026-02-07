@@ -45,7 +45,7 @@ interface FlyingCard {
   amount: number;
 }
 
-export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps) {
+export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
   const { t } = useLanguage();
   const { isActive: skipLineActive } = usePricingConfig('skip_line');
