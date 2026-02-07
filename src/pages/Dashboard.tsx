@@ -508,6 +508,16 @@ const Dashboard = () => {
                 </div>
               </motion.div>
 
+              {/* Now Playing Panel - Above the list */}
+              <NowPlayingPanel
+                submission={nowPlaying.submission}
+                audioUrl={nowPlaying.audioUrl}
+                isLoadingAudio={nowPlaying.isLoading}
+                position={nowPlaying.position}
+                onClose={handleCloseNowPlaying}
+                onDownload={handleNowPlayingDownload}
+              />
+
               {/* Submissions List - Stacked sizing */}
               <div className="space-y-2">
                 {filteredSubmissions.map((submission, index) => (
@@ -517,7 +527,7 @@ const Dashboard = () => {
                     position={index + 1}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
-                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenFloatingPreview(sub, audioUrl, isLoading, index + 1)}
+                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
 
