@@ -144,14 +144,23 @@ export function Header() {
             
             {/* Streamer Dashboard Link - Mobile */}
             {isStreamer && !isAdmin && (
-              <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                  <LayoutDashboard className="w-4 h-4" />
-                  My Dashboard
-                </Button>
-              </Link>
+              <>
+                <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <LayoutDashboard className="w-4 h-4" />
+                    My Dashboard
+                  </Button>
+                </Link>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Profile Settings
+                  </Button>
+                </Link>
+              </>
             )}
             
+            {/* Regular User Links - Mobile */}
             {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
