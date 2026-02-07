@@ -34,6 +34,7 @@ const detectPlatform = (url: string): Platform => {
 interface SubmissionFormProps {
   watchlistRef?: React.RefObject<WatchlistRef>;
   streamerId?: string;
+  streamerSlug?: string;
 }
 
 interface FlyingCard {
