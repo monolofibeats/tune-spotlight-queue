@@ -418,28 +418,20 @@ const StreamerSettings = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label htmlFor="avatarUrl">Avatar URL</Label>
-                    <Input
-                      id="avatarUrl"
+                    <ImageUploadInput
+                      streamerId={streamer.id}
+                      variant="avatar"
                       value={avatarUrl}
-                      onChange={(e) => setAvatarUrl(e.target.value)}
-                      placeholder="https://..."
+                      onChange={setAvatarUrl}
                     />
-                    {avatarUrl && (
-                      <img src={avatarUrl} alt="Avatar preview" className="w-20 h-20 rounded-full object-cover border-2 border-border" />
-                    )}
                   </div>
                   <div className="space-y-3">
-                    <Label htmlFor="bannerUrl">Banner URL</Label>
-                    <Input
-                      id="bannerUrl"
+                    <ImageUploadInput
+                      streamerId={streamer.id}
+                      variant="banner"
                       value={bannerUrl}
-                      onChange={(e) => setBannerUrl(e.target.value)}
-                      placeholder="https://..."
+                      onChange={setBannerUrl}
                     />
-                    {bannerUrl && (
-                      <img src={bannerUrl} alt="Banner preview" className="w-full h-24 rounded-lg object-cover border border-border" />
-                    )}
                   </div>
                 </div>
               </div>

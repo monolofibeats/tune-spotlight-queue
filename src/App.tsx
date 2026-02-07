@@ -85,8 +85,9 @@ const App = () => (
                           </ProtectedRoute>
                         }
                       />
-                      {/* Streamer page - must be after all other routes */}
-                      <Route path="/:slug" element={<StreamerPage />} />
+                      {/* Streamer pages - must be after all other routes */}
+                      <Route path="/:slug/submit" element={<StreamerPage />} />
+                      <Route path="/:slug" element={<StreamerProfilePage />} />
                       {/* 404 catch-all */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>
