@@ -75,6 +75,7 @@ serve(async (req) => {
         is_priority: true,
         status: "pending",
         audio_file_url: audioFileUrl || null,
+        streamer_id: metadata.streamer_id || null,
       })
       .select()
       .single();

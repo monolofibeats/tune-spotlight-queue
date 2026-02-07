@@ -36,10 +36,11 @@ serve(async (req) => {
       message, 
       email,
       platform,
-      audioFileUrl 
+      audioFileUrl,
+      streamerId,
     } = await req.json();
 
-    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl });
+    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId });
 
     // Fetch minimum amount from pricing_config
     const { data: pricingConfig } = await supabase
@@ -84,6 +85,7 @@ serve(async (req) => {
         email: email || "",
         platform: platform,
         amount_paid: amount.toString(),
+        streamer_id: streamerId || "",
         // Store both keys to be resilient against older/newer verifiers
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",

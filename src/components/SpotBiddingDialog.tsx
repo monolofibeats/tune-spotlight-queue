@@ -33,6 +33,7 @@ interface SpotBiddingDialogProps {
   email: string;
   platform: string;
   audioFileUrl?: string | null; // Pre-uploaded audio file path
+  streamerId?: string | null; // Streamer context for marketplace
   onSuccess?: () => void;
 }
 
@@ -49,6 +50,7 @@ export function SpotBiddingDialog({
   email,
   platform,
   audioFileUrl,
+  streamerId,
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
@@ -192,6 +194,7 @@ export function SpotBiddingDialog({
           is_priority: true,
           user_id: user?.id || null,
           audio_file_url: audioFileUrl || null,
+          streamer_id: streamerId || null,
         });
 
         if (error) throw error;
@@ -218,6 +221,7 @@ export function SpotBiddingDialog({
           platform: platform || 'other',
           targetSpot: spotPosition,
           audioFileUrl: audioFileUrl || null,
+          streamerId: streamerId || null,
         },
       });
 

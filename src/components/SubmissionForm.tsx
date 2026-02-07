@@ -1045,6 +1045,7 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
         email={user?.email || email}
         platform={platform || 'other'}
         audioFileUrl={uploadedAudioUrl}
+        streamerId={streamerId}
         onSuccess={() => {
           watchlistRef?.current?.refreshList();
           resetForm();
