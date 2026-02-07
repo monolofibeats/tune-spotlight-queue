@@ -24,25 +24,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isStreamer, setIsStreamer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkRoles = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+        .eq('user_id', userId);
 
       if (error) {
-        console.error('Error checking admin role:', error);
-        return false;
+        console.error('Error checking roles:', error);
+        return { isAdmin: false, isStreamer: false };
       }
-      return !!data;
+      
+      const roles = data?.map(r => r.role) || [];
+      return {
+        isAdmin: roles.includes('admin'),
+        isStreamer: roles.includes('streamer'),
+      };
     } catch (error) {
-      console.error('Error checking admin role:', error);
-      return false;
+      console.error('Error checking roles:', error);
+      return { isAdmin: false, isStreamer: false };
     }
   };
 
