@@ -912,35 +912,42 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 )}
               </AnimatePresence>
 
-              {/* Step 3 & 4: Artist Name and Song Title */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className={`relative ${getFieldGlowClass(2)}`}>
-                  <CompletionTick fieldStep={2} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.artistLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.artistPlaceholder')}
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
+              {/* Artist + Title */}
+              {(showArtist || showTitle) && (
+                <div className={`grid grid-cols-1 ${showArtist && showTitle ? 'md:grid-cols-2' : ''} gap-3`}>
+                  {showArtist && (
+                    <div className={`relative ${getFieldGlowClass(2)}`}>
+                      <CompletionTick fieldStep={2} />
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {artistLabel} {requireArtist && <span className="text-destructive">*</span>}
+                      </label>
+                      <Input
+                        placeholder={artistPlaceholder}
+                        value={artistName}
+                        onChange={(e) => setArtistName(e.target.value)}
+                        className="h-10 text-sm bg-background/50"
+                        required={requireArtist}
+                      />
+                    </div>
+                  )}
+
+                  {showTitle && (
+                    <div className={`relative ${getFieldGlowClass(3)}`}>
+                      <CompletionTick fieldStep={3} />
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {titleLabel} {requireTitle && <span className="text-destructive">*</span>}
+                      </label>
+                      <Input
+                        placeholder={titlePlaceholder}
+                        value={songTitle}
+                        onChange={(e) => setSongTitle(e.target.value)}
+                        className="h-10 text-sm bg-background/50"
+                        required={requireTitle}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className={`relative ${getFieldGlowClass(3)}`}>
-                  <CompletionTick fieldStep={3} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.titleLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.titlePlaceholder')}
-                    value={songTitle}
-                    onChange={(e) => setSongTitle(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Optional: Email */}
               <div>
