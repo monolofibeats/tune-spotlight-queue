@@ -350,9 +350,8 @@ const Dashboard = () => {
     reviewed: submissions.filter(s => s.status === 'reviewed').length,
   };
 
-  const handleOpenFloatingPreview = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
-    setFloatingPreview({
-      isOpen: true,
+  const handleOpenNowPlaying = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
+    setNowPlaying({
       submission,
       audioUrl,
       isLoading: isLoadingAudio,
@@ -360,12 +359,12 @@ const Dashboard = () => {
     });
   };
 
-  const handleCloseFloatingPreview = () => {
-    setFloatingPreview(prev => ({ ...prev, isOpen: false }));
+  const handleCloseNowPlaying = () => {
+    setNowPlaying(prev => ({ ...prev, submission: null }));
   };
 
-  const handleFloatingDownload = async () => {
-    if (!floatingPreview.submission?.audio_file_url) return;
+  const handleNowPlayingDownload = async () => {
+    if (!nowPlaying.submission?.audio_file_url) return;
     
     try {
       const downloadUrl = await getSignedAudioUrl(floatingPreview.submission.audio_file_url);
