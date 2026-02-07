@@ -401,58 +401,88 @@ export function SubmissionListItem({
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'reviewing');
+              {/* Admin Edit Mode */}
+              {isAdmin && isEditing && onUpdate ? (
+                <SubmissionEditForm
+                  submission={submission}
+                  onSave={async (id, updates) => {
+                    await onUpdate(id, updates);
+                    setIsEditing(false);
+                    toast({
+                      title: "Saved!",
+                      description: "Submission updated successfully",
+                    });
                   }}
-                  disabled={submission.status === 'reviewing'}
-                >
-                  <Eye className="w-3 h-3" />
-                  Überprüfen
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'reviewed');
-                  }}
-                  disabled={submission.status === 'reviewed'}
-                >
-                  <CheckCircle className="w-3 h-3" />
-                  Erledigt
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'skipped');
-                  }}
-                >
-                  <XCircle className="w-3 h-3" />
-                  Überspringen
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs text-destructive hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(submission.id);
-                  }}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
+                  onCancel={() => setIsEditing(false)}
+                />
+              ) : (
+                /* Actions */
+                <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                  {isAdmin && onUpdate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                      }}
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'reviewing');
+                    }}
+                    disabled={submission.status === 'reviewing'}
+                  >
+                    <Eye className="w-3 h-3" />
+                    Überprüfen
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'reviewed');
+                    }}
+                    disabled={submission.status === 'reviewed'}
+                  >
+                    <CheckCircle className="w-3 h-3" />
+                    Erledigt
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'skipped');
+                    }}
+                  >
+                    <XCircle className="w-3 h-3" />
+                    Überspringen
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(submission.id);
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
