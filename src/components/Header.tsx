@@ -47,14 +47,22 @@ export function Header() {
             
             {/* Streamer Dashboard Link */}
             {isStreamer && !isAdmin && (
-              <Link to="/streamer/dashboard">
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  My Dashboard
-                </Button>
-              </Link>
+              <>
+                <Link to="/streamer/dashboard">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <LayoutDashboard className="w-3.5 h-3.5" />
+                    My Dashboard
+                  </Button>
+                </Link>
+                <Link to="/profile">
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Settings className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </>
             )}
             
+            {/* Regular User Links */}
             {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard">
