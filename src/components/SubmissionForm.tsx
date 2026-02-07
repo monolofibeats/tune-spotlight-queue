@@ -596,6 +596,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     setMessage('');
     setAudioFile(null);
     setUploadedAudioUrl(null);
+    uploadedAudioUrlRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
