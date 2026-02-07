@@ -10,7 +10,12 @@ import {
   Layout, 
   Link as LinkIcon,
   Image,
-  Eye
+  Eye,
+  FileText,
+  DollarSign,
+  Globe,
+  Flag,
+  Sparkles
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -19,36 +24,85 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { 
+  FormFieldBuilder, 
+  DesignCustomizer, 
+  BannerEditor, 
+  PricingSettings,
+  LanguageSettings 
+} from '@/components/streamer-settings';
 import type { Streamer } from '@/types/streamer';
+
+interface ExtendedStreamer extends Streamer {
+  page_language?: string;
+  font_family?: string;
+  button_style?: string;
+  background_type?: string;
+  background_image_url?: string;
+  background_gradient?: string;
+  animation_style?: string;
+  card_style?: string;
+  banner_enabled?: boolean;
+  banner_text?: string;
+  banner_link?: string;
+  banner_color?: string;
+  submission_type?: string;
+}
 
 const StreamerSettings = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const [streamer, setStreamer] = useState<Streamer | null>(null);
+  const [streamer, setStreamer] = useState<ExtendedStreamer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
 
-  // Form state
+  // Form state - Profile
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  
+  // Form state - Content
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
+  
+  // Form state - Design
   const [primaryColor, setPrimaryColor] = useState('');
   const [accentColor, setAccentColor] = useState('');
+  const [fontFamily, setFontFamily] = useState('system');
+  const [buttonStyle, setButtonStyle] = useState('rounded');
+  const [backgroundType, setBackgroundType] = useState('solid');
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
+  const [backgroundGradient, setBackgroundGradient] = useState('');
+  const [animationStyle, setAnimationStyle] = useState('subtle');
+  const [cardStyle, setCardStyle] = useState('glass');
+  
+  // Form state - Banner
+  const [bannerEnabled, setBannerEnabled] = useState(false);
+  const [bannerText, setBannerText] = useState('');
+  const [bannerLink, setBannerLink] = useState('');
+  const [bannerColor, setBannerColor] = useState('45 90% 50%');
+  
+  // Form state - Layout
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
+  
+  // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [tiktokUrl, setTiktokUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
   const [twitterUrl, setTwitterUrl] = useState('');
+  
+  // Form state - Language
+  const [pageLanguage, setPageLanguage] = useState('de');
 
   useEffect(() => {
     if (authLoading) return;
@@ -80,27 +134,51 @@ const StreamerSettings = () => {
         return;
       }
 
-      const s = data as Streamer;
+      const s = data as ExtendedStreamer;
       setStreamer(s);
       
-      // Populate form
+      // Populate form - Profile
       setDisplayName(s.display_name || '');
       setBio(s.bio || '');
       setAvatarUrl(s.avatar_url || '');
       setBannerUrl(s.banner_url || '');
+      
+      // Content
       setHeroTitle(s.hero_title || '');
       setHeroSubtitle(s.hero_subtitle || '');
       setWelcomeMessage(s.welcome_message || '');
-      setPrimaryColor(s.primary_color || '');
-      setAccentColor(s.accent_color || '');
+      
+      // Design
+      setPrimaryColor(s.primary_color || '45 90% 50%');
+      setAccentColor(s.accent_color || '45 90% 50%');
+      setFontFamily(s.font_family || 'system');
+      setButtonStyle(s.button_style || 'rounded');
+      setBackgroundType(s.background_type || 'solid');
+      setBackgroundImageUrl(s.background_image_url || '');
+      setBackgroundGradient(s.background_gradient || '');
+      setAnimationStyle(s.animation_style || 'subtle');
+      setCardStyle(s.card_style || 'glass');
+      
+      // Banner
+      setBannerEnabled(s.banner_enabled || false);
+      setBannerText(s.banner_text || '');
+      setBannerLink(s.banner_link || '');
+      setBannerColor(s.banner_color || '45 90% 50%');
+      
+      // Layout
       setShowHowItWorks(s.show_how_it_works ?? true);
       setShowStreamEmbed(s.show_stream_embed ?? true);
       setCustomCss(s.custom_css || '');
+      
+      // Social
       setTwitchUrl(s.twitch_url || '');
       setYoutubeUrl(s.youtube_url || '');
       setTiktokUrl(s.tiktok_url || '');
       setInstagramUrl(s.instagram_url || '');
       setTwitterUrl(s.twitter_url || '');
+      
+      // Language
+      setPageLanguage(s.page_language || 'de');
       
       setIsLoading(false);
     };
@@ -108,40 +186,105 @@ const StreamerSettings = () => {
     fetchStreamer();
   }, [user, authLoading, navigate]);
 
+  const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
+    if (!streamer || oldValue === newValue) return;
+    
+    try {
+      await supabase
+        .from('streamer_content_changes')
+        .insert({
+          streamer_id: streamer.id,
+          field_name: fieldName,
+          old_value: oldValue,
+          new_value: newValue,
+        });
+    } catch (e) {
+      console.log('Failed to log content change:', e);
+    }
+  };
+
   const handleSave = async () => {
     if (!streamer) return;
 
     setIsSaving(true);
 
+    // Log text content changes for admin review
+    if (heroTitle !== streamer.hero_title) {
+      await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
+    }
+    if (heroSubtitle !== streamer.hero_subtitle) {
+      await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
+    }
+    if (welcomeMessage !== streamer.welcome_message) {
+      await logContentChange('welcome_message', streamer.welcome_message || '', welcomeMessage);
+    }
+    if (bannerText !== streamer.banner_text) {
+      await logContentChange('banner_text', streamer.banner_text || '', bannerText);
+    }
+
     try {
       const { error } = await supabase
         .from('streamers')
         .update({
+          // Profile
           display_name: displayName,
           bio: bio || null,
           avatar_url: avatarUrl || null,
           banner_url: bannerUrl || null,
+          
+          // Content
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
           welcome_message: welcomeMessage || null,
-          primary_color: primaryColor || '142 76% 36%',
-          accent_color: accentColor || '142 76% 36%',
+          
+          // Design
+          primary_color: primaryColor || '45 90% 50%',
+          accent_color: accentColor || '45 90% 50%',
+          font_family: fontFamily,
+          button_style: buttonStyle,
+          background_type: backgroundType,
+          background_image_url: backgroundImageUrl || null,
+          background_gradient: backgroundGradient || null,
+          animation_style: animationStyle,
+          card_style: cardStyle,
+          
+          // Banner
+          banner_enabled: bannerEnabled,
+          banner_text: bannerText || null,
+          banner_link: bannerLink || null,
+          banner_color: bannerColor,
+          
+          // Layout
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
+          
+          // Social
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
           instagram_url: instagramUrl || null,
           twitter_url: twitterUrl || null,
+          
+          // Language
+          page_language: pageLanguage,
         })
         .eq('id', streamer.id);
 
       if (error) throw error;
 
+      // Update local streamer state with new values
+      setStreamer({
+        ...streamer,
+        hero_title: heroTitle,
+        hero_subtitle: heroSubtitle,
+        welcome_message: welcomeMessage,
+        banner_text: bannerText,
+      });
+
       toast({
         title: "Settings saved! ✨",
-        description: "Your profile has been updated.",
+        description: "Your profile has been updated. Changes are live now.",
       });
     } catch (error) {
       console.error('Save error:', error);
@@ -167,24 +310,35 @@ const StreamerSettings = () => {
     return null;
   }
 
+  const tabs = [
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'content', label: 'Content', icon: FileText },
+    { id: 'form', label: 'Form', icon: Layout },
+    { id: 'design', label: 'Design', icon: Palette },
+    { id: 'banner', label: 'Banner', icon: Flag },
+    { id: 'pricing', label: 'Pricing', icon: DollarSign },
+    { id: 'language', label: 'Language', icon: Globe },
+    { id: 'social', label: 'Social', icon: LinkIcon },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <main className="pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Settings className="w-8 h-8 text-primary" />
                 <div>
-                  <h1 className="text-3xl font-display font-bold">Streamer Settings</h1>
+                  <h1 className="text-3xl font-display font-bold">Customize Your Page</h1>
                   <p className="text-muted-foreground">
-                    Customize your profile at <span className="text-primary">/{streamer.slug}</span>
+                    <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
                   </p>
                 </div>
               </div>
@@ -207,25 +361,21 @@ const StreamerSettings = () => {
             </div>
           </motion.div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="glass p-1 rounded-xl">
-              <TabsTrigger value="profile" className="rounded-lg px-6 gap-2">
-                <User className="w-4 h-4" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="rounded-lg px-6 gap-2">
-                <Palette className="w-4 h-4" />
-                Appearance
-              </TabsTrigger>
-              <TabsTrigger value="layout" className="rounded-lg px-6 gap-2">
-                <Layout className="w-4 h-4" />
-                Layout
-              </TabsTrigger>
-              <TabsTrigger value="social" className="rounded-lg px-6 gap-2">
-                <LinkIcon className="w-4 h-4" />
-                Social
-              </TabsTrigger>
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <ScrollArea className="w-full">
+              <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
+                {tabs.map((tab) => (
+                  <TabsTrigger 
+                    key={tab.id}
+                    value={tab.id} 
+                    className="rounded-lg px-4 gap-2 whitespace-nowrap"
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
@@ -244,7 +394,7 @@ const StreamerSettings = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Profile URL</Label>
-                    <div className="flex items-center h-10 px-3 bg-muted rounded-md text-muted-foreground text-sm">
+                    <div className="flex items-center h-12 px-4 bg-muted rounded-lg text-muted-foreground">
                       upstar.gg/{streamer.slug}
                     </div>
                   </div>
@@ -268,8 +418,8 @@ const StreamerSettings = () => {
                   Images
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
                     <Label htmlFor="avatarUrl">Avatar URL</Label>
                     <Input
                       id="avatarUrl"
@@ -278,10 +428,10 @@ const StreamerSettings = () => {
                       placeholder="https://..."
                     />
                     {avatarUrl && (
-                      <img src={avatarUrl} alt="Avatar preview" className="w-16 h-16 rounded-full object-cover" />
+                      <img src={avatarUrl} alt="Avatar preview" className="w-20 h-20 rounded-full object-cover border-2 border-border" />
                     )}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label htmlFor="bannerUrl">Banner URL</Label>
                     <Input
                       id="bannerUrl"
@@ -290,17 +440,20 @@ const StreamerSettings = () => {
                       placeholder="https://..."
                     />
                     {bannerUrl && (
-                      <img src={bannerUrl} alt="Banner preview" className="w-full h-20 rounded-lg object-cover" />
+                      <img src={bannerUrl} alt="Banner preview" className="w-full h-24 rounded-lg object-cover border border-border" />
                     )}
                   </div>
                 </div>
               </div>
             </TabsContent>
 
-            {/* Appearance Tab */}
-            <TabsContent value="appearance" className="space-y-6">
+            {/* Content Tab */}
+            <TabsContent value="content" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                <h2 className="font-semibold text-lg">Hero Section</h2>
+                <h2 className="font-semibold text-lg">Hero Section Text</h2>
+                <p className="text-sm text-muted-foreground">
+                  These texts appear prominently on your page. Changes go live immediately but are logged for admin review.
+                </p>
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -334,51 +487,6 @@ const StreamerSettings = () => {
                 </div>
               </div>
 
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                <h2 className="font-semibold text-lg">Colors (HSL format)</h2>
-                <p className="text-sm text-muted-foreground">
-                  Enter colors in HSL format, e.g., "142 76% 36%" for green
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primary Color</Label>
-                    <Input
-                      id="primaryColor"
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
-                      placeholder="142 76% 36%"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="accentColor">Accent Color</Label>
-                    <Input
-                      id="accentColor"
-                      value={accentColor}
-                      onChange={(e) => setAccentColor(e.target.value)}
-                      placeholder="142 76% 36%"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                <h2 className="font-semibold text-lg">Custom CSS (Advanced)</h2>
-                <p className="text-sm text-muted-foreground">
-                  Add custom CSS to further customize your page
-                </p>
-                <Textarea
-                  value={customCss}
-                  onChange={(e) => setCustomCss(e.target.value)}
-                  placeholder=".my-class { color: red; }"
-                  rows={6}
-                  className="font-mono text-sm"
-                />
-              </div>
-            </TabsContent>
-
-            {/* Layout Tab */}
-            <TabsContent value="layout" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
                 <h2 className="font-semibold text-lg">Page Sections</h2>
                 
@@ -410,6 +518,88 @@ const StreamerSettings = () => {
                   </div>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Form Builder Tab */}
+            <TabsContent value="form" className="space-y-6">
+              <FormFieldBuilder streamerId={streamer.id} />
+            </TabsContent>
+
+            {/* Design Tab */}
+            <TabsContent value="design" className="space-y-6">
+              <DesignCustomizer
+                settings={{
+                  primaryColor,
+                  accentColor,
+                  fontFamily,
+                  buttonStyle,
+                  backgroundType,
+                  backgroundImageUrl,
+                  backgroundGradient,
+                  animationStyle,
+                  cardStyle,
+                }}
+                onChange={(updates) => {
+                  if (updates.primaryColor !== undefined) setPrimaryColor(updates.primaryColor);
+                  if (updates.accentColor !== undefined) setAccentColor(updates.accentColor);
+                  if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily);
+                  if (updates.buttonStyle !== undefined) setButtonStyle(updates.buttonStyle);
+                  if (updates.backgroundType !== undefined) setBackgroundType(updates.backgroundType);
+                  if (updates.backgroundImageUrl !== undefined) setBackgroundImageUrl(updates.backgroundImageUrl);
+                  if (updates.backgroundGradient !== undefined) setBackgroundGradient(updates.backgroundGradient);
+                  if (updates.animationStyle !== undefined) setAnimationStyle(updates.animationStyle);
+                  if (updates.cardStyle !== undefined) setCardStyle(updates.cardStyle);
+                }}
+              />
+              
+              {/* Custom CSS */}
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  Custom CSS (Advanced)
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Add custom CSS to further customize your page
+                </p>
+                <Textarea
+                  value={customCss}
+                  onChange={(e) => setCustomCss(e.target.value)}
+                  placeholder=".my-class { color: red; }"
+                  rows={6}
+                  className="font-mono text-sm"
+                />
+              </div>
+            </TabsContent>
+
+            {/* Banner Tab */}
+            <TabsContent value="banner" className="space-y-6">
+              <BannerEditor
+                settings={{
+                  bannerEnabled,
+                  bannerText,
+                  bannerLink,
+                  bannerColor,
+                }}
+                onChange={(updates) => {
+                  if (updates.bannerEnabled !== undefined) setBannerEnabled(updates.bannerEnabled);
+                  if (updates.bannerText !== undefined) setBannerText(updates.bannerText);
+                  if (updates.bannerLink !== undefined) setBannerLink(updates.bannerLink);
+                  if (updates.bannerColor !== undefined) setBannerColor(updates.bannerColor);
+                }}
+              />
+            </TabsContent>
+
+            {/* Pricing Tab */}
+            <TabsContent value="pricing" className="space-y-6">
+              <PricingSettings streamerId={streamer.id} />
+            </TabsContent>
+
+            {/* Language Tab */}
+            <TabsContent value="language" className="space-y-6">
+              <LanguageSettings
+                language={pageLanguage}
+                onChange={setPageLanguage}
+              />
             </TabsContent>
 
             {/* Social Tab */}
@@ -462,12 +652,12 @@ const StreamerSettings = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="twitterUrl">Twitter/X</Label>
+                    <Label htmlFor="twitterUrl">Twitter / X</Label>
                     <Input
                       id="twitterUrl"
                       value={twitterUrl}
                       onChange={(e) => setTwitterUrl(e.target.value)}
-                      placeholder="https://twitter.com/..."
+                      placeholder="https://x.com/..."
                     />
                   </div>
                 </div>

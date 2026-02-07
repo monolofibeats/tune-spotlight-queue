@@ -505,30 +505,143 @@ export type Database = {
         }
         Relationships: []
       }
+      streamer_content_changes: {
+        Row: {
+          created_at: string
+          field_name: string
+          id: string
+          is_reviewed: boolean | null
+          new_value: string | null
+          old_value: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          streamer_id: string
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          id?: string
+          is_reviewed?: boolean | null
+          new_value?: string | null
+          old_value?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          streamer_id: string
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          id?: string
+          is_reviewed?: boolean | null
+          new_value?: string | null
+          old_value?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          streamer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_content_changes_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streamer_form_fields: {
+        Row: {
+          created_at: string
+          field_label: string
+          field_name: string
+          field_order: number | null
+          field_type: string
+          id: string
+          is_enabled: boolean | null
+          is_required: boolean | null
+          options: Json | null
+          placeholder: string | null
+          streamer_id: string
+          updated_at: string
+          validation_regex: string | null
+        }
+        Insert: {
+          created_at?: string
+          field_label: string
+          field_name: string
+          field_order?: number | null
+          field_type?: string
+          id?: string
+          is_enabled?: boolean | null
+          is_required?: boolean | null
+          options?: Json | null
+          placeholder?: string | null
+          streamer_id: string
+          updated_at?: string
+          validation_regex?: string | null
+        }
+        Update: {
+          created_at?: string
+          field_label?: string
+          field_name?: string
+          field_order?: number | null
+          field_type?: string
+          id?: string
+          is_enabled?: boolean | null
+          is_required?: boolean | null
+          options?: Json | null
+          placeholder?: string | null
+          streamer_id?: string
+          updated_at?: string
+          validation_regex?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_form_fields_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streamers: {
         Row: {
           accent_color: string | null
+          animation_style: string | null
           application_message: string | null
           approved_at: string | null
           avatar_url: string | null
+          background_gradient: string | null
+          background_image_url: string | null
           background_style: string | null
+          background_type: string | null
+          banner_color: string | null
+          banner_enabled: boolean | null
+          banner_link: string | null
+          banner_text: string | null
           banner_url: string | null
           bio: string | null
+          button_style: string | null
+          card_style: string | null
           created_at: string
           custom_css: string | null
           display_name: string
           email: string
+          font_family: string | null
           hero_subtitle: string | null
           hero_title: string | null
           id: string
           instagram_url: string | null
           is_live: boolean | null
+          page_language: string | null
           primary_color: string | null
           rejection_reason: string | null
           show_how_it_works: boolean | null
           show_stream_embed: boolean | null
           slug: string
           status: Database["public"]["Enums"]["streamer_status"]
+          submission_type: string | null
           tiktok_url: string | null
           twitch_url: string | null
           twitter_url: string | null
@@ -539,27 +652,40 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          animation_style?: string | null
           application_message?: string | null
           approved_at?: string | null
           avatar_url?: string | null
+          background_gradient?: string | null
+          background_image_url?: string | null
           background_style?: string | null
+          background_type?: string | null
+          banner_color?: string | null
+          banner_enabled?: boolean | null
+          banner_link?: string | null
+          banner_text?: string | null
           banner_url?: string | null
           bio?: string | null
+          button_style?: string | null
+          card_style?: string | null
           created_at?: string
           custom_css?: string | null
           display_name: string
           email: string
+          font_family?: string | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
           instagram_url?: string | null
           is_live?: boolean | null
+          page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
           show_stream_embed?: boolean | null
           slug: string
           status?: Database["public"]["Enums"]["streamer_status"]
+          submission_type?: string | null
           tiktok_url?: string | null
           twitch_url?: string | null
           twitter_url?: string | null
@@ -570,27 +696,40 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          animation_style?: string | null
           application_message?: string | null
           approved_at?: string | null
           avatar_url?: string | null
+          background_gradient?: string | null
+          background_image_url?: string | null
           background_style?: string | null
+          background_type?: string | null
+          banner_color?: string | null
+          banner_enabled?: boolean | null
+          banner_link?: string | null
+          banner_text?: string | null
           banner_url?: string | null
           bio?: string | null
+          button_style?: string | null
+          card_style?: string | null
           created_at?: string
           custom_css?: string | null
           display_name?: string
           email?: string
+          font_family?: string | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
           instagram_url?: string | null
           is_live?: boolean | null
+          page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
           show_stream_embed?: boolean | null
           slug?: string
           status?: Database["public"]["Enums"]["streamer_status"]
+          submission_type?: string | null
           tiktok_url?: string | null
           twitch_url?: string | null
           twitter_url?: string | null
