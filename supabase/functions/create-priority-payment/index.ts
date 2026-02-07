@@ -38,9 +38,10 @@ serve(async (req) => {
       platform,
       audioFileUrl,
       streamerId,
+      streamerSlug, // New: slug for redirect URL
     } = await req.json();
 
-    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId });
+    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug });
 
     // Fetch minimum amount from pricing_config
     const { data: pricingConfig } = await supabase
@@ -57,6 +58,11 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    // Build the redirect URL - go back to streamer page if slug provided, else root
+    const origin = req.headers.get("origin") || "";
+    const successPath = streamerSlug ? `/${streamerSlug}/submit` : "/";
+    const cancelPath = streamerSlug ? `/${streamerSlug}/submit` : "/";
 
     // Create a checkout session with custom amount using price_data
     const session = await stripe.checkout.sessions.create({
@@ -75,8 +81,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/?payment=cancelled`,
+      success_url: `${origin}${successPath}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}${cancelPath}?payment=cancelled`,
       metadata: {
         song_url: songUrl,
         artist_name: artistName,
@@ -86,6 +92,7 @@ serve(async (req) => {
         platform: platform,
         amount_paid: amount.toString(),
         streamer_id: streamerId || "",
+        streamer_slug: streamerSlug || "",
         // Store both keys to be resilient against older/newer verifiers
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",

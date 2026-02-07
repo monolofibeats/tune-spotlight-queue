@@ -34,6 +34,7 @@ interface SpotBiddingDialogProps {
   platform: string;
   audioFileUrl?: string | null; // Pre-uploaded audio file path
   streamerId?: string | null; // Streamer context for marketplace
+  streamerSlug?: string | null; // Streamer slug for redirect after payment
   onSuccess?: () => void;
 }
 
@@ -51,6 +52,7 @@ export function SpotBiddingDialog({
   platform,
   audioFileUrl,
   streamerId,
+  streamerSlug,
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
@@ -230,6 +232,7 @@ export function SpotBiddingDialog({
           targetSpot: spotPosition,
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
+          streamerSlug: streamerSlug || null,
         },
       });
 
