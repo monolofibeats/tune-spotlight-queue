@@ -174,16 +174,7 @@ export function SpotBiddingDialog({
     const spot = spots.find(s => s.position === spotPosition);
     if (!spot) return;
 
-    // Validate email for non-logged in users
-    if (!user && !email) {
-      toast({
-        title: 'Email required',
-        description: 'Please enter your email address',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+    // Email is optional - Stripe will collect it during checkout if not provided
     setSelectedSpot(spotPosition);
     setIsProcessing(true);
 
