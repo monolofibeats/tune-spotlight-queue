@@ -10,7 +10,6 @@ export function PerformanceToggle() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        {/* Hidden on mobile (< md), visible on tablet and up */}
         <button
           onClick={toggleMode}
           className="hidden md:relative md:inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
