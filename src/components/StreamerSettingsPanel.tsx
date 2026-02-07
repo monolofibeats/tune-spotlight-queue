@@ -30,6 +30,7 @@ import {
   PricingSettings,
   LanguageSettings 
 } from '@/components/streamer-settings';
+import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
@@ -185,7 +186,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('streamers')
         .update({
           // Profile
@@ -231,21 +232,16 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           // Language
           page_language: pageLanguage,
         })
-        .eq('id', streamer.id);
+        .eq('id', streamer.id)
+        .select('*')
+        .single();
 
       if (error) throw error;
 
-      // Update local streamer state with new values
-      const updatedStreamer = {
-        ...streamer,
-        display_name: displayName,
-        hero_title: heroTitle,
-        hero_subtitle: heroSubtitle,
-        welcome_message: welcomeMessage,
-        banner_text: bannerText,
-      };
-      setStreamer(updatedStreamer);
-      onUpdate(updatedStreamer);
+      if (data) {
+        setStreamer(data as ExtendedStreamer);
+        onUpdate(data as Streamer);
+      }
 
       toast({
         title: "Settings saved! ✨",
@@ -290,7 +286,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+            <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <Eye className="w-4 h-4" />
               Preview
             </a>
@@ -365,28 +361,20 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <Label htmlFor="avatarUrl">Avatar URL</Label>
-                <Input
-                  id="avatarUrl"
+                <ImageUploadInput
+                  streamerId={streamer.id}
+                  variant="avatar"
                   value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://..."
+                  onChange={setAvatarUrl}
                 />
-                {avatarUrl && (
-                  <img src={avatarUrl} alt="Avatar preview" className="w-20 h-20 rounded-full object-cover border-2 border-border" />
-                )}
               </div>
               <div className="space-y-3">
-                <Label htmlFor="bannerUrl">Banner URL</Label>
-                <Input
-                  id="bannerUrl"
+                <ImageUploadInput
+                  streamerId={streamer.id}
+                  variant="banner"
                   value={bannerUrl}
-                  onChange={(e) => setBannerUrl(e.target.value)}
-                  placeholder="https://..."
+                  onChange={setBannerUrl}
                 />
-                {bannerUrl && (
-                  <img src={bannerUrl} alt="Banner preview" className="w-full h-24 rounded-lg object-cover border border-border" />
-                )}
               </div>
             </div>
           </div>

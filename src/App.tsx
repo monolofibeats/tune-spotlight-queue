@@ -13,6 +13,7 @@ import { PerformancePrompt } from "@/components/PerformancePrompt";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import Discovery from "./pages/Discovery";
 import StreamerPage from "./pages/StreamerPage";
+import StreamerProfilePage from "./pages/StreamerProfilePage";
 import StreamerSettings from "./pages/StreamerSettings";
 import StreamerDashboard from "./pages/StreamerDashboard";
 import Dashboard from "./pages/Dashboard";
@@ -84,8 +85,9 @@ const App = () => (
                           </ProtectedRoute>
                         }
                       />
-                      {/* Streamer page - must be after all other routes */}
-                      <Route path="/:slug" element={<StreamerPage />} />
+                      {/* Streamer pages - must be after all other routes */}
+                      <Route path="/:slug/submit" element={<StreamerPage />} />
+                      <Route path="/:slug" element={<StreamerProfilePage />} />
                       {/* 404 catch-all */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

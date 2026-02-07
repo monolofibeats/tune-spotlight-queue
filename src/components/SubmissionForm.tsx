@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useStreamerFormFields } from '@/hooks/useStreamerFormFields';
 import { parseUrlMetadata, parseFilename } from '@/lib/songMetadataParser';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -52,7 +53,54 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     isActive: submissionPaid,
   } = usePricingConfig('submission');
   const { isActive: submissionsOpen } = usePricingConfig('submissions_open');
-  
+
+  const { fields: streamerFormFields } = useStreamerFormFields(streamerId);
+
+  const fieldConfig = useMemo(() => {
+    const map = new Map<
+      string,
+      { label?: string; placeholder?: string; enabled: boolean; required: boolean }
+    >();
+
+    for (const f of streamerFormFields) {
+      map.set(f.field_name, {
+        label: f.field_label || undefined,
+        placeholder: f.placeholder || undefined,
+        enabled: f.is_enabled ?? true,
+        required: f.is_required ?? false,
+      });
+    }
+
+    return map;
+  }, [streamerFormFields]);
+
+  const getEnabled = (name: string, fallback: boolean) => fieldConfig.get(name)?.enabled ?? fallback;
+  const getRequired = (name: string, fallback: boolean) => fieldConfig.get(name)?.required ?? fallback;
+  const getLabel = (name: string, fallback: string) => fieldConfig.get(name)?.label || fallback;
+  const getPlaceholder = (name: string, fallback: string) => fieldConfig.get(name)?.placeholder || fallback;
+
+  const showSongUrl = getEnabled('song_url', true);
+  const showArtist = getEnabled('artist_name', true);
+  const showTitle = getEnabled('song_title', true);
+  const showEmail = getEnabled('email', true);
+  const showMessage = getEnabled('message', true);
+
+  const requireArtist = showArtist && getRequired('artist_name', true);
+  const requireTitle = showTitle && getRequired('song_title', true);
+  const requireEmail = showEmail && getRequired('email', false);
+  const requireMessage = showMessage && getRequired('message', false);
+
+  const songUrlLabel = getLabel('song_url', t('submission.linkLabel'));
+  const songUrlPlaceholder = getPlaceholder('song_url', t('submission.linkPlaceholder'));
+  const artistLabel = getLabel('artist_name', t('submission.artistLabel'));
+  const artistPlaceholder = getPlaceholder('artist_name', t('submission.artistPlaceholder'));
+  const titleLabel = getLabel('song_title', t('submission.titleLabel'));
+  const titlePlaceholder = getPlaceholder('song_title', t('submission.titlePlaceholder'));
+  const emailLabel = getLabel('email', t('submission.emailLabel'));
+  const emailPlaceholder = getPlaceholder('email', t('submission.emailPlaceholder'));
+  const messageLabel = getLabel('message', t('submission.messageLabel'));
+  const messagePlaceholder = getPlaceholder('message', t('submission.messagePlaceholder'));
+
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
   const [songTitle, setSongTitle] = useState('');
@@ -68,6 +116,12 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!showSongUrl && songUrl) {
+      setSongUrl('');
+    }
+  }, [showSongUrl, songUrl]);
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
@@ -96,15 +150,26 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
     }
   };
 
+  const isStepEnabled = (fieldStep: number) => {
+    if (fieldStep === 0) return showSongUrl;
+    if (fieldStep === 2) return showArtist;
+    if (fieldStep === 3) return showTitle;
+    return true; // file upload step always exists
+  };
+
   // Determine which field is the "next" one to fill (for progressive glow)
-  // Order: 0=link/file, 1=file (if no link), 2=artistName, 3=songTitle
+  // Order: 0=link, 1=file, 2=artistName, 3=songTitle
   const getFieldCompletionStep = (): number => {
-    const hasLinkOrFile = songUrl.trim() || audioFile;
-    if (!hasLinkOrFile) return 0; // Focus on link
-    if (!songUrl.trim() && !audioFile) return 1; // Focus on file upload
-    if (!artistName.trim()) return 2; // Focus on artist name
-    if (!songTitle.trim()) return 3; // Focus on song title
-    return 4; // All done
+    const hasLinkOrFile = (showSongUrl && songUrl.trim()) || audioFile;
+
+    if (!hasLinkOrFile) {
+      return showSongUrl ? 0 : 1;
+    }
+
+    if (showArtist && !artistName.trim()) return 2;
+    if (showTitle && !songTitle.trim()) return 3;
+
+    return 4;
   };
 
   const currentStep = getFieldCompletionStep();
@@ -114,6 +179,8 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
   // Check if a specific field is completed
   const isFieldCompleted = (fieldStep: number): boolean => {
+    if (!isStepEnabled(fieldStep)) return false;
+
     return (fieldStep === 0 && songUrl.trim() !== '') || 
       (fieldStep === 1 && audioFile !== null) ||
       (fieldStep === 2 && artistName.trim() !== '') ||
@@ -123,19 +190,21 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
   // Track when fields become completed to show tick only once
   useEffect(() => {
     [0, 1, 2, 3].forEach((step) => {
+      if (!isStepEnabled(step)) return;
+
       const completed = isFieldCompleted(step);
       if (completed && !shownTicks.has(step)) {
-        setShownTicks(prev => new Set(prev).add(step));
+        setShownTicks((prev) => new Set(prev).add(step));
       } else if (!completed && shownTicks.has(step)) {
         // Remove from set if field is cleared
-        setShownTicks(prev => {
+        setShownTicks((prev) => {
           const newSet = new Set(prev);
           newSet.delete(step);
           return newSet;
         });
       }
     });
-  }, [songUrl, audioFile, artistName, songTitle]);
+  }, [songUrl, audioFile, artistName, songTitle, showSongUrl, showArtist, showTitle, shownTicks]);
 
   // Get glow class for a field based on whether it's the next one to fill
   const getFieldGlowClass = (fieldStep: number): string => {
@@ -159,6 +228,8 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
   // Completion tick component - only animates when first added to shownTicks
   const CompletionTick = ({ fieldStep }: { fieldStep: number }) => {
+    if (!isStepEnabled(fieldStep)) return null;
+
     const isCompleted = isFieldCompleted(fieldStep);
     const hasBeenShown = shownTicks.has(fieldStep);
     
@@ -402,21 +473,32 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
 
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
-    // Artist name and song title are required
-    if (!artistName.trim() || !songTitle.trim()) {
+    // Required fields
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter both artist name and song title.",
+        description: "Please fill out the required fields.",
         variant: "destructive",
       });
       return;
     }
-    
-    // Either song URL or audio file is required
-    if (!songUrl && !audioFile) {
+
+    if ((requireEmail && !email.trim()) || (requireMessage && !message.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link or upload an audio file.",
+        description: "Please fill out the required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Either song URL or audio file is required (depending on config)
+    if ((showSongUrl && !songUrl && !audioFile) || (!showSongUrl && !audioFile)) {
+      toast({
+        title: "Missing information",
+        description: showSongUrl
+          ? "Please enter a song link or upload an audio file."
+          : "Please upload an audio file.",
         variant: "destructive",
       });
       return;
@@ -499,21 +581,32 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Artist name and song title are required
-    if (!artistName.trim() || !songTitle.trim()) {
+    // Required fields
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter both artist name and song title.",
+        description: "Please fill out the required fields.",
         variant: "destructive",
       });
       return;
     }
-    
-    // Either song URL or audio file is required
-    if (!songUrl && !audioFile) {
+
+    if ((requireEmail && !email.trim()) || (requireMessage && !message.trim())) {
       toast({
         title: "Missing information",
-        description: "Please enter a song link or upload an audio file.",
+        description: "Please fill out the required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Either song URL or audio file is required (depending on config)
+    if ((showSongUrl && !songUrl && !audioFile) || (!showSongUrl && !audioFile)) {
+      toast({
+        title: "Missing information",
+        description: showSongUrl
+          ? "Please enter a song link or upload an audio file."
+          : "Please upload an audio file.",
         variant: "destructive",
       });
       return;
@@ -638,82 +731,90 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
               {/* Input method toggle hint */}
               {!songUrl && !audioFile && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Provide a music link <span className="font-semibold">or</span> upload an audio file
+                  {showSongUrl ? (
+                    <>
+                      Provide a music link <span className="font-semibold">or</span> upload an audio file
+                    </>
+                  ) : (
+                    <>Upload an audio file</>
+                  )}
                 </p>
               )}
 
-              {/* Step 1: Music Link - stays mounted (so glow rhythm stays globally in sync) */}
-              <motion.div
-                initial={false}
-                animate={
-                  audioFile
-                    ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
-                    : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
-                }
-                transition={{ duration: 0.2 }}
-                style={{ overflow: 'hidden' }}
-                aria-hidden={!!audioFile}
-              >
-                <div className={`relative ${getFieldGlowClass(0)}`}>
-                  <CompletionTick fieldStep={0} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.linkLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.linkPlaceholder')}
-                    value={songUrl}
-                    onChange={(e) => {
-                      const url = e.target.value;
-                      setSongUrl(url);
+              {/* Step 1: Music Link */}
+              {showSongUrl && (
+                <motion.div
+                  initial={false}
+                  animate={
+                    audioFile
+                      ? { opacity: 0, height: 0, marginTop: 0, pointerEvents: 'none' }
+                      : { opacity: 1, height: 'auto', marginTop: 0, pointerEvents: 'auto' }
+                  }
+                  transition={{ duration: 0.2 }}
+                  style={{ overflow: 'hidden' }}
+                  aria-hidden={!!audioFile}
+                >
+                  <div className={`relative ${getFieldGlowClass(0)}`}>
+                    <CompletionTick fieldStep={0} />
+                    <label className="text-xs text-muted-foreground mb-1.5 block">
+                      {songUrlLabel} {(showSongUrl ? <span className="text-destructive">*</span> : null)}
+                    </label>
+                    <Input
+                      placeholder={songUrlPlaceholder}
+                      value={songUrl}
+                      onChange={(e) => {
+                        const url = e.target.value;
+                        setSongUrl(url);
 
-                      // Non-Spotify: best-effort sync parsing
-                      if (url.includes('http') && !url.includes('spotify.com')) {
-                        const metadata = parseUrlMetadata(url);
+                        // Non-Spotify: best-effort sync parsing
+                        if (url.includes('http') && !url.includes('spotify.com')) {
+                          const metadata = parseUrlMetadata(url);
+                          if (metadata.artistName && !artistName.trim()) {
+                            setArtistName(metadata.artistName);
+                          }
+                          if (metadata.songTitle && !songTitle.trim()) {
+                            setSongTitle(metadata.songTitle);
+                          }
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const pasted = e.clipboardData.getData('text');
+                        if (!pasted || !pasted.includes('http')) return;
+
+                        // Replace whatever was in the input with the pasted URL (more reliable)
+                        e.preventDefault();
+                        setSongUrl(pasted);
+
+                        if (pasted.includes('spotify.com')) {
+                          void autofillFromSpotify(pasted);
+                          return;
+                        }
+
+                        const metadata = parseUrlMetadata(pasted);
                         if (metadata.artistName && !artistName.trim()) {
                           setArtistName(metadata.artistName);
                         }
                         if (metadata.songTitle && !songTitle.trim()) {
                           setSongTitle(metadata.songTitle);
                         }
-                      }
-                    }}
-                    onPaste={(e) => {
-                      const pasted = e.clipboardData.getData('text');
-                      if (!pasted || !pasted.includes('http')) return;
-
-                      // Replace whatever was in the input with the pasted URL (more reliable)
-                      e.preventDefault();
-                      setSongUrl(pasted);
-
-                      if (pasted.includes('spotify.com')) {
-                        void autofillFromSpotify(pasted);
-                        return;
-                      }
-
-                      const metadata = parseUrlMetadata(pasted);
-                      if (metadata.artistName && !artistName.trim()) {
-                        setArtistName(metadata.artistName);
-                      }
-                      if (metadata.songTitle && !songTitle.trim()) {
-                        setSongTitle(metadata.songTitle);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (songUrl.includes('spotify.com')) {
-                        void autofillFromSpotify(songUrl);
-                      }
-                    }}
-                    className="h-10 text-sm bg-background/50"
-                  />
-                  {platform && (
-                    <div className="mt-1.5">
-                      <Badge variant="platform" className="text-xs">
-                        {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+                      }}
+                      onBlur={() => {
+                        if (songUrl.includes('spotify.com')) {
+                          void autofillFromSpotify(songUrl);
+                        }
+                      }}
+                      className="h-10 text-sm bg-background/50"
+                    />
+                    {platform && (
+                      <div className="mt-1.5">
+                        <Badge variant="platform" className="text-xs">
+                          {platform === 'apple-music' ? 'Apple Music' : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Step 2: Audio File Upload - stays mounted (so glow rhythm stays globally in sync) */}
               <motion.div
@@ -811,58 +912,75 @@ export function SubmissionForm({ watchlistRef, streamerId }: SubmissionFormProps
                 )}
               </AnimatePresence>
 
-              {/* Step 3 & 4: Artist Name and Song Title */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className={`relative ${getFieldGlowClass(2)}`}>
-                  <CompletionTick fieldStep={2} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.artistLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.artistPlaceholder')}
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
+              {/* Artist + Title */}
+              {(showArtist || showTitle) && (
+                <div className={`grid grid-cols-1 ${showArtist && showTitle ? 'md:grid-cols-2' : ''} gap-3`}>
+                  {showArtist && (
+                    <div className={`relative ${getFieldGlowClass(2)}`}>
+                      <CompletionTick fieldStep={2} />
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {artistLabel} {requireArtist && <span className="text-destructive">*</span>}
+                      </label>
+                      <Input
+                        placeholder={artistPlaceholder}
+                        value={artistName}
+                        onChange={(e) => setArtistName(e.target.value)}
+                        className="h-10 text-sm bg-background/50"
+                        required={requireArtist}
+                      />
+                    </div>
+                  )}
+
+                  {showTitle && (
+                    <div className={`relative ${getFieldGlowClass(3)}`}>
+                      <CompletionTick fieldStep={3} />
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {titleLabel} {requireTitle && <span className="text-destructive">*</span>}
+                      </label>
+                      <Input
+                        placeholder={titlePlaceholder}
+                        value={songTitle}
+                        onChange={(e) => setSongTitle(e.target.value)}
+                        className="h-10 text-sm bg-background/50"
+                        required={requireTitle}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className={`relative ${getFieldGlowClass(3)}`}>
-                  <CompletionTick fieldStep={3} />
-                  <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {t('submission.titleLabel')} <span className="text-destructive">*</span>
-                  </label>
-                  <Input
-                    placeholder={t('submission.titlePlaceholder')}
-                    value={songTitle}
-                    onChange={(e) => setSongTitle(e.target.value)}
-                    className="h-10 text-sm bg-background/50"
-                    required
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Optional: Email */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.emailLabel')}</label>
-                <Input
-                  type="email"
-                  placeholder={t('submission.emailPlaceholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 text-sm bg-background/50"
-                />
-              </div>
+              {showEmail && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {emailLabel} {requireEmail && <span className="text-destructive">*</span>}
+                  </label>
+                  <Input
+                    type="email"
+                    placeholder={emailPlaceholder}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-10 text-sm bg-background/50"
+                    required={requireEmail}
+                  />
+                </div>
+              )}
 
               {/* Optional: Message */}
-              <div>
-                <label className="text-xs text-muted-foreground mb-1.5 block">{t('submission.messageLabel')}</label>
-                <Textarea
-                  placeholder={t('submission.messagePlaceholder')}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[80px] text-sm resize-none bg-background/50"
-                />
-              </div>
+              {showMessage && (
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block">
+                    {messageLabel} {requireMessage && <span className="text-destructive">*</span>}
+                  </label>
+                  <Textarea
+                    placeholder={messagePlaceholder}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="min-h-[80px] text-sm resize-none bg-background/50"
+                    required={requireMessage}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

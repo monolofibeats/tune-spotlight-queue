@@ -23,12 +23,29 @@ export interface Streamer {
   hero_title: string;
   hero_subtitle: string;
   welcome_message?: string;
-  
+
   // Customization - Colors (HSL format)
   primary_color: string;
   accent_color: string;
   background_style: string;
-  
+
+  // Customization - Advanced design
+  page_language?: string;
+  font_family?: string;
+  button_style?: string;
+  background_type?: string;
+  background_image_url?: string;
+  background_gradient?: string;
+  animation_style?: string;
+  card_style?: string;
+
+  // Customization - Announcement banner
+  banner_enabled?: boolean;
+  banner_text?: string;
+  banner_link?: string;
+  banner_color?: string;
+  submission_type?: string;
+
   // Customization - Layout
   show_how_it_works: boolean;
   show_stream_embed: boolean;
