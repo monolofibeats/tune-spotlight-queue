@@ -468,38 +468,46 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         {/* Design Tab */}
         <TabsContent value="design" className="space-y-6">
           <DesignCustomizer
-            primaryColor={primaryColor}
-            accentColor={accentColor}
-            fontFamily={fontFamily}
-            buttonStyle={buttonStyle}
-            backgroundType={backgroundType}
-            backgroundImageUrl={backgroundImageUrl}
-            backgroundGradient={backgroundGradient}
-            animationStyle={animationStyle}
-            cardStyle={cardStyle}
-            onPrimaryColorChange={setPrimaryColor}
-            onAccentColorChange={setAccentColor}
-            onFontFamilyChange={setFontFamily}
-            onButtonStyleChange={setButtonStyle}
-            onBackgroundTypeChange={setBackgroundType}
-            onBackgroundImageUrlChange={setBackgroundImageUrl}
-            onBackgroundGradientChange={setBackgroundGradient}
-            onAnimationStyleChange={setAnimationStyle}
-            onCardStyleChange={setCardStyle}
+            settings={{
+              primaryColor,
+              accentColor,
+              fontFamily,
+              buttonStyle,
+              backgroundType,
+              backgroundImageUrl,
+              backgroundGradient,
+              animationStyle,
+              cardStyle,
+            }}
+            onChange={(newSettings) => {
+              if (newSettings.primaryColor !== undefined) setPrimaryColor(newSettings.primaryColor);
+              if (newSettings.accentColor !== undefined) setAccentColor(newSettings.accentColor);
+              if (newSettings.fontFamily !== undefined) setFontFamily(newSettings.fontFamily);
+              if (newSettings.buttonStyle !== undefined) setButtonStyle(newSettings.buttonStyle);
+              if (newSettings.backgroundType !== undefined) setBackgroundType(newSettings.backgroundType);
+              if (newSettings.backgroundImageUrl !== undefined) setBackgroundImageUrl(newSettings.backgroundImageUrl);
+              if (newSettings.backgroundGradient !== undefined) setBackgroundGradient(newSettings.backgroundGradient);
+              if (newSettings.animationStyle !== undefined) setAnimationStyle(newSettings.animationStyle);
+              if (newSettings.cardStyle !== undefined) setCardStyle(newSettings.cardStyle);
+            }}
           />
         </TabsContent>
 
         {/* Banner Tab */}
         <TabsContent value="banner" className="space-y-6">
           <BannerEditor
-            enabled={bannerEnabled}
-            text={bannerText}
-            link={bannerLink}
-            color={bannerColor}
-            onEnabledChange={setBannerEnabled}
-            onTextChange={setBannerText}
-            onLinkChange={setBannerLink}
-            onColorChange={setBannerColor}
+            settings={{
+              bannerEnabled,
+              bannerText,
+              bannerLink,
+              bannerColor,
+            }}
+            onChange={(newSettings) => {
+              if (newSettings.bannerEnabled !== undefined) setBannerEnabled(newSettings.bannerEnabled);
+              if (newSettings.bannerText !== undefined) setBannerText(newSettings.bannerText);
+              if (newSettings.bannerLink !== undefined) setBannerLink(newSettings.bannerLink);
+              if (newSettings.bannerColor !== undefined) setBannerColor(newSettings.bannerColor);
+            }}
           />
         </TabsContent>
 
@@ -511,8 +519,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         {/* Language Tab */}
         <TabsContent value="language" className="space-y-6">
           <LanguageSettings
-            pageLanguage={pageLanguage}
-            onLanguageChange={setPageLanguage}
+            language={pageLanguage}
+            onChange={setPageLanguage}
           />
         </TabsContent>
 
