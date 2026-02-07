@@ -76,6 +76,11 @@ export function StreamerApplicationForm({ onSuccess }: StreamerApplicationFormPr
           desired_slug: desiredSlug.trim().toLowerCase(),
           twitch_url: twitchUrl.trim() || null,
           youtube_url: youtubeUrl.trim() || null,
+          tiktok_url: tiktokUrl.trim() || null,
+          instagram_url: instagramUrl.trim() || null,
+          spotify_url: spotifyUrl.trim() || null,
+          twitter_url: twitterUrl.trim() || null,
+          website_url: websiteUrl.trim() || null,
           application_message: applicationMessage.trim() || null,
         });
 
