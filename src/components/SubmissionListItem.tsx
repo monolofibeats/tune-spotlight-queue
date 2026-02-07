@@ -105,6 +105,7 @@ export function SubmissionListItem({
   onPlayAudio 
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
