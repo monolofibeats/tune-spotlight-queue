@@ -44,7 +44,8 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    const showShine = variant === 'secondary' || variant === 'hero';
+    // Only show shine effect for non-asChild buttons with secondary/hero variants
+    const showShine = !asChild && (variant === 'secondary' || variant === 'hero');
     
     return (
       <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
