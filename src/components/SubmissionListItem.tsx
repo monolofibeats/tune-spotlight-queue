@@ -221,20 +221,6 @@ export function SubmissionListItem({
           </p>
         </div>
 
-        {/* Quick play button - for audio files OR playable links */}
-        {onPlayAudio && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 shrink-0 text-primary hover:text-primary hover:bg-primary/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleOpenNowPlaying();
-            }}
-          >
-            <Play className="w-4 h-4" />
-          </Button>
-        )}
 
         {/* Status Badge */}
         <Badge 
