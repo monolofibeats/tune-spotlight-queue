@@ -466,11 +466,15 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     });
   };
 
+  // Store the uploaded URL directly for immediate use (avoid React state timing issues)
+  const uploadedAudioUrlRef = useRef<string | null>(null);
+
   const handleSkipTheLine = async () => {
     // Upload audio file first if present (before opening dialog)
-    if (audioFile && !uploadedAudioUrl) {
+    if (audioFile && !uploadedAudioUrl && !uploadedAudioUrlRef.current) {
       try {
         const url = await uploadAudioFile();
+        uploadedAudioUrlRef.current = url;
         setUploadedAudioUrl(url);
       } catch (error) {
         toast({
@@ -483,6 +487,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     }
     setShowPriorityDialog(true);
   };
+
+  // Sync ref with state for cases where state is set elsewhere
+  useEffect(() => {
+    uploadedAudioUrlRef.current = uploadedAudioUrl;
+  }, [uploadedAudioUrl]);
 
 
   // Handle paid submission via Stripe
