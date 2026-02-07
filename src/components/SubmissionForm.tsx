@@ -1059,7 +1059,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
         message={message}
         email={user?.email || email}
         platform={platform || 'other'}
-        audioFileUrl={uploadedAudioUrl}
+        audioFileUrl={uploadedAudioUrl || uploadedAudioUrlRef.current}
         streamerId={streamerId}
         streamerSlug={streamerSlug}
         onSuccess={() => {
