@@ -126,6 +126,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Store the uploaded URL directly for immediate use (avoid React state timing issues)
+  const uploadedAudioUrlRef = useRef<string | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
