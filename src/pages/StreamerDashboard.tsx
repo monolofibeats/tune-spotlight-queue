@@ -162,6 +162,28 @@ const StreamerDashboard = () => {
     }
   };
 
+  const handleUpdateSubmission = async (id: string, updates: {
+    song_url: string;
+    artist_name: string;
+    song_title: string;
+    message: string | null;
+    email: string | null;
+  }) => {
+    const { error } = await supabase
+      .from('submissions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update submission",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const filteredSubmissions = submissions.filter(s => {
     const matchesSearch = 
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -387,8 +409,10 @@ const StreamerDashboard = () => {
                     key={submission.id}
                     submission={submission}
                     position={index + 1}
+                    isAdmin={true}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
+                    onUpdate={handleUpdateSubmission}
                     onPlayAudio={(sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}

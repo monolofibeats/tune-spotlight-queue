@@ -16,7 +16,8 @@ import {
   FileAudio,
   Download,
   Play,
-  ExternalLink
+  ExternalLink,
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,7 @@ import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
+import { SubmissionEditForm } from '@/components/submission/SubmissionEditForm';
 
 // Check if URL is a playable embed (Spotify, SoundCloud)
 const isPlayableEmbed = (url: string) => {
@@ -80,19 +82,30 @@ const getPositionStyles = (position: number | undefined) => {
 interface SubmissionListItemProps {
   submission: Submission;
   position?: number;
+  isAdmin?: boolean;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onUpdate?: (id: string, updates: {
+    song_url: string;
+    artist_name: string;
+    song_title: string;
+    message: string | null;
+    email: string | null;
+  }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
 }
 
 export function SubmissionListItem({ 
   submission, 
   position,
+  isAdmin = false,
   onStatusChange, 
   onDelete,
+  onUpdate,
   onPlayAudio 
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -388,58 +401,88 @@ export function SubmissionListItem({
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'reviewing');
+              {/* Admin Edit Mode */}
+              {isAdmin && isEditing && onUpdate ? (
+                <SubmissionEditForm
+                  submission={submission}
+                  onSave={async (id, updates) => {
+                    await onUpdate(id, updates);
+                    setIsEditing(false);
+                    toast({
+                      title: "Saved!",
+                      description: "Submission updated successfully",
+                    });
                   }}
-                  disabled={submission.status === 'reviewing'}
-                >
-                  <Eye className="w-3 h-3" />
-                  Überprüfen
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'reviewed');
-                  }}
-                  disabled={submission.status === 'reviewed'}
-                >
-                  <CheckCircle className="w-3 h-3" />
-                  Erledigt
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange(submission.id, 'skipped');
-                  }}
-                >
-                  <XCircle className="w-3 h-3" />
-                  Überspringen
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs text-destructive hover:text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(submission.id);
-                  }}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
+                  onCancel={() => setIsEditing(false)}
+                />
+              ) : (
+                /* Actions */
+                <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                  {isAdmin && onUpdate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                      }}
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'reviewing');
+                    }}
+                    disabled={submission.status === 'reviewing'}
+                  >
+                    <Eye className="w-3 h-3" />
+                    Überprüfen
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'reviewed');
+                    }}
+                    disabled={submission.status === 'reviewed'}
+                  >
+                    <CheckCircle className="w-3 h-3" />
+                    Erledigt
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange(submission.id, 'skipped');
+                    }}
+                  >
+                    <XCircle className="w-3 h-3" />
+                    Überspringen
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(submission.id);
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
