@@ -10,6 +10,13 @@ export function ThemeWrapper({ children }: ThemeWrapperProps) {
 
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
+    
+    // Don't apply global theme if a streamer-specific theme is active
+    // StreamerThemeProvider sets data-streamer-theme="active" when applied
+    if (body.dataset.streamerTheme === "active") {
+      return;
+    }
     
     if (isLive) {
       // Active/Live theme - yellow colors, pulsing effects
