@@ -134,7 +134,17 @@ export function Header() {
               <PerformanceToggle />
             </div>
             
-            {user && !isAdmin && (
+            {/* Streamer Dashboard Link - Mobile */}
+            {isStreamer && !isAdmin && (
+              <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                  <LayoutDashboard className="w-4 h-4" />
+                  My Dashboard
+                </Button>
+              </Link>
+            )}
+            
+            {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
