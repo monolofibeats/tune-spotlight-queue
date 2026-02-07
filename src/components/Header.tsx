@@ -45,7 +45,17 @@ export function Header() {
             
             {user && <BidNotificationBell />}
             
-            {user && !isAdmin && (
+            {/* Streamer Dashboard Link */}
+            {isStreamer && !isAdmin && (
+              <Link to="/streamer/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  My Dashboard
+                </Button>
+              </Link>
+            )}
+            
+            {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
