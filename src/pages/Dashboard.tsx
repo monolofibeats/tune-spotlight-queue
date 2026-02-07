@@ -88,15 +88,13 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   
-  // Floating audio preview state
-  const [floatingPreview, setFloatingPreview] = useState<{
-    isOpen: boolean;
+  // Now Playing panel state
+  const [nowPlaying, setNowPlaying] = useState<{
     submission: Submission | null;
     audioUrl: string | null;
     isLoading: boolean;
     position: number;
   }>({
-    isOpen: false,
     submission: null,
     audioUrl: null,
     isLoading: false,
