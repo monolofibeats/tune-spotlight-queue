@@ -14,7 +14,7 @@ import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isStreamer } = useAuth();
   const { t } = useLanguage();
 
   return (
@@ -45,7 +45,17 @@ export function Header() {
             
             {user && <BidNotificationBell />}
             
-            {user && !isAdmin && (
+            {/* Streamer Dashboard Link */}
+            {isStreamer && !isAdmin && (
+              <Link to="/streamer/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  My Dashboard
+                </Button>
+              </Link>
+            )}
+            
+            {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
@@ -124,7 +134,17 @@ export function Header() {
               <PerformanceToggle />
             </div>
             
-            {user && !isAdmin && (
+            {/* Streamer Dashboard Link - Mobile */}
+            {isStreamer && !isAdmin && (
+              <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                  <LayoutDashboard className="w-4 h-4" />
+                  My Dashboard
+                </Button>
+              </Link>
+            )}
+            
+            {user && !isAdmin && !isStreamer && (
               <>
                 <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">

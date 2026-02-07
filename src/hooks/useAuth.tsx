@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isStreamer: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
 }
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   isAdmin: false,
+  isStreamer: false,
   isLoading: true,
   signOut: async () => {},
 });
@@ -22,25 +24,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isStreamer, setIsStreamer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkRoles = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+        .eq('user_id', userId);
 
       if (error) {
-        console.error('Error checking admin role:', error);
-        return false;
+        console.error('Error checking roles:', error);
+        return { isAdmin: false, isStreamer: false };
       }
-      return !!data;
+      
+      const roles = data?.map(r => r.role) || [];
+      return {
+        isAdmin: roles.includes('admin'),
+        isStreamer: roles.includes('streamer'),
+      };
     } catch (error) {
-      console.error('Error checking admin role:', error);
-      return false;
+      console.error('Error checking roles:', error);
+      return { isAdmin: false, isStreamer: false };
     }
   };
 
@@ -51,13 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Defer admin check with setTimeout to avoid deadlock
+        // Defer role check with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            checkAdminRole(session.user.id).then(setIsAdmin);
+            checkRoles(session.user.id).then(({ isAdmin, isStreamer }) => {
+              setIsAdmin(isAdmin);
+              setIsStreamer(isStreamer);
+            });
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsStreamer(false);
         }
       }
     );
@@ -68,8 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminRole(session.user.id).then((isAdminResult) => {
-          setIsAdmin(isAdminResult);
+        checkRoles(session.user.id).then(({ isAdmin, isStreamer }) => {
+          setIsAdmin(isAdmin);
+          setIsStreamer(isStreamer);
           setIsLoading(false);
         });
       } else {
@@ -85,10 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
+    setIsStreamer(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
