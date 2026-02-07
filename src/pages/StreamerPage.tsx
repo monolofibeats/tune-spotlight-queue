@@ -50,8 +50,9 @@ function StreamerPageContent() {
   const isStreamerLive = streamer.is_live || isLive;
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <Header />
+    <StreamerThemeProvider streamer={streamer}>
+      <div className="min-h-screen bg-background relative">
+        <Header />
       
       {/* Streamer Banner */}
       {streamer.banner_url && (
