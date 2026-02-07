@@ -345,7 +345,7 @@ const StreamerSettings = () => {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
-                  <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
                     <Eye className="w-4 h-4" />
                     Preview
                   </a>
