@@ -126,11 +126,13 @@ function StreamerPageContent() {
       <section className="pb-8 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <div>
-              <SubmissionForm watchlistRef={watchlistRef} streamerId={streamer.id} />
-            </div>
-            <div className="lg:sticky lg:top-20 lg:self-start">
+            {/* Watchlist Display - Shows first on mobile */}
+            <div className="order-first lg:order-last lg:sticky lg:top-20 lg:self-start">
               <WatchlistDisplay ref={watchlistRef} streamerId={streamer.id} />
+            </div>
+            {/* Submission Form - Shows second on mobile */}
+            <div className="order-last lg:order-first">
+              <SubmissionForm watchlistRef={watchlistRef} streamerId={streamer.id} />
             </div>
           </div>
         </div>
