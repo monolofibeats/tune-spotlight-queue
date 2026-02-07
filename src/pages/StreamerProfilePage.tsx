@@ -34,7 +34,7 @@ function StreamerProfilePageContent() {
   return (
     <StreamerThemeProvider streamer={streamer}>
       <div className="min-h-screen bg-background">
-      <Header />
+        <Header />
 
       {/* Banner */}
       {streamer.banner_url && (
