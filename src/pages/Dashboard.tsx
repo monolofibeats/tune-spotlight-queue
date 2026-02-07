@@ -218,6 +218,28 @@ const Dashboard = () => {
     }
   };
 
+  const handleUpdateSubmission = async (id: string, updates: {
+    song_url: string;
+    artist_name: string;
+    song_title: string;
+    message: string | null;
+    email: string | null;
+  }) => {
+    const { error } = await supabase
+      .from('submissions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update submission",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const handleCreateEvent = async () => {
     if (!newEventTitle || !newEventReward) {
       toast({
