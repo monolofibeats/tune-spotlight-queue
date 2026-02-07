@@ -992,9 +992,19 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
                 variant="hero"
                 size="lg"
                 className="w-full"
+                disabled={isUploadingFile || isSubmitting}
               >
-                <Zap className="w-4 h-4" />
-                {t('submission.skipWaitingList')}
+                {isUploadingFile ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    {t('submission.skipWaitingList')}
+                  </>
+                )}
               </Button>
             )}
           </div>
