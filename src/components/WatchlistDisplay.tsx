@@ -80,15 +80,18 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
 
     const fetchSubmissions = async () => {
       // Fetch all pending submissions - sorting will be done client-side for proper priority ordering
+      // For streamer pages: get submissions for that streamer OR global submissions (null streamer_id)
+      // For main page: get all submissions with null streamer_id
       let query = supabase
         .from('public_submissions_queue')
         .select('*')
         .eq('status', 'pending');
 
-      // Filter by streamer if provided, otherwise get global submissions (null streamer_id)
       if (streamerId) {
-        query = query.eq('streamer_id', streamerId);
+        // On streamer pages, show submissions for this streamer OR global ones
+        query = query.or(`streamer_id.eq.${streamerId},streamer_id.is.null`);
       } else {
+        // On main page, show only global submissions
         query = query.is('streamer_id', null);
       }
 
