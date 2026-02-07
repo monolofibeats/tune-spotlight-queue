@@ -117,12 +117,12 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
     };
 
     useEffect(() => {
-      if (!onlyRealtime) {
-        fetchSubmissions();
-      }
+      // Always fetch on mount
+      fetchSubmissions();
 
+      // Subscribe to realtime changes
       const channel = supabase
-        .channel('submissions_changes')
+        .channel(`submissions_changes_${streamerId || 'global'}`)
         .on(
           'postgres_changes',
           {
@@ -139,7 +139,7 @@ export const WatchlistDisplay = forwardRef<WatchlistRef, WatchlistDisplayProps>(
       return () => {
         supabase.removeChannel(channel);
       };
-    }, [onlyRealtime]);
+    }, [streamerId]);
 
     useImperativeHandle(ref, () => ({
       addNewItem: (item) => {
