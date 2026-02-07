@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
+import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
 import { WatchlistDisplay, WatchlistRef } from '@/components/WatchlistDisplay';
