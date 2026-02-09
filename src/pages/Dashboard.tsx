@@ -804,6 +804,7 @@ const Dashboard = () => {
         </div>
       </main>
 
+      <AdminChatPanel />
     </div>
   );
 };
