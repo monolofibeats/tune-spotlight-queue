@@ -436,6 +436,9 @@ const StreamerDashboard = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Private admin chat */}
+      <AdminStreamerChat streamerId={streamer.id} role="streamer" />
     </div>
   );
 };
