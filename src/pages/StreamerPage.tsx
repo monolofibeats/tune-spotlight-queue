@@ -6,6 +6,7 @@ import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
+import { SubmissionTracker } from '@/components/SubmissionTracker';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -14,6 +15,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
 function StreamerPageContent() {
   const { streamer, isLoading, error } = useStreamer();
