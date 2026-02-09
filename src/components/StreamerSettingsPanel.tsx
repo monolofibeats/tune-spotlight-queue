@@ -320,6 +320,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           </TabsList>
         </ScrollArea>
 
+        {/* Presets Tab */}
+        <TabsContent value="presets" className="space-y-6">
+          <PresetManager streamerId={streamer.id} />
+        </TabsContent>
+
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
           <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
