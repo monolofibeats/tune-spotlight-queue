@@ -10,7 +10,8 @@ import {
   ChevronDown,
   ChevronUp,
   Mail,
-  Link as LinkIcon
+  Link as LinkIcon,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import type { StreamerApplication, StreamerStatus } from '@/types/streamer';
+
+interface SiteFeedback {
+  id: string;
+  message: string;
+  contact_info: string | null;
+  created_at: string;
+}
 
 export function AdminStreamerManager() {
   const { user } = useAuth();
