@@ -217,6 +217,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     resize();
     window.addEventListener('resize', resize);
 
+    // Transient (hit/kick/snare) detection state
+    let prevEnergy = 0;
+    let transient = 0; // 0-1 spike that decays
+
     const draw = () => {
       time += 1 / 60;
       const { width, height } = canvas.getBoundingClientRect();
@@ -235,23 +239,40 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
+      // Faster lerp on attack, slower on release for snappy feel
       if (smoothed && data) {
-        const lerpSpeed = hasAudio ? 0.06 : 0.03;
         for (let i = 0; i < smoothed.length; i++) {
           const target = hasAudio ? data[i] / 255 : 0;
+          const isRising = target > smoothed[i];
+          const lerpSpeed = hasAudio ? (isRising ? 0.35 : 0.08) : 0.03;
           smoothed[i] += (target - smoothed[i]) * lerpSpeed;
         }
       }
 
+      // Overall energy
       let rawEnergy = 0;
       if (smoothed) {
         for (let i = 0; i < smoothed.length; i++) rawEnergy += smoothed[i];
         rawEnergy /= smoothed.length;
       }
-      smoothEnergy += (rawEnergy - smoothEnergy) * 0.04;
 
-      // Audio-driven expansion (mirrors cursor influence on homepage)
-      const targetExpansion = 1 + smoothEnergy * 2.5;
+      // Faster energy tracking (attack fast, release medium)
+      const energyLerp = rawEnergy > smoothEnergy ? 0.25 : 0.06;
+      smoothEnergy += (rawEnergy - smoothEnergy) * energyLerp;
+
+      // Transient / hit detection — spike when energy jumps suddenly
+      const energyDelta = rawEnergy - prevEnergy;
+      if (energyDelta > 0.04) {
+        transient = Math.min(1, transient + energyDelta * 6);
+      }
+      transient *= 0.88; // fast decay
+      prevEnergy = rawEnergy;
+
+      // Combined reactivity = smooth energy + transient punch
+      const reactivity = smoothEnergy + transient * 0.6;
+
+      // Audio-driven expansion
+      const targetExpansion = 1 + reactivity * 3.5;
 
       // ── Draw wave lines (1:1 from SoundwaveBackgroundCanvas) ──
       ctx.save();
@@ -261,19 +282,19 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       for (let wi = 0; wi < waves.length; wi++) {
         const wave = waves[wi];
 
-        // Smooth expansion toward target
+        // Faster expansion tracking for hits
         const targetOffset = wave.baseYOffset * targetExpansion;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.08;
 
-        // Audio-reactive amplitude boost
-        const ampBoost = 1 + smoothEnergy * 3.0;
+        // Audio-reactive amplitude boost with transient punch
+        const ampBoost = 1 + reactivity * 5.0;
         const effectiveAmplitude = wave.amplitude * ampBoost;
 
         ctx.beginPath();
-        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.12);
-        ctx.lineWidth = 1.5 + smoothEnergy * 1.0;
-        ctx.shadowBlur = 10 + smoothEnergy * 10;
-        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.15);
+        ctx.strokeStyle = hsla(wave.opacity + reactivity * 0.18);
+        ctx.lineWidth = 1.5 + reactivity * 1.5;
+        ctx.shadowBlur = 10 + reactivity * 14;
+        ctx.shadowColor = hsla(wave.opacity * 0.5 + reactivity * 0.2);
 
         const pts = wave.points;
         const centerY = 0.5 + wave.currentYOffset;
