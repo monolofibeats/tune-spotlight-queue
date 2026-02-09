@@ -6,6 +6,7 @@ import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
+import { SubmissionTracker } from '@/components/SubmissionTracker';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -14,11 +15,14 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
 function StreamerPageContent() {
+  const { slug } = useParams<{ slug: string }>();
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
+  const { currentSubmission, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   if (isLoading) {
     return (
@@ -122,7 +126,11 @@ function StreamerPageContent() {
       {/* Main Content - Submission Form */}
       <section className="pb-8 px-4">
         <div className="container mx-auto max-w-xl">
-          <SubmissionForm streamerId={streamer.id} streamerSlug={streamer.slug} />
+          <SubmissionForm
+            streamerId={streamer.id}
+            streamerSlug={streamer.slug}
+            onSubmissionTracked={(sub) => trackSubmission(sub)}
+          />
         </div>
       </section>
 
@@ -152,6 +160,14 @@ function StreamerPageContent() {
             <StreamEmbed />
           </div>
         </section>
+      )}
+
+      {/* Submission Tracker - floating banner for free submissions */}
+      {currentSubmission && (
+        <SubmissionTracker
+          submission={currentSubmission}
+          onClear={() => clearSubmission(streamer.slug)}
+        />
       )}
 
       <LanguageSwitcher />

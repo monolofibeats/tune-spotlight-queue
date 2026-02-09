@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { autoCreateUserFromPayment } from "../_shared/auto-create-user.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -55,7 +56,19 @@ serve(async (req) => {
     const amountPaid = parseFloat(metadata.amount_paid || "0");
     const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 
-    logStep("Creating submission", { metadata, amountPaid });
+    // Get email from Stripe checkout
+    const stripeEmail = session.customer_details?.email || metadata.email || null;
+
+    // Auto-create user account
+    const origin = req.headers.get("origin") || "https://tune-spotlight-queue.lovable.app";
+    const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
+      stripeEmail,
+      origin,
+    );
+
+    const finalUserId = metadata.user_id || autoUserId || null;
+
+    logStep("Creating submission", { metadata, amountPaid, accountCreated });
 
     // Create submission in database using service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -70,12 +83,13 @@ serve(async (req) => {
         artist_name: metadata.artist_name || "Unknown Artist",
         song_title: metadata.song_title || "Untitled",
         message: metadata.message || null,
-        email: metadata.email || null,
+        email: stripeEmail,
         amount_paid: amountPaid,
         is_priority: true,
         status: "pending",
         audio_file_url: audioFileUrl || null,
         streamer_id: metadata.streamer_id || null,
+        user_id: finalUserId,
       })
       .select()
       .single();
@@ -87,10 +101,15 @@ serve(async (req) => {
 
     logStep("Submission created", { submissionId: submission.id });
 
+    const accountMessage = accountCreated
+      ? " We've sent you a login link to track your submission!"
+      : "";
+
     return new Response(JSON.stringify({ 
       success: true, 
       submission,
-      message: "Your priority submission has been added to the queue!"
+      message: `Your priority submission has been added to the queue!${accountMessage}`,
+      accountCreated,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

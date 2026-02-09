@@ -35,6 +35,7 @@ interface SubmissionFormProps {
   watchlistRef?: React.RefObject<WatchlistRef>;
   streamerId?: string;
   streamerSlug?: string;
+  onSubmissionTracked?: (sub: { songTitle: string; artistName: string; songUrl: string; platform: string; audioFileUrl: string | null; streamerId: string | null; streamerSlug: string | null }) => void;
 }
 
 interface FlyingCard {
@@ -45,7 +46,7 @@ interface FlyingCard {
   amount: number;
 }
 
-export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: SubmissionFormProps) {
+export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmissionTracked }: SubmissionFormProps) {
   const { user: authUser, isAdmin } = useAuth();
   const { t } = useLanguage();
   const { isActive: skipLineActive } = usePricingConfig('skip_line');
@@ -694,6 +695,17 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       
       resetForm();
 
+      // Track submission in localStorage for upsell
+      onSubmissionTracked?.({
+        songTitle: capturedSongTitle,
+        artistName: capturedArtistName,
+        songUrl: capturedSongUrl,
+        platform: capturedPlatform,
+        audioFileUrl: uploadedFileUrl,
+        streamerId: streamerId || null,
+        streamerSlug: streamerSlug || null,
+      });
+
       // Show skip the line offer after successful free submission (if feature is active)
       if (skipLineActive && !isAdmin) {
         setLastSubmittedSong({
@@ -703,11 +715,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
           message: capturedMessage,
           email: capturedEmail,
           platform: capturedPlatform,
-          audioFileUrl: uploadedFileUrl, // Use the URL from the ref AFTER upload completed
+          audioFileUrl: uploadedFileUrl,
         });
         setTimeout(() => {
           setShowPostSubmitOffer(true);
-        }, 1000); // Small delay for better UX
+        }, 1000);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
