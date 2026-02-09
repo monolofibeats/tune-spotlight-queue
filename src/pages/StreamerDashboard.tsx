@@ -292,12 +292,15 @@ const StreamerDashboard = () => {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" asChild className="gap-2">
-                <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4" />
-                  View My Page
-                </a>
-              </Button>
+              <div className="flex items-center gap-2">
+                <DashboardEditor streamerId={streamer.id} />
+                <Button variant="outline" asChild className="gap-2">
+                  <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4" />
+                    View My Page
+                  </a>
+                </Button>
+              </div>
             </div>
           </motion.div>
 
