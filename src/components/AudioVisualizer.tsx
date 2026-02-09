@@ -293,8 +293,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         ctx.beginPath();
         ctx.strokeStyle = hsla(wave.opacity + reactivity * 0.18);
         ctx.lineWidth = 1.5 + reactivity * 1.5;
-        ctx.shadowBlur = 10 + smoothEnergy * 10;
-        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.15);
+        ctx.shadowBlur = 10 + reactivity * 14;
+        ctx.shadowColor = hsla(wave.opacity * 0.5 + reactivity * 0.2);
 
         const pts = wave.points;
         const centerY = 0.5 + wave.currentYOffset;
