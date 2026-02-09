@@ -36,10 +36,10 @@ const Discovery = () => {
   const offlineStreamers = streamers.filter(s => !s.is_live);
 
   const stats = [
-    { label: t('discovery.activeStreamers'), value: streamers.length, icon: Users, isLive: false },
-    { label: t('discovery.songsReviewed'), value: 10847, icon: Music, isLive: true },
-    { label: t('discovery.liveNow'), value: liveStreamers.length, icon: Radio, isLive: false },
-    { label: t('discovery.weeklyViews'), value: '50K+', icon: TrendingUp, isLive: false },
+    { label: t('discovery.activeStreamers'), value: 0, icon: Users, isLive: false },
+    { label: t('discovery.songsReviewed'), value: 0, icon: Music, isLive: true },
+    { label: t('discovery.liveNow'), value: 0, icon: Radio, isLive: false },
+    { label: t('discovery.weeklyViews'), value: 0, icon: TrendingUp, isLive: false },
   ];
 
   const faqs = [
