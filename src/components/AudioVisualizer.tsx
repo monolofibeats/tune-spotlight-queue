@@ -102,32 +102,31 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
           isPlayingRef.current = false;
         };
 
-          const onPlay = () => startShadowPlayback();
-          const onPause = () => stopShadowPlayback();
-          const onEnded = () => stopShadowPlayback();
-          const onSeeked = () => {
-            if (!audioElement.paused) {
-              stopShadowPlayback();
-              startShadowPlayback();
-            }
-          };
-
-          audioElement.addEventListener('play', onPlay);
-          audioElement.addEventListener('pause', onPause);
-          audioElement.addEventListener('ended', onEnded);
-          audioElement.addEventListener('seeked', onSeeked);
-
-          cleanupRef.current = () => {
-            audioElement.removeEventListener('play', onPlay);
-            audioElement.removeEventListener('pause', onPause);
-            audioElement.removeEventListener('ended', onEnded);
-            audioElement.removeEventListener('seeked', onSeeked);
-            stopShadowPlayback();
-          };
-
+        const onPlay = () => startShadowPlayback();
+        const onPause = () => stopShadowPlayback();
+        const onEnded = () => stopShadowPlayback();
+        const onSeeked = () => {
           if (!audioElement.paused) {
+            stopShadowPlayback();
             startShadowPlayback();
           }
+        };
+
+        audioElement.addEventListener('play', onPlay);
+        audioElement.addEventListener('pause', onPause);
+        audioElement.addEventListener('ended', onEnded);
+        audioElement.addEventListener('seeked', onSeeked);
+
+        cleanupRef.current = () => {
+          audioElement.removeEventListener('play', onPlay);
+          audioElement.removeEventListener('pause', onPause);
+          audioElement.removeEventListener('ended', onEnded);
+          audioElement.removeEventListener('seeked', onSeeked);
+          stopShadowPlayback();
+        };
+
+        if (!audioElement.paused) {
+          startShadowPlayback();
         }
       } catch (err) {
         console.warn('AudioVisualizer: Could not set up analyser', err);
