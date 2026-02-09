@@ -496,7 +496,7 @@ const Dashboard = () => {
                 Events
               </TabsTrigger>
               <TabsTrigger value="streamers" className="rounded-lg px-6">
-                Streamers
+                Support
               </TabsTrigger>
             </TabsList>
 
