@@ -219,7 +219,11 @@ const StreamerDashboard = () => {
     }
   };
 
+  // Hide the currently playing submission from the list
   const filteredSubmissions = submissions.filter(s => {
+    // Hide submission that's currently in Now Playing
+    if (nowPlaying.submission && s.id === nowPlaying.submission.id) return false;
+    
     const matchesSearch = 
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.artist_name?.toLowerCase().includes(searchQuery.toLowerCase());
