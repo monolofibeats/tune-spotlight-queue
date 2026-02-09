@@ -216,7 +216,7 @@ const Discovery = () => {
                 }}
                 transition={{ type: "spring", stiffness: 200 }}
               >
-                <LiveCounter startValue={0} />
+                0
               </motion.div>
               <div className="text-base text-muted-foreground">{t('discovery.songsReviewed')}</div>
             </div>
