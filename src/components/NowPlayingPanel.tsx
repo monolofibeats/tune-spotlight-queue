@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -24,6 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { AudioVisualizer } from '@/components/AudioVisualizer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -115,6 +116,11 @@ export function NowPlayingPanel({
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingSpotify, setIsLoadingSpotify] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+
+  const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
+    setAudioEl(el);
+  }, []);
 
   // Fetch submitter profile stats
   useEffect(() => {
@@ -327,7 +333,11 @@ export function NowPlayingPanel({
                       <AudioPlayer
                         src={audioUrl}
                         isLoading={isLoadingAudio}
+                        onAudioElement={handleAudioElement}
                       />
+                      
+                      {/* Audio Visualizer */}
+                      <AudioVisualizer audioElement={audioEl} className="rounded-lg" />
                     </div>
                   )}
 

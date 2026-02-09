@@ -7,6 +7,7 @@ interface AudioPlayerProps {
   src: string | null;
   isLoading?: boolean;
   onEnded?: () => void;
+  onAudioElement?: (el: HTMLAudioElement | null) => void;
 }
 
 interface SeekBarProps {
@@ -234,7 +235,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
 }
 
 export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
-  ({ src, isLoading = false, onEnded }, ref) => {
+  ({ src, isLoading = false, onEnded, onAudioElement }, ref) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const pendingSeekRef = useRef<number | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -246,6 +247,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
     useEffect(() => {
       const audio = audioRef.current;
       if (!audio) return;
+
+      // Expose audio element to parent (e.g. for visualizer)
+      onAudioElement?.(audio);
 
       // Attach listeners *after* the audio element exists, and re-run when src changes.
       // Previously, the <audio> element wasn't rendered until src existed, so the effect
@@ -301,8 +305,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         audio.removeEventListener('durationchange', handleDurationChange);
         audio.removeEventListener('ended', handleEnded);
         audio.removeEventListener('error', handleError);
+        onAudioElement?.(null);
       };
-    }, [src, onEnded]);
+    }, [src, onEnded, onAudioElement]);
 
     useEffect(() => {
       if (audioRef.current) {
