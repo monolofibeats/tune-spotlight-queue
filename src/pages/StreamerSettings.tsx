@@ -310,6 +310,7 @@ const StreamerSettings = () => {
   }
 
   const tabs = [
+    { id: 'presets', label: 'Presets', icon: Palette },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'form', label: 'Form', icon: Layout },
