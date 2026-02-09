@@ -305,8 +305,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         audio.removeEventListener('durationchange', handleDurationChange);
         audio.removeEventListener('ended', handleEnded);
         audio.removeEventListener('error', handleError);
+        onAudioElement?.(null);
       };
-    }, [src, onEnded]);
+    }, [src, onEnded, onAudioElement]);
 
     useEffect(() => {
       if (audioRef.current) {
