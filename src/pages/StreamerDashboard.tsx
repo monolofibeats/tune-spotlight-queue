@@ -149,27 +149,46 @@ const StreamerDashboard = () => {
     }
   };
 
-  const handleDeleteSubmission = async (id: string) => {
+  // Soft-delete: move to "deleted" status (trash). Permanently delete only from trash.
+  const handleDeleteSubmission = async (id: string, permanent = false) => {
     const wasPlaying = nowPlaying.submission?.id === id;
+    
+    if (permanent) {
+      const { error } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', id);
+      if (error) {
+        toast({ title: "Error", description: "Failed to permanently delete", variant: "destructive" });
+      } else {
+        toast({ title: "Permanently deleted", description: "Submission removed forever" });
+      }
+    } else {
+      const { error } = await supabase
+        .from('submissions')
+        .update({ status: 'deleted' })
+        .eq('id', id);
+      if (error) {
+        toast({ title: "Error", description: "Failed to delete submission", variant: "destructive" });
+      } else {
+        toast({ title: "Moved to trash", description: "Submission will be permanently deleted in 7 days" });
+        if (wasPlaying) {
+          advanceToNext(id);
+        }
+      }
+    }
+  };
+
+  // Restore from trash
+  const handleRestoreSubmission = async (id: string) => {
     const { error } = await supabase
       .from('submissions')
-      .delete()
+      .update({ status: 'pending' })
       .eq('id', id);
-
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete submission",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to restore", variant: "destructive" });
     } else {
-      toast({
-        title: "Deleted",
-        description: "Submission removed",
-      });
-      if (wasPlaying) {
-        advanceToNext(id);
-      }
+      toast({ title: "Restored", description: "Submission moved back to pending" });
     }
   };
 
