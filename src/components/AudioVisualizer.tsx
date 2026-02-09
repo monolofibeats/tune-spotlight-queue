@@ -180,13 +180,10 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 // ── Frequency scale config ──
 const FREQ_LABELS: { freq: number; label: string; major: boolean }[] = [
   { freq: 20, label: '20', major: true },
-  { freq: 50, label: '50', major: false },
   { freq: 100, label: '100', major: true },
-  { freq: 200, label: '200', major: false },
-  { freq: 500, label: '500', major: false },
+  { freq: 500, label: '500', major: true },
   { freq: 1000, label: '1k', major: true },
-  { freq: 2000, label: '2k', major: false },
-  { freq: 5000, label: '5k', major: false },
+  { freq: 5000, label: '5k', major: true },
   { freq: 10000, label: '10k', major: true },
   { freq: 20000, label: '20k', major: true },
 ];
