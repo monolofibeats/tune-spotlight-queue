@@ -370,7 +370,7 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
     return (
       <div ref={ref} className="flex flex-col gap-3 w-full p-3 rounded-lg bg-background/50 border border-border/30">
         {/* Always render the audio element so refs + listeners work even when src arrives later */}
-        <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
+        <audio ref={audioRef} preload="metadata" />
         
         {/* Progress bar and time */}
         <div className="flex items-center gap-3">
