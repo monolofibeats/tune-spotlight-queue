@@ -1,25 +1,34 @@
 import { useEffect, useRef } from 'react';
 
 interface AudioVisualizerProps {
+  /** The audio element to visualize. We listen to its timeupdate/play/pause
+   *  but do NOT use createMediaElementSource (which hijacks audio output). 
+   *  Instead we fetch the audio URL separately and decode it for analysis. */
   audioElement: HTMLAudioElement | null;
   className?: string;
 }
 
-// We store connected elements globally to avoid creating duplicate MediaElementSourceNodes
-// (the browser throws if you call createMediaElementSource twice on the same element)
-const connectedElements = new WeakMap<HTMLAudioElement, { analyser: AnalyserNode; ctx: AudioContext }>();
-
 /**
- * A reactive audio visualizer that renders soundwave lines driven by
- * Web Audio API frequency data — styled to match the Discovery page waves.
+ * A reactive audio visualizer that renders soundwave lines.
+ * 
+ * Instead of using createMediaElementSource (which reroutes audio through
+ * Web Audio API and breaks playback with cross-origin sources), this component
+ * monitors the audio element's state and uses an AnalyserNode fed by a
+ * separately-fetched copy of the audio data.
  */
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataRef = useRef<Uint8Array | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const isPlayingRef = useRef(false);
+  const lastSrcRef = useRef<string>('');
 
-  // Connect analyser to audio element
+  // Set up a shadow audio pipeline: fetch the audio, decode it, play through an
+  // AnalyserNode with gain=0 (inaudible) so we get frequency data without
+  // touching the main <audio> element's output.
   useEffect(() => {
     if (!audioElement) {
       analyserRef.current = null;
@@ -27,47 +36,101 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       return;
     }
 
-    // Check if we already connected this element
-    const existing = connectedElements.get(audioElement);
-    if (existing) {
-      analyserRef.current = existing.analyser;
-      dataRef.current = new Uint8Array(existing.analyser.frequencyBinCount);
-      // Make sure context is running
-      if (existing.ctx.state === 'suspended') {
-        existing.ctx.resume();
+    const setupAnalyser = async () => {
+      const src = audioElement.src;
+      if (!src || src === lastSrcRef.current) return;
+      lastSrcRef.current = src;
+
+      try {
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioContext();
+        }
+        const actx = audioCtxRef.current;
+        if (actx.state === 'suspended') await actx.resume();
+
+        // Fetch the audio file
+        const response = await fetch(src);
+        if (!response.ok) return;
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+
+        const analyser = actx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.75;
+
+        // Connect: source -> analyser -> gain(0) -> destination
+        // Gain=0 means this shadow pipeline is silent
+        const gainNode = actx.createGain();
+        gainNode.gain.value = 0;
+        analyser.connect(gainNode);
+        gainNode.connect(actx.destination);
+
+        analyserRef.current = analyser;
+        dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+
+        // Store buffer for synced playback
+        const startShadowPlayback = () => {
+          // Stop previous
+          if (bufferSourceRef.current) {
+            try { bufferSourceRef.current.stop(); } catch {}
+          }
+
+          const bufferSource = actx.createBufferSource();
+          bufferSource.buffer = audioBuffer;
+          bufferSource.connect(analyser);
+          bufferSourceRef.current = bufferSource;
+
+          // Sync to audio element's current time
+          const offset = audioElement.currentTime || 0;
+          bufferSource.start(0, offset);
+          isPlayingRef.current = true;
+        };
+
+        const stopShadowPlayback = () => {
+          if (bufferSourceRef.current) {
+            try { bufferSourceRef.current.stop(); } catch {}
+            bufferSourceRef.current = null;
+          }
+          isPlayingRef.current = false;
+        };
+
+        // Sync with main audio element
+        const onPlay = () => startShadowPlayback();
+        const onPause = () => stopShadowPlayback();
+        const onEnded = () => stopShadowPlayback();
+        const onSeeked = () => {
+          if (!audioElement.paused) {
+            stopShadowPlayback();
+            startShadowPlayback();
+          }
+        };
+
+        audioElement.addEventListener('play', onPlay);
+        audioElement.addEventListener('pause', onPause);
+        audioElement.addEventListener('ended', onEnded);
+        audioElement.addEventListener('seeked', onSeeked);
+
+        // If already playing, start immediately
+        if (!audioElement.paused) {
+          startShadowPlayback();
+        }
+
+        return () => {
+          audioElement.removeEventListener('play', onPlay);
+          audioElement.removeEventListener('pause', onPause);
+          audioElement.removeEventListener('ended', onEnded);
+          audioElement.removeEventListener('seeked', onSeeked);
+          stopShadowPlayback();
+        };
+      } catch (err) {
+        console.warn('AudioVisualizer: Could not set up analyser', err);
       }
-      return;
-    }
+    };
 
-    try {
-      const actx = new AudioContext();
-
-      const analyser = actx.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.75;
-
-      const source = actx.createMediaElementSource(audioElement);
-      source.connect(analyser);
-      analyser.connect(actx.destination); // Critical: connect to destination so audio is audible
-
-      analyserRef.current = analyser;
-      dataRef.current = new Uint8Array(analyser.frequencyBinCount);
-
-      connectedElements.set(audioElement, { analyser, ctx: actx });
-
-      // Resume on user interaction if needed
-      const resumeCtx = () => {
-        if (actx.state === 'suspended') actx.resume();
-      };
-      audioElement.addEventListener('play', resumeCtx);
-
-      return () => {
-        audioElement.removeEventListener('play', resumeCtx);
-      };
-    } catch (err) {
-      console.warn('AudioVisualizer: Failed to connect analyser', err);
-    }
-  }, [audioElement]);
+    // Wait a tick for the audio element to have its src set
+    const timer = setTimeout(setupAnalyser, 200);
+    return () => clearTimeout(timer);
+  }, [audioElement, audioElement?.src]);
 
   // Animation loop
   useEffect(() => {
@@ -76,7 +139,6 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Read primary colour from CSS vars
     const cssVal = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
     const parts = cssVal.split(/\s+/);
     const h = parts[0] || '50';
@@ -107,12 +169,11 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const hh = rect.height;
       ctx.clearRect(0, 0, w, hh);
 
-      // Get frequency data
       const analyser = analyserRef.current;
       const data = dataRef.current;
       let hasAudio = false;
 
-      if (analyser && data) {
+      if (analyser && data && isPlayingRef.current) {
         analyser.getByteFrequencyData(data as Uint8Array<ArrayBuffer>);
         for (let i = 0; i < data.length; i++) {
           if (data[i] > 0) { hasAudio = true; break; }
@@ -139,11 +200,9 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
           const x = (i / (POINT_COUNT - 1)) * w;
           const normX = i / (POINT_COUNT - 1);
 
-          // Base idle wave
           const idleWave = Math.sin(normX * Math.PI * 2.5 + time * 0.8 + li * 0.4) * 8
             + Math.sin(normX * Math.PI * 5 + time * 1.2 + li * 0.6) * 4;
 
-          // Audio-reactive amplitude
           let audioAmp = 0;
           if (hasAudio && data) {
             const binIndex = Math.floor(normX * (data.length * 0.7));
@@ -151,7 +210,6 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             audioAmp = val * (hh * 0.35);
           }
 
-          // Envelope — fade edges
           const envelope = Math.sin(normX * Math.PI);
           const totalAmp = (idleWave + audioAmp * envelope) * envelope;
           const y = centerY + lineOffset + totalAmp * (hasAudio ? 1 : 0.3);
