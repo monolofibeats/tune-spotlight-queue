@@ -23,6 +23,7 @@ import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
+import { DashboardEditor, useDashboardLayout } from '@/components/DashboardEditor';
 import type { Streamer } from '@/types/streamer';
 
 interface Submission {
