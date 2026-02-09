@@ -25,6 +25,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
   const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isPlayingRef = useRef(false);
   const lastSrcRef = useRef<string>('');
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   // Set up a shadow audio pipeline: fetch the audio, decode it, play through an
   // AnalyserNode with gain=0 (inaudible) so we get frequency data without
