@@ -444,6 +444,8 @@ const StreamerDashboard = () => {
                     position={nowPlaying.position}
                     onClose={handleCloseNowPlaying}
                     onDownload={handleNowPlayingDownload}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDeleteSubmission}
                   />
                 </div>
               )}
