@@ -61,137 +61,140 @@ function createWaveLines(): WaveLine[] {
   return lines;
 }
 
-// ── Audio analyser hook — instant connection via MediaElementSource ──
+// ── Shadow audio pipeline — pre-fetches buffer immediately, no delay ──
 
 function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const freqDataRef = useRef<Uint8Array | null>(null);
   const timeDomainRef = useRef<Float32Array | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const connectedElRef = useRef<HTMLAudioElement | null>(null);
+  const bufferRef = useRef<AudioBuffer | null>(null);
+  const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const isPlayingRef = useRef(false);
+  const lastSrcRef = useRef('');
+  const cleanupRef = useRef<(() => void) | null>(null);
+  const readyRef = useRef(false);
 
   useEffect(() => {
-    if (!audioElement) return;
+    if (!audioElement) {
+      analyserRef.current = null;
+      freqDataRef.current = null;
+      timeDomainRef.current = null;
+      lastSrcRef.current = '';
+      readyRef.current = false;
+      return;
+    }
 
-    // Already connected to this element
-    if (connectedElRef.current === audioElement && analyserRef.current) return;
+    // Clean up previous listeners
+    if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
 
-    const connect = async () => {
+    const src = audioElement.src;
+    if (!src) return;
+
+    const srcChanged = src !== lastSrcRef.current;
+    lastSrcRef.current = src;
+
+    const setup = async () => {
       try {
         if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
 
-        // MediaElementSource can only be created once per element
-        if (sourceNodeRef.current) {
-          sourceNodeRef.current.disconnect();
-          sourceNodeRef.current = null;
+        // Only re-fetch/decode if source changed
+        if (srcChanged || !analyserRef.current) {
+          const resp = await fetch(src);
+          if (!resp.ok) return;
+          const audioBuffer = await actx.decodeAudioData(await resp.arrayBuffer());
+          bufferRef.current = audioBuffer;
+
+          const analyser = actx.createAnalyser();
+          analyser.fftSize = 2048;
+          analyser.smoothingTimeConstant = 0.3;
+          const gain = actx.createGain();
+          gain.gain.value = 0; // Silent — shadow only
+          analyser.connect(gain);
+          gain.connect(actx.destination);
+
+          analyserRef.current = analyser;
+          freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+          timeDomainRef.current = new Float32Array(analyser.fftSize);
         }
 
-        const analyser = actx.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.3;
-
-        const source = actx.createMediaElementSource(audioElement);
-        source.connect(analyser);
-        analyser.connect(actx.destination); // Pass audio through to speakers
-
-        sourceNodeRef.current = source;
-        connectedElRef.current = audioElement;
-        analyserRef.current = analyser;
-        freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
-        timeDomainRef.current = new Float32Array(analyser.fftSize);
-      } catch (err) {
-        console.warn('AudioVisualizer: MediaElementSource failed, trying shadow pipeline', err);
-        // Fallback: shadow pipeline
-        await setupShadowPipeline(audioElement);
-      }
-    };
-
-    // Shadow pipeline fallback
-    const setupShadowPipeline = async (el: HTMLAudioElement) => {
-      try {
-        const actx = audioCtxRef.current!;
-        const src = el.src;
-        if (!src) return;
-
-        const resp = await fetch(src);
-        if (!resp.ok) return;
-        const audioBuffer = await actx.decodeAudioData(await resp.arrayBuffer());
-
-        const analyser = actx.createAnalyser();
-        analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.3;
-        const gain = actx.createGain();
-        gain.gain.value = 0;
-        analyser.connect(gain);
-        gain.connect(actx.destination);
-
-        analyserRef.current = analyser;
-        freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
-        timeDomainRef.current = new Float32Array(analyser.fftSize);
+        readyRef.current = true;
 
         const startShadow = () => {
+          if (!readyRef.current || !bufferRef.current || !analyserRef.current) return;
+          // Stop any existing
+          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} }
+          const actx = audioCtxRef.current!;
+          if (actx.state === 'suspended') actx.resume();
           const bs = actx.createBufferSource();
-          bs.buffer = audioBuffer;
-          bs.connect(analyser);
-          bs.start(0, el.currentTime || 0);
-          (el as any).__vizSource = bs;
+          bs.buffer = bufferRef.current;
+          bs.connect(analyserRef.current);
+          bufferSourceRef.current = bs;
+          bs.start(0, audioElement.currentTime || 0);
+          isPlayingRef.current = true;
         };
+
         const stopShadow = () => {
-          const bs = (el as any).__vizSource;
-          if (bs) { try { bs.stop(); } catch {} }
-          (el as any).__vizSource = null;
+          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
+          isPlayingRef.current = false;
         };
 
-        el.addEventListener('play', startShadow);
-        el.addEventListener('pause', stopShadow);
-        el.addEventListener('ended', stopShadow);
-        el.addEventListener('seeked', () => { if (!el.paused) { stopShadow(); startShadow(); } });
+        const onPlay = () => startShadow();
+        const onPause = () => stopShadow();
+        const onEnded = () => stopShadow();
+        const onSeeked = () => { if (!audioElement.paused) { stopShadow(); startShadow(); } };
 
-        if (!el.paused) startShadow();
-        connectedElRef.current = el;
+        audioElement.addEventListener('play', onPlay);
+        audioElement.addEventListener('pause', onPause);
+        audioElement.addEventListener('ended', onEnded);
+        audioElement.addEventListener('seeked', onSeeked);
+
+        cleanupRef.current = () => {
+          audioElement.removeEventListener('play', onPlay);
+          audioElement.removeEventListener('pause', onPause);
+          audioElement.removeEventListener('ended', onEnded);
+          audioElement.removeEventListener('seeked', onSeeked);
+          stopShadow();
+        };
+
+        // If already playing, start immediately
+        if (!audioElement.paused) startShadow();
       } catch (err) {
-        console.warn('AudioVisualizer: shadow pipeline also failed', err);
+        console.warn('AudioVisualizer: analyser setup failed', err);
       }
     };
 
-    connect();
-  }, [audioElement]);
+    // No delay — start setup immediately
+    setup();
 
-  // Resume AudioContext on user interaction if suspended
-  useEffect(() => {
-    if (!audioElement || !audioCtxRef.current) return;
-    const resume = () => { if (audioCtxRef.current?.state === 'suspended') audioCtxRef.current.resume(); };
-    audioElement.addEventListener('play', resume);
-    return () => audioElement.removeEventListener('play', resume);
-  }, [audioElement]);
+    return () => {
+      if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
+    };
+  }, [audioElement, audioElement?.src]);
 
-  return { analyserRef, freqDataRef, timeDomainRef };
+  return { analyserRef, freqDataRef, timeDomainRef, isPlayingRef };
 }
 
-// ── Frequency scale labels ──
-const FREQ_LABELS = [
-  { freq: 20, label: '20' },
-  { freq: 50, label: '50' },
-  { freq: 100, label: '100' },
-  { freq: 200, label: '200' },
-  { freq: 500, label: '500' },
-  { freq: 1000, label: '1k' },
-  { freq: 2000, label: '2k' },
-  { freq: 5000, label: '5k' },
-  { freq: 10000, label: '10k' },
-  { freq: 20000, label: '20k' },
+// ── Frequency scale config ──
+const FREQ_LABELS: { freq: number; label: string; major: boolean }[] = [
+  { freq: 20, label: '20', major: true },
+  { freq: 50, label: '50', major: false },
+  { freq: 100, label: '100', major: true },
+  { freq: 200, label: '200', major: false },
+  { freq: 500, label: '500', major: false },
+  { freq: 1000, label: '1k', major: true },
+  { freq: 2000, label: '2k', major: false },
+  { freq: 5000, label: '5k', major: false },
+  { freq: 10000, label: '10k', major: true },
+  { freq: 20000, label: '20k', major: true },
 ];
 
-/** Convert frequency to normalized x position (matching our log scale) */
-function freqToX(freq: number, sampleRate: number, binCount: number): number {
-  // Reverse the log mapping: normX^1.6 = freq / (sampleRate/2)
+function freqToX(freq: number, sampleRate: number): number {
   const nyquist = sampleRate / 2;
   const logX = Math.min(1, freq / nyquist);
-  const normX = Math.pow(logX, 1 / 1.6);
-  return normX;
+  return Math.pow(logX, 1 / 1.6);
 }
 
 /**
@@ -201,7 +204,7 @@ function freqToX(freq: number, sampleRate: number, binCount: number): number {
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
-  const { analyserRef, freqDataRef, timeDomainRef } = useAudioAnalyser(audioElement);
+  const { analyserRef, freqDataRef, timeDomainRef, isPlayingRef } = useAudioAnalyser(audioElement);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -216,11 +219,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
     let time = 0;
     let smoothEnergy = 0;
-    let smoothLufs = -60; // Start at silence
+    let smoothLufs = -60;
 
-    // Margins for frequency labels
-    const BOTTOM_MARGIN = 20;
-    const RIGHT_MARGIN = 44; // LUFS meter width
+    const BOTTOM_MARGIN = 24;
+    const RIGHT_MARGIN = 44;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -246,14 +248,14 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const tdData = timeDomainRef.current;
       let hasAudio = false;
 
-      if (analyser && data) {
+      if (analyser && data && isPlayingRef.current) {
         analyser.getByteFrequencyData(data as Uint8Array<ArrayBuffer>);
         for (let i = 0; i < data.length; i++) {
           if (data[i] > 0) { hasAudio = true; break; }
         }
       }
 
-      // ── Compute LUFS (approximation from time-domain RMS) ──
+      // ── LUFS approximation ──
       let rms = 0;
       if (analyser && tdData && hasAudio) {
         analyser.getFloatTimeDomainData(tdData as Float32Array<ArrayBuffer>);
@@ -292,9 +294,9 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const eLerp = rawEnergy > smoothEnergy ? 0.3 : 0.05;
       smoothEnergy += (rawEnergy - smoothEnergy) * eLerp;
 
-      // ══════════════════════════════════════════
-      // ── Draw wave lines in waveW × waveH area ──
-      // ══════════════════════════════════════════
+      // ══════════════════════════════
+      // ── Draw wave lines ──
+      // ══════════════════════════════
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -336,7 +338,6 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
             const prevFreqDisp = smoothedSpectrum[i - 1] * dir * freqStrength;
             const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
-
             const cpX = ((prevX + x) / 2) * waveW;
             const cpY = ((prevY + y) / 2) * waveH;
             ctx.quadraticCurveTo(prevX * waveW, prevY * waveH, cpX, cpY);
@@ -346,38 +347,62 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       }
       ctx.restore();
 
-      // ══════════════════════════════════════
-      // ── Frequency scale labels at bottom ──
-      // ══════════════════════════════════════
+      // ══════════════════════════════════════════
+      // ── Frequency scale at bottom (enhanced) ──
+      // ══════════════════════════════════════════
       ctx.save();
-      ctx.font = '9px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = hsla(0.3);
-
       const sampleRate = analyser?.context?.sampleRate || 44100;
-      const binCount = data?.length || 1024;
+      const scaleY = waveH + 1;
 
-      for (const { freq, label } of FREQ_LABELS) {
-        const normX = freqToX(freq, sampleRate, binCount);
-        const px = normX * waveW;
-        if (px < 10 || px > waveW - 10) continue;
+      // Base line across the bottom
+      ctx.strokeStyle = hsla(0.12);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, scaleY);
+      ctx.lineTo(waveW, scaleY);
+      ctx.stroke();
 
-        // Tick mark
-        ctx.strokeStyle = hsla(0.15);
-        ctx.lineWidth = 1;
+      // Minor ticks between labels (sub-divisions)
+      const minorFreqs = [30, 40, 60, 70, 80, 150, 300, 400, 600, 700, 800, 1500, 3000, 4000, 6000, 7000, 8000, 15000];
+      ctx.strokeStyle = hsla(0.06);
+      ctx.lineWidth = 1;
+      for (const f of minorFreqs) {
+        const nx = freqToX(f, sampleRate);
+        const px = nx * waveW;
+        if (px < 4 || px > waveW - 4) continue;
         ctx.beginPath();
-        ctx.moveTo(px, waveH);
-        ctx.lineTo(px, waveH + 4);
+        ctx.moveTo(px, scaleY);
+        ctx.lineTo(px, scaleY + 3);
         ctx.stroke();
-
-        // Label
-        ctx.fillText(label, px, waveH + 14);
       }
 
-      // "Hz" label at the start
-      ctx.textAlign = 'left';
-      ctx.fillStyle = hsla(0.2);
-      ctx.fillText('Hz', 2, waveH + 14);
+      // Major labels with ticks
+      for (const { freq, label, major } of FREQ_LABELS) {
+        const nx = freqToX(freq, sampleRate);
+        const px = nx * waveW;
+        if (px < 8 || px > waveW - 8) continue;
+
+        // Tick mark — taller for major
+        const tickH = major ? 7 : 5;
+        ctx.strokeStyle = major ? hsla(0.3) : hsla(0.15);
+        ctx.lineWidth = major ? 1.5 : 1;
+        ctx.beginPath();
+        ctx.moveTo(px, scaleY);
+        ctx.lineTo(px, scaleY + tickH);
+        ctx.stroke();
+
+        // Label text
+        ctx.font = major ? 'bold 10px monospace' : '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = major ? hsla(0.6) : hsla(0.35);
+        ctx.fillText(label, px, scaleY + tickH + 10);
+      }
+
+      // "Hz" unit label
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = hsla(0.25);
+      ctx.fillText('Hz', waveW - 2, scaleY + 18);
       ctx.restore();
 
       // ══════════════════════════════
@@ -396,53 +421,49 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       ctx.roundRect(meterX, meterTop, meterW, meterH, 3);
       ctx.fill();
 
-      // Filled level: map -60…0 LUFS to 0…1
+      // Filled level
       const lufsNorm = (clampedLufs + 60) / 60;
       const fillH = lufsNorm * meterH;
 
-      // Color gradient: green → yellow → red
       if (fillH > 0) {
         const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-        grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');   // green (quiet)
-        grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');  // yellow (mid)
-        grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)'); // orange (loud)
-        grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');     // red (clip)
+        grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
+        grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
+        grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)');
+        grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.roundRect(meterX, meterBottom - fillH, meterW, fillH, 3);
         ctx.fill();
       }
 
-      // LUFS scale labels
-      ctx.font = '8px monospace';
+      // LUFS scale ticks & labels
+      ctx.font = '7px monospace';
       ctx.textAlign = 'left';
-      ctx.fillStyle = hsla(0.3);
       const lufsLabels = [0, -6, -14, -24, -40, -60];
       for (const lv of lufsLabels) {
         const norm = (lv + 60) / 60;
         const ly = meterBottom - norm * meterH;
-        // Small tick
-        ctx.strokeStyle = hsla(0.12);
+        ctx.strokeStyle = hsla(0.15);
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(meterX - 2, ly);
+        ctx.moveTo(meterX - 3, ly);
         ctx.lineTo(meterX, ly);
         ctx.stroke();
       }
 
-      // Current LUFS value text
+      // Current LUFS value
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = hsla(0.5);
       ctx.fillText(`${Math.round(clampedLufs)}`, meterX + meterW / 2, meterBottom + 14);
 
-      // "LUFS" label at top
+      // "LUFS" label
       ctx.font = '7px monospace';
       ctx.fillStyle = hsla(0.25);
       ctx.fillText('LUFS', meterX + meterW / 2, meterTop - 3);
 
       ctx.restore();
-
       rafRef.current = requestAnimationFrame(draw);
     };
 
