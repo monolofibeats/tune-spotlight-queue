@@ -695,6 +695,17 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       
       resetForm();
 
+      // Track submission in localStorage for upsell
+      onSubmissionTracked?.({
+        songTitle: capturedSongTitle,
+        artistName: capturedArtistName,
+        songUrl: capturedSongUrl,
+        platform: capturedPlatform,
+        audioFileUrl: uploadedFileUrl,
+        streamerId: streamerId || null,
+        streamerSlug: streamerSlug || null,
+      });
+
       // Show skip the line offer after successful free submission (if feature is active)
       if (skipLineActive && !isAdmin) {
         setLastSubmittedSong({
@@ -704,11 +715,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           message: capturedMessage,
           email: capturedEmail,
           platform: capturedPlatform,
-          audioFileUrl: uploadedFileUrl, // Use the URL from the ref AFTER upload completed
+          audioFileUrl: uploadedFileUrl,
         });
         setTimeout(() => {
           setShowPostSubmitOffer(true);
-        }, 1000); // Small delay for better UX
+        }, 1000);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit';
