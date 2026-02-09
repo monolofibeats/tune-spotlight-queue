@@ -13,6 +13,7 @@ import { CursorFollower } from '@/components/discovery/CursorFollower';
 import { SoundwaveBackgroundCanvas } from '@/components/discovery/SoundwaveBackgroundCanvas';
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { LiveCounter } from '@/components/discovery/LiveCounter';
+import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
 import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
@@ -35,10 +36,10 @@ const Discovery = () => {
   const offlineStreamers = streamers.filter(s => !s.is_live);
 
   const stats = [
-    { label: t('discovery.activeStreamers'), value: streamers.length, icon: Users, isLive: false },
-    { label: t('discovery.songsReviewed'), value: 10847, icon: Music, isLive: true },
-    { label: t('discovery.liveNow'), value: liveStreamers.length, icon: Radio, isLive: false },
-    { label: t('discovery.weeklyViews'), value: '50K+', icon: TrendingUp, isLive: false },
+    { label: t('discovery.activeStreamers'), value: 0, icon: Users, isLive: false },
+    { label: t('discovery.songsReviewed'), value: 0, icon: Music, isLive: true },
+    { label: t('discovery.liveNow'), value: 0, icon: Radio, isLive: false },
+    { label: t('discovery.weeklyViews'), value: 0, icon: TrendingUp, isLive: false },
   ];
 
   const faqs = [
@@ -113,9 +114,12 @@ const Discovery = () => {
         </div>
       </motion.header>
 
+      {/* Building Phase Banner */}
+      <BuildingPhaseBanner />
+
       {/* Hero Section */}
       <motion.section 
-        className="pt-28 pb-16 px-4 relative z-10"
+        className="pt-8 pb-16 px-4 relative z-10"
         style={{ scale: heroScale }}
       >
         <div className="container mx-auto max-w-4xl text-center">
@@ -212,7 +216,7 @@ const Discovery = () => {
                 }}
                 transition={{ type: "spring", stiffness: 200 }}
               >
-                <LiveCounter startValue={10847} />
+                <LiveCounter startValue={0} />
               </motion.div>
               <div className="text-base text-muted-foreground">{t('discovery.songsReviewed')}</div>
             </div>
