@@ -51,6 +51,7 @@ const StreamerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const nowPlayingRef = useRef<HTMLDivElement>(null);
+  const { visibleWidgets } = useDashboardLayout(streamer?.id);
   
   const [nowPlaying, setNowPlaying] = useState<{
     submission: Submission | null;
