@@ -5,8 +5,6 @@ interface AudioVisualizerProps {
   className?: string;
 }
 
-// ── Copied 1:1 from SoundwaveBackgroundCanvas ──
-
 function parseHslTriplet(input: string) {
   const parts = input.trim().split(/\s+/);
   if (parts.length < 3) return null;
@@ -24,50 +22,11 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
-interface WaveLine {
-  points: number[];
-  phase: number;
-  speed: number;
-  amplitude: number;
-  baseYOffset: number;
-  currentYOffset: number;
-  opacity: number;
-}
-
-function createWaveLines(): WaveLine[] {
-  const lines: WaveLine[] = [];
-  const lineCount = 14;
-  const pointCount = 100;
-
-  for (let i = 0; i < lineCount; i++) {
-    const points: number[] = [];
-    for (let j = 0; j < pointCount; j++) {
-      const x = j / pointCount;
-      const baseWave = Math.sin(x * Math.PI * 2.5 + i * 0.25) * 0.6;
-      const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
-      const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
-      points.push(baseWave + harmonic1 + harmonic2);
-    }
-    const baseYOffset = (i - lineCount / 2) * 0.01;
-    lines.push({
-      points,
-      phase: i * 0.35,
-      speed: 0.25 + Math.random() * 0.35,
-      amplitude: 0.055 + (i % 5) * 0.018,
-      baseYOffset,
-      currentYOffset: baseYOffset,
-      opacity: 0.06 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.14,
-    });
-  }
-  return lines;
-}
-
-// ── Shadow audio pipeline hook (analyser setup) ──
+// ── Shadow audio pipeline ──
 
 function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataRef = useRef<Uint8Array | null>(null);
-  const smoothedRef = useRef<Float32Array | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isPlayingRef = useRef(false);
@@ -89,10 +48,7 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
       const srcChanged = src !== lastSrcRef.current;
       lastSrcRef.current = src;
 
-      if (cleanupRef.current) {
-        cleanupRef.current();
-        cleanupRef.current = null;
-      }
+      if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
 
       try {
         if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
@@ -108,8 +64,8 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
           audioBuffer = await actx.decodeAudioData(await resp.arrayBuffer());
 
           analyser = actx.createAnalyser();
-          analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.82;
+          analyser.fftSize = 2048; // High res: 1024 frequency bins
+          analyser.smoothingTimeConstant = 0.4; // Low smoothing = fast reaction
           const gain = actx.createGain();
           gain.gain.value = 0;
           analyser.connect(gain);
@@ -117,15 +73,12 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 
           analyserRef.current = analyser;
           dataRef.current = new Uint8Array(analyser.frequencyBinCount);
-          smoothedRef.current = new Float32Array(analyser.frequencyBinCount);
         }
 
         const currentAnalyser = analyser!;
 
         const startShadow = () => {
-          if (bufferSourceRef.current) {
-            try { bufferSourceRef.current.stop(); } catch {}
-          }
+          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} }
           (async () => {
             let buf = audioBuffer;
             if (!buf) {
@@ -145,10 +98,7 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         };
 
         const stopShadow = () => {
-          if (bufferSourceRef.current) {
-            try { bufferSourceRef.current.stop(); } catch {}
-            bufferSourceRef.current = null;
-          }
+          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
           isPlayingRef.current = false;
         };
 
@@ -177,23 +127,21 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
     };
 
     const timer = setTimeout(setup, 200);
-    return () => {
-      clearTimeout(timer);
-      if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
-    };
+    return () => { clearTimeout(timer); if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; } };
   }, [audioElement, audioElement?.src]);
 
-  return { analyserRef, dataRef, smoothedRef, isPlayingRef };
+  return { analyserRef, dataRef, isPlayingRef };
 }
 
 /**
- * Audio-reactive visualizer – identical wave rendering to Discovery page,
- * driven by audio energy instead of cursor position.
+ * Hybrid visualizer: smooth flowing wave lines (homepage style)
+ * whose shapes are directly driven by the full frequency spectrum (0–20kHz, left to right).
+ * Attack is near-instant, release is smooth.
  */
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
-  const { analyserRef, dataRef, smoothedRef, isPlayingRef } = useAudioAnalyser(audioElement);
+  const { analyserRef, dataRef, isPlayingRef } = useAudioAnalyser(audioElement);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -202,9 +150,26 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     if (!ctx) return;
 
     const hsla = makeHslaFromCssVar('--primary');
-    const waves = createWaveLines();
+
+    const LINE_COUNT = 14;
+    const POINTS = 120; // x-axis resolution
+
+    // Smoothed spectrum mapped to POINTS (persistent across frames)
+    const spectrum = new Float32Array(POINTS); // 0-1 per point
+
+    // Each line has a vertical offset and style
+    const lines = Array.from({ length: LINE_COUNT }, (_, i) => ({
+      yOffset: (i - LINE_COUNT / 2) * 0.012,
+      phase: i * 0.35,
+      speed: 0.2 + (i % 5) * 0.06,
+      // How much this line reacts to audio (center lines react most)
+      reactivity: 0.6 + (1 - Math.abs(i - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.4,
+      opacity: 0.05 + (1 - Math.abs(i - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.16,
+      // Slight vertical flip for lines below center
+      direction: i < LINE_COUNT / 2 ? -1 : 1,
+    }));
+
     let time = 0;
-    let smoothEnergy = 0;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -217,19 +182,13 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     resize();
     window.addEventListener('resize', resize);
 
-    // Transient (hit/kick/snare) detection state
-    let prevEnergy = 0;
-    let transient = 0; // 0-1 spike that decays
-
     const draw = () => {
       time += 1 / 60;
       const { width, height } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, width, height);
 
-      // ── Read & smooth audio data ──
       const analyser = analyserRef.current;
       const data = dataRef.current;
-      const smoothed = smoothedRef.current;
       let hasAudio = false;
 
       if (analyser && data && isPlayingRef.current) {
@@ -239,94 +198,87 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      // Faster lerp on attack, slower on release for snappy feel
-      if (smoothed && data) {
-        for (let i = 0; i < smoothed.length; i++) {
-          const target = hasAudio ? data[i] / 255 : 0;
-          const isRising = target > smoothed[i];
-          const lerpSpeed = hasAudio ? (isRising ? 0.35 : 0.08) : 0.03;
-          smoothed[i] += (target - smoothed[i]) * lerpSpeed;
+      // Map frequency bins → POINTS with logarithmic scaling
+      // (gives more resolution to bass/mids, less to ultra-highs)
+      if (data) {
+        const binCount = data.length; // 1024 bins
+        for (let p = 0; p < POINTS; p++) {
+          const normX = p / (POINTS - 1);
+          // Log scale: more bins for low freqs
+          const logX = Math.pow(normX, 1.8);
+          const binIdx = Math.min(Math.floor(logX * binCount), binCount - 1);
+          // Average a small neighborhood for smoothness
+          let sum = 0;
+          let count = 0;
+          const spread = Math.max(1, Math.floor(binCount / POINTS * 0.5));
+          for (let b = Math.max(0, binIdx - spread); b <= Math.min(binCount - 1, binIdx + spread); b++) {
+            sum += (hasAudio ? data[b] / 255 : 0);
+            count++;
+          }
+          const target = sum / count;
+
+          // Ultra-fast attack, smooth release
+          const isRising = target > spectrum[p];
+          const lerpSpeed = isRising ? 0.7 : 0.06;
+          spectrum[p] += (target - spectrum[p]) * lerpSpeed;
         }
       }
 
-      // Overall energy
-      let rawEnergy = 0;
-      if (smoothed) {
-        for (let i = 0; i < smoothed.length; i++) rawEnergy += smoothed[i];
-        rawEnergy /= smoothed.length;
-      }
+      // Overall energy for glow/expansion
+      let energy = 0;
+      for (let p = 0; p < POINTS; p++) energy += spectrum[p];
+      energy /= POINTS;
 
-      // Faster energy tracking (attack fast, release medium)
-      const energyLerp = rawEnergy > smoothEnergy ? 0.25 : 0.06;
-      smoothEnergy += (rawEnergy - smoothEnergy) * energyLerp;
+      const centerY = height / 2;
 
-      // Transient / hit detection — spike when energy jumps suddenly
-      const energyDelta = rawEnergy - prevEnergy;
-      if (energyDelta > 0.04) {
-        transient = Math.min(1, transient + energyDelta * 6);
-      }
-      transient *= 0.88; // fast decay
-      prevEnergy = rawEnergy;
-
-      // Combined reactivity = smooth energy + transient punch
-      const reactivity = smoothEnergy + transient * 0.6;
-
-      // Audio-driven expansion
-      const targetExpansion = 1 + reactivity * 3.5;
-
-      // ── Draw wave lines (1:1 from SoundwaveBackgroundCanvas) ──
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      for (let wi = 0; wi < waves.length; wi++) {
-        const wave = waves[wi];
+      for (let li = 0; li < LINE_COUNT; li++) {
+        const line = lines[li];
 
-        // Faster expansion tracking for hits
-        const targetOffset = wave.baseYOffset * targetExpansion;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.08;
-
-        // Audio-reactive amplitude boost with transient punch
-        const ampBoost = 1 + reactivity * 5.0;
-        const effectiveAmplitude = wave.amplitude * ampBoost;
+        // Audio makes lines spread apart from center
+        const expansion = 1 + energy * 4.0;
+        const yBase = centerY + line.yOffset * expansion * height * 5;
 
         ctx.beginPath();
-        ctx.strokeStyle = hsla(wave.opacity + reactivity * 0.18);
-        ctx.lineWidth = 1.5 + reactivity * 1.5;
-        ctx.shadowBlur = 10 + reactivity * 14;
-        ctx.shadowColor = hsla(wave.opacity * 0.5 + reactivity * 0.2);
+        ctx.strokeStyle = hsla(line.opacity + energy * 0.2);
+        ctx.lineWidth = 1.2 + energy * 2.0;
+        ctx.shadowBlur = 8 + energy * 16;
+        ctx.shadowColor = hsla(line.opacity * 0.4 + energy * 0.15);
 
-        const pts = wave.points;
-        const centerY = 0.5 + wave.currentYOffset;
+        const points: { x: number; y: number }[] = [];
 
-        for (let i = 0; i < pts.length; i++) {
-          const x = i / (pts.length - 1);
-          const animatedY = pts[i] * Math.sin(time * wave.speed + wave.phase + i * 0.04);
+        for (let p = 0; p < POINTS; p++) {
+          const normX = p / (POINTS - 1);
+          const x = normX * width;
 
-          // Per-point frequency modulation
-          let freqMod = 0;
-          if (smoothed && hasAudio) {
-            const binIdx = Math.floor(x * (smoothed.length * 0.75));
-            freqMod = smoothed[Math.min(binIdx, smoothed.length - 1)] * 0.15;
-          }
+          // Gentle ambient wave animation (the "flowing" part)
+          const ambientWave =
+            Math.sin(normX * Math.PI * 2.5 + time * line.speed + line.phase) * 0.3 +
+            Math.sin(normX * Math.PI * 5 + time * line.speed * 0.7 + line.phase * 1.3) * 0.15 +
+            Math.sin(normX * Math.PI * 7.5 + time * line.speed * 0.4 + line.phase * 1.7) * 0.08;
 
-          const y = centerY + animatedY * effectiveAmplitude + freqMod * (wave.baseYOffset > 0 ? 1 : -1) * 0.08;
+          // Frequency-driven displacement (the "spectrum" part)
+          const freqDisplacement = spectrum[p] * line.reactivity * line.direction;
 
-          if (i === 0) {
-            ctx.moveTo(x * width, y * height);
-          } else {
-            const prevX = (i - 1) / (pts.length - 1);
-            const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
-            let prevFreqMod = 0;
-            if (smoothed && hasAudio) {
-              const prevBin = Math.floor(prevX * (smoothed.length * 0.75));
-              prevFreqMod = smoothed[Math.min(prevBin, smoothed.length - 1)] * 0.15;
-            }
-            const prevY = centerY + prevAnimatedY * effectiveAmplitude + prevFreqMod * (wave.baseYOffset > 0 ? 1 : -1) * 0.08;
+          // Combine: ambient gives the flowing feel, spectrum gives the reactive shape
+          const totalDisplacement = (ambientWave * 0.03 + freqDisplacement * 0.35) * height;
 
-            const cpX = ((prevX + x) / 2) * width;
-            const cpY = ((prevY + y) / 2) * height;
-            ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
+          const y = yBase + totalDisplacement;
+          points.push({ x, y });
+        }
+
+        // Draw with quadratic curves for ultra-smoothness
+        if (points.length > 0) {
+          ctx.moveTo(points[0].x, points[0].y);
+          for (let p = 1; p < points.length; p++) {
+            const prev = points[p - 1];
+            const curr = points[p];
+            const cpX = (prev.x + curr.x) / 2;
+            const cpY = (prev.y + curr.y) / 2;
+            ctx.quadraticCurveTo(prev.x, prev.y, cpX, cpY);
           }
         }
         ctx.stroke();
