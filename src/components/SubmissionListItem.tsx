@@ -101,8 +101,10 @@ export function SubmissionListItem({
   submission, 
   position,
   isAdmin = false,
+  isTrashView = false,
   onStatusChange, 
   onDelete,
+  onRestore,
   onUpdate,
   onPlayAudio 
 }: SubmissionListItemProps) {
