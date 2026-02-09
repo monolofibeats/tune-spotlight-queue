@@ -55,8 +55,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         const audioBuffer = await actx.decodeAudioData(arrayBuffer);
 
         const analyser = actx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.75;
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.65;
 
         // Connect: source -> analyser -> gain(0) -> destination
         // Gain=0 means this shadow pipeline is silent
@@ -146,8 +146,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const l = (parts[2] || '50%').replace('%', '');
     const hsla = (a: number) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
 
-    const LINE_COUNT = 7;
-    const POINT_COUNT = 64;
+    const LINE_COUNT = 9;
+    const POINT_COUNT = 80;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -187,32 +187,34 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       ctx.lineJoin = 'round';
 
       for (let li = 0; li < LINE_COUNT; li++) {
-        const lineOffset = (li - LINE_COUNT / 2) * (hh * 0.08);
-        const baseOpacity = 0.08 + (1 - Math.abs(li - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.18;
+        const lineOffset = (li - LINE_COUNT / 2) * (hh * 0.06);
+        const normalizedDist = Math.abs(li - LINE_COUNT / 2) / (LINE_COUNT / 2);
+        const baseOpacity = 0.1 + (1 - normalizedDist) * 0.35;
 
         ctx.beginPath();
         ctx.strokeStyle = hsla(baseOpacity);
-        ctx.lineWidth = 1.5;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = hsla(baseOpacity * 0.4);
+        ctx.lineWidth = hasAudio ? 2.5 - normalizedDist * 1.2 : 1.5;
+        ctx.shadowBlur = hasAudio ? 16 : 8;
+        ctx.shadowColor = hsla(baseOpacity * 0.6);
 
         for (let i = 0; i < POINT_COUNT; i++) {
           const x = (i / (POINT_COUNT - 1)) * w;
           const normX = i / (POINT_COUNT - 1);
 
-          const idleWave = Math.sin(normX * Math.PI * 2.5 + time * 0.8 + li * 0.4) * 8
-            + Math.sin(normX * Math.PI * 5 + time * 1.2 + li * 0.6) * 4;
+          const idleWave = Math.sin(normX * Math.PI * 2.5 + time * 0.8 + li * 0.4) * 6
+            + Math.sin(normX * Math.PI * 5 + time * 1.2 + li * 0.6) * 3;
 
           let audioAmp = 0;
           if (hasAudio && data) {
-            const binIndex = Math.floor(normX * (data.length * 0.7));
+            const binIndex = Math.floor(normX * (data.length * 0.75));
             const val = data[Math.min(binIndex, data.length - 1)] / 255;
-            audioAmp = val * (hh * 0.35);
+            const boosted = Math.pow(val, 0.7); // boost quieter frequencies
+            audioAmp = boosted * (hh * 0.55);
           }
 
           const envelope = Math.sin(normX * Math.PI);
           const totalAmp = (idleWave + audioAmp * envelope) * envelope;
-          const y = centerY + lineOffset + totalAmp * (hasAudio ? 1 : 0.3);
+          const y = centerY + lineOffset + totalAmp * (hasAudio ? 1.2 : 0.25);
 
           if (i === 0) {
             ctx.moveTo(x, y);
@@ -241,7 +243,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     <canvas
       ref={canvasRef}
       className={`w-full pointer-events-none ${className}`}
-      style={{ height: 80 }}
+      style={{ height: 140 }}
       aria-hidden="true"
     />
   );
