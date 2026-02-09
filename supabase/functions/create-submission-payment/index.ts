@@ -121,8 +121,12 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?submission_payment=cancelled`,
+      success_url: streamerSlug 
+        ? `${origin}/${streamerSlug}/submit?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`
+        : `${origin}/?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: streamerSlug
+        ? `${origin}/${streamerSlug}/submit?submission_payment=cancelled`
+        : `${origin}/?submission_payment=cancelled`,
       metadata: {
         type: "submission",
         user_id: user?.id || "",
