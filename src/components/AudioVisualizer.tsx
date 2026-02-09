@@ -5,6 +5,21 @@ interface AudioVisualizerProps {
   className?: string;
 }
 
+/** Parse CSS HSL triplet like "50 100% 50%" */
+function parseHsl(input: string) {
+  const parts = input.trim().split(/\s+/);
+  if (parts.length < 3) return { h: 50, s: 100, l: 50 };
+  return {
+    h: Number(parts[0]) || 50,
+    s: Number((parts[1] || '100%').replace('%', '')) || 100,
+    l: Number((parts[2] || '50%').replace('%', '')) || 50,
+  };
+}
+
+/**
+ * Audio-reactive visualizer styled like the Discovery page soundwave.
+ * Ultra-smooth flowing lines that gently respond to audio frequency data.
+ */
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -13,10 +28,12 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isPlayingRef = useRef(false);
-  const lastSrcRef = useRef<string>('');
+  const lastSrcRef = useRef('');
   const cleanupRef = useRef<(() => void) | null>(null);
+  // Smoothed audio energy — lerped slowly for ultra-smooth reaction
+  const smoothedBandsRef = useRef<Float32Array | null>(null);
 
-  // Shadow audio pipeline for analysis without hijacking main output
+  // ── Shadow audio pipeline (unchanged logic) ──
   useEffect(() => {
     if (!audioElement) {
       analyserRef.current = null;
@@ -55,7 +72,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
           analyser = actx.createAnalyser();
           analyser.fftSize = 256;
-          analyser.smoothingTimeConstant = 0.7;
+          analyser.smoothingTimeConstant = 0.82;
 
           const gainNode = actx.createGain();
           gainNode.gain.value = 0;
@@ -64,16 +81,15 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
           analyserRef.current = analyser;
           dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+          smoothedBandsRef.current = new Float32Array(analyser.frequencyBinCount);
         }
 
-        // Always set up listeners (they may have been cleaned up by effect re-run)
         const currentAnalyser = analyser!;
 
         const startShadowPlayback = () => {
           if (bufferSourceRef.current) {
             try { bufferSourceRef.current.stop(); } catch {}
           }
-          // Need audioBuffer - re-fetch if we don't have it
           const doStart = async () => {
             let buf = audioBuffer;
             if (!buf) {
@@ -87,8 +103,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             bufferSource.buffer = buf;
             bufferSource.connect(currentAnalyser);
             bufferSourceRef.current = bufferSource;
-            const offset = audioElement.currentTime || 0;
-            bufferSource.start(0, offset);
+            bufferSource.start(0, audioElement.currentTime || 0);
             isPlayingRef.current = true;
           };
           doStart();
@@ -143,22 +158,43 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     };
   }, [audioElement, audioElement?.src]);
 
-  // Animation loop — hybrid bar + wave visualizer
+  // ── Animation loop — smooth flowing wave lines ──
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const cssVal = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
-    const parts = cssVal.split(/\s+/);
-    const h = parts[0] || '50';
-    const s = (parts[1] || '100%').replace('%', '');
-    const l = (parts[2] || '50%').replace('%', '');
+    const { h, s, l } = parseHsl(
+      getComputedStyle(document.documentElement).getPropertyValue('--primary')
+    );
     const hsla = (a: number) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
 
-    const BAR_COUNT = 48;
-    const PADDING = 16; // horizontal padding so bars don't touch edges
+    // Wave configuration — matching Discovery page style
+    const LINE_COUNT = 12;
+    const POINT_COUNT = 100;
+
+    // Pre-compute wave line offsets & properties
+    const lines = Array.from({ length: LINE_COUNT }, (_, i) => ({
+      phase: i * 0.35,
+      speed: 0.25 + (i % 5) * 0.08,
+      amplitude: 0.06 + (i % 5) * 0.015,
+      yOffset: (i - LINE_COUNT / 2) * 0.012,
+      opacity: 0.06 + (1 - Math.abs(i - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.18,
+    }));
+
+    // Pre-compute base wave shapes (harmonics)
+    const basePoints: number[][] = lines.map((_, li) => {
+      const pts: number[] = [];
+      for (let j = 0; j < POINT_COUNT; j++) {
+        const x = j / POINT_COUNT;
+        const base = Math.sin(x * Math.PI * 2.5 + li * 0.25) * 0.6;
+        const h1 = Math.sin(x * Math.PI * 5 + li * 0.4) * 0.3;
+        const h2 = Math.sin(x * Math.PI * 7.5 + li * 0.6) * 0.15;
+        pts.push(base + h1 + h2);
+      }
+      return pts;
+    });
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -172,8 +208,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     window.addEventListener('resize', resize);
 
     let time = 0;
-    // Smoothed values for each bar
-    const smoothed = new Float32Array(BAR_COUNT);
+    // Smoothed overall energy for wave expansion
+    let smoothEnergy = 0;
 
     const draw = () => {
       time += 1 / 60;
@@ -182,8 +218,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const hh = rect.height;
       ctx.clearRect(0, 0, w, hh);
 
+      // ── Read audio data ──
       const analyser = analyserRef.current;
       const data = dataRef.current;
+      const smoothed = smoothedBandsRef.current;
       let hasAudio = false;
 
       if (analyser && data && isPlayingRef.current) {
@@ -193,102 +231,90 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      const centerY = hh / 2;
-      const usableWidth = w - PADDING * 2;
-      const barWidth = usableWidth / BAR_COUNT;
-      const gap = Math.max(1, barWidth * 0.25);
-      const actualBarWidth = barWidth - gap;
-      const maxBarHeight = (hh / 2) - 4; // leave 4px margin top/bottom
+      // Smooth each frequency band for ultra-smooth reaction
+      if (smoothed && data) {
+        const lerpSpeed = hasAudio ? 0.06 : 0.03;
+        for (let i = 0; i < smoothed.length; i++) {
+          const target = hasAudio ? data[i] / 255 : 0;
+          smoothed[i] += (target - smoothed[i]) * lerpSpeed;
+        }
+      }
 
+      // Overall energy (average of all bands) — smoothed
+      let rawEnergy = 0;
+      if (smoothed) {
+        for (let i = 0; i < smoothed.length; i++) rawEnergy += smoothed[i];
+        rawEnergy /= smoothed.length;
+      }
+      smoothEnergy += (rawEnergy - smoothEnergy) * 0.04;
+
+      // Audio boosts the wave expansion (lines spread apart)
+      const waveExpansion = 1 + smoothEnergy * 3.0;
+
+      // ── Draw flowing wave lines ──
       ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const normX = i / (BAR_COUNT - 1);
+      const centerY = hh / 2;
 
-        // Get audio amplitude for this bar
-        let targetAmp = 0;
-        if (hasAudio && data) {
-          const binIndex = Math.floor(normX * (data!.length * 0.8));
-          const val = data![Math.min(binIndex, data!.length - 1)] / 255;
-          targetAmp = Math.pow(val, 0.65);
+      for (let li = 0; li < LINE_COUNT; li++) {
+        const line = lines[li];
+        const pts = basePoints[li];
+
+        // Spread apart based on audio energy
+        const expandedYOffset = line.yOffset * waveExpansion * hh * 6;
+
+        // Audio-reactive amplitude boost
+        const ampBoost = 1 + smoothEnergy * 4.0;
+        const effectiveAmplitude = line.amplitude * ampBoost;
+
+        ctx.beginPath();
+        ctx.strokeStyle = hsla(line.opacity + smoothEnergy * 0.15);
+        ctx.lineWidth = 1.5 + smoothEnergy * 1.5;
+        ctx.shadowBlur = 8 + smoothEnergy * 14;
+        ctx.shadowColor = hsla(line.opacity * 0.5 + smoothEnergy * 0.2);
+
+        for (let i = 0; i < POINT_COUNT; i++) {
+          const normX = i / (POINT_COUNT - 1);
+          const x = normX * w;
+
+          // Base animated wave
+          const animatedY = pts[i] * Math.sin(time * line.speed + line.phase + i * 0.04);
+
+          // Per-point audio modulation (frequency mapped to x position)
+          let freqMod = 0;
+          if (smoothed && hasAudio) {
+            const binIdx = Math.floor(normX * (smoothed.length * 0.75));
+            const val = smoothed[Math.min(binIdx, smoothed.length - 1)];
+            freqMod = val * 0.3;
+          }
+
+          const totalAmp = (animatedY * effectiveAmplitude + freqMod) * hh;
+          const y = centerY + expandedYOffset + totalAmp;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            // Smooth quadratic curve between points
+            const prevX = ((i - 1) / (POINT_COUNT - 1)) * w;
+            const prevNormX = (i - 1) / (POINT_COUNT - 1);
+            const prevAnimatedY = pts[i - 1] * Math.sin(time * line.speed + line.phase + (i - 1) * 0.04);
+            let prevFreqMod = 0;
+            if (smoothed && hasAudio) {
+              const prevBin = Math.floor(prevNormX * (smoothed.length * 0.75));
+              prevFreqMod = smoothed[Math.min(prevBin, smoothed.length - 1)] * 0.3;
+            }
+            const prevTotalAmp = (prevAnimatedY * effectiveAmplitude + prevFreqMod) * hh;
+            const prevY = centerY + expandedYOffset + prevTotalAmp;
+
+            const cpX = (prevX + x) / 2;
+            const cpY = (prevY + y) / 2;
+            ctx.quadraticCurveTo(prevX, prevY, cpX, cpY);
+          }
         }
-
-        // Smooth transition
-        smoothed[i] += (targetAmp - smoothed[i]) * 0.25;
-        const amp = smoothed[i];
-
-        // Idle wave when no audio
-        const idleWave = Math.sin(normX * Math.PI * 3 + time * 1.2) * 0.08
-          + Math.sin(normX * Math.PI * 5 + time * 0.7) * 0.04;
-
-        const finalAmp = hasAudio ? amp : Math.abs(idleWave) + 0.02;
-
-        // Bar height — mirrored from center, clamped to maxBarHeight
-        const barH = Math.min(finalAmp * maxBarHeight * 2, maxBarHeight);
-
-        const x = PADDING + i * barWidth + gap / 2;
-
-        // Envelope — bars at edges are slightly shorter
-        const edgeFade = Math.sin(normX * Math.PI);
-        const adjustedH = barH * (0.4 + edgeFade * 0.6);
-
-        // Color intensity based on amplitude
-        const intensity = 0.3 + finalAmp * 0.7;
-
-        // Glow
-        ctx.shadowBlur = hasAudio ? 8 + amp * 12 : 4;
-        ctx.shadowColor = hsla(intensity * 0.5);
-
-        // Draw mirrored bar (top half + bottom half from center)
-        const radius = Math.min(actualBarWidth / 2, 3);
-
-        // Top bar (goes upward from center)
-        ctx.fillStyle = hsla(intensity);
-        roundedRect(ctx, x, centerY - adjustedH, actualBarWidth, adjustedH, radius);
-        ctx.fill();
-
-        // Bottom bar (mirror, slightly less opaque)
-        ctx.fillStyle = hsla(intensity * 0.7);
-        roundedRect(ctx, x, centerY, actualBarWidth, adjustedH, radius);
-        ctx.fill();
-
-        // Wave line connecting bar tops — draw as we go
-        if (i === 0) {
-          ctx.beginPath();
-          ctx.strokeStyle = hsla(0.4);
-          ctx.lineWidth = 1.5;
-          ctx.shadowBlur = hasAudio ? 10 : 4;
-          ctx.shadowColor = hsla(0.3);
-          ctx.moveTo(x + actualBarWidth / 2, centerY - adjustedH);
-        } else {
-          ctx.lineTo(x + actualBarWidth / 2, centerY - adjustedH);
-        }
+        ctx.stroke();
       }
-      // Stroke the wave line connecting bar tops
-      ctx.stroke();
-
-      // Mirror wave line on bottom
-      ctx.beginPath();
-      ctx.strokeStyle = hsla(0.25);
-      ctx.lineWidth = 1;
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const normX = i / (BAR_COUNT - 1);
-        let targetAmp = smoothed[i];
-        const idleWave = Math.sin(normX * Math.PI * 3 + time * 1.2) * 0.08
-          + Math.sin(normX * Math.PI * 5 + time * 0.7) * 0.04;
-        const finalAmp = hasAudio ? targetAmp : Math.abs(idleWave) + 0.02;
-        const barH = Math.min(finalAmp * maxBarHeight * 2, maxBarHeight);
-        const edgeFade = Math.sin(normX * Math.PI);
-        const adjustedH = barH * (0.4 + edgeFade * 0.6);
-        const x = PADDING + i * (usableWidth / BAR_COUNT) + (Math.max(1, (usableWidth / BAR_COUNT) * 0.25)) / 2;
-        const bw = (usableWidth / BAR_COUNT) - Math.max(1, (usableWidth / BAR_COUNT) * 0.25);
-        if (i === 0) {
-          ctx.moveTo(x + bw / 2, centerY + adjustedH);
-        } else {
-          ctx.lineTo(x + bw / 2, centerY + adjustedH);
-        }
-      }
-      ctx.stroke();
 
       ctx.restore();
       rafRef.current = requestAnimationFrame(draw);
@@ -306,28 +332,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     <canvas
       ref={canvasRef}
       className={`w-full pointer-events-none ${className}`}
-      style={{ height: 140 }}
+      style={{ height: 120 }}
       aria-hidden="true"
     />
   );
-}
-
-/** Draw a rounded rectangle path and begin fill (caller must call ctx.fill()) */
-function roundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number, y: number,
-  w: number, h: number,
-  r: number
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
 }
