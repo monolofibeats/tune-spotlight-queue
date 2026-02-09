@@ -12,12 +12,19 @@ interface LiveCounterProps {
 const getStoredCount = (startValue: number): number => {
   const stored = localStorage.getItem('liveCounter_songs');
   if (stored) {
-    const { base, timestamp } = JSON.parse(stored);
-    // Calculate how many seconds have passed and add to base
-    const secondsPassed = Math.floor((Date.now() - timestamp) / 1000);
-    return base + secondsPassed;
+    try {
+      const { base, timestamp } = JSON.parse(stored);
+      // If startValue changed (e.g. reset to 0), respect the new startValue
+      if (startValue === 0) {
+        localStorage.setItem('liveCounter_songs', JSON.stringify({ base: 0, timestamp: Date.now() }));
+        return 0;
+      }
+      const secondsPassed = Math.floor((Date.now() - timestamp) / 1000);
+      return base + secondsPassed;
+    } catch {
+      // corrupted data, reset
+    }
   }
-  // First time: store the initial value
   localStorage.setItem('liveCounter_songs', JSON.stringify({ base: startValue, timestamp: Date.now() }));
   return startValue;
 };
