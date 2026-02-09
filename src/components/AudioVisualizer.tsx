@@ -256,7 +256,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       // ── Compute LUFS (approximation from time-domain RMS) ──
       let rms = 0;
       if (analyser && tdData && hasAudio) {
-        analyser.getFloatTimeDomainData(tdData);
+        analyser.getFloatTimeDomainData(tdData as Float32Array<ArrayBuffer>);
         let sumSq = 0;
         for (let i = 0; i < tdData.length; i++) sumSq += tdData[i] * tdData[i];
         rms = Math.sqrt(sumSq / tdData.length);
