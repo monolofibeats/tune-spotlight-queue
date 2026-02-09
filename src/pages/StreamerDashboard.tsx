@@ -437,9 +437,9 @@ const StreamerDashboard = () => {
                   {[
                     { key: 'all', label: 'All' },
                     { key: 'pending', label: 'Pending' },
-                    { key: 'reviewing', label: 'Reviewing' },
                     { key: 'reviewed', label: 'Done' },
-                    { key: 'skipped', label: 'Skipped' }
+                    { key: 'skipped', label: 'Skipped' },
+                    { key: 'deleted', label: '🗑 Trash' }
                   ].map(({ key, label }) => (
                     <Button
                       key={key}
