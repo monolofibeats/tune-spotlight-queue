@@ -146,8 +146,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const l = (parts[2] || '50%').replace('%', '');
     const hsla = (a: number) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
 
-    const LINE_COUNT = 7;
-    const POINT_COUNT = 64;
+    const LINE_COUNT = 9;
+    const POINT_COUNT = 80;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
