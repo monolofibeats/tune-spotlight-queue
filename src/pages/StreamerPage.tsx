@@ -22,7 +22,7 @@ function StreamerPageContent() {
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
-  const { currentSubmission, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
+  const { currentSubmissions, trackSubmission } = useTrackedSubmission(slug || null);
 
   if (isLoading) {
     return (
