@@ -229,7 +229,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       let hasAudio = false;
 
       if (analyser && data && isPlayingRef.current) {
-        analyser.getByteFrequencyData(data);
+        analyser.getByteFrequencyData(data as Uint8Array<ArrayBuffer>);
         for (let i = 0; i < data.length; i++) {
           if (data[i] > 0) { hasAudio = true; break; }
         }
