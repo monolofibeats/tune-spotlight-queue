@@ -13,6 +13,7 @@ import { CursorFollower } from '@/components/discovery/CursorFollower';
 import { SoundwaveBackgroundCanvas } from '@/components/discovery/SoundwaveBackgroundCanvas';
 import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
 import { LiveCounter } from '@/components/discovery/LiveCounter';
+import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
 import { GlowButton } from '@/components/discovery/GlowButton';
 import { AnimatedCard } from '@/components/discovery/AnimatedCard';
 import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
