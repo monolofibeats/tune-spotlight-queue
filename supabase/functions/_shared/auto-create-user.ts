@@ -70,7 +70,7 @@ export async function autoCreateUserFromPayment(
         try {
           const resend = new Resend(resendKey);
           await resend.emails.send({
-            from: "UpStar <noreply@upstar.live>",
+            from: "UpStar <noreply@upstar.gg>",
             to: [email],
             subject: "Your song was submitted! Log in to track it 🎵",
             html: `

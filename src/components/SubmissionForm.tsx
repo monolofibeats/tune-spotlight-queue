@@ -337,6 +337,24 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               description: data.message,
             });
             watchlistRef?.current?.refreshList();
+
+            // Track the paid submission in localStorage (same as free submissions)
+            const pendingRaw = localStorage.getItem('upstar_pending_paid_submission');
+            if (pendingRaw) {
+              try {
+                const pending = JSON.parse(pendingRaw);
+                onSubmissionTracked?.({
+                  songTitle: pending.songTitle,
+                  artistName: pending.artistName,
+                  songUrl: pending.songUrl,
+                  platform: pending.platform,
+                  audioFileUrl: pending.audioFileUrl,
+                  streamerId: pending.streamerId,
+                  streamerSlug: pending.streamerSlug,
+                });
+              } catch {}
+              localStorage.removeItem('upstar_pending_paid_submission');
+            }
           }
         } catch (error) {
           console.error('Submission payment verification error:', error);
@@ -344,6 +362,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
         window.history.replaceState({}, '', currentPath);
       } else if (submissionPayment === 'cancelled') {
+        localStorage.removeItem('upstar_pending_paid_submission');
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
@@ -563,6 +582,19 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     try {
       // Upload audio file FIRST before redirecting to Stripe
       const audioFileUrl = await uploadAudioFile();
+
+      // Save submission data to localStorage BEFORE Stripe redirect
+      // so we can track it when the user returns
+      const pendingData = {
+        songTitle: songTitle || 'Untitled',
+        artistName: artistName || 'Unknown Artist',
+        songUrl: songUrl || 'direct-upload',
+        platform: platform || 'other',
+        audioFileUrl: audioFileUrl || null,
+        streamerId: streamerId || null,
+        streamerSlug: streamerSlug || null,
+      };
+      localStorage.setItem('upstar_pending_paid_submission', JSON.stringify(pendingData));
       
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
@@ -574,6 +606,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email: user?.email || email,
           platform: platform || 'other',
           audioFileUrl, // Pass the uploaded file path
+          streamerSlug: streamerSlug || null,
+          streamerId: streamerId || null,
         },
       });
 

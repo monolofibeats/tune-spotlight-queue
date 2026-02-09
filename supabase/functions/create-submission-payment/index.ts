@@ -18,6 +18,8 @@ const requestSchema = z.object({
   email: z.string().email().max(255).optional(),
   platform: z.string().max(50).optional().default('other'),
   audioFileUrl: z.string().max(500).optional().nullable(),
+  streamerSlug: z.string().max(100).optional().nullable(),
+  streamerId: z.string().max(100).optional().nullable(),
 });
 
 const logStep = (step: string, details?: unknown) => {
@@ -47,7 +49,7 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl } = validationResult.data;
+    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl, streamerSlug, streamerId } = validationResult.data;
     logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl });
 
     // Check if submission pricing is active
@@ -119,8 +121,12 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?submission_payment=cancelled`,
+      success_url: streamerSlug 
+        ? `${origin}/${streamerSlug}/submit?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`
+        : `${origin}/?submission_payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: streamerSlug
+        ? `${origin}/${streamerSlug}/submit?submission_payment=cancelled`
+        : `${origin}/?submission_payment=cancelled`,
       metadata: {
         type: "submission",
         user_id: user?.id || "",
@@ -133,6 +139,7 @@ serve(async (req) => {
         // Store both keys to be resilient across verifier versions
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",
+        streamer_id: streamerId || "",
       },
     });
 
