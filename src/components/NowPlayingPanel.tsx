@@ -116,6 +116,11 @@ export function NowPlayingPanel({
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [isLoadingSpotify, setIsLoadingSpotify] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+
+  const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
+    setAudioEl(el);
+  }, []);
 
   // Fetch submitter profile stats
   useEffect(() => {
