@@ -115,17 +115,19 @@ export function useStreamerPresets(streamerId?: string) {
     
     const template = templateKey ? PLATFORM_TEMPLATES[templateKey] : {};
     
+    const insertData = {
+      streamer_id: streamerId,
+      name: template?.name || 'New Preset',
+      platform_type: template?.platform_type || 'custom',
+      occasion_type: template?.occasion_type || 'custom',
+      theme_config: (template?.theme_config || {}) as unknown as Record<string, never>,
+      dashboard_layout: (template?.dashboard_layout || { widgets: DEFAULT_WIDGETS }) as unknown as Record<string, never>,
+      form_template: template?.form_template || null,
+    };
+
     const { data, error } = await supabase
       .from('streamer_presets')
-      .insert({
-        streamer_id: streamerId,
-        name: template?.name || 'New Preset',
-        platform_type: template?.platform_type || 'custom',
-        occasion_type: template?.occasion_type || 'custom',
-        theme_config: template?.theme_config || {},
-        dashboard_layout: template?.dashboard_layout || { widgets: DEFAULT_WIDGETS },
-        form_template: template?.form_template || null,
-      })
+      .insert(insertData)
       .select()
       .single();
 
