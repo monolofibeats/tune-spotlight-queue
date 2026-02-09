@@ -337,6 +337,24 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               description: data.message,
             });
             watchlistRef?.current?.refreshList();
+
+            // Track the paid submission in localStorage (same as free submissions)
+            const pendingRaw = localStorage.getItem('upstar_pending_paid_submission');
+            if (pendingRaw) {
+              try {
+                const pending = JSON.parse(pendingRaw);
+                onSubmissionTracked?.({
+                  songTitle: pending.songTitle,
+                  artistName: pending.artistName,
+                  songUrl: pending.songUrl,
+                  platform: pending.platform,
+                  audioFileUrl: pending.audioFileUrl,
+                  streamerId: pending.streamerId,
+                  streamerSlug: pending.streamerSlug,
+                });
+              } catch {}
+              localStorage.removeItem('upstar_pending_paid_submission');
+            }
           }
         } catch (error) {
           console.error('Submission payment verification error:', error);
@@ -344,6 +362,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
         window.history.replaceState({}, '', currentPath);
       } else if (submissionPayment === 'cancelled') {
+        localStorage.removeItem('upstar_pending_paid_submission');
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
