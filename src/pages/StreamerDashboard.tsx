@@ -478,12 +478,14 @@ const StreamerDashboard = () => {
                   <SubmissionListItem
                     key={submission.id}
                     submission={submission}
-                    position={index + 1}
+                    position={statusFilter === 'deleted' ? undefined : index + 1}
                     isAdmin={true}
+                    isTrashView={statusFilter === 'deleted'}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
+                    onRestore={handleRestoreSubmission}
                     onUpdate={handleUpdateSubmission}
-                    onPlayAudio={(sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
+                    onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
                   />
                 ))}
 
