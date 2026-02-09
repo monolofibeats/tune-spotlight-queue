@@ -161,6 +161,14 @@ function StreamerPageContent() {
         </section>
       )}
 
+      {/* Submission Tracker - floating banner for free submissions */}
+      {currentSubmission && (
+        <SubmissionTracker
+          submission={currentSubmission}
+          onClear={() => clearSubmission(streamer.slug)}
+        />
+      )}
+
       <LanguageSwitcher />
       <Footer />
 
