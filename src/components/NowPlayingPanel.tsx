@@ -14,7 +14,12 @@ import {
   Check,
   Disc3,
   Users,
-  Play
+  Play,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  SkipForward
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +83,8 @@ interface NowPlayingPanelProps {
   position: number;
   onClose: () => void;
   onDownload: () => void;
+  onStatusChange?: (id: string, status: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 // Social platform icons mapping
@@ -100,6 +107,8 @@ export function NowPlayingPanel({
   position,
   onClose,
   onDownload,
+  onStatusChange,
+  onDelete,
 }: NowPlayingPanelProps) {
   const [submitterStats, setSubmitterStats] = useState<SubmitterStats | null>(null);
   const [spotifyMeta, setSpotifyMeta] = useState<SpotifyMetadata | null>(null);
@@ -591,6 +600,53 @@ export function NowPlayingPanel({
                 </div>
               </div>
             </div>
+
+              {/* Review Actions */}
+              {onStatusChange && submission && (
+                <div className="px-6 py-4 border-t border-border/30 bg-card/30">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground mr-2">Actions:</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5"
+                      onClick={() => onStatusChange(submission.id, 'reviewing')}
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Reviewing
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5"
+                      onClick={() => onStatusChange(submission.id, 'reviewed')}
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Done
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5"
+                      onClick={() => onStatusChange(submission.id, 'skipped')}
+                    >
+                      <SkipForward className="w-3.5 h-3.5" />
+                      Skip
+                    </Button>
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-xs gap-1.5 text-destructive hover:text-destructive ml-auto"
+                        onClick={() => onDelete(submission.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
 
             {/* Visual accent bar */}
             <div className="h-1 bg-gradient-to-r from-primary via-primary/50 to-transparent" />

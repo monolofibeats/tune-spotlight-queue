@@ -142,10 +142,15 @@ const StreamerDashboard = () => {
         title: "Status updated",
         description: `Submission marked as ${newStatus}`,
       });
+      // If this was the now-playing submission and a final action was taken, auto-advance
+      if (nowPlaying.submission?.id === id && ['reviewed', 'skipped'].includes(newStatus)) {
+        advanceToNext(id);
+      }
     }
   };
 
   const handleDeleteSubmission = async (id: string) => {
+    const wasPlaying = nowPlaying.submission?.id === id;
     const { error } = await supabase
       .from('submissions')
       .delete()
@@ -162,6 +167,33 @@ const StreamerDashboard = () => {
         title: "Deleted",
         description: "Submission removed",
       });
+      if (wasPlaying) {
+        advanceToNext(id);
+      }
+    }
+  };
+
+  // Auto-advance: load the next #1 submission into now playing
+  const advanceToNext = (excludeId: string) => {
+    // Find the next top submission from the sorted pending list
+    const pendingQueue = submissions
+      .filter(s => s.status === 'pending' && s.id !== excludeId)
+      .sort((a, b) => {
+        if (a.is_priority && !b.is_priority) return -1;
+        if (!a.is_priority && b.is_priority) return 1;
+        if (a.is_priority && b.is_priority) {
+          const aTotal = (a.amount_paid || 0);
+          const bTotal = (b.amount_paid || 0);
+          if (aTotal !== bTotal) return bTotal - aTotal;
+        }
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      });
+
+    const next = pendingQueue[0];
+    if (next) {
+      handleOpenNowPlaying(next, null, false, 1);
+    } else {
+      setNowPlaying({ submission: null, audioUrl: null, isLoading: false, position: 0 });
     }
   };
 
@@ -187,7 +219,11 @@ const StreamerDashboard = () => {
     }
   };
 
+  // Hide the currently playing submission from the list
   const filteredSubmissions = submissions.filter(s => {
+    // Hide submission that's currently in Now Playing
+    if (nowPlaying.submission && s.id === nowPlaying.submission.id) return false;
+    
     const matchesSearch = 
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.artist_name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -408,6 +444,8 @@ const StreamerDashboard = () => {
                     position={nowPlaying.position}
                     onClose={handleCloseNowPlaying}
                     onDownload={handleNowPlayingDownload}
+                    onStatusChange={handleStatusChange}
+                    onDelete={handleDeleteSubmission}
                   />
                 </div>
               )}
