@@ -31,10 +31,22 @@ interface SiteFeedback {
 export function AdminStreamerManager() {
   const { user } = useAuth();
   const [applications, setApplications] = useState<StreamerApplication[]>([]);
+  const [feedback, setFeedback] = useState<SiteFeedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const fetchFeedback = async () => {
+    const { data, error } = await supabase
+      .from('site_feedback')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setFeedback(data as SiteFeedback[]);
+    }
+  };
 
   const fetchApplications = async () => {
     const { data, error } = await supabase
