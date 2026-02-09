@@ -305,47 +305,49 @@ const StreamerDashboard = () => {
             </div>
           </motion.div>
 
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-3 gap-4 mb-8"
-          >
-            <div className="glass rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/20">
-                  <Music className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                </div>
-              </div>
-            </div>
-            <div className="glass rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/20">
-                  <Eye className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold">{stats.pending}</p>
-                  <p className="text-sm text-muted-foreground">Pending</p>
+          {/* Stats - conditionally rendered */}
+          {visibleWidgets.includes('stats') && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-3 gap-4 mb-8"
+            >
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Music className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-display font-bold">{stats.total}</p>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="glass rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/20">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold">{stats.reviewed}</p>
-                  <p className="text-sm text-muted-foreground">Reviewed</p>
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-display font-bold">{stats.pending}</p>
+                    <p className="text-sm text-muted-foreground">Pending</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-500/20">
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-display font-bold">{stats.reviewed}</p>
+                    <p className="text-sm text-muted-foreground">Reviewed</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Tabs */}
           <Tabs defaultValue="submissions" className="space-y-6">
