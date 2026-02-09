@@ -235,7 +235,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
 }
 
 export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
-  ({ src, isLoading = false, onEnded }, ref) => {
+  ({ src, isLoading = false, onEnded, onAudioElement }, ref) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const pendingSeekRef = useRef<number | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
