@@ -607,15 +607,6 @@ export function NowPlayingPanel({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs text-muted-foreground mr-2">Actions:</span>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs gap-1.5"
-                      onClick={() => onStatusChange(submission.id, 'reviewing')}
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      Reviewing
-                    </Button>
-                    <Button
                       variant="default"
                       size="sm"
                       className="h-8 text-xs gap-1.5"
@@ -641,7 +632,7 @@ export function NowPlayingPanel({
                         onClick={() => onDelete(submission.id)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        Delete
+                        Trash
                       </Button>
                     )}
                   </div>
