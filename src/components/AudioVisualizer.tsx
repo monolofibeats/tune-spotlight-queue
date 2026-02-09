@@ -1,21 +1,10 @@
 import { useEffect, useRef } from 'react';
 
 interface AudioVisualizerProps {
-  /** The audio element to visualize. We listen to its timeupdate/play/pause
-   *  but do NOT use createMediaElementSource (which hijacks audio output). 
-   *  Instead we fetch the audio URL separately and decode it for analysis. */
   audioElement: HTMLAudioElement | null;
   className?: string;
 }
 
-/**
- * A reactive audio visualizer that renders soundwave lines.
- * 
- * Instead of using createMediaElementSource (which reroutes audio through
- * Web Audio API and breaks playback with cross-origin sources), this component
- * monitors the audio element's state and uses an AnalyserNode fed by a
- * separately-fetched copy of the audio data.
- */
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -27,9 +16,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
   const lastSrcRef = useRef<string>('');
   const cleanupRef = useRef<(() => void) | null>(null);
 
-  // Set up a shadow audio pipeline: fetch the audio, decode it, play through an
-  // AnalyserNode with gain=0 (inaudible) so we get frequency data without
-  // touching the main <audio> element's output.
+  // Shadow audio pipeline for analysis without hijacking main output
   useEffect(() => {
     if (!audioElement) {
       analyserRef.current = null;
@@ -41,12 +28,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const setupAnalyser = async () => {
       const src = audioElement.src;
       if (!src) return;
-      
-      // If src changed, reset; if same src re-mount, still set up listeners
+
       const srcChanged = src !== lastSrcRef.current;
       lastSrcRef.current = src;
 
-      // Clean up previous listeners
       if (cleanupRef.current) {
         cleanupRef.current();
         cleanupRef.current = null;
@@ -62,15 +47,14 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         let analyser = analyserRef.current;
 
         if (srcChanged || !analyser) {
-          // Fetch the audio file
           const response = await fetch(src);
           if (!response.ok) return;
           const arrayBuffer = await response.arrayBuffer();
           const audioBuffer = await actx.decodeAudioData(arrayBuffer);
 
           analyser = actx.createAnalyser();
-          analyser.fftSize = 512;
-          analyser.smoothingTimeConstant = 0.65;
+          analyser.fftSize = 256;
+          analyser.smoothingTimeConstant = 0.7;
 
           const gainNode = actx.createGain();
           gainNode.gain.value = 0;
@@ -80,9 +64,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
           analyserRef.current = analyser;
           dataRef.current = new Uint8Array(analyser.frequencyBinCount);
 
-          // Store buffer for synced playback
           const currentAnalyser = analyser;
-          
+
           const startShadowPlayback = () => {
             if (bufferSourceRef.current) {
               try { bufferSourceRef.current.stop(); } catch {}
@@ -127,7 +110,6 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             stopShadowPlayback();
           };
 
-          // If already playing, start immediately
           if (!audioElement.paused) {
             startShadowPlayback();
           }
@@ -147,7 +129,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     };
   }, [audioElement, audioElement?.src]);
 
-  // Animation loop
+  // Animation loop — hybrid bar + wave visualizer
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -161,8 +143,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const l = (parts[2] || '50%').replace('%', '');
     const hsla = (a: number) => `hsla(${h}, ${s}%, ${l}%, ${a})`;
 
-    const LINE_COUNT = 9;
-    const POINT_COUNT = 80;
+    const BAR_COUNT = 48;
+    const PADDING = 16; // horizontal padding so bars don't touch edges
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -176,6 +158,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     window.addEventListener('resize', resize);
 
     let time = 0;
+    // Smoothed values for each bar
+    const smoothed = new Float32Array(BAR_COUNT);
 
     const draw = () => {
       time += 1 / 60;
@@ -196,51 +180,101 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       }
 
       const centerY = hh / 2;
+      const usableWidth = w - PADDING * 2;
+      const barWidth = usableWidth / BAR_COUNT;
+      const gap = Math.max(1, barWidth * 0.25);
+      const actualBarWidth = barWidth - gap;
+      const maxBarHeight = (hh / 2) - 4; // leave 4px margin top/bottom
 
       ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
 
-      for (let li = 0; li < LINE_COUNT; li++) {
-        const lineOffset = (li - LINE_COUNT / 2) * (hh * 0.06);
-        const normalizedDist = Math.abs(li - LINE_COUNT / 2) / (LINE_COUNT / 2);
-        const baseOpacity = 0.1 + (1 - normalizedDist) * 0.35;
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const normX = i / (BAR_COUNT - 1);
 
-        ctx.beginPath();
-        ctx.strokeStyle = hsla(baseOpacity);
-        ctx.lineWidth = hasAudio ? 2.5 - normalizedDist * 1.2 : 1.5;
-        ctx.shadowBlur = hasAudio ? 16 : 8;
-        ctx.shadowColor = hsla(baseOpacity * 0.6);
-
-        for (let i = 0; i < POINT_COUNT; i++) {
-          const x = (i / (POINT_COUNT - 1)) * w;
-          const normX = i / (POINT_COUNT - 1);
-
-          const idleWave = Math.sin(normX * Math.PI * 2.5 + time * 0.8 + li * 0.4) * 6
-            + Math.sin(normX * Math.PI * 5 + time * 1.2 + li * 0.6) * 3;
-
-          let audioAmp = 0;
-          if (hasAudio && data) {
-            const binIndex = Math.floor(normX * (data.length * 0.75));
-            const val = data[Math.min(binIndex, data.length - 1)] / 255;
-            const boosted = Math.pow(val, 0.7); // boost quieter frequencies
-            audioAmp = boosted * (hh * 0.55);
-          }
-
-          const envelope = Math.sin(normX * Math.PI);
-          const totalAmp = (idleWave + audioAmp * envelope) * envelope;
-          const y = centerY + lineOffset + totalAmp * (hasAudio ? 1.2 : 0.25);
-
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            const prevX = ((i - 1) / (POINT_COUNT - 1)) * w;
-            const cpX = (prevX + x) / 2;
-            ctx.quadraticCurveTo(prevX, y, cpX, y);
-          }
+        // Get audio amplitude for this bar
+        let targetAmp = 0;
+        if (hasAudio && data) {
+          const binIndex = Math.floor(normX * (data!.length * 0.8));
+          const val = data![Math.min(binIndex, data!.length - 1)] / 255;
+          targetAmp = Math.pow(val, 0.65);
         }
-        ctx.stroke();
+
+        // Smooth transition
+        smoothed[i] += (targetAmp - smoothed[i]) * 0.25;
+        const amp = smoothed[i];
+
+        // Idle wave when no audio
+        const idleWave = Math.sin(normX * Math.PI * 3 + time * 1.2) * 0.08
+          + Math.sin(normX * Math.PI * 5 + time * 0.7) * 0.04;
+
+        const finalAmp = hasAudio ? amp : Math.abs(idleWave) + 0.02;
+
+        // Bar height — mirrored from center, clamped to maxBarHeight
+        const barH = Math.min(finalAmp * maxBarHeight * 2, maxBarHeight);
+
+        const x = PADDING + i * barWidth + gap / 2;
+
+        // Envelope — bars at edges are slightly shorter
+        const edgeFade = Math.sin(normX * Math.PI);
+        const adjustedH = barH * (0.4 + edgeFade * 0.6);
+
+        // Color intensity based on amplitude
+        const intensity = 0.3 + finalAmp * 0.7;
+
+        // Glow
+        ctx.shadowBlur = hasAudio ? 8 + amp * 12 : 4;
+        ctx.shadowColor = hsla(intensity * 0.5);
+
+        // Draw mirrored bar (top half + bottom half from center)
+        const radius = Math.min(actualBarWidth / 2, 3);
+
+        // Top bar (goes upward from center)
+        ctx.fillStyle = hsla(intensity);
+        roundedRect(ctx, x, centerY - adjustedH, actualBarWidth, adjustedH, radius);
+        ctx.fill();
+
+        // Bottom bar (mirror, slightly less opaque)
+        ctx.fillStyle = hsla(intensity * 0.7);
+        roundedRect(ctx, x, centerY, actualBarWidth, adjustedH, radius);
+        ctx.fill();
+
+        // Wave line connecting bar tops — draw as we go
+        if (i === 0) {
+          ctx.beginPath();
+          ctx.strokeStyle = hsla(0.4);
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = hasAudio ? 10 : 4;
+          ctx.shadowColor = hsla(0.3);
+          ctx.moveTo(x + actualBarWidth / 2, centerY - adjustedH);
+        } else {
+          ctx.lineTo(x + actualBarWidth / 2, centerY - adjustedH);
+        }
       }
+      // Stroke the wave line connecting bar tops
+      ctx.stroke();
+
+      // Mirror wave line on bottom
+      ctx.beginPath();
+      ctx.strokeStyle = hsla(0.25);
+      ctx.lineWidth = 1;
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const normX = i / (BAR_COUNT - 1);
+        let targetAmp = smoothed[i];
+        const idleWave = Math.sin(normX * Math.PI * 3 + time * 1.2) * 0.08
+          + Math.sin(normX * Math.PI * 5 + time * 0.7) * 0.04;
+        const finalAmp = hasAudio ? targetAmp : Math.abs(idleWave) + 0.02;
+        const barH = Math.min(finalAmp * maxBarHeight * 2, maxBarHeight);
+        const edgeFade = Math.sin(normX * Math.PI);
+        const adjustedH = barH * (0.4 + edgeFade * 0.6);
+        const x = PADDING + i * (usableWidth / BAR_COUNT) + (Math.max(1, (usableWidth / BAR_COUNT) * 0.25)) / 2;
+        const bw = (usableWidth / BAR_COUNT) - Math.max(1, (usableWidth / BAR_COUNT) * 0.25);
+        if (i === 0) {
+          ctx.moveTo(x + bw / 2, centerY + adjustedH);
+        } else {
+          ctx.lineTo(x + bw / 2, centerY + adjustedH);
+        }
+      }
+      ctx.stroke();
 
       ctx.restore();
       rafRef.current = requestAnimationFrame(draw);
@@ -262,4 +296,24 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       aria-hidden="true"
     />
   );
+}
+
+/** Draw a rounded rectangle path and begin fill (caller must call ctx.fill()) */
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number,
+  w: number, h: number,
+  r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
