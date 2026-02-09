@@ -162,9 +162,13 @@ export function useStreamerPresets(streamerId?: string) {
   };
 
   const updatePreset = async (presetId: string, updates: Partial<StreamerPreset>) => {
+    const dbUpdates: Record<string, unknown> = { ...updates };
+    if (updates.theme_config) dbUpdates.theme_config = updates.theme_config as unknown as Record<string, never>;
+    if (updates.dashboard_layout) dbUpdates.dashboard_layout = updates.dashboard_layout as unknown as Record<string, never>;
+    
     const { error } = await supabase
       .from('streamer_presets')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', presetId);
 
     if (!error) {
