@@ -249,27 +249,34 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Audio-driven expansion factor
-      const waveExpansion = 1 + smoothEnergy * 3.5;
+      // Audio-driven expansion — reduced, only outer lines spread on spikes
+      const waveExpansion = 1 + smoothEnergy * 1.2;
 
       for (let wi = 0; wi < waves.length; wi++) {
         const wave = waves[wi];
 
-        // Smooth expansion (homepage style)
-        const targetOffset = wave.baseYOffset * waveExpansion;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.06;
+        // How far from center this line is (0 = center, 1 = outermost)
+        const distFromCenter = Math.abs(wi - (waves.length - 1) / 2) / ((waves.length - 1) / 2);
+
+        // Only outer lines expand; center lines stay tight
+        const lineExpansion = 1 + (waveExpansion - 1) * Math.pow(distFromCenter, 2.0);
+        const targetOffset = wave.baseYOffset * lineExpansion;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.04;
 
         ctx.beginPath();
-        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.15);
-        ctx.lineWidth = 1.5 + smoothEnergy * 1.2;
-        ctx.shadowBlur = 10 + smoothEnergy * 12;
-        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.15);
+        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.1);
+        ctx.lineWidth = 1.5 + smoothEnergy * 0.8;
+        ctx.shadowBlur = 10 + smoothEnergy * 8;
+        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.1);
 
         const pts = wave.points;
         const centerY = 0.5 + wave.currentYOffset;
 
-        // Direction: lines above center push up with audio, below push down
+        // Direction: lines above center push up, below push down
         const dir = wave.baseYOffset >= 0 ? 1 : -1;
+
+        // Outer lines get more freq displacement, center lines get very little
+        const freqStrength = 0.05 + distFromCenter * 0.25;
 
         for (let i = 0; i < pts.length; i++) {
           const x = i / (pts.length - 1);
@@ -277,9 +284,9 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
           // Homepage animated wave (identical formula)
           const animatedY = pts[i] * Math.sin(time * wave.speed + wave.phase + i * 0.04);
 
-          // Frequency spectrum displacement at this x-position
+          // Frequency spectrum displacement — scaled by line's distance from center
           const spectrumVal = smoothedSpectrum[i];
-          const freqDisplacement = spectrumVal * dir * 0.25;
+          const freqDisplacement = spectrumVal * dir * freqStrength;
 
           const y = centerY + animatedY * wave.amplitude + freqDisplacement;
 
@@ -290,7 +297,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             const prevX = (i - 1) / (pts.length - 1);
             const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
             const prevSpectrumVal = smoothedSpectrum[i - 1];
-            const prevFreqDisp = prevSpectrumVal * dir * 0.25;
+            const prevFreqDisp = prevSpectrumVal * dir * freqStrength;
             const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
 
             const cpX = ((prevX + x) / 2) * width;
