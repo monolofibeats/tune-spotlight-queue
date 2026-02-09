@@ -14,7 +14,12 @@ import {
   Check,
   Disc3,
   Users,
-  Play
+  Play,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Trash2,
+  SkipForward
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
