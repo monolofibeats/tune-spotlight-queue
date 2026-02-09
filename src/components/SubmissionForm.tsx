@@ -563,6 +563,19 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     try {
       // Upload audio file FIRST before redirecting to Stripe
       const audioFileUrl = await uploadAudioFile();
+
+      // Save submission data to localStorage BEFORE Stripe redirect
+      // so we can track it when the user returns
+      const pendingData = {
+        songTitle: songTitle || 'Untitled',
+        artistName: artistName || 'Unknown Artist',
+        songUrl: songUrl || 'direct-upload',
+        platform: platform || 'other',
+        audioFileUrl: audioFileUrl || null,
+        streamerId: streamerId || null,
+        streamerSlug: streamerSlug || null,
+      };
+      localStorage.setItem('upstar_pending_paid_submission', JSON.stringify(pendingData));
       
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
@@ -574,6 +587,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email: user?.email || email,
           platform: platform || 'other',
           audioFileUrl, // Pass the uploaded file path
+          streamerSlug: streamerSlug || null,
+          streamerId: streamerId || null,
         },
       });
 
