@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend@2.0.0";
 
 const logStep = (prefix: string, step: string, details?: unknown) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -8,7 +9,6 @@ const logStep = (prefix: string, step: string, details?: unknown) => {
 /**
  * Auto-create a user account from a Stripe checkout email and send a magic link.
  * If the user already exists, this is a no-op.
- * Uses the service role client to bypass RLS.
  */
 export async function autoCreateUserFromPayment(
   email: string | null | undefined,
@@ -26,13 +26,7 @@ export async function autoCreateUserFromPayment(
   });
 
   try {
-    // Check if user already exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1,
-    });
-
-    // Search by email using the admin API
+    // Check if user already exists by email
     const { data: userList } = await supabase.auth.admin.listUsers();
     const existingUser = userList?.users?.find(
       (u) => u.email?.toLowerCase() === email.toLowerCase()
@@ -48,7 +42,7 @@ export async function autoCreateUserFromPayment(
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password: randomPassword,
-      email_confirm: true, // Auto-confirm since they paid via Stripe
+      email_confirm: true,
     });
 
     if (createError) {
@@ -58,8 +52,8 @@ export async function autoCreateUserFromPayment(
 
     logStep('AUTO-ACCOUNT', 'User created', { userId: newUser.user.id, email });
 
-    // Send magic link for login
-    const { error: magicLinkError } = await supabase.auth.admin.generateLink({
+    // Generate magic link
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email,
       options: {
@@ -67,11 +61,43 @@ export async function autoCreateUserFromPayment(
       },
     });
 
-    if (magicLinkError) {
-      logStep('AUTO-ACCOUNT', 'Magic link generation failed', { error: magicLinkError.message });
-      // User was still created — they can request a magic link later
+    if (linkError || !linkData?.properties?.action_link) {
+      logStep('AUTO-ACCOUNT', 'Magic link generation failed', { error: linkError?.message });
     } else {
-      logStep('AUTO-ACCOUNT', 'Magic link sent', { email });
+      // Send the magic link via Resend
+      const resendKey = Deno.env.get("RESEND_API_KEY");
+      if (resendKey) {
+        try {
+          const resend = new Resend(resendKey);
+          await resend.emails.send({
+            from: "UpStar <noreply@upstar.live>",
+            to: [email],
+            subject: "Your song was submitted! Log in to track it 🎵",
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">
+                <h1 style="font-size: 24px; margin-bottom: 16px;">Your submission is in! 🎶</h1>
+                <p style="color: #666; font-size: 16px; line-height: 1.5;">
+                  Thanks for your submission. We've created an account for you so you can track your song's progress.
+                </p>
+                <p style="margin: 24px 0;">
+                  <a href="${linkData.properties.action_link}" 
+                     style="display: inline-block; background: #8B5CF6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                    Log in to your dashboard →
+                  </a>
+                </p>
+                <p style="color: #999; font-size: 13px;">
+                  This link expires in 24 hours. You can always request a new one from the login page.
+                </p>
+              </div>
+            `,
+          });
+          logStep('AUTO-ACCOUNT', 'Magic link email sent', { email });
+        } catch (emailErr) {
+          logStep('AUTO-ACCOUNT', 'Failed to send email', { error: String(emailErr) });
+        }
+      } else {
+        logStep('AUTO-ACCOUNT', 'RESEND_API_KEY not set, skipping email');
+      }
     }
 
     // Add the 'user' role
