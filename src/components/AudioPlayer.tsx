@@ -248,6 +248,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       const audio = audioRef.current;
       if (!audio) return;
 
+      // Expose audio element to parent (e.g. for visualizer)
+      onAudioElement?.(audio);
+
       // Attach listeners *after* the audio element exists, and re-run when src changes.
       // Previously, the <audio> element wasn't rendered until src existed, so the effect
       // ran with audioRef.current === null and never attached listeners.
