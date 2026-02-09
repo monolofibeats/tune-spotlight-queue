@@ -286,7 +286,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
           // Frequency spectrum displacement — scaled by line's distance from center
           const spectrumVal = smoothedSpectrum[i];
-          const freqDisplacement = spectrumVal * dir * 0.25;
+          const freqDisplacement = spectrumVal * dir * freqStrength;
 
           const y = centerY + animatedY * wave.amplitude + freqDisplacement;
 
