@@ -78,6 +78,8 @@ interface NowPlayingPanelProps {
   position: number;
   onClose: () => void;
   onDownload: () => void;
+  onStatusChange?: (id: string, status: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 // Social platform icons mapping
