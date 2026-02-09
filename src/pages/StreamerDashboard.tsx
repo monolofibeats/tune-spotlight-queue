@@ -398,17 +398,19 @@ const StreamerDashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Now Playing Panel */}
-              <div ref={nowPlayingRef}>
-                <NowPlayingPanel
-                  submission={nowPlaying.submission}
-                  audioUrl={nowPlaying.audioUrl}
-                  isLoadingAudio={nowPlaying.isLoading}
-                  position={nowPlaying.position}
-                  onClose={handleCloseNowPlaying}
-                  onDownload={handleNowPlayingDownload}
-                />
-              </div>
+              {/* Now Playing Panel - conditionally rendered */}
+              {visibleWidgets.includes('now_playing') && (
+                <div ref={nowPlayingRef}>
+                  <NowPlayingPanel
+                    submission={nowPlaying.submission}
+                    audioUrl={nowPlaying.audioUrl}
+                    isLoadingAudio={nowPlaying.isLoading}
+                    position={nowPlaying.position}
+                    onClose={handleCloseNowPlaying}
+                    onDownload={handleNowPlayingDownload}
+                  />
+                </div>
+              )}
 
               {/* Submissions List */}
               <div className="space-y-2">
