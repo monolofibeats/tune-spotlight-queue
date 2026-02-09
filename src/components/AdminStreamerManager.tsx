@@ -62,14 +62,21 @@ export function AdminStreamerManager() {
 
   useEffect(() => {
     fetchApplications();
+    fetchFeedback();
 
     const channel = supabase
       .channel('streamer_applications')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'streamer_applications' }, fetchApplications)
       .subscribe();
 
+    const feedbackChannel = supabase
+      .channel('site_feedback_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_feedback' }, fetchFeedback)
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(feedbackChannel);
     };
   }, []);
 
