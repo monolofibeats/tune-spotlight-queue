@@ -83,8 +83,10 @@ interface SubmissionListItemProps {
   submission: Submission;
   position?: number;
   isAdmin?: boolean;
+  isTrashView?: boolean;
   onStatusChange: (id: string, status: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, permanent?: boolean) => void;
+  onRestore?: (id: string) => void;
   onUpdate?: (id: string, updates: {
     song_url: string;
     artist_name: string;
