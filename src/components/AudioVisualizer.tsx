@@ -243,7 +243,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     <canvas
       ref={canvasRef}
       className={`w-full pointer-events-none ${className}`}
-      style={{ height: 80 }}
+      style={{ height: 140 }}
       aria-hidden="true"
     />
   );
