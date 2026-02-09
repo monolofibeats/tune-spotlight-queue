@@ -102,6 +102,8 @@ export function NowPlayingPanel({
   position,
   onClose,
   onDownload,
+  onStatusChange,
+  onDelete,
 }: NowPlayingPanelProps) {
   const [submitterStats, setSubmitterStats] = useState<SubmitterStats | null>(null);
   const [spotifyMeta, setSpotifyMeta] = useState<SpotifyMetadata | null>(null);
