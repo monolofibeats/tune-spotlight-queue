@@ -25,6 +25,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
   const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isPlayingRef = useRef(false);
   const lastSrcRef = useRef<string>('');
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   // Set up a shadow audio pipeline: fetch the audio, decode it, play through an
   // AnalyserNode with gain=0 (inaudible) so we get frequency data without
@@ -33,13 +34,23 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     if (!audioElement) {
       analyserRef.current = null;
       dataRef.current = null;
+      lastSrcRef.current = '';
       return;
     }
 
     const setupAnalyser = async () => {
       const src = audioElement.src;
-      if (!src || src === lastSrcRef.current) return;
+      if (!src) return;
+      
+      // If src changed, reset; if same src re-mount, still set up listeners
+      const srcChanged = src !== lastSrcRef.current;
       lastSrcRef.current = src;
+
+      // Clean up previous listeners
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
 
       try {
         if (!audioCtxRef.current) {
@@ -48,88 +59,92 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
 
-        // Fetch the audio file
-        const response = await fetch(src);
-        if (!response.ok) return;
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+        let analyser = analyserRef.current;
 
-        const analyser = actx.createAnalyser();
-        analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.65;
+        if (srcChanged || !analyser) {
+          // Fetch the audio file
+          const response = await fetch(src);
+          if (!response.ok) return;
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await actx.decodeAudioData(arrayBuffer);
 
-        // Connect: source -> analyser -> gain(0) -> destination
-        // Gain=0 means this shadow pipeline is silent
-        const gainNode = actx.createGain();
-        gainNode.gain.value = 0;
-        analyser.connect(gainNode);
-        gainNode.connect(actx.destination);
+          analyser = actx.createAnalyser();
+          analyser.fftSize = 512;
+          analyser.smoothingTimeConstant = 0.65;
 
-        analyserRef.current = analyser;
-        dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+          const gainNode = actx.createGain();
+          gainNode.gain.value = 0;
+          analyser.connect(gainNode);
+          gainNode.connect(actx.destination);
 
-        // Store buffer for synced playback
-        const startShadowPlayback = () => {
-          // Stop previous
-          if (bufferSourceRef.current) {
-            try { bufferSourceRef.current.stop(); } catch {}
-          }
+          analyserRef.current = analyser;
+          dataRef.current = new Uint8Array(analyser.frequencyBinCount);
 
-          const bufferSource = actx.createBufferSource();
-          bufferSource.buffer = audioBuffer;
-          bufferSource.connect(analyser);
-          bufferSourceRef.current = bufferSource;
+          // Store buffer for synced playback
+          const currentAnalyser = analyser;
+          
+          const startShadowPlayback = () => {
+            if (bufferSourceRef.current) {
+              try { bufferSourceRef.current.stop(); } catch {}
+            }
+            const bufferSource = actx.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.connect(currentAnalyser);
+            bufferSourceRef.current = bufferSource;
+            const offset = audioElement.currentTime || 0;
+            bufferSource.start(0, offset);
+            isPlayingRef.current = true;
+          };
 
-          // Sync to audio element's current time
-          const offset = audioElement.currentTime || 0;
-          bufferSource.start(0, offset);
-          isPlayingRef.current = true;
-        };
+          const stopShadowPlayback = () => {
+            if (bufferSourceRef.current) {
+              try { bufferSourceRef.current.stop(); } catch {}
+              bufferSourceRef.current = null;
+            }
+            isPlayingRef.current = false;
+          };
 
-        const stopShadowPlayback = () => {
-          if (bufferSourceRef.current) {
-            try { bufferSourceRef.current.stop(); } catch {}
-            bufferSourceRef.current = null;
-          }
-          isPlayingRef.current = false;
-        };
+          const onPlay = () => startShadowPlayback();
+          const onPause = () => stopShadowPlayback();
+          const onEnded = () => stopShadowPlayback();
+          const onSeeked = () => {
+            if (!audioElement.paused) {
+              stopShadowPlayback();
+              startShadowPlayback();
+            }
+          };
 
-        // Sync with main audio element
-        const onPlay = () => startShadowPlayback();
-        const onPause = () => stopShadowPlayback();
-        const onEnded = () => stopShadowPlayback();
-        const onSeeked = () => {
-          if (!audioElement.paused) {
+          audioElement.addEventListener('play', onPlay);
+          audioElement.addEventListener('pause', onPause);
+          audioElement.addEventListener('ended', onEnded);
+          audioElement.addEventListener('seeked', onSeeked);
+
+          cleanupRef.current = () => {
+            audioElement.removeEventListener('play', onPlay);
+            audioElement.removeEventListener('pause', onPause);
+            audioElement.removeEventListener('ended', onEnded);
+            audioElement.removeEventListener('seeked', onSeeked);
             stopShadowPlayback();
+          };
+
+          // If already playing, start immediately
+          if (!audioElement.paused) {
             startShadowPlayback();
           }
-        };
-
-        audioElement.addEventListener('play', onPlay);
-        audioElement.addEventListener('pause', onPause);
-        audioElement.addEventListener('ended', onEnded);
-        audioElement.addEventListener('seeked', onSeeked);
-
-        // If already playing, start immediately
-        if (!audioElement.paused) {
-          startShadowPlayback();
         }
-
-        return () => {
-          audioElement.removeEventListener('play', onPlay);
-          audioElement.removeEventListener('pause', onPause);
-          audioElement.removeEventListener('ended', onEnded);
-          audioElement.removeEventListener('seeked', onSeeked);
-          stopShadowPlayback();
-        };
       } catch (err) {
         console.warn('AudioVisualizer: Could not set up analyser', err);
       }
     };
 
-    // Wait a tick for the audio element to have its src set
     const timer = setTimeout(setupAnalyser, 200);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (cleanupRef.current) {
+        cleanupRef.current();
+        cleanupRef.current = null;
+      }
+    };
   }, [audioElement, audioElement?.src]);
 
   // Animation loop
