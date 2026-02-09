@@ -209,161 +209,197 @@ export function AdminStreamerManager() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Users className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Streamer Applications</h2>
-          {pendingCount > 0 && (
-            <Badge variant="destructive">{pendingCount} pending</Badge>
-          )}
-        </div>
-      </div>
+    <div className="space-y-10">
+      {/* Feedback Section */}
+      {feedback.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold">Site Feedback</h2>
+            <Badge variant="outline">{feedback.length}</Badge>
+          </div>
 
-      {applications.length === 0 ? (
-        <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
-          <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No applications yet</h3>
-          <p className="text-muted-foreground">Streamer applications will appear here.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {applications.map((application) => (
-            <motion.div
-              key={application.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card/50 border border-border/50 rounded-xl overflow-hidden"
-            >
-              {/* Header */}
-              <div
-                className="p-4 flex items-center justify-between cursor-pointer hover:bg-card/80 transition-colors"
-                onClick={() => setExpandedId(expandedId === application.id ? null : application.id)}
+          <div className="space-y-3">
+            {feedback.map((item) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card/50 border border-border/50 rounded-xl p-4 space-y-2"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-lg font-bold text-primary">
-                      {application.display_name.charAt(0).toUpperCase()}
+                <p className="text-sm whitespace-pre-wrap">{item.message}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{new Date(item.created_at).toLocaleString()}</span>
+                  {item.contact_info && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3 h-3" />
+                      {item.contact_info}
                     </span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{application.display_name}</h3>
-                      {getStatusBadge(application.status)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      /{application.desired_slug} • {new Date(application.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                {expandedId === application.id ? (
-                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                )}
-              </div>
-
-              {/* Expanded Content */}
-              {expandedId === application.id && (
-                <div className="px-4 pb-4 border-t border-border/50 pt-4 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <a href={`mailto:${application.email}`} className="text-primary hover:underline">
-                          {application.email}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <LinkIcon className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">upstar.gg/{application.desired_slug}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {application.twitch_url && (
-                        <a
-                          href={application.twitch_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-purple-400 hover:underline"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Twitch
-                        </a>
-                      )}
-                      {application.youtube_url && (
-                        <a
-                          href={application.youtube_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-red-400 hover:underline"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          YouTube
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {application.application_message && (
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {application.application_message}
-                      </p>
-                    </div>
-                  )}
-
-                  {application.status === 'rejected' && application.rejection_reason && (
-                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                      <p className="text-sm text-destructive">
-                        <strong>Rejection reason:</strong> {application.rejection_reason}
-                      </p>
-                    </div>
-                  )}
-
-                  {application.status === 'pending' && (
-                    <div className="space-y-3 pt-2">
-                      <Textarea
-                        placeholder="Rejection reason (required if rejecting)"
-                        value={rejectionReason}
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                        rows={2}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => handleApprove(application)}
-                          disabled={processingId === application.id}
-                          className="flex-1 gap-2"
-                        >
-                          {processingId === application.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Check className="w-4 h-4" />
-                          )}
-                          Approve
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleReject(application)}
-                          disabled={processingId === application.id}
-                          className="flex-1 gap-2"
-                        >
-                          {processingId === application.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4" />
-                          )}
-                          Reject
-                        </Button>
-                      </div>
-                    </div>
                   )}
                 </div>
-              )}
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Streamer Applications Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold">Streamer Applications</h2>
+            {pendingCount > 0 && (
+              <Badge variant="destructive">{pendingCount} pending</Badge>
+            )}
+          </div>
+        </div>
+
+        {applications.length === 0 ? (
+          <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
+            <Users className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No applications yet</h3>
+            <p className="text-muted-foreground">Streamer applications will appear here.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {applications.map((application) => (
+              <motion.div
+                key={application.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card/50 border border-border/50 rounded-xl overflow-hidden"
+              >
+                {/* Header */}
+                <div
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-card/80 transition-colors"
+                  onClick={() => setExpandedId(expandedId === application.id ? null : application.id)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">
+                        {application.display_name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{application.display_name}</h3>
+                        {getStatusBadge(application.status)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        /{application.desired_slug} • {new Date(application.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  {expandedId === application.id ? (
+                    <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Expanded Content */}
+                {expandedId === application.id && (
+                  <div className="px-4 pb-4 border-t border-border/50 pt-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          <a href={`mailto:${application.email}`} className="text-primary hover:underline">
+                            {application.email}
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <LinkIcon className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">upstar.gg/{application.desired_slug}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {application.twitch_url && (
+                          <a
+                            href={application.twitch_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-purple-400 hover:underline"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Twitch
+                          </a>
+                        )}
+                        {application.youtube_url && (
+                          <a
+                            href={application.youtube_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-sm text-red-400 hover:underline"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            YouTube
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {application.application_message && (
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                          {application.application_message}
+                        </p>
+                      </div>
+                    )}
+
+                    {application.status === 'rejected' && application.rejection_reason && (
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                        <p className="text-sm text-destructive">
+                          <strong>Rejection reason:</strong> {application.rejection_reason}
+                        </p>
+                      </div>
+                    )}
+
+                    {application.status === 'pending' && (
+                      <div className="space-y-3 pt-2">
+                        <Textarea
+                          placeholder="Rejection reason (required if rejecting)"
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleApprove(application)}
+                            disabled={processingId === application.id}
+                            className="flex-1 gap-2"
+                          >
+                            {processingId === application.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Check className="w-4 h-4" />
+                            )}
+                            Approve
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleReject(application)}
+                            disabled={processingId === application.id}
+                            className="flex-1 gap-2"
+                          >
+                            {processingId === application.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <X className="w-4 h-4" />
+                            )}
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
