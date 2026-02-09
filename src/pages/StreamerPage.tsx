@@ -18,10 +18,11 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
 function StreamerPageContent() {
+  const { slug } = useParams<{ slug: string }>();
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
-  const { currentSubmission, trackSubmission, clearSubmission } = useTrackedSubmission(null);
+  const { currentSubmission, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   if (isLoading) {
     return (
