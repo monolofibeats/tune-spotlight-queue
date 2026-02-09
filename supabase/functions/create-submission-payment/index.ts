@@ -18,6 +18,8 @@ const requestSchema = z.object({
   email: z.string().email().max(255).optional(),
   platform: z.string().max(50).optional().default('other'),
   audioFileUrl: z.string().max(500).optional().nullable(),
+  streamerSlug: z.string().max(100).optional().nullable(),
+  streamerId: z.string().max(100).optional().nullable(),
 });
 
 const logStep = (step: string, details?: unknown) => {
