@@ -7,6 +7,7 @@ interface AudioPlayerProps {
   src: string | null;
   isLoading?: boolean;
   onEnded?: () => void;
+  onAudioElement?: (el: HTMLAudioElement | null) => void;
 }
 
 interface SeekBarProps {
