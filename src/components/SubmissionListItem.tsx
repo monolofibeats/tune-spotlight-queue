@@ -21,6 +21,17 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
@@ -494,17 +505,35 @@ export function SubmissionListItem({
                         <XCircle className="w-3 h-3" />
                         Skip
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(submission.id);
-                        }}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-destructive hover:text-destructive"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="glass-strong" onClick={(e) => e.stopPropagation()}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Move to Trash?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will move "{submission.artist_name} – {submission.song_title}" to the trash. You can restore it within 7 days.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => onDelete(submission.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Move to Trash
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </>
                   )}
                 </div>
