@@ -282,17 +282,17 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       for (let wi = 0; wi < waves.length; wi++) {
         const wave = waves[wi];
 
-        // Smooth expansion toward target
+        // Faster expansion tracking for hits
         const targetOffset = wave.baseYOffset * targetExpansion;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.03;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.08;
 
-        // Audio-reactive amplitude boost
-        const ampBoost = 1 + smoothEnergy * 3.0;
+        // Audio-reactive amplitude boost with transient punch
+        const ampBoost = 1 + reactivity * 5.0;
         const effectiveAmplitude = wave.amplitude * ampBoost;
 
         ctx.beginPath();
-        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.12);
-        ctx.lineWidth = 1.5 + smoothEnergy * 1.0;
+        ctx.strokeStyle = hsla(wave.opacity + reactivity * 0.18);
+        ctx.lineWidth = 1.5 + reactivity * 1.5;
         ctx.shadowBlur = 10 + smoothEnergy * 10;
         ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.15);
 
