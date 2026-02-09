@@ -45,12 +45,13 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         if (actx.state === 'suspended') await actx.resume();
 
         let analyser = analyserRef.current;
+        let audioBuffer: AudioBuffer | null = null;
 
         if (srcChanged || !analyser) {
           const response = await fetch(src);
           if (!response.ok) return;
           const arrayBuffer = await response.arrayBuffer();
-          const audioBuffer = await actx.decodeAudioData(arrayBuffer);
+          audioBuffer = await actx.decodeAudioData(arrayBuffer);
 
           analyser = actx.createAnalyser();
           analyser.fftSize = 256;
@@ -63,29 +64,43 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
           analyserRef.current = analyser;
           dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+        }
 
-          const currentAnalyser = analyser;
+        // Always set up listeners (they may have been cleaned up by effect re-run)
+        const currentAnalyser = analyser!;
 
-          const startShadowPlayback = () => {
-            if (bufferSourceRef.current) {
-              try { bufferSourceRef.current.stop(); } catch {}
+        const startShadowPlayback = () => {
+          if (bufferSourceRef.current) {
+            try { bufferSourceRef.current.stop(); } catch {}
+          }
+          // Need audioBuffer - re-fetch if we don't have it
+          const doStart = async () => {
+            let buf = audioBuffer;
+            if (!buf) {
+              try {
+                const resp = await fetch(src);
+                if (!resp.ok) return;
+                buf = await actx.decodeAudioData(await resp.arrayBuffer());
+              } catch { return; }
             }
             const bufferSource = actx.createBufferSource();
-            bufferSource.buffer = audioBuffer;
+            bufferSource.buffer = buf;
             bufferSource.connect(currentAnalyser);
             bufferSourceRef.current = bufferSource;
             const offset = audioElement.currentTime || 0;
             bufferSource.start(0, offset);
             isPlayingRef.current = true;
           };
+          doStart();
+        };
 
-          const stopShadowPlayback = () => {
-            if (bufferSourceRef.current) {
-              try { bufferSourceRef.current.stop(); } catch {}
-              bufferSourceRef.current = null;
-            }
-            isPlayingRef.current = false;
-          };
+        const stopShadowPlayback = () => {
+          if (bufferSourceRef.current) {
+            try { bufferSourceRef.current.stop(); } catch {}
+            bufferSourceRef.current = null;
+          }
+          isPlayingRef.current = false;
+        };
 
           const onPlay = () => startShadowPlayback();
           const onPause = () => stopShadowPlayback();
