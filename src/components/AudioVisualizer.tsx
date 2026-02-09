@@ -22,6 +22,46 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
+// ── Exact homepage wave line creation ──
+
+interface WaveLine {
+  points: number[];
+  phase: number;
+  speed: number;
+  amplitude: number;
+  baseYOffset: number;
+  currentYOffset: number;
+  opacity: number;
+}
+
+function createWaveLines(): WaveLine[] {
+  const lines: WaveLine[] = [];
+  const lineCount = 14;
+  const pointCount = 100;
+
+  for (let i = 0; i < lineCount; i++) {
+    const points: number[] = [];
+    for (let j = 0; j < pointCount; j++) {
+      const x = j / pointCount;
+      const baseWave = Math.sin(x * Math.PI * 2.5 + i * 0.25) * 0.6;
+      const harmonic1 = Math.sin(x * Math.PI * 5 + i * 0.4) * 0.3;
+      const harmonic2 = Math.sin(x * Math.PI * 7.5 + i * 0.6) * 0.15;
+      points.push(baseWave + harmonic1 + harmonic2);
+    }
+    const baseYOffset = (i - lineCount / 2) * 0.01;
+    lines.push({
+      points,
+      phase: i * 0.35,
+      speed: 0.25 + Math.random() * 0.35,
+      amplitude: 0.055 + (i % 5) * 0.018,
+      baseYOffset,
+      currentYOffset: baseYOffset,
+      opacity: 0.06 + (1 - Math.abs(i - lineCount / 2) / (lineCount / 2)) * 0.14,
+    });
+  }
+  return lines;
+}
+
 // ── Shadow audio pipeline ──
 
 function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
@@ -44,10 +84,8 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
     const setup = async () => {
       const src = audioElement.src;
       if (!src) return;
-
       const srcChanged = src !== lastSrcRef.current;
       lastSrcRef.current = src;
-
       if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
 
       try {
@@ -64,8 +102,8 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
           audioBuffer = await actx.decodeAudioData(await resp.arrayBuffer());
 
           analyser = actx.createAnalyser();
-          analyser.fftSize = 2048; // High res: 1024 frequency bins
-          analyser.smoothingTimeConstant = 0.4; // Low smoothing = fast reaction
+          analyser.fftSize = 2048;
+          analyser.smoothingTimeConstant = 0.3;
           const gain = actx.createGain();
           gain.gain.value = 0;
           analyser.connect(gain);
@@ -76,18 +114,11 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         }
 
         const currentAnalyser = analyser!;
-
         const startShadow = () => {
           if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} }
           (async () => {
             let buf = audioBuffer;
-            if (!buf) {
-              try {
-                const r = await fetch(src);
-                if (!r.ok) return;
-                buf = await actx.decodeAudioData(await r.arrayBuffer());
-              } catch { return; }
-            }
+            if (!buf) { try { const r = await fetch(src); if (!r.ok) return; buf = await actx.decodeAudioData(await r.arrayBuffer()); } catch { return; } }
             const bs = actx.createBufferSource();
             bs.buffer = buf;
             bs.connect(currentAnalyser);
@@ -96,7 +127,6 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
             isPlayingRef.current = true;
           })();
         };
-
         const stopShadow = () => {
           if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
           isPlayingRef.current = false;
@@ -119,7 +149,6 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
           audioElement.removeEventListener('seeked', onSeeked);
           stopShadow();
         };
-
         if (!audioElement.paused) startShadow();
       } catch (err) {
         console.warn('AudioVisualizer: analyser setup failed', err);
@@ -134,9 +163,8 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 }
 
 /**
- * Hybrid visualizer: smooth flowing wave lines (homepage style)
- * whose shapes are directly driven by the full frequency spectrum (0–20kHz, left to right).
- * Attack is near-instant, release is smooth.
+ * Hybrid visualizer: exact homepage smooth wave lines +
+ * frequency spectrum (0–20kHz left→right) as displacement.
  */
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -150,26 +178,14 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     if (!ctx) return;
 
     const hsla = makeHslaFromCssVar('--primary');
+    const waves = createWaveLines();
+    const POINT_COUNT = waves[0].points.length; // 100
 
-    const LINE_COUNT = 14;
-    const POINTS = 120; // x-axis resolution
-
-    // Smoothed spectrum mapped to POINTS (persistent across frames)
-    const spectrum = new Float32Array(POINTS); // 0-1 per point
-
-    // Each line has a vertical offset and style
-    const lines = Array.from({ length: LINE_COUNT }, (_, i) => ({
-      yOffset: (i - LINE_COUNT / 2) * 0.012,
-      phase: i * 0.35,
-      speed: 0.2 + (i % 5) * 0.06,
-      // How much this line reacts to audio (center lines react most)
-      reactivity: 0.6 + (1 - Math.abs(i - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.4,
-      opacity: 0.05 + (1 - Math.abs(i - LINE_COUNT / 2) / (LINE_COUNT / 2)) * 0.16,
-      // Slight vertical flip for lines below center
-      direction: i < LINE_COUNT / 2 ? -1 : 1,
-    }));
+    // Smoothed spectrum values per wave point (persistent across frames)
+    const smoothedSpectrum = new Float32Array(POINT_COUNT);
 
     let time = 0;
+    let smoothEnergy = 0;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -198,87 +214,88 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      // Map frequency bins → POINTS with logarithmic scaling
-      // (gives more resolution to bass/mids, less to ultra-highs)
+      // Map full frequency spectrum to wave points (log-scaled, 0–20kHz L→R)
       if (data) {
-        const binCount = data.length; // 1024 bins
-        for (let p = 0; p < POINTS; p++) {
-          const normX = p / (POINTS - 1);
-          // Log scale: more bins for low freqs
-          const logX = Math.pow(normX, 1.8);
+        const binCount = data.length;
+        for (let p = 0; p < POINT_COUNT; p++) {
+          const normX = p / (POINT_COUNT - 1);
+          // Log scale gives bass/mids more resolution
+          const logX = Math.pow(normX, 1.6);
           const binIdx = Math.min(Math.floor(logX * binCount), binCount - 1);
-          // Average a small neighborhood for smoothness
-          let sum = 0;
-          let count = 0;
-          const spread = Math.max(1, Math.floor(binCount / POINTS * 0.5));
+          // Small neighborhood average for smoothness
+          const spread = Math.max(1, Math.floor(binCount / POINT_COUNT));
+          let sum = 0, count = 0;
           for (let b = Math.max(0, binIdx - spread); b <= Math.min(binCount - 1, binIdx + spread); b++) {
             sum += (hasAudio ? data[b] / 255 : 0);
             count++;
           }
           const target = sum / count;
-
-          // Ultra-fast attack, smooth release
-          const isRising = target > spectrum[p];
-          const lerpSpeed = isRising ? 0.7 : 0.06;
-          spectrum[p] += (target - spectrum[p]) * lerpSpeed;
+          // Fast attack, smooth release
+          const rising = target > smoothedSpectrum[p];
+          const lerp = rising ? 0.65 : 0.06;
+          smoothedSpectrum[p] += (target - smoothedSpectrum[p]) * lerp;
         }
       }
 
-      // Overall energy for glow/expansion
-      let energy = 0;
-      for (let p = 0; p < POINTS; p++) energy += spectrum[p];
-      energy /= POINTS;
+      // Overall energy for expansion
+      let rawEnergy = 0;
+      for (let p = 0; p < POINT_COUNT; p++) rawEnergy += smoothedSpectrum[p];
+      rawEnergy /= POINT_COUNT;
+      const eLerp = rawEnergy > smoothEnergy ? 0.3 : 0.05;
+      smoothEnergy += (rawEnergy - smoothEnergy) * eLerp;
 
-      const centerY = height / 2;
-
+      // ── Draw wave lines (exact homepage rendering) ──
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      for (let li = 0; li < LINE_COUNT; li++) {
-        const line = lines[li];
+      // Audio-driven expansion factor
+      const waveExpansion = 1 + smoothEnergy * 3.5;
 
-        // Audio makes lines spread apart from center
-        const expansion = 1 + energy * 4.0;
-        const yBase = centerY + line.yOffset * expansion * height * 5;
+      for (let wi = 0; wi < waves.length; wi++) {
+        const wave = waves[wi];
+
+        // Smooth expansion (homepage style)
+        const targetOffset = wave.baseYOffset * waveExpansion;
+        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.06;
 
         ctx.beginPath();
-        ctx.strokeStyle = hsla(line.opacity + energy * 0.2);
-        ctx.lineWidth = 1.2 + energy * 2.0;
-        ctx.shadowBlur = 8 + energy * 16;
-        ctx.shadowColor = hsla(line.opacity * 0.4 + energy * 0.15);
+        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.15);
+        ctx.lineWidth = 1.5 + smoothEnergy * 1.2;
+        ctx.shadowBlur = 10 + smoothEnergy * 12;
+        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.15);
 
-        const points: { x: number; y: number }[] = [];
+        const pts = wave.points;
+        const centerY = 0.5 + wave.currentYOffset;
 
-        for (let p = 0; p < POINTS; p++) {
-          const normX = p / (POINTS - 1);
-          const x = normX * width;
+        // Direction: lines above center push up with audio, below push down
+        const dir = wave.baseYOffset >= 0 ? 1 : -1;
 
-          // Gentle ambient wave animation (the "flowing" part)
-          const ambientWave =
-            Math.sin(normX * Math.PI * 2.5 + time * line.speed + line.phase) * 0.3 +
-            Math.sin(normX * Math.PI * 5 + time * line.speed * 0.7 + line.phase * 1.3) * 0.15 +
-            Math.sin(normX * Math.PI * 7.5 + time * line.speed * 0.4 + line.phase * 1.7) * 0.08;
+        for (let i = 0; i < pts.length; i++) {
+          const x = i / (pts.length - 1);
 
-          // Frequency-driven displacement (the "spectrum" part)
-          const freqDisplacement = spectrum[p] * line.reactivity * line.direction;
+          // Homepage animated wave (identical formula)
+          const animatedY = pts[i] * Math.sin(time * wave.speed + wave.phase + i * 0.04);
 
-          // Combine: ambient gives the flowing feel, spectrum gives the reactive shape
-          const totalDisplacement = (ambientWave * 0.03 + freqDisplacement * 0.35) * height;
+          // Frequency spectrum displacement at this x-position
+          const spectrumVal = smoothedSpectrum[i];
+          const freqDisplacement = spectrumVal * dir * 0.25;
 
-          const y = yBase + totalDisplacement;
-          points.push({ x, y });
-        }
+          const y = centerY + animatedY * wave.amplitude + freqDisplacement;
 
-        // Draw with quadratic curves for ultra-smoothness
-        if (points.length > 0) {
-          ctx.moveTo(points[0].x, points[0].y);
-          for (let p = 1; p < points.length; p++) {
-            const prev = points[p - 1];
-            const curr = points[p];
-            const cpX = (prev.x + curr.x) / 2;
-            const cpY = (prev.y + curr.y) / 2;
-            ctx.quadraticCurveTo(prev.x, prev.y, cpX, cpY);
+          if (i === 0) {
+            ctx.moveTo(x * width, y * height);
+          } else {
+            // Quadratic curve interpolation (identical to homepage)
+            const prevX = (i - 1) / (pts.length - 1);
+            const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
+            const prevSpectrumVal = smoothedSpectrum[i - 1];
+            const prevFreqDisp = prevSpectrumVal * dir * 0.25;
+            const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
+
+            const cpX = ((prevX + x) / 2) * width;
+            const cpY = ((prevY + y) / 2) * height;
+            ctx.quadraticCurveTo(prevX * width, prevY * height, cpX, cpY);
           }
         }
         ctx.stroke();
