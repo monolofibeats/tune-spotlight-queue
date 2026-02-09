@@ -422,9 +422,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
     // Upload audio file if present
     const audioFileUrl = await uploadAudioFile();
     
+    // Store in ref immediately so it's available for post-submit offer
+    if (audioFileUrl) {
+      uploadedAudioUrlRef.current = audioFileUrl;
+    }
+    
     // Direct database insert for free submissions
     const { error } = await supabase.from('submissions').insert({
-      song_url: songUrl,
+      song_url: songUrl || 'direct-upload',
       platform: platform || 'other',
       artist_name: artistName || 'Unknown Artist',
       song_title: songTitle || 'Untitled',
@@ -654,18 +659,19 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
       
       setFlyingCard(cardData);
       
-      // Store song data before resetting form (for post-submit offer)
-      const submittedSongData = {
-        songUrl: songUrl || 'direct-upload',
-        artistName: cardData.artistName,
-        songTitle: cardData.songTitle,
-        message: message || '',
-        email: email || '',
-        platform: platform || 'other',
-        audioFileUrl: uploadedAudioUrl,
-      };
+      // Capture form data BEFORE reset (but audio URL comes from handleFreeSubmit)
+      const capturedSongUrl = songUrl || 'direct-upload';
+      const capturedArtistName = cardData.artistName;
+      const capturedSongTitle = cardData.songTitle;
+      const capturedMessage = message || '';
+      const capturedEmail = email || '';
+      const capturedPlatform = platform || 'other';
 
+      // handleFreeSubmit uploads the file and returns the URL via uploadedAudioUrlRef
       await handleFreeSubmit();
+      
+      // NOW capture the uploaded audio URL (after handleFreeSubmit has uploaded it)
+      const uploadedFileUrl = uploadedAudioUrlRef.current;
       
       setTimeout(() => {
         watchlistRef?.current?.addNewItem({
@@ -690,7 +696,15 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug }: Submi
 
       // Show skip the line offer after successful free submission (if feature is active)
       if (skipLineActive && !isAdmin) {
-        setLastSubmittedSong(submittedSongData);
+        setLastSubmittedSong({
+          songUrl: capturedSongUrl,
+          artistName: capturedArtistName,
+          songTitle: capturedSongTitle,
+          message: capturedMessage,
+          email: capturedEmail,
+          platform: capturedPlatform,
+          audioFileUrl: uploadedFileUrl, // Use the URL from the ref AFTER upload completed
+        });
         setTimeout(() => {
           setShowPostSubmitOffer(true);
         }, 1000); // Small delay for better UX
