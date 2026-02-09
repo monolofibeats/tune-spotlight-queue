@@ -664,6 +664,56 @@ export type Database = {
           },
         ]
       }
+      streamer_presets: {
+        Row: {
+          created_at: string
+          dashboard_layout: Json
+          form_template: string | null
+          id: string
+          is_active: boolean
+          name: string
+          occasion_type: string
+          platform_type: string
+          streamer_id: string
+          theme_config: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dashboard_layout?: Json
+          form_template?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          occasion_type?: string
+          platform_type?: string
+          streamer_id: string
+          theme_config?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dashboard_layout?: Json
+          form_template?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          occasion_type?: string
+          platform_type?: string
+          streamer_id?: string
+          theme_config?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_presets_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streamers: {
         Row: {
           accent_color: string | null
