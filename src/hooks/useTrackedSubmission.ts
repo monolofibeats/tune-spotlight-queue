@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'upstar_tracked_submissions';
 
@@ -31,33 +31,33 @@ function saveTrackedSubmissions(subs: TrackedSubmission[]) {
 export function useTrackedSubmission(streamerSlug?: string | null) {
   const [submissions, setSubmissions] = useState<TrackedSubmission[]>([]);
 
-  // Load from localStorage
   useEffect(() => {
     setSubmissions(getTrackedSubmissions());
   }, []);
 
-  // Get submissions for the current streamer
-  const currentSubmission = submissions.find(
+  // Get all submissions for the current streamer
+  const currentSubmissions = submissions.filter(
     (s) => s.streamerSlug === (streamerSlug || null)
-  ) || null;
+  );
 
   const trackSubmission = useCallback((sub: Omit<TrackedSubmission, 'trackedAt'>) => {
-    const updated = getTrackedSubmissions().filter(
-      (s) => s.streamerSlug !== sub.streamerSlug
-    );
+    const updated = [...getTrackedSubmissions()];
     const newSub: TrackedSubmission = { ...sub, trackedAt: Date.now() };
     updated.push(newSub);
     saveTrackedSubmissions(updated);
     setSubmissions(updated);
   }, []);
 
-  const clearSubmission = useCallback((slug: string | null) => {
-    const updated = getTrackedSubmissions().filter(
-      (s) => s.streamerSlug !== slug
-    );
+  const clearSubmission = useCallback((slug: string | null, trackedAt?: number) => {
+    let updated = getTrackedSubmissions();
+    if (trackedAt) {
+      updated = updated.filter((s) => s.trackedAt !== trackedAt);
+    } else {
+      updated = updated.filter((s) => s.streamerSlug !== slug);
+    }
     saveTrackedSubmissions(updated);
     setSubmissions(updated);
   }, []);
 
-  return { currentSubmission, submissions, trackSubmission, clearSubmission };
+  return { currentSubmissions, submissions, trackSubmission, clearSubmission };
 }

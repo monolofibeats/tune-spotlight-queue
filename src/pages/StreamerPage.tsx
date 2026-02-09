@@ -22,7 +22,7 @@ function StreamerPageContent() {
   const { streamer, isLoading, error } = useStreamer();
   const { isLive } = useStreamSession();
   const { t } = useLanguage();
-  const { currentSubmission, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
+  const { currentSubmissions, trackSubmission } = useTrackedSubmission(slug || null);
 
   if (isLoading) {
     return (
@@ -124,7 +124,7 @@ function StreamerPageContent() {
       </section>
 
       {/* Main Content - Submission Form */}
-      <section className="pb-8 px-4">
+      <section className="pb-4 px-4">
         <div className="container mx-auto max-w-xl">
           <SubmissionForm
             streamerId={streamer.id}
@@ -134,40 +134,13 @@ function StreamerPageContent() {
         </div>
       </section>
 
-      {/* How It Works - Conditional */}
-      {streamer.show_how_it_works && <HowItWorks />}
-
-      {/* Pre-Stream Spots - Only visible when NOT live */}
-      {!isStreamerLive && (
-        <section className="px-4 pb-6">
-          <div className="container mx-auto max-w-3xl">
-            <PreStreamSpots />
-          </div>
-        </section>
-      )}
-
-      {/* Special Event Banner */}
-      <section className="px-4 pb-6">
-        <div className="container mx-auto max-w-3xl">
-          <SpecialEventBanner />
-        </div>
-      </section>
-
-      {/* Stream Section - Conditional */}
-      {streamer.show_stream_embed && (
+      {/* Tracked Submissions - below the form */}
+      {currentSubmissions.length > 0 && (
         <section className="pb-8 px-4">
-          <div className="container mx-auto max-w-3xl">
-            <StreamEmbed />
+          <div className="container mx-auto max-w-xl">
+            <SubmissionTracker submissions={currentSubmissions} />
           </div>
         </section>
-      )}
-
-      {/* Submission Tracker - floating banner for free submissions */}
-      {currentSubmission && (
-        <SubmissionTracker
-          submission={currentSubmission}
-          onClear={() => clearSubmission(streamer.slug)}
-        />
       )}
 
       <LanguageSwitcher />
