@@ -297,7 +297,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             const prevX = (i - 1) / (pts.length - 1);
             const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
             const prevSpectrumVal = smoothedSpectrum[i - 1];
-            const prevFreqDisp = prevSpectrumVal * dir * 0.25;
+            const prevFreqDisp = prevSpectrumVal * dir * freqStrength;
             const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
 
             const cpX = ((prevX + x) / 2) * width;
