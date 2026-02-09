@@ -213,6 +213,27 @@ export type Database = {
         }
         Relationships: []
       }
+      site_feedback: {
+        Row: {
+          contact_info: string | null
+          created_at: string
+          id: string
+          message: string
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          message: string
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       special_events: {
         Row: {
           created_at: string
