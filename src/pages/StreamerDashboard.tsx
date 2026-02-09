@@ -247,7 +247,10 @@ const StreamerDashboard = () => {
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.artist_name?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
+    // "all" shows everything except deleted/trash
+    const matchesStatus = statusFilter === 'all' 
+      ? s.status !== 'deleted'
+      : s.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });

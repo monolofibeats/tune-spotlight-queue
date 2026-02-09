@@ -422,69 +422,91 @@ export function SubmissionListItem({
               ) : (
                 /* Actions */
                 <div className="flex items-center gap-1.5 pt-1 flex-wrap">
-                  {isAdmin && onUpdate && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsEditing(true);
-                      }}
-                    >
-                      <Pencil className="w-3 h-3" />
-                      Edit
-                    </Button>
+                  {isTrashView ? (
+                    // Trash view: restore or permanently delete
+                    <>
+                      {onRestore && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRestore(submission.id);
+                          }}
+                        >
+                          <Eye className="w-3 h-3" />
+                          Restore
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(submission.id, true);
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete Forever
+                      </Button>
+                    </>
+                  ) : (
+                    // Normal view actions
+                    <>
+                      {isAdmin && onUpdate && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsEditing(true);
+                          }}
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Edit
+                        </Button>
+                      )}
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onStatusChange(submission.id, 'reviewed');
+                        }}
+                        disabled={submission.status === 'reviewed'}
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        Done
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onStatusChange(submission.id, 'skipped');
+                        }}
+                      >
+                        <XCircle className="w-3 h-3" />
+                        Skip
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(submission.id);
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onStatusChange(submission.id, 'reviewing');
-                    }}
-                    disabled={submission.status === 'reviewing'}
-                  >
-                    <Eye className="w-3 h-3" />
-                    Überprüfen
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onStatusChange(submission.id, 'reviewed');
-                    }}
-                    disabled={submission.status === 'reviewed'}
-                  >
-                    <CheckCircle className="w-3 h-3" />
-                    Erledigt
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onStatusChange(submission.id, 'skipped');
-                    }}
-                  >
-                    <XCircle className="w-3 h-3" />
-                    Überspringen
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs text-destructive hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(submission.id);
-                    }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
                 </div>
               )}
             </div>
