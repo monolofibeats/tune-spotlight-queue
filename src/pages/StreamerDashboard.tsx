@@ -22,6 +22,7 @@ import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
+import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import type { Streamer } from '@/types/streamer';
 
 interface Submission {
