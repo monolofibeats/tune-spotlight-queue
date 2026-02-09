@@ -35,6 +35,7 @@ interface SubmissionFormProps {
   watchlistRef?: React.RefObject<WatchlistRef>;
   streamerId?: string;
   streamerSlug?: string;
+  onSubmissionTracked?: (sub: { songTitle: string; artistName: string; songUrl: string; platform: string; audioFileUrl: string | null; streamerId: string | null; streamerSlug: string | null }) => void;
 }
 
 interface FlyingCard {
