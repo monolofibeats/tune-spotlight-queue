@@ -24,6 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { AudioVisualizer } from '@/components/AudioVisualizer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
