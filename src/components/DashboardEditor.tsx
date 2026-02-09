@@ -88,7 +88,7 @@ export function DashboardEditor({ streamerId }: DashboardEditorProps) {
           streamer_id: streamerId,
           name: 'Default',
           is_active: true,
-          dashboard_layout: { widgets: enabledWidgets },
+          dashboard_layout: { widgets: enabledWidgets } as unknown as Record<string, never>,
         })
         .select()
         .single();
