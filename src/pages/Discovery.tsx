@@ -114,9 +114,12 @@ const Discovery = () => {
         </div>
       </motion.header>
 
+      {/* Building Phase Banner */}
+      <BuildingPhaseBanner />
+
       {/* Hero Section */}
       <motion.section 
-        className="pt-28 pb-16 px-4 relative z-10"
+        className="pt-8 pb-16 px-4 relative z-10"
         style={{ scale: heroScale }}
       >
         <div className="container mx-auto max-w-4xl text-center">
