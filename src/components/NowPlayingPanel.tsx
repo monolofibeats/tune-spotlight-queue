@@ -333,7 +333,11 @@ export function NowPlayingPanel({
                       <AudioPlayer
                         src={audioUrl}
                         isLoading={isLoadingAudio}
+                        onAudioElement={handleAudioElement}
                       />
+                      
+                      {/* Audio Visualizer */}
+                      <AudioVisualizer audioElement={audioEl} className="rounded-lg" />
                     </div>
                   )}
 
