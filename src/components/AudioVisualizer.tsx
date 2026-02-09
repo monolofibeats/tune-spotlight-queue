@@ -55,8 +55,8 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         const audioBuffer = await actx.decodeAudioData(arrayBuffer);
 
         const analyser = actx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.75;
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.65;
 
         // Connect: source -> analyser -> gain(0) -> destination
         // Gain=0 means this shadow pipeline is silent
