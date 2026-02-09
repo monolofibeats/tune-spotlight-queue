@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_streamer_chat: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          sender_id: string
+          sender_role: string
+          streamer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          sender_id: string
+          sender_role: string
+          streamer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          sender_id?: string
+          sender_role?: string
+          streamer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_streamer_chat_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bid_notifications: {
         Row: {
           created_at: string

@@ -41,6 +41,7 @@ import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
+import { AdminChatPanel } from '@/components/AdminChatPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 
 interface Submission {
@@ -803,6 +804,7 @@ const Dashboard = () => {
         </div>
       </main>
 
+      <AdminChatPanel />
     </div>
   );
 };
