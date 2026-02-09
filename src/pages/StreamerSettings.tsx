@@ -33,7 +33,8 @@ import {
   DesignCustomizer, 
   BannerEditor, 
   PricingSettings,
-  LanguageSettings 
+  LanguageSettings,
+  PresetManager,
 } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
