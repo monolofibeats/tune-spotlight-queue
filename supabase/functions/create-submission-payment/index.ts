@@ -49,7 +49,7 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl } = validationResult.data;
+    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl, streamerSlug, streamerId } = validationResult.data;
     logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl });
 
     // Check if submission pricing is active
