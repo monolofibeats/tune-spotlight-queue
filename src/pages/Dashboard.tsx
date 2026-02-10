@@ -43,6 +43,7 @@ import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { AdminChatPanel } from '@/components/AdminChatPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
+import { BulkActionBar } from '@/components/submission/BulkActionBar';
 
 interface Submission {
   id: string;
