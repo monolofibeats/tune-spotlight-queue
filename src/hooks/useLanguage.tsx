@@ -336,7 +336,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq4q': 'Is it free to submit?',
     'discovery.faq4a': "Each streamer sets their own pricing. Some offer free submissions, while others may charge for submissions or priority queue placement. Check each streamer's page for their specific rates.",
     'discovery.faq5q': 'What platforms are supported?',
-    'discovery.faq5a': 'We support Spotify, Apple Music, SoundCloud, YouTube, and direct file uploads (up to 100MB). If your content is hosted elsewhere, you can paste any link or upload the file directly.',
+    'discovery.faq5a': 'For streamers we support TikTok Live, Instagram, YouTube, Twitch, Kick — Users can send a link to their work on any of the usual DSPs and upload files directly (up to 100MB).',
     'discovery.contentReviewer': 'Content reviewer',
   },
   de: {
