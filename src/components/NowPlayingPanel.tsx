@@ -345,6 +345,7 @@ export function NowPlayingPanel({
                         submissionId={submission.id}
                         hasAudioFile={!!submission.audio_file_url}
                       />
+                    </div>
                   )}
 
                   {/* Spotify Embed - for Spotify links */}
