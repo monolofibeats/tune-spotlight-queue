@@ -34,12 +34,6 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-3">
-            <Link to="/library">
-              <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                <Film className="w-3.5 h-3.5" />
-                {t('nav.library')}
-              </Button>
-            </Link>
             
             <SocialLinks />
             
