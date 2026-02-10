@@ -332,7 +332,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq2q': 'How do I submit my work?',
     'discovery.faq2a': "Simply visit a streamer's page, paste your link or upload a file, and click submit. You can optionally pay to skip the queue for priority review.",
     'discovery.faq3q': 'How do streamers join?',
-    'discovery.faq3a': 'Streamers join by invitation. If you\'re interested, reach out to us and we\'ll review your profile.',
+    'discovery.faq3a': 'For now, streamers can only join by invitation from us. If you\'re interested, reach out to us and we\'ll get in touch if we see you as a good fit.',
     'discovery.faq4q': 'Is it free to submit?',
     'discovery.faq4a': "Each streamer sets their own pricing. Some offer free submissions, while others may charge for submissions or priority queue placement. Check each streamer's page for their specific rates.",
     'discovery.faq5q': 'What platforms are supported?',
