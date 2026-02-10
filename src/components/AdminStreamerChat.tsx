@@ -115,7 +115,7 @@ export function AdminStreamerChat({ streamerId, role, streamerName }: AdminStrea
     : 'Admin Messages';
 
   return (
-    <div className="fixed bottom-4 right-4 z-50" style={{ maxWidth: '360px', width: '100%' }}>
+    <div className="fixed bottom-4 right-4 z-[100]" style={{ maxWidth: '360px', width: '100%' }}>
       {/* Toggle Button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}

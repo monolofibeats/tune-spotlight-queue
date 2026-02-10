@@ -17,6 +17,8 @@ import StreamerProfilePage from "./pages/StreamerProfilePage";
 import StreamerSettings from "./pages/StreamerSettings";
 import StreamerDashboard from "./pages/StreamerDashboard";
 import StreamerPayments from "./pages/StreamerPayments";
+import StreamerStatistics from "./pages/StreamerStatistics";
+import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
@@ -89,6 +91,22 @@ const App = () => (
                         element={
                           <ProtectedRoute>
                             <StreamerPayments />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/streamer/statistics"
+                        element={
+                          <ProtectedRoute>
+                            <StreamerStatistics />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/settings"
+                        element={
+                          <ProtectedRoute>
+                            <Settings />
                           </ProtectedRoute>
                         }
                       />
