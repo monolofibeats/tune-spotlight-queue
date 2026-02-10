@@ -87,6 +87,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
   // Ref for scrolling to Now Playing panel
   const nowPlayingRef = useRef<HTMLDivElement>(null);
