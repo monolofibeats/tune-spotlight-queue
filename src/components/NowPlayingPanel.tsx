@@ -339,7 +339,12 @@ export function NowPlayingPanel({
                       
                       {/* Audio Visualizer */}
                       <AudioVisualizer audioElement={audioEl} className="rounded-lg" />
-                    </div>
+                      
+                      {/* Stem Separation */}
+                      <StemSeparationPanel 
+                        submissionId={submission.id}
+                        hasAudioFile={!!submission.audio_file_url}
+                      />
                   )}
 
                   {/* Spotify Embed - for Spotify links */}
