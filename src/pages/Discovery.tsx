@@ -201,7 +201,7 @@ const Discovery = () => {
               {t('discovery.sectionStreamers')}
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourWork')}</BlurReveal>
+              {t('discovery.sectionStreamersSubtitle')}
             </p>
           </motion.div>
 
@@ -370,6 +370,7 @@ const Discovery = () => {
               <p className="text-muted-foreground text-lg mb-8">
                 {t('discovery.streamerFeaturesSubtitle')}
               </p>
+              <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">{t('discovery.featuresLabel')}</h3>
               <ul className="space-y-4 mb-8">
                 {[
                   t('discovery.feat1'),
@@ -395,6 +396,7 @@ const Discovery = () => {
                   </motion.li>
                 ))}
               </ul>
+              <h3 className="text-sm font-semibold text-primary mb-2 uppercase tracking-wider">{t('discovery.monetizationLabel')}</h3>
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
@@ -468,10 +470,13 @@ const Discovery = () => {
                   <Send className="w-5 h-5" />
                   {t('discovery.ctaSubmit')}
                 </GlowButton>
-                <GlowButton variant="outline" size="lg" onClick={() => setShowRoster(true)}>
+                <motion.button
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+                  disabled
+                >
                   <Eye className="w-5 h-5" />
                   {t('discovery.ctaReview')}
-                </GlowButton>
+                </motion.button>
               </div>
             </div>
         </div>
