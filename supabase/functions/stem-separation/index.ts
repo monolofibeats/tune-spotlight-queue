@@ -126,6 +126,7 @@ serve(async (req) => {
             source_id: sourceId,
             presets: {
               stem: stemType,
+              extraction_level: "deep_extraction",
               splitter: "perseus",
             },
           }),
@@ -133,7 +134,7 @@ serve(async (req) => {
 
         if (!splitResp.ok) {
           const errText = await splitResp.text();
-          console.error(`LALAL split error for ${stemType}:`, errText);
+          console.error(`LALAL split error for ${stemType}:`, splitResp.status, errText);
           await supabaseAdmin
             .from("stem_separation_jobs")
             .update({ status: "error", error_message: errText })
@@ -142,7 +143,8 @@ serve(async (req) => {
         }
 
         const splitData = await splitResp.json();
-        const taskId = splitData.id;
+        const taskId = splitData.task_id;
+        console.log(`Split started for ${stemType}, task_id:`, taskId);
 
         // Update job with task ID
         await supabaseAdmin
