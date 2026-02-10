@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -24,6 +24,7 @@ import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { DashboardEditor, useDashboardLayout } from '@/components/DashboardEditor';
+import { BulkActionBar } from '@/components/submission/BulkActionBar';
 import type { Streamer } from '@/types/streamer';
 
 interface Submission {
