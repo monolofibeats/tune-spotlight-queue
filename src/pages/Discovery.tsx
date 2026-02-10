@@ -139,7 +139,7 @@ const Discovery = () => {
               </span>
               <br />
               <motion.span 
-                className="text-primary whitespace-nowrap"
+                className="text-primary whitespace-nowrap block"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
