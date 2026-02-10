@@ -652,90 +652,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   });
   const [showTranslatePicker, setShowTranslatePicker] = useState(false);
   const [isTranslated, setIsTranslated] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-
-  // Load Google Translate script on mount (hidden)
-  useEffect(() => {
-    loadGoogleTranslateScript().then((success) => {
-      setScriptLoaded(success);
-      if (!success) console.warn('Google Translate not available, will use URL fallback');
-    });
-  }, []);
-
-  // Hide Google Translate banner
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .goog-te-banner-frame { display: none !important; }
-      body { top: 0 !important; }
-      .skiptranslate { display: none !important; }
-      #google_translate_element { position: absolute !important; opacity: 0 !important; pointer-events: none !important; height: 0 !important; overflow: hidden !important; }
-    `;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
-  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
-    if (isTranslated) {
-      // Reset Google Translate
-      clearGoogleTranslateCookie();
-      const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-      if (selectEl) {
-        selectEl.value = '';
-        selectEl.dispatchEvent(new Event('change'));
-      }
-      setIsTranslated(false);
-    }
+    setIsTranslated(false);
     setLanguageState(lang);
     localStorage.setItem('language', lang);
     setShowTranslatePicker(false);
-  }, [isTranslated]);
+  }, []);
 
   const translateTo = useCallback((langCode: string) => {
-    // First switch to English as base for translation
+    // Switch to English as base, then open Google Translate proxy
     setLanguageState('en');
     localStorage.setItem('language', 'en');
     setShowTranslatePicker(false);
     
-    setGoogleTranslateCookie(langCode);
-    
-    const tryTranslate = (attempts = 0) => {
-      if (doTranslate(langCode)) {
-        setIsTranslated(true);
-      } else if (attempts < 20) {
-        setTimeout(() => tryTranslate(attempts + 1), 300);
-      } else {
-        // Fallback: open current page via Google Translate proxy
-        console.warn('GT widget not available, using URL fallback');
-        const currentUrl = window.location.href;
-        const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
-        window.open(gtUrl, '_blank');
-      }
-    };
-
-    const doInit = async () => {
-      const success = await loadGoogleTranslateScript();
-      setScriptLoaded(success);
-      if (success) {
-        tryTranslate();
-      } else {
-        // Direct fallback
-        const currentUrl = window.location.href;
-        const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
-        window.open(gtUrl, '_blank');
-      }
-    };
-
-    doInit();
+    // Use the published URL if available, otherwise current origin
+    const baseUrl = window.location.origin + window.location.pathname;
+    const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(baseUrl)}`;
+    window.open(gtUrl, '_blank');
   }, []);
 
   const resetTranslation = useCallback(() => {
-    clearGoogleTranslateCookie();
-    const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-    if (selectEl) {
-      selectEl.value = '';
-      selectEl.dispatchEvent(new Event('change'));
-    }
     setIsTranslated(false);
     setShowTranslatePicker(false);
   }, []);
