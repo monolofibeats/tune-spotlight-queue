@@ -50,6 +50,7 @@ const StreamerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
   const nowPlayingRef = useRef<HTMLDivElement>(null);
   const { visibleWidgets } = useDashboardLayout(streamer?.id);
