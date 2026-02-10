@@ -387,7 +387,7 @@ export function StemSeparationPanel({ submissionId, hasAudioFile }: StemSeparati
                           .eq('submission_id', submissionId);
                         setJobs([]);
                         setStemAudioUrls({});
-                        setSelectedStems(['vocals', 'drums', 'bass']);
+                        setSelectedStems(['vocals', 'drum', 'bass']);
                         toast({ title: 'Reset to original audio' });
                       }}
                       size="sm"
