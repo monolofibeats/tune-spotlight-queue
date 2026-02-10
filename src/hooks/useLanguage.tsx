@@ -1,11 +1,14 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type Language = 'en' | 'de' | 'ru';
+export type Language = 'en' | 'de';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  activateGoogleTranslate: () => void;
+  isGoogleTranslateActive: boolean;
+  deactivateGoogleTranslate: () => void;
 }
 
 const translations: Record<Language, Record<string, string>> = {
@@ -635,340 +638,139 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq5a': 'Wir unterstützen Spotify, Apple Music, SoundCloud, YouTube und direkte Datei-Uploads (bis zu 100MB). Wenn deine Musik woanders gehostet ist, kannst du jeden Link einfügen oder die Datei direkt hochladen.',
     'discovery.musicReviewer': 'Musik-Reviewer',
   },
-  ru: {
-    // Header & Navigation
-    'nav.library': 'Библиотека',
-    'nav.mySongs': 'Мои песни',
-    'nav.dashboard': 'Панель',
-    'nav.signIn': 'Войти',
-    'nav.logout': 'Выйти',
-    'nav.liveNow': 'В ЭФИРЕ',
-    'nav.offline': 'Не в сети',
-    
-    // Hero Section
-    'hero.badge.live': 'Мы в эфире!',
-    'hero.badge.offline': 'Живые обзоры музыки',
-    'hero.title': 'Пусть вашу музыку',
-    'hero.titleHighlight': 'услышат',
-    'hero.subtitle': 'Отправляйте песни на живые обзоры. Регистрация не требуется.',
-    
-    // How It Works
-    'howItWorks.title': 'Как это работает',
-    'howItWorks.subtitle': 'Три простых шага, чтобы вашу музыку услышали',
-    'howItWorks.step1.title': 'Вставьте ссылку',
-    'howItWorks.step1.desc': 'Вставьте ссылку на Spotify, SoundCloud или другой сервис',
-    'howItWorks.step2.title': 'Встаньте в очередь',
-    'howItWorks.step2.desc': 'Бесплатно или заплатите, чтобы пройти вперёд',
-    'howItWorks.step3.title': 'Получите отзыв',
-    'howItWorks.step3.desc': 'Смотрите, как вашу песню играют в прямом эфире',
-    
-    // Pre-Stream Spots
-    'spots.title': 'Приоритетные места',
-    'spots.subtitle': 'Гарантируйте своё место в следующем стриме',
-    'spots.available': 'Доступно',
-    'spots.sold': 'Продано',
-    'spots.signInRequired': 'Войдите для покупки',
-    'spots.buyNow': 'Купить',
-    'spots.spot': 'Место',
-    
-    // Submission Form
-    'form.title': 'Отправить песню',
-    'form.songLink': 'Ссылка на песню',
-    'form.songLinkPlaceholder': 'Вставьте ссылку на Spotify, SoundCloud или другую...',
-    'form.artistName': 'Исполнитель',
-    'form.artistPlaceholder': 'Имя исполнителя',
-    'form.songTitle': 'Название',
-    'form.songTitlePlaceholder': 'Название песни',
-    'form.email': 'Email (необязательно)',
-    'form.emailPlaceholder': 'ваш@email.com',
-    'form.message': 'Сообщение (необязательно)',
-    'form.messagePlaceholder': 'Почему стоит послушать?',
-    'form.submit': 'Отправить (Бесплатно)',
-    'form.submitting': 'Отправка...',
-    'form.skipLine': 'Пропустить очередь',
-    'form.priority': 'Приоритетный обзор',
-    'form.priorityTitle': 'Пропустить очередь - Приоритет',
-    'form.priorityDesc': 'Получите обзор быстрее, сделав ставку. Выше ставка = выше позиция!',
-    'form.signInForPriority': 'Войдите для приоритетных заявок',
-    'form.currentHighest': 'Текущая макс. ставка',
-    'form.yourBid': 'Ваша ставка',
-    'form.processingPayment': 'Обработка...',
-    'form.proceedPayment': 'Перейти к оплате',
-    
-    // Submission Form (new keys)
-    'submission.title': 'Покажите, что у вас есть!',
-    'submission.linkLabel': 'Ссылка на трек',
-    'submission.linkPlaceholder': 'ваша ссылка на музыку?',
-    'submission.artistLabel': 'Исполнитель',
-    'submission.artistPlaceholder': 'Имя исполнителя',
-    'submission.titleLabel': 'Название',
-    'submission.titlePlaceholder': 'Название песни',
-    'submission.emailLabel': 'Email (необязательно)',
-    'submission.emailPlaceholder': 'ваш@email.com',
-    'submission.messageLabel': 'Сообщение (необязательно)',
-    'submission.messagePlaceholder': 'Расскажите, что особенного в этом треке!',
-    'submission.audioFileLabel': 'Аудио файл (необязательно)',
-    'submission.uploadFile': 'Загрузить файл',
-    'submission.submitFree': 'Отправить трек (бесплатно)',
-    'submission.submitAdminFree': 'Отправить трек (Админ - бесплатно)',
-    'submission.skipWaitingList': 'Пропустить очередь',
-    
-    // Watchlist / Queue
-    'queue.title': 'Очередь',
-    'queue.empty': 'Пока нет песен',
-    'queue.beFirst': 'Будьте первым!',
-    'queue.position': 'Позиция',
-    'queue.justNow': 'только что',
-    'queue.minutesAgo': ' мин. назад',
-    'queue.hoursAgo': ' ч. назад',
-    
-    // Stream
-    'stream.live': 'Прямой эфир',
-    'stream.nowReviewing': 'Сейчас обзор песен!',
-    'stream.openIn': 'Открыть в',
-    'stream.tiktokLive': 'TikTok Live',
-    'stream.watchOnTiktok': 'Смотреть стрим в TikTok',
-    'stream.liveScreenShare': 'Трансляция экрана',
-    'stream.screenShare': 'Трансляция экрана',
-    'stream.adminStreaming': 'Админ ведёт стрим',
-    'stream.connecting': 'Подключение к стриму...',
-    'stream.connectionLost': 'Соединение потеряно. Стрим мог закончиться.',
-    'stream.watching': 'Вы смотрите трансляцию экрана',
-    'stream.clickUnmute': 'Нажмите на иконку звука для включения',
-    'stream.audioEnabled': 'Звук включён',
-    'stream.refresh': 'Обновить страницу',
-    'stream.chat.title': 'Чат',
-    'stream.chat.enterUsername': 'Введите имя для чата',
-    'stream.chat.usernamePlaceholder': 'Ваше имя...',
-    'stream.chat.join': 'Войти',
-    'stream.chat.empty': 'Пока нет сообщений. Будьте первым!',
-    'stream.chat.messagePlaceholder': 'Написать сообщение...',
-    
-    // Library
-    'library.title': 'Библиотека стримов',
-    'library.recordings': 'Прошлые стримы',
-    'library.clips': 'Клипы сообщества',
-    'library.noRecordings': 'Пока нет записей',
-    'library.noClips': 'Пока нет клипов',
-    'library.createFirst': 'Посмотрите запись и создайте первый клип!',
-    'library.addRecording': 'Добавить запись',
-    'library.views': 'просмотров',
-    'library.watch': 'Смотреть',
-    
-    // Recording Viewer
-    'viewer.watch': 'Смотреть',
-    'viewer.createClip': 'Создать клип',
-    'viewer.clipTitle': 'Название клипа',
-    'viewer.clipTitlePlaceholder': 'Дайте название клипу...',
-    'viewer.startTime': 'Начало',
-    'viewer.endTime': 'Конец',
-    'viewer.clipDuration': 'Длительность',
-    'viewer.maxDuration': 'макс. 2 мин.',
-    'viewer.saveClip': 'Сохранить клип',
-    'viewer.download': 'Скачать',
-    'viewer.openOriginal': 'Открыть оригинал',
-    'viewer.share': 'Поделиться',
-    'viewer.views': 'просмотров',
-    'viewer.signInToSave': 'Войдите, чтобы сохранять клипы',
-    'viewer.watermarkInfo': 'Клипы содержат водяной знак Upstar',
-    
-    // Clip Viewer
-    'clipViewer.title': 'Клип',
-    'clipViewer.from': 'Из',
-    'clipViewer.watchFull': 'Смотреть полную запись',
-    
-    // Soundboard
-    'soundboard.title': 'Саундборд',
-    'soundboard.effects': 'Звуковые эффекты',
-    
-    // Special Events
-    'events.specialEvent': 'Спецсобытие',
-    'events.reward': 'Награда',
-    'events.endsAt': 'Заканчивается в',
-    
-    // Auth
-    'auth.signIn': 'Войти',
-    'auth.signUp': 'Регистрация',
-    'auth.email': 'Email',
-    'auth.password': 'Пароль',
-    'auth.forgotPassword': 'Забыли пароль?',
-    'auth.orContinueWith': 'Или продолжить с',
-    'auth.noAccount': 'Нет аккаунта?',
-    'auth.haveAccount': 'Уже есть аккаунт?',
-    'auth.signInWithGoogle': 'Войти через Google',
-    'auth.signInWithApple': 'Войти через Apple',
-    
-    // Common
-    'common.loading': 'Загрузка...',
-    'common.error': 'Ошибка',
-    'common.success': 'Успех',
-    'common.cancel': 'Отмена',
-    'common.close': 'Закрыть',
-    'common.save': 'Сохранить',
-    'common.delete': 'Удалить',
-    'common.edit': 'Изменить',
-    'common.copied': 'Ссылка скопирована!',
-    'common.required': 'Обязательно',
-    
-    // Dashboard
-    'dashboard.title': 'Панель управления',
-    'dashboard.subtitle': 'Управление заявками, стримом и событиями.',
-    'dashboard.submissions': 'Заявки',
-    'dashboard.stream': 'Стрим',
-    'dashboard.events': 'События',
-    'dashboard.total': 'Всего',
-    'dashboard.pending': 'Ожидает',
-    'dashboard.reviewed': 'Обзорено',
-    'dashboard.revenue': 'Доход',
-    'dashboard.status.pending': 'Ожидает',
-    'dashboard.status.reviewed': 'Обзорено',
-    'dashboard.status.reviewing': 'На рассмотрении',
-    'dashboard.searchPlaceholder': 'Поиск песен или исполнителей...',
-    'dashboard.noSubmissions': 'Заявок не найдено',
-    'dashboard.waitingSubmissions': 'Ожидание заявок...',
-    
-    // Stream Settings
-    'streamSettings.title': 'Настройки стрима на главной',
-    'streamSettings.type': 'Тип стрима',
-    'streamSettings.none': 'Нет (скрыть стрим)',
-    'streamSettings.twitch': 'Twitch Live',
-    'streamSettings.youtube': 'YouTube Live',
-    'streamSettings.tiktok': 'TikTok Live',
-    'streamSettings.video': 'Зацикленное видео',
-    'streamSettings.screenshare': 'Трансляция экрана',
-    'streamSettings.url': 'URL стрима',
-    'streamSettings.videoUrl': 'URL видео',
-    'streamSettings.save': 'Сохранить настройки',
-    'streamSettings.saving': 'Сохранение...',
-    
-    // Screen Streamer
-    'screenshare.title': 'Трансляция экрана',
-    'screenshare.subtitle': 'Транслируйте экран напрямую зрителям',
-    'screenshare.start': 'Начать трансляцию',
-    'screenshare.stop': 'Остановить стрим',
-    'screenshare.starting': 'Запуск...',
-    'screenshare.noActive': 'Нет активной трансляции',
-    'screenshare.watching': 'смотрят',
-    'screenshare.overlaySettings': 'Настройки оверлея',
-    'screenshare.showLogo': 'Показать лого',
-    'screenshare.showBanner': 'Показать баннер',
-    'screenshare.bannerPlaceholder': 'Текст баннера...',
-    'screenshare.browserPrompt': 'Браузер спросит, какой экран транслировать. Зрители увидят его на главной.',
-    
-    // Session Manager
-    'session.title': 'Сессия стрима',
-    'session.startStream': 'Начать стрим',
-    'session.endStream': 'Завершить стрим',
-    'session.sessionActive': 'Сессия активна',
-    'session.noActiveSession': 'Нет активной сессии',
-    
-    // Spots Manager
-    'spotsManager.title': 'Приоритетные места',
-    'spotsManager.resetAll': 'Сбросить все места',
-    'spotsManager.allAvailable': 'Все места доступны для след. стрима',
-    
-    // Footer
-    'footer.copyright': '© 2024 UpStar ⭐',
-    
-    // Toasts & Messages
-    'toast.songSubmitted': 'Песня отправлена! 🎵',
-    'toast.songAddedQueue': 'Ваша песня добавлена в очередь.',
-    'toast.paymentSuccess': 'Оплата успешна! 🎉',
-    'toast.paymentCancelled': 'Оплата отменена',
-    'toast.submissionNotProcessed': 'Заявка не обработана.',
-    'toast.missingInfo': 'Недостаточно данных',
-    'toast.enterSongLink': 'Введите ссылку на песню.',
-    'toast.submissionFailed': 'Ошибка отправки',
-    'toast.clipCreated': 'Клип создан! ✂️',
-    'toast.clipSaved': 'Ваш клип сохранён в библиотеке',
-    'toast.streamStarted': 'Трансляция началась! 📺',
-    'toast.streamLive': 'Ваш экран транслируется на главной',
-    'toast.streamEnded': 'Стрим окончен',
-    'toast.streamStopped': 'Трансляция остановлена',
-    'toast.loginRequired': 'Требуется вход',
-    'toast.signInForPriority': 'Войдите для приоритетных заявок',
-    
-    // Discovery Page
-    'discovery.badge': 'Платформа обзоров музыки',
-    'discovery.heroTitle': 'Пусть вашу музыку',
-    'discovery.heroHighlight': 'оценят вживую',
-    'discovery.heroSubtitle': 'Отправляйте треки стримерам и получайте обратную связь в реальном времени от создателей контента и их аудитории.',
-    'discovery.heroJoin': 'Присоединяйтесь к',
-    'discovery.heroThousands': 'тысячам артистов',
-    'discovery.heroGetting': 'которых',
-    'discovery.heroDiscovered': 'открывают',
-    'discovery.browseStreamers': 'Найти стримеров',
-    'discovery.becomeStreamer': 'Стать стримером',
-    'discovery.songsReviewed': 'Песен оценено',
-    'discovery.livePerSecond': '+1 каждую секунду (live)',
-    'discovery.activeStreamers': 'Активные стримеры',
-    'discovery.liveNow': 'Сейчас онлайн',
-    'discovery.weeklyViews': 'Просмотров за неделю',
-    'discovery.sectionStreamers': 'Активные стримеры',
-    'discovery.sectionStreamersSubtitle': 'Найди стримера для обзора',
-    'discovery.yourMusic': 'твоей музыки',
-    'discovery.allStreamers': 'Все стримеры',
-    'discovery.loadingStreamers': 'Загрузка стримеров...',
-    'discovery.noStreamersYet': 'Пока нет стримеров',
-    'discovery.beFirstStreamer': 'Будьте первым, кто присоединится как стример!',
-    'discovery.applyNow': 'Подать заявку',
-    'discovery.howItWorksTitle': 'Как это работает',
-    'discovery.howItWorksSubtitle': 'Три простых шага для получения обзора вашей музыки',
-    'discovery.step1Title': 'Выберите стримера',
-    'discovery.step1Desc': 'Просмотрите наших активных стримеров и найдите того, кто подходит вашему жанру и стилю.',
-    'discovery.step2Title': 'Отправьте трек',
-    'discovery.step2Desc': 'Вставьте ссылку на песню или загрузите файл. Добавьте детали и при желании пропустите очередь.',
-    'discovery.step3Title': 'Получите обзор вживую',
-    'discovery.step3Desc': 'Смотрите стрим, пока играет ваша музыка, и получайте обратную связь в реальном времени.',
-    'discovery.forStreamers': 'Для стримеров',
-    'discovery.monetizeTitle': 'Монетизируйте обзоры музыки',
-    'discovery.monetizeSubtitle': 'Присоединяйтесь к UpStar как стример и создайте новый источник дохода. Устанавливайте свои цены, настраивайте страницу и общайтесь с',
-    'discovery.artistsWorldwide': 'артистами со всего мира',
-    'discovery.feature1': 'Устанавливайте свои цены',
-    'discovery.feature2': 'Полностью настраиваемая страница профиля',
-    'discovery.feature3': 'Управление очередью в реальном времени',
-    'discovery.feature4': 'Встроенная обработка платежей',
-    'discovery.feature5': 'Аналитика и статистика',
-    'discovery.applyToJoin': 'Подать заявку',
-    'discovery.applyDialogTitle': 'Заявка на становление стримером',
-    'discovery.avgMonthlyEarnings': 'Средний месячный доход',
-    'discovery.topStreamersEarn': 'Топ-стримеры зарабатывают',
-    'discovery.perMonth': '/месяц на обзорах музыки',
-    'discovery.faqTitle': 'Часто задаваемые вопросы',
-    'discovery.faqSubtitle': 'Всё, что нужно знать об UpStar',
-    'discovery.faq1q': 'Что такое UpStar?',
-    'discovery.faq1a': 'UpStar — платформа, соединяющая музыкантов со стримерами, которые оценивают и реагируют на песни в прямом эфире. Получайте обратную связь в реальном времени от создателей контента и их аудитории.',
-    'discovery.faq2q': 'Как отправить музыку?',
-    'discovery.faq2a': 'Просто зайдите на страницу стримера, вставьте ссылку на песню (Spotify, YouTube, SoundCloud и т.д.) или загрузите аудиофайл и отправьте. Вы можете заплатить, чтобы пропустить очередь.',
-    'discovery.faq3q': 'Как стримеры могут присоединиться?',
-    'discovery.faq3a': 'Стримеры могут подать заявку, нажав «Стать стримером» ниже. Заявки рассматриваются в течение 24-48 часов. После одобрения вы получите собственную настраиваемую страницу.',
-    'discovery.faq4q': 'Бесплатно ли отправлять музыку?',
-    'discovery.faq4a': 'Каждый стример устанавливает свои цены. Некоторые предлагают бесплатные заявки, другие взимают плату за заявки или приоритетное место в очереди. Проверьте страницу каждого стримера.',
-    'discovery.faq5q': 'Какие платформы поддерживаются?',
-    'discovery.faq5a': 'Мы поддерживаем Spotify, Apple Music, SoundCloud, YouTube и прямую загрузку файлов (до 100МБ). Если ваша музыка размещена в другом месте, вы можете вставить любую ссылку или загрузить файл напрямую.',
-    'discovery.musicReviewer': 'Музыкальный обозреватель',
-  },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Google Translate helper functions
+function loadGoogleTranslateScript(): Promise<void> {
+  return new Promise((resolve) => {
+    if (document.getElementById('google-translate-script')) {
+      resolve();
+      return;
+    }
+    
+    // Create the hidden element for Google Translate
+    let el = document.getElementById('google_translate_element');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'google_translate_element';
+      el.style.display = 'none';
+      document.body.appendChild(el);
+    }
+
+    // Define the callback
+    (window as any).googleTranslateElementInit = () => {
+      new (window as any).google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          autoDisplay: false,
+          layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+        },
+        'google_translate_element'
+      );
+      resolve();
+    };
+
+    const script = document.createElement('script');
+    script.id = 'google-translate-script';
+    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    document.head.appendChild(script);
+  });
+}
+
+function triggerGoogleTranslate() {
+  // Wait a bit for the widget to initialize, then click the select
+  setTimeout(() => {
+    const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+    if (selectEl) {
+      selectEl.style.position = 'fixed';
+      selectEl.style.bottom = '60px';
+      selectEl.style.right = '16px';
+      selectEl.style.zIndex = '9999';
+      selectEl.style.display = 'block';
+      selectEl.style.opacity = '1';
+      selectEl.style.padding = '8px 12px';
+      selectEl.style.borderRadius = '12px';
+      selectEl.style.border = '1px solid rgba(255,255,255,0.2)';
+      selectEl.style.background = 'rgba(30,30,30,0.95)';
+      selectEl.style.color = '#fff';
+      selectEl.style.fontSize = '14px';
+      selectEl.style.backdropFilter = 'blur(12px)';
+      selectEl.style.cursor = 'pointer';
+      selectEl.style.minWidth = '180px';
+      selectEl.focus();
+      selectEl.click();
+    }
+  }, 300);
+}
+
+function removeGoogleTranslate() {
+  // Reset translation by setting cookie and reloading isn't great UX,
+  // so we use the select to go back to original
+  const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+  if (selectEl) {
+    selectEl.value = '';
+    selectEl.dispatchEvent(new Event('change'));
+    selectEl.style.display = 'none';
+  }
+  // Also try removing the banner
+  const banner = document.querySelector('.goog-te-banner-frame') as HTMLElement;
+  if (banner) banner.style.display = 'none';
+  document.body.style.top = '0px';
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('language');
+    if (saved === 'ru') return 'de'; // migrate from removed Russian
     return (saved as Language) || 'de';
   });
+  const [isGoogleTranslateActive, setIsGoogleTranslateActive] = useState(false);
 
   const setLanguage = (lang: Language) => {
+    // When switching to EN/DE, deactivate Google Translate
+    if (isGoogleTranslateActive) {
+      removeGoogleTranslate();
+      setIsGoogleTranslateActive(false);
+    }
     setLanguageState(lang);
     localStorage.setItem('language', lang);
   };
 
+  const activateGoogleTranslate = async () => {
+    // First set to English so Google Translate has a clean base
+    setLanguageState('en');
+    localStorage.setItem('language', 'en');
+    await loadGoogleTranslateScript();
+    setIsGoogleTranslateActive(true);
+    triggerGoogleTranslate();
+  };
+
+  const deactivateGoogleTranslate = () => {
+    removeGoogleTranslate();
+    setIsGoogleTranslateActive(false);
+  };
+
+  // Hide Google Translate banner on mount
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0 !important; }
+      .skiptranslate { display: none !important; }
+      #google_translate_element { display: none !important; }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    return translations[language][key] || translations['en'][key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, activateGoogleTranslate, isGoogleTranslateActive, deactivateGoogleTranslate }}>
       {children}
     </LanguageContext.Provider>
   );

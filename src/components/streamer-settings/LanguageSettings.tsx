@@ -24,12 +24,6 @@ const LANGUAGES = [
     nativeLabel: 'English',
     flag: '🇬🇧' 
   },
-  { 
-    value: 'ru', 
-    label: 'Русский', 
-    nativeLabel: 'Russian',
-    flag: '🇷🇺' 
-  },
 ];
 
 export function LanguageSettings({ language, onChange }: LanguageSettingsProps) {
@@ -44,13 +38,14 @@ export function LanguageSettings({ language, onChange }: LanguageSettingsProps) 
           <CardDescription>
             Choose the primary language for your submission page. 
             All interface elements will be displayed in this language.
+            Visitors can also use the translate button (🌐) to auto-translate into any language.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <RadioGroup
             value={language}
             onValueChange={onChange}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {LANGUAGES.map((lang) => (
               <Label
@@ -85,7 +80,7 @@ export function LanguageSettings({ language, onChange }: LanguageSettingsProps) 
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground">
             <strong>Note:</strong> This setting affects how your page is displayed to visitors. 
-            They can still switch languages using the language selector, but this will be the default.
+            They can use the 🌐 button in the language switcher to auto-translate the page into any language via Google Translate.
           </p>
         </CardContent>
       </Card>
