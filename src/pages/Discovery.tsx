@@ -201,7 +201,7 @@ const Discovery = () => {
               {t('discovery.sectionStreamers')}
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourWork')}</BlurReveal>
+              {t('discovery.sectionStreamersSubtitle')}
             </p>
           </motion.div>
 
