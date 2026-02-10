@@ -8,7 +8,7 @@ interface LanguageContextType {
   t: (key: string) => string;
   showTranslatePicker: boolean;
   setShowTranslatePicker: (show: boolean) => void;
-  translateTo: (langCode: string) => void;
+  translateTo: (langCode: string, langLabel?: string) => void;
   resetTranslation: () => void;
   isTranslated: boolean;
 }
@@ -644,6 +644,29 @@ const translations: Record<Language, Record<string, string>> = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Cache translations in memory and localStorage
+const translationCache: Record<string, Record<string, string>> = {};
+
+function getCachedTranslation(langCode: string): Record<string, string> | null {
+  if (translationCache[langCode]) return translationCache[langCode];
+  try {
+    const cached = localStorage.getItem(`translations_${langCode}`);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      translationCache[langCode] = parsed;
+      return parsed;
+    }
+  } catch {}
+  return null;
+}
+
+function setCachedTranslation(langCode: string, data: Record<string, string>) {
+  translationCache[langCode] = data;
+  try {
+    localStorage.setItem(`translations_${langCode}`, JSON.stringify(data));
+  } catch {}
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('language');
@@ -652,37 +675,91 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   });
   const [showTranslatePicker, setShowTranslatePicker] = useState(false);
   const [isTranslated, setIsTranslated] = useState(false);
+  const [translatedStrings, setTranslatedStrings] = useState<Record<string, string>>({});
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedLangCode, setTranslatedLangCode] = useState('');
 
   const setLanguage = useCallback((lang: Language) => {
     setIsTranslated(false);
+    setTranslatedStrings({});
+    setTranslatedLangCode('');
     setLanguageState(lang);
     localStorage.setItem('language', lang);
     setShowTranslatePicker(false);
   }, []);
 
-  const translateTo = useCallback((langCode: string) => {
-    // Switch to English as base, then open Google Translate proxy
-    setLanguageState('en');
-    localStorage.setItem('language', 'en');
+  const translateTo = useCallback(async (langCode: string, langLabel?: string) => {
     setShowTranslatePicker(false);
     
-    // Use the published URL if available, otherwise current origin
-    const baseUrl = window.location.origin + window.location.pathname;
-    const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(baseUrl)}`;
-    window.open(gtUrl, '_blank');
+    // Check cache first
+    const cached = getCachedTranslation(langCode);
+    if (cached) {
+      setTranslatedStrings(cached);
+      setIsTranslated(true);
+      setTranslatedLangCode(langCode);
+      return;
+    }
+
+    setIsTranslating(true);
+    
+    try {
+      // Use English strings as the source
+      const sourceStrings = translations['en'];
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/translate-ui`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            strings: sourceStrings,
+            targetLanguage: langCode,
+            targetLanguageLabel: langLabel || langCode,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error('Translation failed');
+      
+      const data = await response.json();
+      if (data.translations) {
+        setCachedTranslation(langCode, data.translations);
+        setTranslatedStrings(data.translations);
+        setIsTranslated(true);
+        setTranslatedLangCode(langCode);
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+    } finally {
+      setIsTranslating(false);
+    }
   }, []);
 
   const resetTranslation = useCallback(() => {
     setIsTranslated(false);
+    setTranslatedStrings({});
+    setTranslatedLangCode('');
     setShowTranslatePicker(false);
   }, []);
 
-  const t = (key: string): string => {
-    return translations[language][key] || translations['en'][key] || key;
-  };
+  const t = useCallback((key: string): string => {
+    // If we have AI-translated strings, use those first
+    if (isTranslated && translatedStrings[key]) {
+      return translatedStrings[key];
+    }
+    return translations[language]?.[key] || translations['en']?.[key] || key;
+  }, [language, isTranslated, translatedStrings]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, showTranslatePicker, setShowTranslatePicker, translateTo, resetTranslation, isTranslated }}>
+      {isTranslating && (
+        <div className="fixed bottom-20 right-4 z-50 px-4 py-2 rounded-full bg-card/90 backdrop-blur-lg border border-border/50 shadow-lg text-sm text-foreground animate-pulse">
+          Translating...
+        </div>
+      )}
       {children}
     </LanguageContext.Provider>
   );
