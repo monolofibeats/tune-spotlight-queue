@@ -65,6 +65,59 @@
     --background: 0 0% 2%;
     --foreground: 0 0% 98%;
   }
+
+  .light,
+  :root:not(.dark) {
+    --background: 0 0% 97%;
+    --foreground: 0 0% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+
+    --primary: 50 100% 42%;
+    --primary-foreground: 0 0% 2%;
+
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 50 100% 42%;
+    --accent-foreground: 0 0% 2%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 90%;
+    --ring: 50 100% 42%;
+
+    --glow-primary: 50 100% 42%;
+    --glow-accent: 45 100% 45%;
+    --gradient-start: 50 100% 42%;
+    --gradient-end: 45 100% 38%;
+    --surface-glass: 0 0% 100%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 8%;
+    --sidebar-primary: 50 100% 42%;
+    --sidebar-primary-foreground: 0 0% 2%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 15%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 50 100% 42%;
+
+    --podium-gold: var(--primary);
+    --podium-gold-foreground: var(--primary-foreground);
+    --podium-silver: 0 0% 60%;
+    --podium-silver-foreground: 0 0% 98%;
+    --podium-bronze: 28 80% 45%;
+    --podium-bronze-foreground: 0 0% 98%;
+  }
 }
 
 @layer base {

@@ -285,8 +285,12 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
 
     let time = 0;
     let smoothEnergy = 0;
-    let smoothLufs = -60;
     let smoothDb = -60;
+
+    // Integrated LUFS state (Youlean-style: average over entire playback)
+    let integratedSumSq = 0;
+    let integratedSampleCount = 0;
+    let integratedLufs = -60;
 
     // Key detection state
     const chroma = new Float64Array(12);
