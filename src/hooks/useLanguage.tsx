@@ -270,7 +270,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Discovery Page
     'discovery.badge': 'Creator Review Platform',
     'discovery.heroTitle': 'From Upload to UpStar?',
-    'discovery.heroHighlight': 'Let the Stream decide.',
+    'discovery.heroHighlight': 'Let the Stream decide!',
     'discovery.heroSubtitle': 'We connect creators with streamers (experts) who review content live, unfiltered and on repeat.',
     'discovery.heroJoin': 'Join',
     'discovery.heroThousands': 'thousands of creators',
