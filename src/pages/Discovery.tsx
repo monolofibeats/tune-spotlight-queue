@@ -451,8 +451,7 @@ const Discovery = () => {
       {/* CTA Section - Before FAQ */}
       <section className="py-16 px-4 relative z-10">
         <div className="container mx-auto max-w-3xl">
-          <AnimatedCard>
-            <div className="p-10 text-center">
+          <div className="p-10 text-center">
               <motion.h2
                 className="text-2xl md:text-4xl font-display font-bold mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -469,15 +468,12 @@ const Discovery = () => {
                   <Send className="w-5 h-5" />
                   {t('discovery.ctaSubmit')}
                 </GlowButton>
-                <Link to="/library">
-                  <GlowButton variant="outline" size="lg">
-                    <Eye className="w-5 h-5" />
-                    {t('discovery.ctaWatch')}
-                  </GlowButton>
-                </Link>
+                <GlowButton variant="outline" size="lg" onClick={() => setShowRoster(true)}>
+                  <Eye className="w-5 h-5" />
+                  {t('discovery.ctaReview')}
+                </GlowButton>
               </div>
             </div>
-          </AnimatedCard>
         </div>
       </section>
 
