@@ -128,7 +128,7 @@ const Discovery = () => {
               transition={{ delay: 0.3, duration: 0.6 }}
             >
               <span className="block text-center">
-                <span className="relative inline-block pl-7 pr-7 sm:pl-9 sm:pr-9 md:pl-11 md:pr-11">
+                <span className="relative inline-block pr-7 sm:pr-9 md:pr-11">
                   {t('discovery.heroTitle')}
                   <motion.span
                     className="absolute right-0 -top-3 sm:-top-4 md:-top-5 pointer-events-none"
