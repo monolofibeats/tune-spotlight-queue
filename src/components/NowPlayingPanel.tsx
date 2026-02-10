@@ -424,199 +424,227 @@ export function NowPlayingPanel({
                   )}
                 </div>
 
-                {/* Right: Spotify Artist Info OR Submitter Stats */}
-                <div className="space-y-4">
-                  {/* Spotify Artist Card - if Spotify submission */}
-                  {submission.platform === 'spotify' && (
-                    <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
-                      <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                        <Disc3 className="w-4 h-4 text-green-400" />
-                        Artist Profile
-                      </h3>
-                      
-                      {isLoadingSpotify ? (
-                        <div className="flex items-center justify-center py-8">
-                          <Loader2 className="w-5 h-5 animate-spin text-green-400" />
-                        </div>
-                      ) : spotifyMeta ? (
-                        <div className="space-y-4">
-                          {/* Artist Profile Picture */}
-                          {spotifyMeta.artistImage && (
-                            <div className="aspect-square rounded-full overflow-hidden border-2 border-green-500/30 shadow-lg mx-auto w-24 h-24">
-                              <img
-                                src={spotifyMeta.artistImage}
-                                alt={`${spotifyMeta.artistName || submission.artist_name}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          
-                          {/* Artist Name & Monthly Listeners */}
-                          <div className="text-center">
-                            <p className="font-semibold text-green-400 text-lg">
-                              {spotifyMeta.artistName 
-                                ? decodeHtmlEntities(spotifyMeta.artistName) 
-                                : submission.artist_name}
-                            </p>
-                            {spotifyMeta.monthlyListeners && (
-                              <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
-                                <Users className="w-3 h-3" />
-                                {spotifyMeta.monthlyListeners} monthly listeners
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Artist Bio */}
-                          {spotifyMeta.artistBio && (
-                            <div className="p-3 rounded-lg bg-card/50 border border-border/30">
-                              <p className="text-xs text-muted-foreground line-clamp-4">
-                                {spotifyMeta.artistBio}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Top Tracks */}
-                          {spotifyMeta.artistTopTracks && spotifyMeta.artistTopTracks.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground mb-2">Top Tracks</p>
-                              <div className="space-y-1">
-                                {spotifyMeta.artistTopTracks.slice(0, 5).map((track, index) => (
-                                  <a
-                                    key={index}
-                                    href={track.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 p-1.5 rounded-md hover:bg-green-500/10 transition-colors group"
-                                  >
-                                    <span className="text-[10px] text-muted-foreground w-4">{index + 1}</span>
-                                    <Play className="w-3 h-3 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <span className="text-xs truncate flex-1">{track.name}</span>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Social Links */}
-                          {spotifyMeta.artistSocialLinks && spotifyMeta.artistSocialLinks.length > 0 && (
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground mb-2">Links</p>
-                              <div className="flex flex-wrap gap-2">
-                                {spotifyMeta.artistSocialLinks.map((link, index) => (
-                                  <a
-                                    key={index}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-card/50 border border-border/30 hover:border-green-500/30 hover:bg-green-500/10 transition-colors text-xs"
-                                  >
-                                    <span>{getSocialIcon(link.platform)}</span>
-                                    <span>{link.platform}</span>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* View on Spotify */}
-                          {spotifyMeta.artistUrl && (
-                            <a
-                              href={spotifyMeta.artistUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center gap-1.5 text-xs text-green-400 hover:underline mt-2"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              View Artist on Spotify
-                            </a>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground text-sm">
-                          No artist data available
-                        </div>
+                {/* Collapsible Submitter Insights */}
+                <div className="rounded-xl border border-border/30 overflow-hidden">
+                  <button
+                    onClick={() => setInsightsExpanded(!insightsExpanded)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-card/50 hover:bg-card/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold text-muted-foreground">Submitter Insights</span>
+                      {submitterStats && (
+                        <span className="text-[10px] text-muted-foreground/60">
+                          · {submitterStats.username || submission?.email?.split('@')[0] || 'Anonymous'}
+                          · {submitterStats.total_submissions || 1} submission{(submitterStats.total_submissions || 1) !== 1 ? 's' : ''}
+                        </span>
                       )}
                     </div>
-                  )}
-
-                  {/* Submitter Stats */}
-                  <div className="p-4 rounded-xl bg-card/50 border border-border/30">
-                    <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                      <User className="w-4 h-4 text-primary" />
-                      Submitter Insights
-                    </h3>
-                    
-                    {isLoadingStats ? (
-                      <div className="flex items-center justify-center py-4">
-                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                      </div>
+                    {insightsExpanded ? (
+                      <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
                     ) : (
-                      <div className="space-y-3">
-                        {/* Avatar & Name */}
-                        <div className="flex items-center gap-3">
-                          {submitterStats?.avatar_url ? (
-                            <img
-                              src={submitterStats.avatar_url}
-                              alt="Avatar"
-                              className="w-10 h-10 rounded-full object-cover border border-border"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                              <User className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium">
-                              {submitterStats?.username || submission.email?.split('@')[0] || 'Anonymous'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Contact - Hidden by default, click to copy */}
-                        {submission.email && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start text-xs"
-                            onClick={handleCopyContact}
-                          >
-                            {copiedContact ? (
-                              <>
-                                <Check className="w-3 h-3 mr-2 text-green-500" />
-                                Copied!
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3 h-3 mr-2" />
-                                Copy Contact
-                              </>
-                            )}
-                          </Button>
-                        )}
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/30">
-                          <div className="text-center p-2 rounded-lg bg-secondary/30">
-                            <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                              <Send className="w-3 h-3" />
-                            </div>
-                            <p className="text-lg font-bold">{submitterStats?.total_submissions || 1}</p>
-                            <p className="text-[10px] text-muted-foreground">Submissions</p>
-                          </div>
-                          
-                          <div className="text-center p-2 rounded-lg bg-secondary/30">
-                            <div className="flex items-center justify-center gap-1 text-primary mb-1">
-                              <Calendar className="w-3 h-3" />
-                            </div>
-                            <p className="text-xs font-medium">
-                              {formatDate(submitterStats?.created_at || submission.created_at)}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">Submitted</p>
-                          </div>
-                        </div>
-                      </div>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                     )}
-                  </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {insightsExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-4 border-t border-border/30">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {/* Spotify Artist Card - if Spotify submission */}
+                            {submission?.platform === 'spotify' && (
+                              <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
+                                <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                                  <Disc3 className="w-4 h-4 text-green-400" />
+                                  Artist Profile
+                                </h3>
+                                
+                                {isLoadingSpotify ? (
+                                  <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="w-5 h-5 animate-spin text-green-400" />
+                                  </div>
+                                ) : spotifyMeta ? (
+                                  <div className="space-y-4">
+                                    {spotifyMeta.artistImage && (
+                                      <div className="aspect-square rounded-full overflow-hidden border-2 border-green-500/30 shadow-lg mx-auto w-24 h-24">
+                                        <img
+                                          src={spotifyMeta.artistImage}
+                                          alt={`${spotifyMeta.artistName || submission.artist_name}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    )}
+                                    
+                                    <div className="text-center">
+                                      <p className="font-semibold text-green-400 text-lg">
+                                        {spotifyMeta.artistName 
+                                          ? decodeHtmlEntities(spotifyMeta.artistName) 
+                                          : submission.artist_name}
+                                      </p>
+                                      {spotifyMeta.monthlyListeners && (
+                                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                                          <Users className="w-3 h-3" />
+                                          {spotifyMeta.monthlyListeners} monthly listeners
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {spotifyMeta.artistBio && (
+                                      <div className="p-3 rounded-lg bg-card/50 border border-border/30">
+                                        <p className="text-xs text-muted-foreground line-clamp-4">
+                                          {spotifyMeta.artistBio}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {spotifyMeta.artistTopTracks && spotifyMeta.artistTopTracks.length > 0 && (
+                                      <div>
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">Top Tracks</p>
+                                        <div className="space-y-1">
+                                          {spotifyMeta.artistTopTracks.slice(0, 5).map((track, index) => (
+                                            <a
+                                              key={index}
+                                              href={track.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center gap-2 p-1.5 rounded-md hover:bg-green-500/10 transition-colors group"
+                                            >
+                                              <span className="text-[10px] text-muted-foreground w-4">{index + 1}</span>
+                                              <Play className="w-3 h-3 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                              <span className="text-xs truncate flex-1">{track.name}</span>
+                                            </a>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {spotifyMeta.artistSocialLinks && spotifyMeta.artistSocialLinks.length > 0 && (
+                                      <div>
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">Links</p>
+                                        <div className="flex flex-wrap gap-2">
+                                          {spotifyMeta.artistSocialLinks.map((link, index) => (
+                                            <a
+                                              key={index}
+                                              href={link.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-card/50 border border-border/30 hover:border-green-500/30 hover:bg-green-500/10 transition-colors text-xs"
+                                            >
+                                              <span>{getSocialIcon(link.platform)}</span>
+                                              <span>{link.platform}</span>
+                                            </a>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {spotifyMeta.artistUrl && (
+                                      <a
+                                        href={spotifyMeta.artistUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-1.5 text-xs text-green-400 hover:underline mt-2"
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                        View Artist on Spotify
+                                      </a>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-center py-4 text-muted-foreground text-sm">
+                                    No artist data available
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Submitter Stats */}
+                            <div className="p-4 rounded-xl bg-card/50 border border-border/30">
+                              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                                <User className="w-4 h-4 text-primary" />
+                                Submitter Details
+                              </h3>
+                              
+                              {isLoadingStats ? (
+                                <div className="flex items-center justify-center py-4">
+                                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    {submitterStats?.avatar_url ? (
+                                      <img
+                                        src={submitterStats.avatar_url}
+                                        alt="Avatar"
+                                        className="w-10 h-10 rounded-full object-cover border border-border"
+                                      />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                                        <User className="w-5 h-5 text-muted-foreground" />
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="font-medium">
+                                        {submitterStats?.username || submission?.email?.split('@')[0] || 'Anonymous'}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {submission?.email && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="w-full justify-start text-xs"
+                                      onClick={handleCopyContact}
+                                    >
+                                      {copiedContact ? (
+                                        <>
+                                          <Check className="w-3 h-3 mr-2 text-green-500" />
+                                          Copied!
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy className="w-3 h-3 mr-2" />
+                                          Copy Contact
+                                        </>
+                                      )}
+                                    </Button>
+                                  )}
+
+                                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/30">
+                                    <div className="text-center p-2 rounded-lg bg-secondary/30">
+                                      <div className="flex items-center justify-center gap-1 text-primary mb-1">
+                                        <Send className="w-3 h-3" />
+                                      </div>
+                                      <p className="text-lg font-bold">{submitterStats?.total_submissions || 1}</p>
+                                      <p className="text-[10px] text-muted-foreground">Submissions</p>
+                                    </div>
+                                    
+                                    <div className="text-center p-2 rounded-lg bg-secondary/30">
+                                      <div className="flex items-center justify-center gap-1 text-primary mb-1">
+                                        <Calendar className="w-3 h-3" />
+                                      </div>
+                                      <p className="text-xs font-medium">
+                                        {formatDate(submitterStats?.created_at || submission?.created_at || '')}
+                                      </p>
+                                      <p className="text-[10px] text-muted-foreground">Submitted</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
