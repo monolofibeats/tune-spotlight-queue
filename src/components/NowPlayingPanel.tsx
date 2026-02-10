@@ -346,6 +346,13 @@ export function NowPlayingPanel({
                         submissionId={submission.id}
                         hasAudioFile={!!submission.audio_file_url}
                       />
+                      
+                      {/* Key Finder */}
+                      <KeyFinder
+                        audioFilePath={submission.audio_file_url}
+                        audioUrl={audioUrl}
+                        label={`${submission.artist_name} - ${submission.song_title}`}
+                      />
                     </div>
                   )}
 
