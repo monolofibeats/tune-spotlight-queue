@@ -625,6 +625,9 @@ const Dashboard = () => {
                     submission={submission}
                     position={index + 1}
                     isAdmin={true}
+                    isSelected={selectedIds.has(submission.id)}
+                    isSelectionMode={isSelectionMode}
+                    onToggleSelect={handleToggleSelect}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
                     onUpdate={handleUpdateSubmission}
@@ -642,6 +645,17 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
+
+              {/* Bulk Action Bar */}
+              <BulkActionBar
+                selectedCount={selectedIds.size}
+                totalCount={filteredSubmissions.length}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkStatusChange={handleBulkStatusChange}
+                onBulkDelete={handleBulkDelete}
+                onBulkRestore={handleBulkRestore}
+              />
             </TabsContent>
 
             <TabsContent value="stream" className="space-y-6">
