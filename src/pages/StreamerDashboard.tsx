@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -24,6 +24,7 @@ import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { DashboardEditor, useDashboardLayout } from '@/components/DashboardEditor';
+import { BulkActionBar } from '@/components/submission/BulkActionBar';
 import type { Streamer } from '@/types/streamer';
 
 interface Submission {
@@ -49,6 +50,7 @@ const StreamerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
   const nowPlayingRef = useRef<HTMLDivElement>(null);
   const { visibleWidgets } = useDashboardLayout(streamer?.id);
@@ -254,6 +256,75 @@ const StreamerDashboard = () => {
     
     return matchesSearch && matchesStatus;
   });
+
+  // Clear selection when filter changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [statusFilter]);
+
+  const isSelectionMode = selectedIds.size > 0;
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(filteredSubmissions.map(s => s.id)));
+  }, [filteredSubmissions]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkStatusChange = useCallback(async (status: string) => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase
+      .from('submissions')
+      .update({ status })
+      .in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update submissions", variant: "destructive" });
+    } else {
+      toast({ title: "Updated", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to ${status}` });
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds]);
+
+  const handleBulkDelete = useCallback(async (permanent = false) => {
+    const ids = Array.from(selectedIds);
+    if (permanent) {
+      const { error } = await supabase.from('submissions').delete().in('id', ids);
+      if (error) {
+        toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+      } else {
+        toast({ title: "Deleted", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} permanently deleted` });
+      }
+    } else {
+      const { error } = await supabase.from('submissions').update({ status: 'deleted' }).in('id', ids);
+      if (error) {
+        toast({ title: "Error", description: "Failed to move to trash", variant: "destructive" });
+      } else {
+        toast({ title: "Moved to trash", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to trash` });
+      }
+    }
+    setSelectedIds(new Set());
+  }, [selectedIds]);
+
+  const handleBulkRestore = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('submissions').update({ status: 'pending' }).in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to restore", variant: "destructive" });
+    } else {
+      toast({ title: "Restored", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} restored` });
+    }
+    setSelectedIds(new Set());
+  }, [selectedIds]);
 
   const stats = {
     total: submissions.length,
@@ -481,6 +552,9 @@ const StreamerDashboard = () => {
                     position={statusFilter === 'deleted' ? undefined : index + 1}
                     isAdmin={true}
                     isTrashView={statusFilter === 'deleted'}
+                    isSelected={selectedIds.has(submission.id)}
+                    isSelectionMode={isSelectionMode}
+                    onToggleSelect={handleToggleSelect}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
                     onRestore={handleRestoreSubmission}
@@ -499,6 +573,18 @@ const StreamerDashboard = () => {
                   </div>
                 )}
               </div>
+
+              {/* Bulk Action Bar */}
+              <BulkActionBar
+                selectedCount={selectedIds.size}
+                totalCount={filteredSubmissions.length}
+                isTrashView={statusFilter === 'deleted'}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkStatusChange={handleBulkStatusChange}
+                onBulkDelete={handleBulkDelete}
+                onBulkRestore={handleBulkRestore}
+              />
             </TabsContent>
 
             <TabsContent value="settings">
