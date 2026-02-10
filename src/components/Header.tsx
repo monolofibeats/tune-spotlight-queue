@@ -59,7 +59,7 @@ export function Header() {
             {/* Regular User Links */}
             {user && !isAdmin && !isStreamer && (
               <>
-                <Link to="/my-dashboard">
+                <Link to="/user/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                     <User className="w-3.5 h-3.5" />
                     {t('nav.mySongs')}
@@ -152,7 +152,7 @@ export function Header() {
             {/* Regular User Links - Mobile */}
             {user && !isAdmin && !isStreamer && (
               <>
-                <Link to="/my-dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/user/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <User className="w-4 h-4" />
                     {t('nav.mySongs')}

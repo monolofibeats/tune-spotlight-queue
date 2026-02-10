@@ -114,7 +114,7 @@ function StreamerProfilePageContent() {
 export default function StreamerProfilePage() {
   const { slug } = useParams<{ slug: string }>();
 
-  const reservedRoutes = ["library", "auth", "dashboard", "my-dashboard", "imprint", "admin", "streamer", "profile"];
+  const reservedRoutes = ["library", "auth", "dashboard", "user", "imprint", "admin", "streamer", "profile"];
   if (!slug || reservedRoutes.includes(slug)) {
     return <Navigate to="/" replace />;
   }

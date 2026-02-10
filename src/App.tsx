@@ -60,7 +60,7 @@ const App = () => (
                         }
                       />
                       <Route
-                        path="/my-dashboard"
+                        path="/user/dashboard"
                         element={
                           <ProtectedRoute>
                             <UserDashboard />
