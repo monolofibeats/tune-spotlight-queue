@@ -44,7 +44,7 @@ interface StemSeparationPanelProps {
 
 const STEM_OPTIONS = [
   { type: 'vocals', label: 'Vocals', icon: Mic, color: 'text-pink-400' },
-  { type: 'drums', label: 'Drums', icon: Drum, color: 'text-orange-400' },
+  { type: 'drum', label: 'Drums', icon: Drum, color: 'text-orange-400' },
   { type: 'bass', label: 'Bass', icon: Guitar, color: 'text-blue-400' },
   { type: 'electric_guitar', label: 'E-Guitar', icon: Guitar, color: 'text-red-400' },
   { type: 'acoustic_guitar', label: 'A-Guitar', icon: Guitar, color: 'text-amber-400' },
@@ -58,7 +58,7 @@ export function StemSeparationPanel({ submissionId, hasAudioFile }: StemSeparati
   const [jobs, setJobs] = useState<StemJob[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [selectedStems, setSelectedStems] = useState<string[]>(['vocals', 'drums', 'bass']);
+  const [selectedStems, setSelectedStems] = useState<string[]>(['vocals', 'drum', 'bass']);
   const [isExpanded, setIsExpanded] = useState(false);
   const [stemAudioUrls, setStemAudioUrls] = useState<Record<string, string>>({});
   const pollRef = useRef<NodeJS.Timeout | null>(null);
@@ -387,7 +387,7 @@ export function StemSeparationPanel({ submissionId, hasAudioFile }: StemSeparati
                           .eq('submission_id', submissionId);
                         setJobs([]);
                         setStemAudioUrls({});
-                        setSelectedStems(['vocals', 'drums', 'bass']);
+                        setSelectedStems(['vocals', 'drum', 'bass']);
                         toast({ title: 'Reset to original audio' });
                       }}
                       size="sm"
