@@ -696,13 +696,11 @@ function triggerGoogleTranslate() {
 }
 
 function removeGoogleTranslate() {
-  // Reset translation by setting cookie and reloading isn't great UX,
-  // so we use the select to go back to original
+  document.body.classList.remove('google-translate-active');
   const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
   if (selectEl) {
     selectEl.value = '';
     selectEl.dispatchEvent(new Event('change'));
-    selectEl.style.display = 'none';
   }
   // Also try removing the banner
   const banner = document.querySelector('.goog-te-banner-frame') as HTMLElement;
