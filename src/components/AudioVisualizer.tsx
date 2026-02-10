@@ -337,18 +337,28 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      // ── LUFS approximation ──
+      // ── LUFS & dB approximation ──
       let rms = 0;
+      let peak = 0;
       if (analyser && tdData && hasAudio) {
         analyser.getFloatTimeDomainData(tdData as Float32Array<ArrayBuffer>);
         let sumSq = 0;
-        for (let i = 0; i < tdData.length; i++) sumSq += tdData[i] * tdData[i];
+        for (let i = 0; i < tdData.length; i++) {
+          sumSq += tdData[i] * tdData[i];
+          const abs = Math.abs(tdData[i]);
+          if (abs > peak) peak = abs;
+        }
         rms = Math.sqrt(sumSq / tdData.length);
       }
       const rawLufs = rms > 0 ? 20 * Math.log10(rms) - 0.691 : -60;
       const lufsLerp = rawLufs > smoothLufs ? 0.4 : 0.05;
       smoothLufs += (rawLufs - smoothLufs) * lufsLerp;
       const clampedLufs = Math.max(-60, Math.min(0, smoothLufs));
+
+      const rawDb = peak > 0 ? 20 * Math.log10(peak) : -60;
+      const dbLerp = rawDb > smoothDb ? 0.5 : 0.08;
+      smoothDb += (rawDb - smoothDb) * dbLerp;
+      const clampedDb = Math.max(-60, Math.min(0, smoothDb));
 
       // ── Real-time key detection from frequency data ──
       if (hasAudio && data && analyser) {
