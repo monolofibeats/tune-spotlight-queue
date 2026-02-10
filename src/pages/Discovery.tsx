@@ -115,7 +115,7 @@ const Discovery = () => {
         className="pt-8 pb-16 px-4 relative z-10"
         style={{ scale: heroScale }}
       >
-        <div className="container mx-auto max-w-4xl text-center">
+        <div className="container mx-auto max-w-5xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
