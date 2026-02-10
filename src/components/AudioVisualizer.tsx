@@ -304,7 +304,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     const KEY_UPDATE_INTERVAL = 0.4;
 
     const BOTTOM_MARGIN = 28;
-    const RIGHT_MARGIN = 80; // Room for LUFS + dB meters
+    const RIGHT_MARGIN = 120; // Room for LUFS + dB meters
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
