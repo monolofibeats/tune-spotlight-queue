@@ -127,19 +127,20 @@ const Discovery = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <span className="relative">
-                {t('discovery.heroTitle')}
-                <motion.span
-                  className="absolute -right-7 -top-3 sm:-right-9 sm:-top-4 md:-right-11 md:-top-5 pointer-events-none"
-                  animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
-                </motion.span>
+              <span className="block text-center">
+                <span className="relative inline-block">
+                  {t('discovery.heroTitle')}
+                  <motion.span
+                    className="absolute -right-7 -top-3 sm:-right-9 sm:-top-4 md:-right-11 md:-top-5 pointer-events-none"
+                    animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                  </motion.span>
+                </span>
               </span>
-              <br />
               <motion.span 
-                className="text-primary whitespace-nowrap"
+                className="block text-center text-primary whitespace-nowrap"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
