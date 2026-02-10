@@ -135,8 +135,8 @@ export default function Settings() {
 
   // Apply language changes immediately
   useEffect(() => {
-    if (language !== currentLanguage) {
-      setAppLanguage(language);
+    if ((language === 'en' || language === 'de') && language !== currentLanguage) {
+      setAppLanguage(language as 'en' | 'de');
     }
   }, [language]);
 
