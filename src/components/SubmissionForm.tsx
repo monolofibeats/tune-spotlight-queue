@@ -530,10 +530,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
     // Required fields
-    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
+        (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please fill out the required fields.",
+        description: "Please enter at least an artist name or song title.",
         variant: "destructive",
       });
       return;
