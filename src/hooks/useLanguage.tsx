@@ -594,7 +594,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Discovery Page
     'discovery.badge': 'Creator Review Platform',
-    'discovery.heroTitle': 'Upload zum UpStar?',
+    'discovery.heroTitle': 'Vom Upload zum UpStar?',
     'discovery.heroHighlight': 'Lass den Stream entscheiden!',
     'discovery.heroSubtitle': 'Wir verbinden Creator mit Streamern (Experten) die Content live, unfiltered und on repeat bewerten.',
     'discovery.heroJoin': 'Schließe dich',
