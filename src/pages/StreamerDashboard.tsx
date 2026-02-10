@@ -552,6 +552,9 @@ const StreamerDashboard = () => {
                     position={statusFilter === 'deleted' ? undefined : index + 1}
                     isAdmin={true}
                     isTrashView={statusFilter === 'deleted'}
+                    isSelected={selectedIds.has(submission.id)}
+                    isSelectionMode={isSelectionMode}
+                    onToggleSelect={handleToggleSelect}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDeleteSubmission}
                     onRestore={handleRestoreSubmission}
@@ -570,6 +573,18 @@ const StreamerDashboard = () => {
                   </div>
                 )}
               </div>
+
+              {/* Bulk Action Bar */}
+              <BulkActionBar
+                selectedCount={selectedIds.size}
+                totalCount={filteredSubmissions.length}
+                isTrashView={statusFilter === 'deleted'}
+                onSelectAll={handleSelectAll}
+                onDeselectAll={handleDeselectAll}
+                onBulkStatusChange={handleBulkStatusChange}
+                onBulkDelete={handleBulkDelete}
+                onBulkRestore={handleBulkRestore}
+              />
             </TabsContent>
 
             <TabsContent value="settings">
