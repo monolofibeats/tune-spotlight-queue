@@ -680,39 +680,27 @@ function loadGoogleTranslateScript(): Promise<void> {
 }
 
 function triggerGoogleTranslate() {
-  // Wait a bit for the widget to initialize, then click the select
-  setTimeout(() => {
+  // Wait for the widget to initialize, then show the select
+  const tryShow = (attempts = 0) => {
     const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (selectEl) {
-      selectEl.style.position = 'fixed';
-      selectEl.style.bottom = '60px';
-      selectEl.style.right = '16px';
-      selectEl.style.zIndex = '9999';
-      selectEl.style.display = 'block';
-      selectEl.style.opacity = '1';
-      selectEl.style.padding = '8px 12px';
-      selectEl.style.borderRadius = '12px';
-      selectEl.style.border = '1px solid rgba(255,255,255,0.2)';
-      selectEl.style.background = 'rgba(30,30,30,0.95)';
-      selectEl.style.color = '#fff';
-      selectEl.style.fontSize = '14px';
-      selectEl.style.backdropFilter = 'blur(12px)';
-      selectEl.style.cursor = 'pointer';
-      selectEl.style.minWidth = '180px';
+      // Mark body so CSS knows to show the combo
+      document.body.classList.add('google-translate-active');
       selectEl.focus();
       selectEl.click();
+    } else if (attempts < 20) {
+      setTimeout(() => tryShow(attempts + 1), 200);
     }
-  }, 300);
+  };
+  setTimeout(() => tryShow(), 500);
 }
 
 function removeGoogleTranslate() {
-  // Reset translation by setting cookie and reloading isn't great UX,
-  // so we use the select to go back to original
+  document.body.classList.remove('google-translate-active');
   const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
   if (selectEl) {
     selectEl.value = '';
     selectEl.dispatchEvent(new Event('change'));
-    selectEl.style.display = 'none';
   }
   // Also try removing the banner
   const banner = document.querySelector('.goog-te-banner-frame') as HTMLElement;
@@ -752,14 +740,44 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setIsGoogleTranslateActive(false);
   };
 
-  // Hide Google Translate banner on mount
+  // Hide Google Translate banner but show combo when active
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
       .goog-te-banner-frame { display: none !important; }
       body { top: 0 !important; }
-      .skiptranslate { display: none !important; }
-      #google_translate_element { display: none !important; }
+      #google_translate_element { position: absolute; opacity: 0; pointer-events: none; height: 0; overflow: hidden; }
+      .skiptranslate:not(#google_translate_element) { display: none !important; }
+      
+      /* When active, show the combo as a styled floating select */
+      body.google-translate-active .goog-te-combo {
+        position: fixed !important;
+        bottom: 60px !important;
+        right: 16px !important;
+        z-index: 9999 !important;
+        display: block !important;
+        opacity: 1 !important;
+        padding: 8px 12px !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        background: rgba(30,30,30,0.95) !important;
+        color: #fff !important;
+        font-size: 14px !important;
+        backdrop-filter: blur(12px) !important;
+        cursor: pointer !important;
+        min-width: 180px !important;
+        pointer-events: auto !important;
+      }
+      body.google-translate-active #google_translate_element {
+        position: fixed !important;
+        bottom: 50px !important;
+        right: 10px !important;
+        z-index: 9998 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
