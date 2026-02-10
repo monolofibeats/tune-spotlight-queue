@@ -76,16 +76,22 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const readyRef = useRef(false);
 
   useEffect(() => {
+    // Always clean up previous session first
+    if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
+
     if (!audioElement) {
-      analyserRef.current = null;
+      // Stop any playing shadow source
+      if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
+      // Disconnect old analyser
+      if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
       freqDataRef.current = null;
       timeDomainRef.current = null;
+      bufferRef.current = null;
       lastSrcRef.current = '';
       readyRef.current = false;
+      isPlayingRef.current = false;
       return;
     }
-
-    if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
 
     const src = audioElement.src;
     if (!src) return;
@@ -98,6 +104,14 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
+
+        // Always stop old shadow source when src changes
+        if (srcChanged) {
+          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
+          isPlayingRef.current = false;
+          // Disconnect old analyser to prevent stale audio
+          if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
+        }
 
         if (srcChanged || !analyserRef.current) {
           const resp = await fetch(src);
