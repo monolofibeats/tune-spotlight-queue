@@ -446,10 +446,16 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     if (audioFileUrl) {
       uploadedAudioUrlRef.current = audioFileUrl;
     }
+
+    // If no link was provided, a file upload is required
+    const finalSongUrl = songUrl || (audioFileUrl ? 'direct-upload' : null);
+    if (!finalSongUrl) {
+      throw new Error('Please provide a song link or upload an audio file');
+    }
     
     // Direct database insert for free submissions
     const { error } = await supabase.from('submissions').insert({
-      song_url: songUrl || 'direct-upload',
+      song_url: finalSongUrl,
       platform: platform || 'other',
       artist_name: artistName || 'Unknown Artist',
       song_title: songTitle || 'Untitled',
