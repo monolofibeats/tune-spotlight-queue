@@ -680,29 +680,19 @@ function loadGoogleTranslateScript(): Promise<void> {
 }
 
 function triggerGoogleTranslate() {
-  // Wait a bit for the widget to initialize, then click the select
-  setTimeout(() => {
+  // Wait for the widget to initialize, then show the select
+  const tryShow = (attempts = 0) => {
     const selectEl = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (selectEl) {
-      selectEl.style.position = 'fixed';
-      selectEl.style.bottom = '60px';
-      selectEl.style.right = '16px';
-      selectEl.style.zIndex = '9999';
-      selectEl.style.display = 'block';
-      selectEl.style.opacity = '1';
-      selectEl.style.padding = '8px 12px';
-      selectEl.style.borderRadius = '12px';
-      selectEl.style.border = '1px solid rgba(255,255,255,0.2)';
-      selectEl.style.background = 'rgba(30,30,30,0.95)';
-      selectEl.style.color = '#fff';
-      selectEl.style.fontSize = '14px';
-      selectEl.style.backdropFilter = 'blur(12px)';
-      selectEl.style.cursor = 'pointer';
-      selectEl.style.minWidth = '180px';
+      // Mark body so CSS knows to show the combo
+      document.body.classList.add('google-translate-active');
       selectEl.focus();
       selectEl.click();
+    } else if (attempts < 20) {
+      setTimeout(() => tryShow(attempts + 1), 200);
     }
-  }, 300);
+  };
+  setTimeout(() => tryShow(), 500);
 }
 
 function removeGoogleTranslate() {
