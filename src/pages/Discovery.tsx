@@ -130,7 +130,7 @@ const Discovery = () => {
               >
                 <span className="block">{t('discovery.heroTitle')}</span>
                 <motion.span 
-                  className="text-primary"
+                  className="text-primary whitespace-nowrap"
                   animate={{ 
                     textShadow: [
                       '0 0 20px hsl(var(--primary) / 0.5)',
