@@ -779,27 +779,39 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // First switch to English as base for translation
     setLanguageState('en');
     localStorage.setItem('language', 'en');
+    setShowTranslatePicker(false);
     
     setGoogleTranslateCookie(langCode);
     
     const tryTranslate = (attempts = 0) => {
       if (doTranslate(langCode)) {
         setIsTranslated(true);
-        setShowTranslatePicker(false);
-      } else if (attempts < 30) {
-        setTimeout(() => tryTranslate(attempts + 1), 200);
+      } else if (attempts < 20) {
+        setTimeout(() => tryTranslate(attempts + 1), 300);
+      } else {
+        // Fallback: open current page via Google Translate proxy
+        console.warn('GT widget not available, using URL fallback');
+        const currentUrl = window.location.href;
+        const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
+        window.open(gtUrl, '_blank');
       }
     };
 
-    if (scriptLoaded) {
-      tryTranslate();
-    } else {
-      loadGoogleTranslateScript().then(() => {
-        setScriptLoaded(true);
+    const doInit = async () => {
+      const success = await loadGoogleTranslateScript();
+      setScriptLoaded(success);
+      if (success) {
         tryTranslate();
-      });
-    }
-  }, [scriptLoaded]);
+      } else {
+        // Direct fallback
+        const currentUrl = window.location.href;
+        const gtUrl = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
+        window.open(gtUrl, '_blank');
+      }
+    };
+
+    doInit();
+  }, []);
 
   const resetTranslation = useCallback(() => {
     clearGoogleTranslateCookie();
