@@ -657,10 +657,14 @@ function clearGoogleTranslateCookie() {
   document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 }
 
-function loadGoogleTranslateScript(): Promise<void> {
-  return new Promise((resolve) => {
-    if (document.getElementById('google-translate-script')) {
-      resolve();
+let gtScriptPromise: Promise<boolean> | null = null;
+
+function loadGoogleTranslateScript(): Promise<boolean> {
+  if (gtScriptPromise) return gtScriptPromise;
+  
+  gtScriptPromise = new Promise((resolve) => {
+    if (document.querySelector('.goog-te-combo')) {
+      resolve(true);
       return;
     }
 
@@ -676,23 +680,42 @@ function loadGoogleTranslateScript(): Promise<void> {
       document.body.appendChild(el);
     }
 
+    // Timeout in case script loads but callback never fires
+    const timeout = setTimeout(() => {
+      console.warn('Google Translate init timed out');
+      resolve(false);
+    }, 10000);
+
     (window as any).googleTranslateElementInit = () => {
-      new (window as any).google.translate.TranslateElement(
-        {
-          pageLanguage: 'en',
-          autoDisplay: false,
-          layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-        },
-        'google_translate_element'
-      );
-      resolve();
+      clearTimeout(timeout);
+      try {
+        new (window as any).google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            autoDisplay: false,
+            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+          },
+          'google_translate_element'
+        );
+        resolve(true);
+      } catch (e) {
+        console.error('Google Translate init error:', e);
+        resolve(false);
+      }
     };
 
     const script = document.createElement('script');
     script.id = 'google-translate-script';
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.onerror = () => {
+      clearTimeout(timeout);
+      console.warn('Google Translate script failed to load');
+      resolve(false);
+    };
     document.head.appendChild(script);
   });
+  
+  return gtScriptPromise;
 }
 
 function doTranslate(langCode: string) {
