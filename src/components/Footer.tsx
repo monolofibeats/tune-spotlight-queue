@@ -10,15 +10,6 @@ const footerLinks = {
       { label: 'Cookie Policy', href: '/cookies' },
     ],
   },
-  resources: {
-    title: 'Resources',
-    links: [
-      { label: 'FAQs', href: '/#faq' },
-      { label: 'Changelog', href: '/changelog' },
-      { label: 'Docs', href: '/docs' },
-      { label: 'Support', href: '/support' },
-    ],
-  },
   about: {
     title: 'About',
     links: [
