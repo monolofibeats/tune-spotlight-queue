@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -9,6 +9,7 @@ interface AuthContextType {
   isStreamer: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  getRoleBasedRedirect: () => string;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isStreamer: false,
   isLoading: true,
   signOut: async () => {},
+  getRoleBasedRedirect: () => '/user/dashboard',
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -91,6 +93,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const getRoleBasedRedirect = useCallback(() => {
+    if (isAdmin) return '/dashboard';
+    if (isStreamer) return '/streamer/dashboard';
+    return '/user/dashboard';
+  }, [isAdmin, isStreamer]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -100,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut, getRoleBasedRedirect }}>
       {children}
     </AuthContext.Provider>
   );

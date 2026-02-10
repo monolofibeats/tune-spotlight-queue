@@ -29,28 +29,40 @@ export default function Auth() {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  // Redirect if already logged in - role-based
+  // Redirect if already logged in or on auth state change - role-based
   useEffect(() => {
+    const redirectByRole = async (userId: string) => {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      const roles = roleData?.map(r => r.role) || [];
+
+      if (roles.includes('admin')) {
+        navigate('/dashboard');
+      } else if (roles.includes('streamer')) {
+        navigate('/streamer/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+    };
+
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id);
-
-        const roles = roleData?.map(r => r.role) || [];
-
-        if (roles.includes('admin')) {
-          navigate('/dashboard');
-        } else if (roles.includes('streamer')) {
-          navigate('/streamer/dashboard');
-        } else {
-          navigate('/user/dashboard');
-        }
+        redirectByRole(session.user.id);
       }
     };
     checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        redirectByRole(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
@@ -173,7 +185,7 @@ export default function Auth() {
     
     try {
       const { error } = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}/auth`,
       });
       
       if (error) throw error;
