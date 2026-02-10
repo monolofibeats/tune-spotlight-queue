@@ -45,6 +45,9 @@ const App = () => (
                     <Routes>
                       <Route path="/" element={<Discovery />} />
                       <Route path="/imprint" element={<Imprint />} />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/terms" element={<TermsOfService />} />
+                      <Route path="/cookies" element={<CookiePolicy />} />
                       <Route path="/library" element={<Library />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/admin/login" element={<Auth />} />
