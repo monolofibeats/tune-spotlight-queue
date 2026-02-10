@@ -103,6 +103,56 @@ export type Database = {
           },
         ]
       }
+      payout_preferences: {
+        Row: {
+          bank_account_holder: string | null
+          bank_bic: string | null
+          bank_iban: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_primary: boolean
+          payout_method: string
+          paypal_email: string | null
+          streamer_id: string
+          updated_at: string
+        }
+        Insert: {
+          bank_account_holder?: string | null
+          bank_bic?: string | null
+          bank_iban?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_primary?: boolean
+          payout_method?: string
+          paypal_email?: string | null
+          streamer_id: string
+          updated_at?: string
+        }
+        Update: {
+          bank_account_holder?: string | null
+          bank_bic?: string | null
+          bank_iban?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_primary?: boolean
+          payout_method?: string
+          paypal_email?: string | null
+          streamer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_preferences_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_stream_spots: {
         Row: {
           created_at: string
