@@ -4,8 +4,8 @@ import { Globe, X, Search } from 'lucide-react';
 import { useLanguage, Language } from '@/hooks/useLanguage';
 
 const manualLanguages: { code: Language; label: string }[] = [
-  { code: 'en', label: 'EN' },
   { code: 'de', label: 'DE' },
+  { code: 'en', label: 'EN' },
 ];
 
 const POPULAR_LANGUAGES = [
