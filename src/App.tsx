@@ -85,6 +85,13 @@ const App = () => (
                         }
                       />
                       <Route
+                        path="/streamer/payments"
+                        element={
+                          <ProtectedRoute>
+                            <StreamerPayments />
+                          </ProtectedRoute>
+                        }
+                      />
                         path="/profile"
                         element={
                           <ProtectedRoute>
