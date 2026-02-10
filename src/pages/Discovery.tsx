@@ -122,12 +122,12 @@ const Discovery = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight"
+              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <span className="relative inline-block">
+              <span className="relative">
                 {t('discovery.heroTitle')}
                 <motion.span
                   className="absolute -right-7 -top-3 sm:-right-9 sm:-top-4 md:-right-11 md:-top-5 pointer-events-none"
