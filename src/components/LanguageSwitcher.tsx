@@ -99,7 +99,7 @@ export function LanguageSwitcher() {
                 <button
                   key={lang.code}
                   onClick={() => {
-                    translateTo(lang.code);
+                    translateTo(lang.code, lang.label);
                     setSearch('');
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-primary/10 transition-colors text-left"
