@@ -634,9 +634,9 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         ctx.moveTo(dbX + meterW + 2, ly);
         ctx.lineTo(dbX + meterW + 6, ly);
         ctx.stroke();
-        ctx.font = '8px monospace';
-        ctx.fillStyle = hsla(0.3);
-        ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 3);
+        ctx.font = 'bold 10px monospace';
+        ctx.fillStyle = hsla(0.45);
+        ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
       }
 
       ctx.restore();
