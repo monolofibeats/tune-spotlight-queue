@@ -87,8 +87,10 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const showEmail = getEnabled('email', true);
   const showMessage = getEnabled('message', true);
 
-  const requireArtist = showArtist && getRequired('artist_name', true);
-  const requireTitle = showTitle && getRequired('song_title', true);
+  const requireArtist = showArtist && getRequired('artist_name', false);
+  const requireTitle = showTitle && getRequired('song_title', false);
+  // At least one of artist name or song title must be filled
+  const requireAtLeastOneIdentifier = showArtist || showTitle;
   const requireEmail = showEmail && getRequired('email', false);
   const requireMessage = showMessage && getRequired('message', false);
 
@@ -528,10 +530,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   // Handle paid submission via Stripe
   const handlePaidSubmit = async () => {
     // Required fields
-    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
+        (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please fill out the required fields.",
+        description: "Please enter at least an artist name or song title.",
         variant: "destructive",
       });
       return;
@@ -652,10 +655,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     e.preventDefault();
     
     // Required fields
-    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim())) {
+    if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
+        (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
       toast({
         title: "Missing information",
-        description: "Please fill out the required fields.",
+        description: "Please enter at least an artist name or song title.",
         variant: "destructive",
       });
       return;
@@ -991,7 +995,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     <div className={`relative ${getFieldGlowClass(2)}`}>
                       <CompletionTick fieldStep={2} />
                       <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {artistLabel} {requireArtist && <span className="text-destructive">*</span>}
+                        {artistLabel} {requireArtist ? <span className="text-destructive">*</span> : requireAtLeastOneIdentifier && <span className="text-muted-foreground/60 text-[10px]">(or song title)</span>}
                       </label>
                       <Input
                         placeholder={artistPlaceholder}
@@ -1007,7 +1011,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     <div className={`relative ${getFieldGlowClass(3)}`}>
                       <CompletionTick fieldStep={3} />
                       <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {titleLabel} {requireTitle && <span className="text-destructive">*</span>}
+                        {titleLabel} {requireTitle ? <span className="text-destructive">*</span> : requireAtLeastOneIdentifier && <span className="text-muted-foreground/60 text-[10px]">(or artist name)</span>}
                       </label>
                       <Input
                         placeholder={titlePlaceholder}
