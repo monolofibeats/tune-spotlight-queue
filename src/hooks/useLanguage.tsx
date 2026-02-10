@@ -278,7 +278,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.heroDiscovered': 'discovered',
     'discovery.browseStreamers': 'Browse Streamers',
     'discovery.becomeStreamer': 'Become a Streamer',
-    'discovery.becomeStreamerInvite': 'Become a Streamer — Invite Only',
+    'discovery.becomeStreamerInvite': 'Become a Streamer (Invite Only for Now)',
     'discovery.songsReviewed': 'Submissions Reviewed',
     'discovery.livePerSecond': '+1 every second (live)',
     'discovery.activeStreamers': 'Active Streamers',
