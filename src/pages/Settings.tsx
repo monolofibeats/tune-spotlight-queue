@@ -69,7 +69,7 @@ export default function Settings() {
   const [statusNotifications, setStatusNotifications] = useState(true);
 
   // Language
-  const [language, setLanguage] = useState(currentLanguage || 'de');
+  const [language, setLanguage] = useState<string>(currentLanguage || 'de');
 
   // Voice & Video
   const [selectedMicrophone, setSelectedMicrophone] = useState('default');
