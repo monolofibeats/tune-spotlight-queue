@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { z } from 'zod';
 
@@ -25,24 +27,26 @@ export default function Auth() {
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
-  // Redirect if already logged in
+  // Redirect if already logged in - role-based
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Check if admin
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
+          .eq('user_id', session.user.id);
 
-        if (roleData) {
+        const roles = roleData?.map(r => r.role) || [];
+
+        if (roles.includes('admin')) {
           navigate('/dashboard');
+        } else if (roles.includes('streamer')) {
+          navigate('/streamer/dashboard');
         } else {
-          navigate('/');
+          navigate('/user/dashboard');
         }
       }
     };
@@ -55,7 +59,7 @@ export default function Auth() {
     const validation = authSchema.safeParse({ email, password });
     if (!validation.success) {
       toast({
-        title: "Validation error",
+        title: t('common.error'),
         description: validation.error.errors[0].message,
         variant: "destructive",
       });
@@ -72,29 +76,30 @@ export default function Auth() {
 
       if (error) throw error;
 
-      // Check if user has admin role
-      const { data: roleData, error: roleError } = await supabase
+      // Check user roles for redirect
+      const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', data.user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
+        .eq('user_id', data.user.id);
 
-      if (roleError || !roleData) {
-        await supabase.auth.signOut();
-        throw new Error('Access denied. Admin privileges required.');
-      }
+      const roles = roleData?.map(r => r.role) || [];
 
       toast({
-        title: "Welcome back! 👋",
-        description: "You've been logged in successfully.",
+        title: t('auth.welcomeBack'),
+        description: t('auth.loginSuccess'),
       });
 
-      navigate('/dashboard');
+      if (roles.includes('admin')) {
+        navigate('/dashboard');
+      } else if (roles.includes('streamer')) {
+        navigate('/streamer/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       toast({
-        title: "Login failed",
+        title: t('auth.loginFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -109,7 +114,7 @@ export default function Auth() {
     const validation = authSchema.safeParse({ email, password });
     if (!validation.success) {
       toast({
-        title: "Validation error",
+        title: t('common.error'),
         description: validation.error.errors[0].message,
         variant: "destructive",
       });
@@ -118,8 +123,8 @@ export default function Auth() {
 
     if (password !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
+        title: t('auth.passwordMismatch'),
+        description: t('auth.passwordMismatchDesc'),
         variant: "destructive",
       });
       return;
@@ -138,14 +143,14 @@ export default function Auth() {
 
       if (error) {
         if (error.message.includes('already registered')) {
-          throw new Error('This email is already registered. Please sign in instead.');
+          throw new Error(t('auth.alreadyRegistered'));
         }
         throw error;
       }
 
       toast({
-        title: "Account created! 🎉",
-        description: "Please check your email to verify your account.",
+        title: t('auth.accountCreated'),
+        description: t('auth.checkEmail'),
       });
 
       setIsSignUp(false);
@@ -154,7 +159,7 @@ export default function Auth() {
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
       toast({
-        title: "Sign up failed",
+        title: t('auth.signUpFailed'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -175,8 +180,8 @@ export default function Auth() {
     } catch (error) {
       console.error('Social login error:', error);
       toast({
-        title: "Login failed",
-        description: "Could not sign in. Please try again.",
+        title: t('auth.loginFailed'),
+        description: t('auth.socialLoginError'),
         variant: "destructive",
       });
       setIsSocialLoading(null);
@@ -200,28 +205,28 @@ export default function Auth() {
               />
             </Link>
             <h1 className="text-2xl font-display font-bold mb-2">
-              {isSignUp ? 'Create Account' : 'Sign In'}
+              {isSignUp ? t('auth.createAccount') : t('auth.signIn')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isSignUp ? 'Join UpStar today' : 'Access your account or skip the line'}
+              {isSignUp ? t('auth.joinUpstar') : t('auth.accessAccount')}
             </p>
           </div>
 
-          <Tabs defaultValue="priority" className="w-full">
+          <Tabs defaultValue="quick" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="priority" className="gap-2">
+              <TabsTrigger value="quick" className="gap-2">
                 <Zap className="w-4 h-4" />
-                Priority Access
+                {t('auth.quickAccess')}
               </TabsTrigger>
               <TabsTrigger value="admin" className="gap-2">
                 <Lock className="w-4 h-4" />
-                Email Login
+                {t('auth.emailLogin')}
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="priority" className="space-y-4">
+            <TabsContent value="quick" className="space-y-4">
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Sign in to use priority submissions and skip the line
+                {t('auth.quickAccessDesc')}
               </p>
               
               <Button
@@ -253,7 +258,7 @@ export default function Auth() {
                     />
                   </svg>
                 )}
-                Continue with Google
+                {t('auth.continueGoogle')}
               </Button>
               
               <Button
@@ -270,7 +275,7 @@ export default function Auth() {
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                   </svg>
                 )}
-                Continue with Apple
+                {t('auth.continueApple')}
               </Button>
 
               <div className="relative my-6">
@@ -278,13 +283,12 @@ export default function Auth() {
                   <div className="w-full border-t border-border/50"></div>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Secure login</span>
+                  <span className="bg-card px-2 text-muted-foreground">{t('auth.secureLogin')}</span>
                 </div>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
-                Sign in with your social account to access priority submissions. 
-                Your account is used only for authentication.
+                {t('auth.quickAccessNote')}
               </p>
             </TabsContent>
 
@@ -292,7 +296,7 @@ export default function Auth() {
               <form onSubmit={isSignUp ? handleSignUp : handleAdminLogin} className="space-y-4">
                 <div>
                   <label className="text-sm text-muted-foreground mb-2 block">
-                    Email
+                    {t('auth.email')}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -308,7 +312,7 @@ export default function Auth() {
 
                 <div>
                   <label className="text-sm text-muted-foreground mb-2 block">
-                    Password
+                    {t('auth.password')}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -332,7 +336,7 @@ export default function Auth() {
                 {isSignUp && (
                   <div>
                     <label className="text-sm text-muted-foreground mb-2 block">
-                      Confirm Password
+                      {t('auth.confirmPassword')}
                     </label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -357,17 +361,17 @@ export default function Auth() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      {isSignUp ? 'Creating account...' : 'Signing in...'}
+                      {isSignUp ? t('auth.creatingAccount') : t('auth.signingIn')}
                     </>
                   ) : isSignUp ? (
                     <>
                       <UserPlus className="w-5 h-5" />
-                      Create Account
+                      {t('auth.createAccount')}
                     </>
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
-                      Sign In
+                      {t('auth.signIn')}
                     </>
                   )}
                 </Button>
@@ -383,14 +387,14 @@ export default function Auth() {
                   }}
                   className="text-sm text-primary hover:underline"
                 >
-                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                  {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
                 </button>
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
                 {isSignUp 
-                  ? 'Create an account to access all features.'
-                  : 'Sign in with your email and password.'}
+                  ? t('auth.createAccountNote')
+                  : t('auth.emailLoginNote')}
               </p>
             </TabsContent>
           </Tabs>
@@ -400,10 +404,11 @@ export default function Auth() {
             className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to homepage
+            {t('auth.backToHome')}
           </Link>
         </div>
       </motion.div>
+      <LanguageSwitcher />
     </div>
   );
 }
