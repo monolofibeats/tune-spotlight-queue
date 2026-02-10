@@ -299,7 +299,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.step2Title': 'Submit Your Work',
     'discovery.step2Desc': 'Paste a link or upload a file. Add details and optionally skip the queue.',
     'discovery.step3Title': 'Get Reviewed Live',
-    'discovery.step3Desc': 'Watch the stream as your work gets featured and receive real-time feedback.',
+    'discovery.step3Desc': 'Watch the stream as your work is featured and get real-time feedback.',
     'discovery.forStreamers': 'For Streamers',
     'discovery.streamerFeaturesTitle': 'Built for Underground Creators',
     'discovery.streamerFeaturesSubtitle': 'UpStar gives independent streamers and creators the tools they need to build real communities — no compromises.',
