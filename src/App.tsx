@@ -16,6 +16,7 @@ import StreamerPage from "./pages/StreamerPage";
 import StreamerProfilePage from "./pages/StreamerProfilePage";
 import StreamerSettings from "./pages/StreamerSettings";
 import StreamerDashboard from "./pages/StreamerDashboard";
+import StreamerPayments from "./pages/StreamerPayments";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Library from "./pages/Library";
