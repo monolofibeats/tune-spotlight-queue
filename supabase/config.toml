@@ -23,3 +23,12 @@ verify_jwt = false
 
 [functions.send-bid-notification]
 verify_jwt = false
+
+[functions.stem-separation]
+verify_jwt = false
+
+[functions.create-submission-payment]
+verify_jwt = false
+
+[functions.verify-submission-payment]
+verify_jwt = false
