@@ -151,6 +151,7 @@ const Discovery = () => {
                 >
                   {t('discovery.heroHighlight')}
                 </motion.span>
+              </motion.h1>
             </div>
             
             <motion.p 
