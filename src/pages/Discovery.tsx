@@ -470,10 +470,13 @@ const Discovery = () => {
                   <Send className="w-5 h-5" />
                   {t('discovery.ctaSubmit')}
                 </GlowButton>
-                <GlowButton variant="outline" size="lg" onClick={() => setShowRoster(true)}>
+                <motion.button
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+                  disabled
+                >
                   <Eye className="w-5 h-5" />
                   {t('discovery.ctaReview')}
-                </GlowButton>
+                </motion.button>
               </div>
             </div>
         </div>
