@@ -319,6 +319,69 @@ export type Database = {
           },
         ]
       }
+      stem_separation_jobs: {
+        Row: {
+          back_url: string | null
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          id: string
+          lalal_source_id: string | null
+          lalal_task_id: string | null
+          progress: number | null
+          status: string
+          stem_type: string
+          stem_url: string | null
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          back_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          lalal_source_id?: string | null
+          lalal_task_id?: string | null
+          progress?: number | null
+          status?: string
+          stem_type: string
+          stem_url?: string | null
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          back_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          lalal_source_id?: string | null
+          lalal_task_id?: string | null
+          progress?: number | null
+          status?: string
+          stem_type?: string
+          stem_url?: string | null
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stem_separation_jobs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stem_separation_jobs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stream_clips: {
         Row: {
           clip_url: string | null
