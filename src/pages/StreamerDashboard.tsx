@@ -257,6 +257,75 @@ const StreamerDashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Clear selection when filter changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [statusFilter]);
+
+  const isSelectionMode = selectedIds.size > 0;
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(filteredSubmissions.map(s => s.id)));
+  }, [filteredSubmissions]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkStatusChange = useCallback(async (status: string) => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase
+      .from('submissions')
+      .update({ status })
+      .in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update submissions", variant: "destructive" });
+    } else {
+      toast({ title: "Updated", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to ${status}` });
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds]);
+
+  const handleBulkDelete = useCallback(async (permanent = false) => {
+    const ids = Array.from(selectedIds);
+    if (permanent) {
+      const { error } = await supabase.from('submissions').delete().in('id', ids);
+      if (error) {
+        toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+      } else {
+        toast({ title: "Deleted", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} permanently deleted` });
+      }
+    } else {
+      const { error } = await supabase.from('submissions').update({ status: 'deleted' }).in('id', ids);
+      if (error) {
+        toast({ title: "Error", description: "Failed to move to trash", variant: "destructive" });
+      } else {
+        toast({ title: "Moved to trash", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to trash` });
+      }
+    }
+    setSelectedIds(new Set());
+  }, [selectedIds]);
+
+  const handleBulkRestore = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('submissions').update({ status: 'pending' }).in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to restore", variant: "destructive" });
+    } else {
+      toast({ title: "Restored", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} restored` });
+    }
+    setSelectedIds(new Set());
+  }, [selectedIds]);
+
   const stats = {
     total: submissions.length,
     pending: submissions.filter(s => s.status === 'pending').length,
