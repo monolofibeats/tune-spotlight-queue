@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 export type Language = 'en' | 'de';
 
@@ -6,9 +6,11 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
-  activateGoogleTranslate: () => void;
-  isGoogleTranslateActive: boolean;
-  deactivateGoogleTranslate: () => void;
+  showTranslatePicker: boolean;
+  setShowTranslatePicker: (show: boolean) => void;
+  translateTo: (langCode: string) => void;
+  resetTranslation: () => void;
+  isTranslated: boolean;
 }
 
 const translations: Record<Language, Record<string, string>> = {
