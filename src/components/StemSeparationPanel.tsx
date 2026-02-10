@@ -58,7 +58,7 @@ export function StemSeparationPanel({ submissionId, hasAudioFile }: StemSeparati
   const [jobs, setJobs] = useState<StemJob[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [selectedStems, setSelectedStems] = useState<string[]>(['vocals', 'drums', 'bass']);
+  const [selectedStems, setSelectedStems] = useState<string[]>(['vocals', 'drum', 'bass']);
   const [isExpanded, setIsExpanded] = useState(false);
   const [stemAudioUrls, setStemAudioUrls] = useState<Record<string, string>>({});
   const pollRef = useRef<NodeJS.Timeout | null>(null);
