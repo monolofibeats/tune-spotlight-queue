@@ -740,7 +740,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Load Google Translate script on mount (hidden)
   useEffect(() => {
-    loadGoogleTranslateScript().then(() => setScriptLoaded(true));
+    loadGoogleTranslateScript().then((success) => {
+      setScriptLoaded(success);
+      if (!success) console.warn('Google Translate not available, will use URL fallback');
+    });
   }, []);
 
   // Hide Google Translate banner
