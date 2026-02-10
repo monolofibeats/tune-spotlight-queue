@@ -355,9 +355,17 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         rms = Math.sqrt(sumSq / tdData.length);
       }
       const rawLufs = rms > 0 ? 20 * Math.log10(rms) - 0.691 : -60;
-      const lufsLerp = rawLufs > smoothLufs ? 0.4 : 0.05;
-      smoothLufs += (rawLufs - smoothLufs) * lufsLerp;
-      const clampedLufs = Math.max(-60, Math.min(0, smoothLufs));
+
+      // Integrated LUFS: accumulate RMS² over entire playback (like Youlean)
+      if (rms > 0 && tdData) {
+        for (let i = 0; i < tdData.length; i++) {
+          integratedSumSq += tdData[i] * tdData[i];
+        }
+        integratedSampleCount += tdData.length;
+        const intRms = Math.sqrt(integratedSumSq / integratedSampleCount);
+        integratedLufs = 20 * Math.log10(intRms) - 0.691;
+      }
+      const clampedLufs = Math.max(-60, Math.min(0, integratedLufs));
 
       const rawDb = peak > 0 ? 20 * Math.log10(peak) : -60;
       const dbLerp = rawDb > smoothDb ? 0.5 : 0.08;
