@@ -15,6 +15,7 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -374,6 +375,29 @@ export function StemSeparationPanel({ submissionId, hasAudioFile }: StemSeparati
                       </div>
                     );
                   })}
+
+                  {/* Reset button */}
+                  <div className="pt-2 border-t border-border/30">
+                    <Button
+                      onClick={async () => {
+                        // Delete all jobs for this submission from DB
+                        await supabase
+                          .from('stem_separation_jobs')
+                          .delete()
+                          .eq('submission_id', submissionId);
+                        setJobs([]);
+                        setStemAudioUrls({});
+                        setSelectedStems(['vocals', 'drums', 'bass']);
+                        toast({ title: 'Reset to original audio' });
+                      }}
+                      size="sm"
+                      variant="ghost"
+                      className="w-full text-muted-foreground hover:text-foreground"
+                    >
+                      <RotateCcw className="w-3 h-3 mr-1.5" />
+                      Reset to Original
+                    </Button>
+                  </div>
 
                   {/* Option to extract more stems */}
                   {completedJobs.length > 0 && (
