@@ -370,6 +370,7 @@ const Discovery = () => {
               <p className="text-muted-foreground text-lg mb-8">
                 {t('discovery.streamerFeaturesSubtitle')}
               </p>
+              <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">{t('discovery.featuresLabel')}</h3>
               <ul className="space-y-4 mb-8">
                 {[
                   t('discovery.feat1'),
@@ -395,6 +396,7 @@ const Discovery = () => {
                   </motion.li>
                 ))}
               </ul>
+              <h3 className="text-sm font-semibold text-primary mb-2 uppercase tracking-wider">{t('discovery.monetizationLabel')}</h3>
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
