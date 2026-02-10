@@ -266,9 +266,9 @@ export function NowPlayingPanel({
 
             {/* Main Content */}
             <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left: Song Info & Player */}
-                <div className="lg:col-span-2 space-y-4">
+              <div className="flex flex-col gap-6">
+                {/* Song Info & Player - Full Width */}
+                <div className="space-y-4">
                   {/* Song Header */}
                   <div className="flex items-start gap-4">
                     <PositionBadge
