@@ -93,6 +93,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const getRoleBasedRedirect = useCallback(() => {
+    if (isAdmin) return '/dashboard';
+    if (isStreamer) return '/streamer/dashboard';
+    return '/user/dashboard';
+  }, [isAdmin, isStreamer]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -102,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isStreamer, isLoading, signOut, getRoleBasedRedirect }}>
       {children}
     </AuthContext.Provider>
   );
