@@ -122,12 +122,12 @@ const Discovery = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight"
+              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight mx-auto"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              {t('discovery.heroTitle')}{' '}
+              <span className="block">{t('discovery.heroTitle')}</span>
               <motion.span 
                 className="text-primary relative inline whitespace-nowrap"
                 animate={{ 
@@ -141,7 +141,7 @@ const Discovery = () => {
               >
                 {t('discovery.heroHighlight')}
                 <motion.span
-                  className="absolute -right-10 -top-6"
+                  className="absolute -right-10 -top-6 pointer-events-none"
                   animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
