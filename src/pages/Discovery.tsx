@@ -129,7 +129,7 @@ const Discovery = () => {
             >
               {t('discovery.heroTitle')}{' '}
               <motion.span 
-                className="text-primary relative inline-block"
+                className="text-primary relative inline"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
