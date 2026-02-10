@@ -740,14 +740,44 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setIsGoogleTranslateActive(false);
   };
 
-  // Hide Google Translate banner on mount
+  // Hide Google Translate banner but show combo when active
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
       .goog-te-banner-frame { display: none !important; }
       body { top: 0 !important; }
-      .skiptranslate { display: none !important; }
-      #google_translate_element { display: none !important; }
+      #google_translate_element { position: absolute; opacity: 0; pointer-events: none; height: 0; overflow: hidden; }
+      .skiptranslate:not(#google_translate_element) { display: none !important; }
+      
+      /* When active, show the combo as a styled floating select */
+      body.google-translate-active .goog-te-combo {
+        position: fixed !important;
+        bottom: 60px !important;
+        right: 16px !important;
+        z-index: 9999 !important;
+        display: block !important;
+        opacity: 1 !important;
+        padding: 8px 12px !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        background: rgba(30,30,30,0.95) !important;
+        color: #fff !important;
+        font-size: 14px !important;
+        backdrop-filter: blur(12px) !important;
+        cursor: pointer !important;
+        min-width: 180px !important;
+        pointer-events: auto !important;
+      }
+      body.google-translate-active #google_translate_element {
+        position: fixed !important;
+        bottom: 50px !important;
+        right: 10px !important;
+        z-index: 9998 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
     `;
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
