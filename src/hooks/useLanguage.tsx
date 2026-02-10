@@ -330,7 +330,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq1q': 'What is UpStar?',
     'discovery.faq1a': 'UpStar is a platform that connects creators with streamers who review and react to submissions live on stream. Get real-time feedback from content creators and their audiences.',
     'discovery.faq2q': 'How do I submit my work?',
-    'discovery.faq2a': "Simply visit a streamer's page, paste your link (Spotify, YouTube, SoundCloud, etc.) or upload a file, and submit. You can optionally pay to skip the queue for priority review.",
+    'discovery.faq2a': "Simply visit a streamer's page, paste your link or upload a file, and click submit. You can optionally pay to skip the queue for priority review.",
     'discovery.faq3q': 'How do streamers join?',
     'discovery.faq3a': 'Streamers join by invitation. If you\'re interested, reach out to us and we\'ll review your profile.',
     'discovery.faq4q': 'Is it free to submit?',
