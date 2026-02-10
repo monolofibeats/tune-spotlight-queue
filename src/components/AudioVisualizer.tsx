@@ -286,6 +286,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let time = 0;
     let smoothEnergy = 0;
     let smoothLufs = -60;
+    let smoothDb = -60;
 
     // Key detection state
     const chroma = new Float64Array(12);
@@ -295,15 +296,15 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let detectedMode = '';
     let detectedConf = 0;
     let detectedCamelot = '';
-    let establishedKey = ''; // The overall key of the track
+    let establishedKey = '';
     let establishedMode = '';
-    let keyDrift = 0; // 0 = on key, higher = drifting
+    let keyDrift = 0;
     let driftMessage = '';
-    let keyDisplayAlpha = 0; // fade in
-    const KEY_UPDATE_INTERVAL = 0.4; // seconds between key re-evaluations
+    let keyDisplayAlpha = 0;
+    const KEY_UPDATE_INTERVAL = 0.4;
 
-    const BOTTOM_MARGIN = 24;
-    const RIGHT_MARGIN = 44;
+    const BOTTOM_MARGIN = 28;
+    const RIGHT_MARGIN = 80; // Room for LUFS + dB meters
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -336,18 +337,28 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      // ── LUFS approximation ──
+      // ── LUFS & dB approximation ──
       let rms = 0;
+      let peak = 0;
       if (analyser && tdData && hasAudio) {
         analyser.getFloatTimeDomainData(tdData as Float32Array<ArrayBuffer>);
         let sumSq = 0;
-        for (let i = 0; i < tdData.length; i++) sumSq += tdData[i] * tdData[i];
+        for (let i = 0; i < tdData.length; i++) {
+          sumSq += tdData[i] * tdData[i];
+          const abs = Math.abs(tdData[i]);
+          if (abs > peak) peak = abs;
+        }
         rms = Math.sqrt(sumSq / tdData.length);
       }
       const rawLufs = rms > 0 ? 20 * Math.log10(rms) - 0.691 : -60;
       const lufsLerp = rawLufs > smoothLufs ? 0.4 : 0.05;
       smoothLufs += (rawLufs - smoothLufs) * lufsLerp;
       const clampedLufs = Math.max(-60, Math.min(0, smoothLufs));
+
+      const rawDb = peak > 0 ? 20 * Math.log10(peak) : -60;
+      const dbLerp = rawDb > smoothDb ? 0.5 : 0.08;
+      smoothDb += (rawDb - smoothDb) * dbLerp;
+      const clampedDb = Math.max(-60, Math.min(0, smoothDb));
 
       // ── Real-time key detection from frequency data ──
       if (hasAudio && data && analyser) {
@@ -543,23 +554,24 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       ctx.fillText('Hz', waveW - 2, scaleY + 18);
       ctx.restore();
 
-      // ── LUFS meter on the right ──
+      // ── LUFS + dB meters on the right ──
       ctx.save();
-      const meterX = waveW + 8;
-      const meterW = RIGHT_MARGIN - 14;
+      const meterW = 14;
+      const meterGap = 6;
       const meterTop = 12;
       const meterBottom = waveH - 4;
       const meterH = meterBottom - meterTop;
 
+      // -- LUFS meter --
+      const lufsX = waveW + 10;
       ctx.fillStyle = hsla(0.06);
       ctx.beginPath();
-      ctx.roundRect(meterX, meterTop, meterW, meterH, 3);
+      ctx.roundRect(lufsX, meterTop, meterW, meterH, 3);
       ctx.fill();
 
       const lufsNorm = (clampedLufs + 60) / 60;
-      const fillH = lufsNorm * meterH;
-
-      if (fillH > 0) {
+      const lufsFillH = lufsNorm * meterH;
+      if (lufsFillH > 0) {
         const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
         grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
         grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
@@ -567,32 +579,66 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.roundRect(meterX, meterBottom - fillH, meterW, fillH, 3);
+        ctx.roundRect(lufsX, meterBottom - lufsFillH, meterW, lufsFillH, 3);
         ctx.fill();
       }
 
-      ctx.font = '7px monospace';
-      ctx.textAlign = 'left';
-      const lufsLabels = [0, -6, -14, -24, -40, -60];
-      for (const lv of lufsLabels) {
-        const norm = (lv + 60) / 60;
-        const ly = meterBottom - norm * meterH;
-        ctx.strokeStyle = hsla(0.15);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(meterX - 3, ly);
-        ctx.lineTo(meterX, ly);
-        ctx.stroke();
-      }
-
-      ctx.font = 'bold 9px monospace';
+      // LUFS value
+      ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = hsla(0.5);
-      ctx.fillText(`${Math.round(clampedLufs)}`, meterX + meterW / 2, meterBottom + 14);
-
+      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 12);
       ctx.font = '7px monospace';
-      ctx.fillStyle = hsla(0.25);
-      ctx.fillText('LUFS', meterX + meterW / 2, meterTop - 3);
+      ctx.fillStyle = hsla(0.3);
+      ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 3);
+
+      // -- dB meter --
+      const dbX = lufsX + meterW + meterGap;
+      ctx.fillStyle = hsla(0.06);
+      ctx.beginPath();
+      ctx.roundRect(dbX, meterTop, meterW, meterH, 3);
+      ctx.fill();
+
+      const dbNorm = (clampedDb + 60) / 60;
+      const dbFillH = dbNorm * meterH;
+      if (dbFillH > 0) {
+        const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+        grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
+        grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
+        grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
+        grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+        ctx.fillStyle = grad2;
+        ctx.beginPath();
+        ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 3);
+        ctx.fill();
+      }
+
+      // dB value
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = hsla(0.5);
+      ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 12);
+      ctx.font = '7px monospace';
+      ctx.fillStyle = hsla(0.3);
+      ctx.fillText('dB', dbX + meterW / 2, meterTop - 3);
+
+      // Shared tick marks
+      const tickLabels = [0, -6, -14, -24, -40, -60];
+      ctx.font = '6px monospace';
+      ctx.textAlign = 'left';
+      for (const lv of tickLabels) {
+        const norm = (lv + 60) / 60;
+        const ly = meterBottom - norm * meterH;
+        ctx.strokeStyle = hsla(0.12);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(dbX + meterW + 2, ly);
+        ctx.lineTo(dbX + meterW + 5, ly);
+        ctx.stroke();
+        ctx.fillStyle = hsla(0.2);
+        ctx.fillText(`${lv}`, dbX + meterW + 7, ly + 3);
+      }
+
       ctx.restore();
 
       // ══════════════════════════════════════
