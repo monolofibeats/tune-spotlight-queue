@@ -8,7 +8,7 @@ interface LanguageContextType {
   t: (key: string) => string;
   showTranslatePicker: boolean;
   setShowTranslatePicker: (show: boolean) => void;
-  translateTo: (langCode: string) => void;
+  translateTo: (langCode: string, langLabel?: string) => void;
   resetTranslation: () => void;
   isTranslated: boolean;
 }
