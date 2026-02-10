@@ -596,16 +596,16 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       ctx.restore();
 
       // ══════════════════════════════════════
-      // ── Key indicator (top-left corner) ──
+      // ── Key indicator (top-right corner) ──
       // ══════════════════════════════════════
       if (detectedKey && keyDisplayAlpha > 0.01) {
         ctx.save();
         ctx.globalAlpha = keyDisplayAlpha;
 
-        const kx = 8;
-        const ky = 8;
         const boxW = driftMessage ? Math.max(130, ctx.measureText(driftMessage).width + 24) : 90;
         const boxH = driftMessage ? 48 : 36;
+        const kx = waveW - boxW - 8;
+        const ky = 8;
 
         // Background
         ctx.fillStyle = keyDrift >= 3
