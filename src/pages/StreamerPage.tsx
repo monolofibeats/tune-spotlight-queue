@@ -159,7 +159,7 @@ export default function StreamerPage() {
   const { slug } = useParams<{ slug: string }>();
 
   // List of reserved routes that shouldn't be treated as streamer slugs
-  const reservedRoutes = ['library', 'auth', 'dashboard', 'my-dashboard', 'imprint', 'admin'];
+  const reservedRoutes = ['library', 'auth', 'dashboard', 'user', 'imprint', 'admin'];
   
   if (!slug || reservedRoutes.includes(slug)) {
     return <Navigate to="/" replace />;

@@ -75,7 +75,7 @@ const UserDashboard = () => {
           description: "Your bid was not processed.",
           variant: "destructive",
         });
-        window.history.replaceState({}, '', '/my-dashboard');
+        window.history.replaceState({}, '', '/user/dashboard');
       }
     };
 
