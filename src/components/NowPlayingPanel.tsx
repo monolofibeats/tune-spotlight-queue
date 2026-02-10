@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
   X, 
   Music2, 
   Download, 
