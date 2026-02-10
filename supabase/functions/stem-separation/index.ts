@@ -116,16 +116,18 @@ serve(async (req) => {
         }
 
         // Start split task on LALAL.AI
-        const splitResp = await fetch(`${LALAL_BASE}/split/stem_separator/`, {
+        const splitResp = await fetch(`${LALAL_BASE}/split/`, {
           method: "POST",
           headers: {
             "X-License-Key": LALAL_API_KEY,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            source_id: sourceId,
-            stem: stemType,
-            splitter: "perseus",
+            id: sourceId,
+            params: {
+              stem: stemType,
+              splitter: "perseus",
+            },
           }),
         });
 
