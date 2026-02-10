@@ -995,7 +995,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     <div className={`relative ${getFieldGlowClass(2)}`}>
                       <CompletionTick fieldStep={2} />
                       <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {artistLabel} {requireArtist && <span className="text-destructive">*</span>}
+                        {artistLabel} {requireArtist ? <span className="text-destructive">*</span> : requireAtLeastOneIdentifier && <span className="text-muted-foreground/60 text-[10px]">(or song title)</span>}
                       </label>
                       <Input
                         placeholder={artistPlaceholder}
