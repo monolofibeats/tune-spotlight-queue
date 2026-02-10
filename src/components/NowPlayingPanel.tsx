@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { AudioVisualizer } from '@/components/AudioVisualizer';
 import { StemSeparationPanel } from '@/components/StemSeparationPanel';
+import { KeyFinder } from '@/components/KeyFinder';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -344,6 +345,13 @@ export function NowPlayingPanel({
                       <StemSeparationPanel 
                         submissionId={submission.id}
                         hasAudioFile={!!submission.audio_file_url}
+                      />
+                      
+                      {/* Key Finder */}
+                      <KeyFinder
+                        audioFilePath={submission.audio_file_url}
+                        audioUrl={audioUrl}
+                        label={`${submission.artist_name} - ${submission.song_title}`}
                       />
                     </div>
                   )}
