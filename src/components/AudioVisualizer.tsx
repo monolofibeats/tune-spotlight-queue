@@ -584,11 +584,11 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       }
 
       // LUFS value
-      ctx.font = 'bold 11px monospace';
+      ctx.font = 'bold 13px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = hsla(0.65);
-      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 16);
-      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
+      ctx.font = 'bold 10px monospace';
       ctx.fillStyle = hsla(0.4);
       ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
 
@@ -614,11 +614,11 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       }
 
       // dB value
-      ctx.font = 'bold 11px monospace';
+      ctx.font = 'bold 13px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = hsla(0.65);
-      ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 16);
-      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 18);
+      ctx.font = 'bold 10px monospace';
       ctx.fillStyle = hsla(0.4);
       ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
 
@@ -634,9 +634,9 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         ctx.moveTo(dbX + meterW + 2, ly);
         ctx.lineTo(dbX + meterW + 6, ly);
         ctx.stroke();
-        ctx.font = '8px monospace';
-        ctx.fillStyle = hsla(0.3);
-        ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 3);
+        ctx.font = 'bold 10px monospace';
+        ctx.fillStyle = hsla(0.45);
+        ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
       }
 
       ctx.restore();
