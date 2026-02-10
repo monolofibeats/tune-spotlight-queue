@@ -398,10 +398,13 @@ const Discovery = () => {
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
-              <GlowButton size="lg" onClick={() => setShowApplicationForm(true)}>
-                {t('discovery.applyToJoin')}
-                <ArrowRight className="w-5 h-5" />
-              </GlowButton>
+              <motion.button
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+                disabled
+              >
+                <Lock className="w-4 h-4" />
+                {t('discovery.contactSales')}
+              </motion.button>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
