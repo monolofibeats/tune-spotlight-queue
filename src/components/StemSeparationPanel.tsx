@@ -44,7 +44,7 @@ interface StemSeparationPanelProps {
 
 const STEM_OPTIONS = [
   { type: 'vocals', label: 'Vocals', icon: Mic, color: 'text-pink-400' },
-  { type: 'drums', label: 'Drums', icon: Drum, color: 'text-orange-400' },
+  { type: 'drum', label: 'Drums', icon: Drum, color: 'text-orange-400' },
   { type: 'bass', label: 'Bass', icon: Guitar, color: 'text-blue-400' },
   { type: 'electric_guitar', label: 'E-Guitar', icon: Guitar, color: 'text-red-400' },
   { type: 'acoustic_guitar', label: 'A-Guitar', icon: Guitar, color: 'text-amber-400' },
