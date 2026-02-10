@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, User, Settings, Wallet, BarChart3, HelpCircle, ChevronDown } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Settings, Wallet, BarChart3, MessageSquare, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,14 +14,26 @@ import { LiveIndicator } from './LiveIndicator';
 import { BidNotificationBell } from './BidNotificationBell';
 import { PerformanceToggle } from './PerformanceToggle';
 import { SignOutDialog } from './SignOutDialog';
+import { AdminStreamerChat } from './AdminStreamerChat';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
+import { supabase } from '@/integrations/supabase/client';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [supportChatOpen, setSupportChatOpen] = useState(false);
+  const [streamerId, setStreamerId] = useState<string | null>(null);
   const { user, isAdmin, isStreamer } = useAuth();
   const { t } = useLanguage();
+
+  // Fetch streamer ID for support chat
+  useEffect(() => {
+    if (!user || !isStreamer) return;
+    supabase.from('streamers').select('id').eq('user_id', user.id).single().then(({ data }) => {
+      if (data) setStreamerId(data.id);
+    });
+  }, [user, isStreamer]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
@@ -59,13 +71,7 @@ export function Header() {
                       <ChevronDown className="w-3 h-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
-                        <User className="w-4 h-4" />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-48 bg-popover z-[60]">
                     <DropdownMenuItem asChild>
                       <Link to="/streamer/payments" className="flex items-center gap-2 cursor-pointer">
                         <Wallet className="w-4 h-4" />
@@ -73,23 +79,21 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/streamer/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <Link to="/streamer/statistics" className="flex items-center gap-2 cursor-pointer">
                         <BarChart3 className="w-4 h-4" />
                         Statistics
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/streamer/settings" className="flex items-center gap-2 cursor-pointer">
+                      <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                         <Settings className="w-4 h-4" />
                         Settings
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <a href="mailto:support@upstar.gg" className="flex items-center gap-2 cursor-pointer">
-                        <HelpCircle className="w-4 h-4" />
-                        Support
-                      </a>
+                    <DropdownMenuItem onClick={() => setSupportChatOpen(prev => !prev)} className="flex items-center gap-2 cursor-pointer">
+                      <MessageSquare className="w-4 h-4" />
+                      Support
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -101,11 +105,11 @@ export function Header() {
               <>
                 <Link to="/user/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <User className="w-3.5 h-3.5" />
+                    <LayoutDashboard className="w-3.5 h-3.5" />
                     {t('nav.mySongs')}
                   </Button>
                 </Link>
-                <Link to="/profile">
+                <Link to="/settings">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                     <Settings className="w-3.5 h-3.5" />
                   </Button>
@@ -121,7 +125,7 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Link to="/profile">
+                <Link to="/settings">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                     <Settings className="w-3.5 h-3.5" />
                   </Button>
@@ -177,36 +181,28 @@ export function Header() {
                     My Dashboard
                   </Button>
                 </Link>
-                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Button>
-                </Link>
                 <Link to="/streamer/payments" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Wallet className="w-4 h-4" />
                     Payments
                   </Button>
                 </Link>
-                <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/streamer/statistics" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <BarChart3 className="w-4 h-4" />
                     Statistics
                   </Button>
                 </Link>
-                <Link to="/streamer/settings" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
                     Settings
                   </Button>
                 </Link>
-                <a href="mailto:support@upstar.gg" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                    <HelpCircle className="w-4 h-4" />
-                    Support
-                  </Button>
-                </a>
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm" onClick={() => { setMobileMenuOpen(false); setSupportChatOpen(prev => !prev); }}>
+                  <MessageSquare className="w-4 h-4" />
+                  Support
+                </Button>
               </>
             )}
             
@@ -215,14 +211,14 @@ export function Header() {
               <>
                 <Link to="/user/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                    <User className="w-4 h-4" />
+                    <LayoutDashboard className="w-4 h-4" />
                     {t('nav.mySongs')}
                   </Button>
                 </Link>
-                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
-                    Profile Settings
+                    Settings
                   </Button>
                 </Link>
               </>
@@ -236,10 +232,10 @@ export function Header() {
                     {t('nav.dashboard')}
                   </Button>
                 </Link>
-                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
-                    Profile Settings
+                    Settings
                   </Button>
                 </Link>
                 <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
@@ -255,6 +251,11 @@ export function Header() {
             )}
           </nav>
         </motion.div>
+      )}
+
+      {/* Support Chat for Streamers */}
+      {isStreamer && streamerId && supportChatOpen && (
+        <AdminStreamerChat streamerId={streamerId} role="streamer" />
       )}
     </header>
   );
