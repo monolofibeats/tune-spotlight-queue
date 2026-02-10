@@ -119,6 +119,7 @@ export function NowPlayingPanel({
   const [isLoadingSpotify, setIsLoadingSpotify] = useState(false);
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
     setAudioEl(el);
