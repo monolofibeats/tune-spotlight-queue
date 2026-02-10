@@ -121,34 +121,36 @@ const Discovery = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              <span className="block">{t('discovery.heroTitle')}</span>
-              <motion.span 
-                className="text-primary relative inline whitespace-nowrap"
-                animate={{ 
-                  textShadow: [
-                    '0 0 20px hsl(var(--primary) / 0.5)',
-                    '0 0 40px hsl(var(--primary) / 0.8)',
-                    '0 0 20px hsl(var(--primary) / 0.5)',
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
+            <div className="relative inline-block">
+              <motion.h1 
+                className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
               >
-                {t('discovery.heroHighlight')}
-                <motion.span
-                  className="absolute -right-10 -top-6 pointer-events-none"
-                  animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
+                <span className="block">{t('discovery.heroTitle')}</span>
+                <motion.span 
+                  className="text-primary"
+                  animate={{ 
+                    textShadow: [
+                      '0 0 20px hsl(var(--primary) / 0.5)',
+                      '0 0 40px hsl(var(--primary) / 0.8)',
+                      '0 0 20px hsl(var(--primary) / 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <img src={upstarHeroStar} alt="" className="w-10 h-10 object-contain" />
+                  {t('discovery.heroHighlight')}
                 </motion.span>
+              </motion.h1>
+              <motion.span
+                className="absolute -right-8 -top-4 pointer-events-none"
+                animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <img src={upstarHeroStar} alt="" className="w-10 h-10 object-contain" />
               </motion.span>
-            </motion.h1>
+            </div>
             
             <motion.p 
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
