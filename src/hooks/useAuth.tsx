@@ -9,6 +9,7 @@ interface AuthContextType {
   isStreamer: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
+  getRoleBasedRedirect: () => string;
 }
 
 const AuthContext = createContext<AuthContextType>({
