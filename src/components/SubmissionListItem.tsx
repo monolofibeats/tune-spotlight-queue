@@ -238,8 +238,29 @@ export function SubmissionListItem({
       {/* Compact Header Row */}
       <div 
         className="flex items-center gap-3 cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          if (isSelectionMode) {
+            onToggleSelect?.(submission.id);
+          } else {
+            setIsExpanded(!isExpanded);
+          }
+        }}
       >
+        {/* Selection dot */}
+        <button
+          className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all duration-200 flex items-center justify-center ${
+            isSelected 
+              ? 'bg-primary border-primary scale-110' 
+              : 'border-muted-foreground/30 hover:border-primary/60'
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect?.(submission.id);
+          }}
+          aria-label={isSelected ? 'Deselect' : 'Select'}
+        >
+          {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+        </button>
         {/* Position number - Star overlay for #1 */}
         {position && (
           <PositionBadge position={position} badgeClassName={styles.positionBadge} showGlow={position === 1} />
