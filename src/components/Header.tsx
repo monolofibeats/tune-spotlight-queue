@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, User, Settings } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User, Settings, Wallet, BarChart3, HelpCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { SocialLinks } from './SocialLinks';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { LiveIndicator } from './LiveIndicator';
 import { BidNotificationBell } from './BidNotificationBell';
 import { PerformanceToggle } from './PerformanceToggle';
@@ -35,11 +41,9 @@ export function Header() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-3">
             
-            <SocialLinks />
-            
             {user && <BidNotificationBell />}
             
-            {/* Streamer Dashboard Link */}
+            {/* Streamer Dropdown Menu */}
             {isStreamer && !isAdmin && (
               <>
                 <Link to="/streamer/dashboard">
@@ -48,11 +52,47 @@ export function Header() {
                     My Dashboard
                   </Button>
                 </Link>
-                <Link to="/profile">
-                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <Settings className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                      <Settings className="w-3.5 h-3.5" />
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                        <User className="w-4 h-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/streamer/payments" className="flex items-center gap-2 cursor-pointer">
+                        <Wallet className="w-4 h-4" />
+                        Payments
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/streamer/dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <BarChart3 className="w-4 h-4" />
+                        Statistics
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/streamer/settings" className="flex items-center gap-2 cursor-pointer">
+                        <Settings className="w-4 h-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <a href="mailto:support@upstar.gg" className="flex items-center gap-2 cursor-pointer">
+                        <HelpCircle className="w-4 h-4" />
+                        Support
+                      </a>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
             
@@ -124,14 +164,11 @@ export function Header() {
           className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
         >
           <nav className="flex flex-col gap-2">
-            {/* Library link removed */}
-            
-            <div className="flex items-center justify-between pb-2 border-b border-border/30">
-              <SocialLinks />
+            <div className="flex items-center justify-end pb-2 border-b border-border/30">
               <PerformanceToggle />
             </div>
             
-            {/* Streamer Dashboard Link - Mobile */}
+            {/* Streamer Mobile Menu */}
             {isStreamer && !isAdmin && (
               <>
                 <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
@@ -142,10 +179,34 @@ export function Header() {
                 </Link>
                 <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                    <Settings className="w-4 h-4" />
-                    Profile Settings
+                    <User className="w-4 h-4" />
+                    Profile
                   </Button>
                 </Link>
+                <Link to="/streamer/payments" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Wallet className="w-4 h-4" />
+                    Payments
+                  </Button>
+                </Link>
+                <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <BarChart3 className="w-4 h-4" />
+                    Statistics
+                  </Button>
+                </Link>
+                <Link to="/streamer/settings" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Button>
+                </Link>
+                <a href="mailto:support@upstar.gg" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <HelpCircle className="w-4 h-4" />
+                    Support
+                  </Button>
+                </a>
               </>
             )}
             
