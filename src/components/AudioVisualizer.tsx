@@ -584,11 +584,11 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       }
 
       // LUFS value
-      ctx.font = 'bold 11px monospace';
+      ctx.font = 'bold 13px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = hsla(0.65);
-      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 16);
-      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
+      ctx.font = 'bold 10px monospace';
       ctx.fillStyle = hsla(0.4);
       ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
 
