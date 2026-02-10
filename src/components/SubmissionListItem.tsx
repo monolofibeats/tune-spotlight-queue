@@ -95,6 +95,9 @@ interface SubmissionListItemProps {
   position?: number;
   isAdmin?: boolean;
   isTrashView?: boolean;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
+  onToggleSelect?: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string, permanent?: boolean) => void;
   onRestore?: (id: string) => void;
