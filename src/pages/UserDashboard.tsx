@@ -68,7 +68,7 @@ const UserDashboard = () => {
           console.error('Bid payment verification error:', error);
         }
 
-        window.history.replaceState({}, '', '/my-dashboard');
+        window.history.replaceState({}, '', '/user/dashboard');
       } else if (bidPayment === 'cancelled') {
         toast({
           title: "Bid cancelled",
