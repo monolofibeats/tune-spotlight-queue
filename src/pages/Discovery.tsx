@@ -1,8 +1,9 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink, Search, Lock, Eye, Send } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -20,13 +21,16 @@ import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
 import { PerformanceToggle } from '@/components/PerformanceToggle';
 import upstarLogo from '@/assets/upstar-logo.png';
 import upstarHeroStar from '@/assets/upstar-hero-star.png';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 const Discovery = () => {
   const { streamers, isLoading } = useActiveStreamers();
   const { t } = useLanguage();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [showRoster, setShowRoster] = useState(false);
+  const [rosterSearch, setRosterSearch] = useState('');
+  const [showAllStreamers, setShowAllStreamers] = useState(false);
   const { scrollYProgress } = useScroll();
   
   const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
@@ -34,35 +38,38 @@ const Discovery = () => {
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
+  
+  // Top 6 streamers for the grid
+  const displayedStreamers = useMemo(() => {
+    const all = [...liveStreamers, ...offlineStreamers];
+    return showAllStreamers ? all : all.slice(0, 6);
+  }, [liveStreamers, offlineStreamers, showAllStreamers]);
+
+  // Filtered streamers for roster dialog
+  const filteredRosterStreamers = useMemo(() => {
+    const all = [...liveStreamers, ...offlineStreamers];
+    if (!rosterSearch.trim()) return all;
+    const q = rosterSearch.toLowerCase();
+    return all.filter(s => 
+      s.display_name.toLowerCase().includes(q) || 
+      s.slug.toLowerCase().includes(q) ||
+      (s.bio && s.bio.toLowerCase().includes(q))
+    );
+  }, [liveStreamers, offlineStreamers, rosterSearch]);
 
   const stats = [
-    { label: t('discovery.activeStreamers'), value: 0, icon: Users, isLive: false },
-    { label: t('discovery.songsReviewed'), value: 0, icon: Music, isLive: true },
-    { label: t('discovery.liveNow'), value: 0, icon: Radio, isLive: false },
-    { label: t('discovery.weeklyViews'), value: 0, icon: TrendingUp, isLive: false },
+    { label: t('discovery.activeStreamers'), value: 0, icon: Users },
+    { label: t('discovery.songsReviewed'), value: 0, icon: Music },
+    { label: t('discovery.liveNow'), value: 0, icon: Radio },
+    { label: t('discovery.weeklyViews'), value: 0, icon: TrendingUp },
   ];
 
   const faqs = [
-    {
-      question: t('discovery.faq1q'),
-      answer: t('discovery.faq1a'),
-    },
-    {
-      question: t('discovery.faq2q'),
-      answer: t('discovery.faq2a'),
-    },
-    {
-      question: t('discovery.faq3q'),
-      answer: t('discovery.faq3a'),
-    },
-    {
-      question: t('discovery.faq4q'),
-      answer: t('discovery.faq4a'),
-    },
-    {
-      question: t('discovery.faq5q'),
-      answer: t('discovery.faq5a'),
-    },
+    { question: t('discovery.faq1q'), answer: t('discovery.faq1a') },
+    { question: t('discovery.faq2q'), answer: t('discovery.faq2a') },
+    { question: t('discovery.faq3q'), answer: t('discovery.faq3a') },
+    { question: t('discovery.faq4q'), answer: t('discovery.faq4a') },
+    { question: t('discovery.faq5q'), answer: t('discovery.faq5a') },
   ];
 
   return (
@@ -87,20 +94,6 @@ const Discovery = () => {
               />
             </Link>
             <nav className="flex items-center gap-3">
-              <Link to="/library">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
-                >
-                  {t('nav.library')}
-                  <motion.span
-                    className="absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                  />
-                </motion.div>
-              </Link>
               <Link to="/auth">
                 <GlowButton variant="primary" size="default">
                   {t('nav.signIn')}
@@ -128,8 +121,6 @@ const Discovery = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Badge removed */}
-            
             <motion.h1 
               className="text-4xl md:text-7xl font-display font-bold mb-6 leading-tight"
               initial={{ opacity: 0, y: 20 }}
@@ -177,72 +168,22 @@ const Discovery = () => {
               <GlowButton 
                 variant="primary" 
                 size="lg"
-                onClick={() => document.getElementById('streamers')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => setShowRoster(true)}
               >
                 <Radio className="w-5 h-5" />
                 {t('discovery.browseStreamers')}
               </GlowButton>
-              <GlowButton 
-                variant="outline" 
-                size="lg"
-                onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
+              <motion.button
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+                disabled
               >
-                {t('discovery.becomeStreamer')}
-                <ArrowRight className="w-5 h-5" />
-              </GlowButton>
+                <Lock className="w-4 h-4" />
+                {t('discovery.becomeStreamerInvite')}
+              </motion.button>
             </motion.div>
           </motion.div>
         </div>
       </motion.section>
-
-      {/* Stats Section */}
-      <section className="py-16 px-4 relative z-10">
-        <div className="container mx-auto max-w-5xl">
-          {/* Featured: Songs Reviewed Counter - Compact */}
-          <AnimatedCard delay={0} className="mb-8 max-w-md mx-auto">
-            <div className="p-6 text-center">
-              <motion.div
-                whileHover={{ scale: 1.2, rotate: 15 }}
-                transition={{ type: "spring", stiffness: 300, damping: 10 }}
-              >
-                <Music className="w-10 h-10 text-primary mx-auto mb-3" />
-              </motion.div>
-              <motion.div
-                className="text-4xl md:text-5xl font-bold mb-1"
-                style={{ color: 'hsl(var(--glow-primary))' }}
-                whileHover={{ 
-                  scale: 1.05,
-                  textShadow: '0 0 30px hsl(var(--primary) / 0.8)',
-                }}
-                transition={{ type: "spring", stiffness: 200 }}
-              >
-                0
-              </motion.div>
-              <div className="text-base text-muted-foreground">{t('discovery.songsReviewed')}</div>
-            </div>
-          </AnimatedCard>
-
-          {/* Other Stats */}
-          <div className="grid grid-cols-3 gap-4 md:gap-6">
-            {stats.filter(s => !s.isLive).map((stat, index) => (
-              <AnimatedCard key={stat.label} delay={index * 0.1} className="text-center">
-                <div className="p-4 md:p-6">
-                  <motion.div
-                    whileHover={{ scale: 1.2, rotate: 10 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <stat.icon className="w-6 h-6 md:w-8 md:h-8 text-primary mx-auto mb-2 md:mb-3" />
-                  </motion.div>
-                  <div className="text-2xl md:text-4xl font-bold mb-1">
-                    <AnimatedCounter value={stat.value} />
-                  </div>
-                  <div className="text-xs md:text-sm text-muted-foreground">{stat.label}</div>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Active Streamers Section */}
       <section id="streamers" className="py-16 px-4 relative z-10">
@@ -256,50 +197,35 @@ const Discovery = () => {
           >
             <motion.h2 
               className="text-3xl md:text-5xl font-display font-bold mb-4"
-              whileInView={{ 
-                backgroundSize: ['100% 0%', '100% 100%'],
-              }}
             >
               {t('discovery.sectionStreamers')}
             </motion.h2>
             <p className="text-muted-foreground text-lg">
-              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourMusic')}</BlurReveal>
+              {t('discovery.sectionStreamersSubtitle')} <BlurReveal>{t('discovery.yourWork')}</BlurReveal>
             </p>
           </motion.div>
 
-          {/* Live Streamers */}
-          {liveStreamers.length > 0 && (
-            <div className="mb-10">
-              <motion.div 
-                className="flex items-center gap-3 mb-6"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <motion.div 
-                  className="w-3 h-3 bg-destructive rounded-full"
-                  animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-                <h3 className="font-semibold text-xl">{t('discovery.liveNow')}</h3>
-              </motion.div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {liveStreamers.map((streamer, index) => (
-                  <StreamerCard key={streamer.id} streamer={streamer} index={index} isLive />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Offline Streamers */}
-          {offlineStreamers.length > 0 && (
+          {/* Streamer Grid - Top 6 or all */}
+          {displayedStreamers.length > 0 && (
             <div>
-              <h3 className="font-semibold text-xl mb-6 text-muted-foreground">{t('discovery.allStreamers')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {offlineStreamers.map((streamer, index) => (
-                  <StreamerCard key={streamer.id} streamer={streamer} index={index} />
+                {displayedStreamers.map((streamer, index) => (
+                  <StreamerCard key={streamer.id} streamer={streamer} index={index} isLive={streamer.is_live || false} />
                 ))}
               </div>
+              {!showAllStreamers && streamers.length > 6 && (
+                <motion.div 
+                  className="text-center mt-8"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                >
+                  <GlowButton variant="outline" onClick={() => setShowRoster(true)}>
+                    Show More
+                    <ArrowRight className="w-4 h-4" />
+                  </GlowButton>
+                </motion.div>
+              )}
             </div>
           )}
 
@@ -325,14 +251,33 @@ const Discovery = () => {
                 </motion.div>
                 <h3 className="text-xl font-semibold mb-3">{t('discovery.noStreamersYet')}</h3>
                 <p className="text-muted-foreground mb-6">{t('discovery.beFirstStreamer')}</p>
-                <GlowButton 
-                  onClick={() => document.getElementById('for-streamers')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  {t('discovery.applyNow')}
-                </GlowButton>
               </div>
             </AnimatedCard>
           )}
+        </div>
+      </section>
+
+      {/* Stats Section - Below streamers, 4 in a row */}
+      <section className="py-16 px-4 relative z-10">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <AnimatedCard key={stat.label} delay={index * 0.1} className="text-center">
+                <div className="p-5">
+                  <motion.div
+                    whileHover={{ scale: 1.2, rotate: 10 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <stat.icon className="w-7 h-7 text-primary mx-auto mb-3" />
+                  </motion.div>
+                  <div className="text-3xl font-bold mb-1">
+                    <AnimatedCounter value={stat.value} />
+                  </div>
+                  <div className="text-xs text-muted-foreground">{stat.label}</div>
+                </div>
+              </AnimatedCard>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -408,7 +353,7 @@ const Discovery = () => {
         </div>
       </section>
 
-      {/* For Streamers Section */}
+      {/* For Streamers Section - Features focused */}
       <section id="for-streamers" className="py-20 px-4 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -420,19 +365,18 @@ const Discovery = () => {
             >
               <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">{t('discovery.forStreamers')}</Badge>
               <h2 className="text-3xl md:text-5xl font-display font-bold mb-5">
-                {t('discovery.monetizeTitle')}
+                {t('discovery.streamerFeaturesTitle')}
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                {t('discovery.monetizeSubtitle')}{' '}
-                <BlurReveal>{t('discovery.artistsWorldwide')}</BlurReveal>.
+                {t('discovery.streamerFeaturesSubtitle')}
               </p>
               <ul className="space-y-4 mb-8">
                 {[
-                  t('discovery.feature1'),
-                  t('discovery.feature2'),
-                  t('discovery.feature3'),
-                  t('discovery.feature4'),
-                  t('discovery.feature5'),
+                  t('discovery.feat1'),
+                  t('discovery.feat2'),
+                  t('discovery.feat3'),
+                  t('discovery.feat4'),
+                  t('discovery.feat5'),
                 ].map((feature, index) => (
                   <motion.li 
                     key={feature} 
@@ -451,6 +395,9 @@ const Discovery = () => {
                   </motion.li>
                 ))}
               </ul>
+              <p className="text-xs text-muted-foreground mb-6">
+                {t('discovery.streamerCTA')}
+              </p>
               <GlowButton size="lg" onClick={() => setShowApplicationForm(true)}>
                 {t('discovery.applyToJoin')}
                 <ArrowRight className="w-5 h-5" />
@@ -465,35 +412,69 @@ const Discovery = () => {
               </Dialog>
             </motion.div>
 
+            {/* Features highlight card instead of money card */}
             <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
               <motion.div
                 className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-10 border border-primary/20"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="text-center">
-                  <motion.div 
-                    className="text-6xl font-bold mb-3"
+                <div className="text-center space-y-6">
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                   >
-                    <span className="text-primary">$</span>
-                    <AnimatedCounter value={500} />
-                    <span className="text-primary">+</span>
+                    <Sparkles className="w-12 h-12 text-primary mx-auto mb-2" />
                   </motion.div>
-                  <div className="text-muted-foreground text-lg mb-6">{t('discovery.avgMonthlyEarnings')}</div>
+                  <h3 className="text-2xl font-bold">{t('discovery.platformHighlightTitle')}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {t('discovery.platformHighlightDesc')}
+                  </p>
                   <motion.div 
                     className="text-sm text-muted-foreground p-4 rounded-lg bg-background/50 border border-border/30"
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 3, repeat: Infinity }}
                   >
-                    {t('discovery.topStreamersEarn')} <span className="text-primary font-semibold">$2,000+</span>{t('discovery.perMonth')}
+                    {t('discovery.lowestFees')}
                   </motion.div>
                 </div>
               </motion.div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Before FAQ */}
+      <section className="py-16 px-4 relative z-10">
+        <div className="container mx-auto max-w-3xl">
+          <AnimatedCard>
+            <div className="p-10 text-center">
+              <motion.h2
+                className="text-2xl md:text-4xl font-display font-bold mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                {t('discovery.ctaTitle')}
+              </motion.h2>
+              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+                {t('discovery.ctaSubtitle')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <GlowButton variant="primary" size="lg" onClick={() => setShowRoster(true)}>
+                  <Send className="w-5 h-5" />
+                  {t('discovery.ctaSubmit')}
+                </GlowButton>
+                <Link to="/library">
+                  <GlowButton variant="outline" size="lg">
+                    <Eye className="w-5 h-5" />
+                    {t('discovery.ctaWatch')}
+                  </GlowButton>
+                </Link>
+              </div>
+            </div>
+          </AnimatedCard>
         </div>
       </section>
 
@@ -558,6 +539,36 @@ const Discovery = () => {
         </div>
       </section>
 
+      {/* Streamer Roster Dialog */}
+      <Dialog open={showRoster} onOpenChange={setShowRoster}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('discovery.rosterTitle')}</DialogTitle>
+          </DialogHeader>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder={t('discovery.rosterSearch')}
+              value={rosterSearch}
+              onChange={(e) => setRosterSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          {filteredRosterStreamers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredRosterStreamers.map((streamer, index) => (
+                <StreamerCard key={streamer.id} streamer={streamer} index={index} isLive={streamer.is_live || false} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p>{t('discovery.noResults')}</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <LanguageSwitcher />
       <Footer />
       </div>
@@ -621,7 +632,7 @@ function StreamerCard({ streamer, index, isLive = false }: { streamer: any; inde
               )}
             </div>
             <p className="text-sm text-muted-foreground truncate mb-2">
-              {streamer.bio || t('discovery.musicReviewer')}
+              {streamer.bio || t('discovery.contentReviewer')}
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {streamer.twitch_url && (

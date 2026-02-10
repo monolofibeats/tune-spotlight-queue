@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, User, Film, Settings } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
@@ -34,12 +34,6 @@ export function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-3">
-            <Link to="/library">
-              <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                <Film className="w-3.5 h-3.5" />
-                {t('nav.library')}
-              </Button>
-            </Link>
             
             <SocialLinks />
             
@@ -130,12 +124,7 @@ export function Header() {
           className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
         >
           <nav className="flex flex-col gap-2">
-            <Link to="/library" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
-                <Film className="w-4 h-4" />
-                {t('nav.library')}
-              </Button>
-            </Link>
+            {/* Library link removed */}
             
             <div className="flex items-center justify-between pb-2 border-b border-border/30">
               <SocialLinks />
