@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, User, Film, Settings } from 'lucide-react';
+import { Menu, X, LayoutDashboard, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { SocialLinks } from './SocialLinks';
