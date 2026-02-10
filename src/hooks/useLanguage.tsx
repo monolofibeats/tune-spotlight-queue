@@ -293,7 +293,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.beFirstStreamer': 'Be the first to join as a streamer!',
     'discovery.applyNow': 'Apply Now',
     'discovery.howItWorksTitle': 'How It Works',
-    'discovery.howItWorksSubtitle': 'Three simple steps to get your work reviewed',
+    'discovery.howItWorksSubtitle': 'Three simple steps to get started',
     'discovery.step1Title': 'Choose a Streamer',
     'discovery.step1Desc': 'Browse our active streamers and find one that matches your niche and style.',
     'discovery.step2Title': 'Submit Your Work',
