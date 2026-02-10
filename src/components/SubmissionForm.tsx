@@ -87,8 +87,10 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const showEmail = getEnabled('email', true);
   const showMessage = getEnabled('message', true);
 
-  const requireArtist = showArtist && getRequired('artist_name', true);
-  const requireTitle = showTitle && getRequired('song_title', true);
+  const requireArtist = showArtist && getRequired('artist_name', false);
+  const requireTitle = showTitle && getRequired('song_title', false);
+  // At least one of artist name or song title must be filled
+  const requireAtLeastOneIdentifier = showArtist || showTitle;
   const requireEmail = showEmail && getRequired('email', false);
   const requireMessage = showMessage && getRequired('message', false);
 
