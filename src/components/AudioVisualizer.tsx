@@ -286,6 +286,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let time = 0;
     let smoothEnergy = 0;
     let smoothLufs = -60;
+    let smoothDb = -60;
 
     // Key detection state
     const chroma = new Float64Array(12);
@@ -295,15 +296,15 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let detectedMode = '';
     let detectedConf = 0;
     let detectedCamelot = '';
-    let establishedKey = ''; // The overall key of the track
+    let establishedKey = '';
     let establishedMode = '';
-    let keyDrift = 0; // 0 = on key, higher = drifting
+    let keyDrift = 0;
     let driftMessage = '';
-    let keyDisplayAlpha = 0; // fade in
-    const KEY_UPDATE_INTERVAL = 0.4; // seconds between key re-evaluations
+    let keyDisplayAlpha = 0;
+    const KEY_UPDATE_INTERVAL = 0.4;
 
-    const BOTTOM_MARGIN = 24;
-    const RIGHT_MARGIN = 44;
+    const BOTTOM_MARGIN = 28;
+    const RIGHT_MARGIN = 80; // Room for LUFS + dB meters
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
