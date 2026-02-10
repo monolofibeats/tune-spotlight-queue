@@ -398,10 +398,13 @@ const Discovery = () => {
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
-              <GlowButton size="lg" onClick={() => setShowApplicationForm(true)}>
-                {t('discovery.applyToJoin')}
-                <ArrowRight className="w-5 h-5" />
-              </GlowButton>
+              <motion.button
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+                disabled
+              >
+                <Lock className="w-4 h-4" />
+                {t('discovery.contactSales')}
+              </motion.button>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
@@ -448,8 +451,7 @@ const Discovery = () => {
       {/* CTA Section - Before FAQ */}
       <section className="py-16 px-4 relative z-10">
         <div className="container mx-auto max-w-3xl">
-          <AnimatedCard>
-            <div className="p-10 text-center">
+          <div className="p-10 text-center">
               <motion.h2
                 className="text-2xl md:text-4xl font-display font-bold mb-4"
                 initial={{ opacity: 0, y: 20 }}
@@ -466,15 +468,12 @@ const Discovery = () => {
                   <Send className="w-5 h-5" />
                   {t('discovery.ctaSubmit')}
                 </GlowButton>
-                <Link to="/library">
-                  <GlowButton variant="outline" size="lg">
-                    <Eye className="w-5 h-5" />
-                    {t('discovery.ctaWatch')}
-                  </GlowButton>
-                </Link>
+                <GlowButton variant="outline" size="lg" onClick={() => setShowRoster(true)}>
+                  <Eye className="w-5 h-5" />
+                  {t('discovery.ctaReview')}
+                </GlowButton>
               </div>
             </div>
-          </AnimatedCard>
         </div>
       </section>
 

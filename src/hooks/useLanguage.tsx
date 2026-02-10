@@ -321,6 +321,8 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.ctaSubtitle': 'Whether you\'re a creator looking for feedback or a viewer looking for the next big thing — we\'ve got you.',
     'discovery.ctaSubmit': 'Submit Your Work',
     'discovery.ctaWatch': 'Watch the Next Stream',
+    'discovery.ctaReview': 'Review Work',
+    'discovery.contactSales': 'Contact Sales',
     'discovery.faqTitle': 'Frequently Asked Questions',
     'discovery.faqSubtitle': 'Everything you need to know about UpStar',
     'discovery.faq1q': 'What is UpStar?',
