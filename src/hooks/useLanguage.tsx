@@ -295,7 +295,7 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.howItWorksTitle': 'How It Works',
     'discovery.howItWorksSubtitle': 'Three simple steps to get started',
     'discovery.step1Title': 'Choose a Streamer',
-    'discovery.step1Desc': 'Browse our active streamers and find one that matches your niche and style.',
+    'discovery.step1Desc': 'Browse active streamers and pick one that fits your style and niche.',
     'discovery.step2Title': 'Submit Your Work',
     'discovery.step2Desc': 'Paste a link or upload a file. Add details and optionally skip the queue.',
     'discovery.step3Title': 'Get Reviewed Live',
