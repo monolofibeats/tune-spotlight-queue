@@ -19,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isStreamer: false,
   isLoading: true,
   signOut: async () => {},
+  getRoleBasedRedirect: () => '/user/dashboard',
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
