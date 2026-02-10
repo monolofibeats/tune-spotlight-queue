@@ -31,7 +31,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border/50 bg-card/30 py-12 px-4 relative z-10">
       <div className="container mx-auto max-w-5xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
           {Object.entries(footerLinks).map(([key, section], sectionIndex) => (
             <motion.div
               key={key}
