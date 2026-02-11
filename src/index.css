@@ -66,8 +66,7 @@
     --foreground: 0 0% 98%;
   }
 
-  .light,
-  :root:not(.dark) {
+  .light {
     --background: 0 0% 97%;
     --foreground: 0 0% 8%;
 

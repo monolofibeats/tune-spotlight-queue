@@ -1,4 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+export type VisualizerMode = 'spectrum' | 'polar-sample' | 'polar-level' | 'lissajous';
 
 interface AudioVisualizerProps {
   audioElement: HTMLAudioElement | null;
@@ -22,8 +31,7 @@ function makeHslaFromCssVar(varName: string) {
   return (a: number) => `hsla(${parsed.h}, ${parsed.s}%, ${parsed.l}%, ${a})`;
 }
 
-// ── Exact homepage wave line creation ──
-
+// ── Wave line for spectrum mode ──
 interface WaveLine {
   points: number[];
   phase: number;
@@ -62,7 +70,6 @@ function createWaveLines(): WaveLine[] {
 }
 
 // ── Shadow audio pipeline ──
-
 function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const freqDataRef = useRef<Uint8Array | null>(null);
@@ -76,13 +83,10 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const readyRef = useRef(false);
 
   useEffect(() => {
-    // Always clean up previous session first
     if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
 
     if (!audioElement) {
-      // Stop any playing shadow source
       if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
-      // Disconnect old analyser
       if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
       freqDataRef.current = null;
       timeDomainRef.current = null;
@@ -105,11 +109,9 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
 
-        // Always stop old shadow source when src changes
         if (srcChanged) {
           if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
           isPlayingRef.current = false;
-          // Disconnect old analyser to prevent stale audio
           if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
         }
 
@@ -187,6 +189,8 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 }
 
 // ── Frequency scale config ──
+const MAX_FREQ = 20000; // Hard cap at 20kHz
+
 const FREQ_LABELS: { freq: number; label: string; major: boolean }[] = [
   { freq: 20, label: '20', major: true },
   { freq: 100, label: '100', major: true },
@@ -197,10 +201,12 @@ const FREQ_LABELS: { freq: number; label: string; major: boolean }[] = [
   { freq: 20000, label: '20k', major: true },
 ];
 
-function freqToX(freq: number, sampleRate: number): number {
-  const nyquist = sampleRate / 2;
-  const logX = Math.min(1, freq / nyquist);
-  return Math.pow(logX, 1 / 1.6);
+// Map frequency to normalized X position [0..1] using log scale, capped at 20kHz
+function freqToX(freq: number): number {
+  const minLog = Math.log10(20);
+  const maxLog = Math.log10(MAX_FREQ);
+  const logF = Math.log10(Math.max(20, Math.min(freq, MAX_FREQ)));
+  return (logF - minLog) / (maxLog - minLog);
 }
 
 // ── Key detection helpers ──
@@ -239,7 +245,6 @@ function detectKeyFromChroma(chroma: number[]): { key: string; mode: string; con
 
   for (let shift = 0; shift < 12; shift++) {
     const rotated = [...chroma.slice(shift), ...chroma.slice(0, shift)];
-
     const majCorr = correlate(rotated, MAJOR_PROFILE);
     if (majCorr > bestCorr) {
       secondCorr = bestCorr; secondKey = bestKey; secondMode = bestMode;
@@ -247,7 +252,6 @@ function detectKeyFromChroma(chroma: number[]): { key: string; mode: string; con
     } else if (majCorr > secondCorr) {
       secondCorr = majCorr; secondKey = NOTE_NAMES[shift]; secondMode = 'Major';
     }
-
     const minCorr = correlate(rotated, MINOR_PROFILE);
     if (minCorr > bestCorr) {
       secondCorr = bestCorr; secondKey = bestKey; secondMode = bestMode;
@@ -262,29 +266,30 @@ function detectKeyFromChroma(chroma: number[]): { key: string; mode: string; con
   return { key: bestKey, mode: bestMode, confidence, secondKey, secondMode, secondConf };
 }
 
-// How many semitones apart two keys are (circle of fifths distance)
 function keyDistance(key1: string, mode1: string, key2: string, mode2: string): number {
   const idx1 = NOTE_NAMES.indexOf(key1);
   const idx2 = NOTE_NAMES.indexOf(key2);
   if (idx1 < 0 || idx2 < 0) return 12;
-  // Simple semitone distance
   let dist = Math.abs(idx1 - idx2);
   if (dist > 6) dist = 12 - dist;
-  // Same key different mode = small drift
   if (dist === 0 && mode1 !== mode2) return 1;
-  // Relative major/minor (3 semitones apart) = compatible
   if (dist === 3 && mode1 !== mode2) return 0;
   return dist;
 }
 
-/**
- * Hybrid visualizer: homepage smooth wave lines + frequency spectrum displacement
- * + frequency scale (Hz) + LUFS meter + real-time key detection
- */
+// ═══════════════════════════════════════
+// ── Main Component ──
+// ═══════════════════════════════════════
+
 export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
+  const [mode, setMode] = useState<VisualizerMode>('spectrum');
+  const modeRef = useRef<VisualizerMode>('spectrum');
   const { analyserRef, freqDataRef, timeDomainRef, isPlayingRef } = useAudioAnalyser(audioElement);
+
+  // Keep modeRef in sync
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -301,7 +306,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let smoothEnergy = 0;
     let smoothDb = -60;
 
-    // Integrated LUFS state (Youlean-style: average over entire playback)
+    // Integrated LUFS state
     let integratedSumSq = 0;
     let integratedSampleCount = 0;
     let integratedLufs = -60;
@@ -321,8 +326,12 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
     let keyDisplayAlpha = 0;
     const KEY_UPDATE_INTERVAL = 0.4;
 
+    // Lissajous history
+    const lissajousHistory: { x: number; y: number }[] = [];
+    const LISSAJOUS_MAX = 2048;
+
     const BOTTOM_MARGIN = 28;
-    const RIGHT_MARGIN = 120; // Room for LUFS + dB meters
+    const RIGHT_MARGIN = 120;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -340,6 +349,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const { width: totalW, height: totalH } = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, totalW, totalH);
 
+      const currentMode = modeRef.current;
       const waveW = totalW - RIGHT_MARGIN;
       const waveH = totalH - BOTTOM_MARGIN;
 
@@ -355,7 +365,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
       }
 
-      // ── LUFS & dB approximation ──
+      // ── LUFS & dB ──
       let rms = 0;
       let peak = 0;
       if (analyser && tdData && hasAudio) {
@@ -368,9 +378,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         }
         rms = Math.sqrt(sumSq / tdData.length);
       }
-      const rawLufs = rms > 0 ? 20 * Math.log10(rms) - 0.691 : -60;
 
-      // Integrated LUFS: accumulate RMS² over entire playback (like Youlean)
       if (rms > 0 && tdData) {
         for (let i = 0; i < tdData.length; i++) {
           integratedSumSq += tdData[i] * tdData[i];
@@ -386,11 +394,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       smoothDb += (rawDb - smoothDb) * dbLerp;
       const clampedDb = Math.max(-60, Math.min(0, smoothDb));
 
-      // ── Real-time key detection from frequency data ──
+      // ── Key detection ──
       if (hasAudio && data && analyser) {
         const sampleRate = analyser.context.sampleRate;
         const binCount = data.length;
-        // Accumulate chroma energy from frequency bins
         for (let pitchClass = 0; pitchClass < 12; pitchClass++) {
           let energy = 0;
           for (let octave = 1; octave <= 7; octave++) {
@@ -399,16 +406,12 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             const nyquist = sampleRate / 2;
             if (freq >= nyquist) continue;
             const binIdx = Math.round(freq / nyquist * binCount);
-            if (binIdx >= 0 && binIdx < binCount) {
-              energy += data[binIdx] / 255;
-            }
+            if (binIdx >= 0 && binIdx < binCount) energy += data[binIdx] / 255;
           }
-          // Exponential moving average for smooth chroma
           chroma[pitchClass] = chroma[pitchClass] * 0.92 + energy * 0.08;
         }
         chromaFrameCount++;
 
-        // Periodically evaluate key
         if (time - lastKeyUpdate > KEY_UPDATE_INTERVAL && chromaFrameCount > 10) {
           lastKeyUpdate = time;
           const maxC = Math.max(...Array.from(chroma));
@@ -420,21 +423,17 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
             detectedConf = result.confidence;
             detectedCamelot = CAMELOT_MAP[`${result.key} ${result.mode}`] || '?';
 
-            // Establish the overall key after a few seconds of confidence
             if (!establishedKey && detectedConf > 60) {
               establishedKey = detectedKey;
               establishedMode = detectedMode;
             }
 
-            // Check for drift from established key
             if (establishedKey) {
               const dist = keyDistance(detectedKey, detectedMode, establishedKey, establishedMode);
               keyDrift = dist;
-              if (dist === 0) {
-                driftMessage = '';
-              } else if (dist <= 2) {
-                driftMessage = 'Slight pitch drift';
-              } else if (dist <= 4) {
+              if (dist === 0) driftMessage = '';
+              else if (dist <= 2) driftMessage = 'Slight pitch drift';
+              else if (dist <= 4) {
                 const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
                 const direction = semiDiff <= 6
                   ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
@@ -447,24 +446,27 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
           }
         }
       } else if (!hasAudio) {
-        // Fade out key display when not playing
         keyDisplayAlpha = Math.max(0, keyDisplayAlpha - 0.02);
       }
 
-      if (hasAudio && detectedKey) {
-        keyDisplayAlpha = Math.min(1, keyDisplayAlpha + 0.05);
-      }
+      if (hasAudio && detectedKey) keyDisplayAlpha = Math.min(1, keyDisplayAlpha + 0.05);
 
-      // ── Map frequency spectrum to wave points ──
+      // ── Map frequency spectrum (capped at 20kHz) ──
+      const sampleRate = analyser?.context?.sampleRate || 44100;
+      const binCount = data ? data.length : 1;
+      const maxBin = Math.min(binCount, Math.ceil(MAX_FREQ / (sampleRate / 2) * binCount));
+
       if (data) {
-        const binCount = data.length;
         for (let p = 0; p < POINT_COUNT; p++) {
           const normX = p / (POINT_COUNT - 1);
-          const logX = Math.pow(normX, 1.6);
-          const binIdx = Math.min(Math.floor(logX * binCount), binCount - 1);
-          const spread = Math.max(1, Math.floor(binCount / POINT_COUNT));
+          // Map normalized X back to frequency using log scale
+          const minLog = Math.log10(20);
+          const maxLog = Math.log10(MAX_FREQ);
+          const freq = Math.pow(10, minLog + normX * (maxLog - minLog));
+          const binIdx = Math.min(Math.floor(freq / (sampleRate / 2) * binCount), maxBin - 1);
+          const spread = Math.max(1, Math.floor(maxBin / POINT_COUNT));
           let sum = 0, count = 0;
-          for (let b = Math.max(0, binIdx - spread); b <= Math.min(binCount - 1, binIdx + spread); b++) {
+          for (let b = Math.max(0, binIdx - spread); b <= Math.min(maxBin - 1, binIdx + spread); b++) {
             sum += (hasAudio ? data[b] / 255 : 0);
             count++;
           }
@@ -481,281 +483,26 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       const eLerp = rawEnergy > smoothEnergy ? 0.3 : 0.05;
       smoothEnergy += (rawEnergy - smoothEnergy) * eLerp;
 
-      // ── Draw wave lines ──
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      // ═══════════════════════════════════════
+      // ── Draw based on mode ──
+      // ═══════════════════════════════════════
 
-      const waveExpansion = 1 + smoothEnergy * 1.2;
-
-      for (let wi = 0; wi < waves.length; wi++) {
-        const wave = waves[wi];
-        const distFromCenter = Math.abs(wi - (waves.length - 1) / 2) / ((waves.length - 1) / 2);
-        const lineExpansion = 1 + (waveExpansion - 1) * Math.pow(distFromCenter, 2.0);
-        const targetOffset = wave.baseYOffset * lineExpansion;
-        wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.04;
-
-        ctx.beginPath();
-        ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.1);
-        ctx.lineWidth = 1.5 + smoothEnergy * 0.8;
-        ctx.shadowBlur = 10 + smoothEnergy * 8;
-        ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.1);
-
-        const pts = wave.points;
-        const centerY = 0.5 + wave.currentYOffset;
-        const dir = wave.baseYOffset >= 0 ? 1 : -1;
-        const freqStrength = 0.05 + distFromCenter * 0.25;
-
-        for (let i = 0; i < pts.length; i++) {
-          const x = i / (pts.length - 1);
-          const animatedY = pts[i] * Math.sin(time * wave.speed + wave.phase + i * 0.04);
-          const spectrumVal = smoothedSpectrum[i];
-          const freqDisplacement = spectrumVal * dir * freqStrength;
-          const y = centerY + animatedY * wave.amplitude + freqDisplacement;
-
-          const px = x * waveW;
-          const py = y * waveH;
-
-          if (i === 0) {
-            ctx.moveTo(px, py);
-          } else {
-            const prevX = (i - 1) / (pts.length - 1);
-            const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
-            const prevFreqDisp = smoothedSpectrum[i - 1] * dir * freqStrength;
-            const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
-            const cpX = ((prevX + x) / 2) * waveW;
-            const cpY = ((prevY + y) / 2) * waveH;
-            ctx.quadraticCurveTo(prevX * waveW, prevY * waveH, cpX, cpY);
-          }
-        }
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // ── Frequency scale at bottom ──
-      ctx.save();
-      const sampleRate = analyser?.context?.sampleRate || 44100;
-      const scaleY = waveH + 1;
-
-      ctx.strokeStyle = hsla(0.12);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, scaleY);
-      ctx.lineTo(waveW, scaleY);
-      ctx.stroke();
-
-      const minorFreqs = [30, 40, 60, 70, 80, 150, 300, 400, 600, 700, 800, 1500, 3000, 4000, 6000, 7000, 8000, 15000];
-      ctx.strokeStyle = hsla(0.06);
-      ctx.lineWidth = 1;
-      for (const f of minorFreqs) {
-        const nx = freqToX(f, sampleRate);
-        const px = nx * waveW;
-        if (px < 4 || px > waveW - 4) continue;
-        ctx.beginPath();
-        ctx.moveTo(px, scaleY);
-        ctx.lineTo(px, scaleY + 3);
-        ctx.stroke();
+      if (currentMode === 'spectrum') {
+        drawSpectrum(ctx, waves, smoothedSpectrum, smoothEnergy, time, waveW, waveH, hsla, POINT_COUNT, sampleRate);
+      } else if (currentMode === 'polar-sample' && tdData) {
+        drawPolarSample(ctx, tdData, hasAudio, waveW, waveH, hsla);
+      } else if (currentMode === 'polar-level' && data) {
+        drawPolarLevel(ctx, data, hasAudio, waveW, waveH, hsla, maxBin);
+      } else if (currentMode === 'lissajous' && tdData) {
+        drawLissajous(ctx, tdData, hasAudio, waveW, waveH, hsla, lissajousHistory, LISSAJOUS_MAX);
       }
 
-      for (const { freq, label, major } of FREQ_LABELS) {
-        const nx = freqToX(freq, sampleRate);
-        const px = nx * waveW;
-        if (px < 8 || px > waveW - 8) continue;
-        const tickH = major ? 7 : 5;
-        ctx.strokeStyle = major ? hsla(0.3) : hsla(0.15);
-        ctx.lineWidth = major ? 1.5 : 1;
-        ctx.beginPath();
-        ctx.moveTo(px, scaleY);
-        ctx.lineTo(px, scaleY + tickH);
-        ctx.stroke();
-        ctx.font = major ? 'bold 10px monospace' : '9px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = major ? hsla(0.6) : hsla(0.35);
-        ctx.fillText(label, px, scaleY + tickH + 10);
-      }
+      // ── LUFS + dB meters (always drawn) ──
+      drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla);
 
-      ctx.font = '8px monospace';
-      ctx.textAlign = 'right';
-      ctx.fillStyle = hsla(0.25);
-      ctx.fillText('Hz', waveW - 2, scaleY + 18);
-      ctx.restore();
-
-      // ── LUFS + dB meters on the right ──
-      ctx.save();
-      const meterW = 22;
-      const meterGap = 10;
-      const meterTop = 18;
-      const meterBottom = waveH - 8;
-      const meterH = meterBottom - meterTop;
-
-      // -- LUFS meter --
-      const lufsX = waveW + 12;
-      ctx.fillStyle = hsla(0.06);
-      ctx.beginPath();
-      ctx.roundRect(lufsX, meterTop, meterW, meterH, 4);
-      ctx.fill();
-
-      const lufsNorm = (clampedLufs + 60) / 60;
-      const lufsFillH = lufsNorm * meterH;
-      if (lufsFillH > 0) {
-        const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-        grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
-        grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
-        grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)');
-        grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.roundRect(lufsX, meterBottom - lufsFillH, meterW, lufsFillH, 4);
-        ctx.fill();
-      }
-
-      // LUFS value
-      ctx.font = 'bold 13px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = hsla(0.65);
-      ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
-      ctx.font = 'bold 10px monospace';
-      ctx.fillStyle = hsla(0.4);
-      ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
-
-      // -- dB meter --
-      const dbX = lufsX + meterW + meterGap;
-      ctx.fillStyle = hsla(0.06);
-      ctx.beginPath();
-      ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
-      ctx.fill();
-
-      const dbNorm = (clampedDb + 60) / 60;
-      const dbFillH = dbNorm * meterH;
-      if (dbFillH > 0) {
-        const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-        grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
-        grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
-        grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
-        grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
-        ctx.fillStyle = grad2;
-        ctx.beginPath();
-        ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
-        ctx.fill();
-      }
-
-      // dB value
-      ctx.font = 'bold 13px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = hsla(0.65);
-      ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 18);
-      ctx.font = 'bold 10px monospace';
-      ctx.fillStyle = hsla(0.4);
-      ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
-
-      // Shared tick marks
-      const tickLabels = [0, -6, -14, -24, -40, -60];
-      ctx.textAlign = 'left';
-      for (const lv of tickLabels) {
-        const norm = (lv + 60) / 60;
-        const ly = meterBottom - norm * meterH;
-        ctx.strokeStyle = hsla(0.15);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(dbX + meterW + 2, ly);
-        ctx.lineTo(dbX + meterW + 6, ly);
-        ctx.stroke();
-        ctx.font = 'bold 10px monospace';
-        ctx.fillStyle = hsla(0.45);
-        ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
-      }
-
-      ctx.restore();
-
-      // ══════════════════════════════════════
-      // ── Key indicator (top-right corner) ──
-      // ══════════════════════════════════════
+      // ── Key indicator (always drawn) ──
       if (detectedKey && keyDisplayAlpha > 0.01) {
-        ctx.save();
-        ctx.globalAlpha = keyDisplayAlpha;
-
-        const boxW = driftMessage ? Math.max(130, ctx.measureText(driftMessage).width + 24) : 90;
-        const boxH = driftMessage ? 48 : 36;
-        const kx = waveW - boxW - 8;
-        const ky = 8;
-
-        // Background
-        ctx.fillStyle = keyDrift >= 3
-          ? `hsla(0, 70%, 15%, 0.85)`
-          : keyDrift >= 1
-            ? `hsla(40, 70%, 15%, 0.85)`
-            : `hsla(0, 0%, 8%, 0.85)`;
-        ctx.beginPath();
-        ctx.roundRect(kx, ky, boxW, boxH, 6);
-        ctx.fill();
-
-        // Border
-        ctx.strokeStyle = keyDrift >= 3
-          ? `hsla(0, 80%, 50%, 0.6)`
-          : keyDrift >= 1
-            ? `hsla(40, 80%, 50%, 0.4)`
-            : hsla(0.2);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(kx, ky, boxW, boxH, 6);
-        ctx.stroke();
-
-        // "KEY" label
-        ctx.font = '7px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillStyle = hsla(0.35);
-        ctx.fillText('KEY', kx + 6, ky + 11);
-
-        // Camelot code (right side)
-        ctx.textAlign = 'right';
-        ctx.font = '8px monospace';
-        ctx.fillStyle = hsla(0.3);
-        ctx.fillText(detectedCamelot, kx + boxW - 6, ky + 11);
-
-        // Key name
-        ctx.textAlign = 'left';
-        ctx.font = 'bold 14px monospace';
-        ctx.fillStyle = keyDrift >= 3
-          ? 'hsla(0, 80%, 60%, 1)'
-          : keyDrift >= 1
-            ? 'hsla(40, 80%, 60%, 1)'
-            : hsla(0.85);
-        ctx.fillText(`${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`, kx + 6, ky + 28);
-
-        // Confidence bar
-        const confBarX = kx + 60;
-        const confBarY = ky + 20;
-        const confBarW = boxW - 68;
-        const confBarH = 4;
-        ctx.fillStyle = hsla(0.1);
-        ctx.beginPath();
-        ctx.roundRect(confBarX, confBarY, confBarW, confBarH, 2);
-        ctx.fill();
-        const confFill = (detectedConf / 100) * confBarW;
-        ctx.fillStyle = keyDrift >= 3
-          ? 'hsla(0, 70%, 50%, 0.7)'
-          : hsla(0.4);
-        ctx.beginPath();
-        ctx.roundRect(confBarX, confBarY, confFill, confBarH, 2);
-        ctx.fill();
-
-        // Confidence text
-        ctx.font = '7px monospace';
-        ctx.textAlign = 'right';
-        ctx.fillStyle = hsla(0.3);
-        ctx.fillText(`${detectedConf}%`, kx + boxW - 6, ky + 28);
-
-        // Drift message
-        if (driftMessage) {
-          ctx.font = 'bold 9px monospace';
-          ctx.textAlign = 'left';
-          ctx.fillStyle = keyDrift >= 3
-            ? 'hsla(0, 80%, 65%, 0.9)'
-            : 'hsla(40, 80%, 60%, 0.8)';
-          ctx.fillText(driftMessage, kx + 6, ky + 43);
-        }
-
-        ctx.restore();
+        drawKeyIndicator(ctx, detectedKey, detectedMode, detectedConf, detectedCamelot, keyDrift, driftMessage, keyDisplayAlpha, waveW, hsla);
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -770,11 +517,514 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`w-full pointer-events-none ${className}`}
-      style={{ height: 320 }}
-      aria-hidden="true"
-    />
+    <div className={`relative ${className}`}>
+      {/* Mode selector */}
+      <div className="absolute top-2 left-2 z-10">
+        <Select value={mode} onValueChange={(v) => setMode(v as VisualizerMode)}>
+          <SelectTrigger className="h-7 w-[140px] text-[11px] bg-background/80 border-border/50 backdrop-blur-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="spectrum">Spectrum</SelectItem>
+            <SelectItem value="polar-sample">Polar Sample</SelectItem>
+            <SelectItem value="polar-level">Polar Level</SelectItem>
+            <SelectItem value="lissajous">Lissajous</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <canvas
+        ref={canvasRef}
+        className="w-full pointer-events-none"
+        style={{ height: 320 }}
+        aria-hidden="true"
+      />
+    </div>
   );
+}
+
+// ═══════════════════════════════════════
+// ── Drawing functions ──
+// ═══════════════════════════════════════
+
+function drawSpectrum(
+  ctx: CanvasRenderingContext2D,
+  waves: WaveLine[],
+  smoothedSpectrum: Float32Array,
+  smoothEnergy: number,
+  time: number,
+  waveW: number,
+  waveH: number,
+  hsla: (a: number) => string,
+  POINT_COUNT: number,
+  sampleRate: number,
+) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const waveExpansion = 1 + smoothEnergy * 1.2;
+
+  for (let wi = 0; wi < waves.length; wi++) {
+    const wave = waves[wi];
+    const distFromCenter = Math.abs(wi - (waves.length - 1) / 2) / ((waves.length - 1) / 2);
+    const lineExpansion = 1 + (waveExpansion - 1) * Math.pow(distFromCenter, 2.0);
+    const targetOffset = wave.baseYOffset * lineExpansion;
+    wave.currentYOffset += (targetOffset - wave.currentYOffset) * 0.04;
+
+    ctx.beginPath();
+    ctx.strokeStyle = hsla(wave.opacity + smoothEnergy * 0.1);
+    ctx.lineWidth = 1.5 + smoothEnergy * 0.8;
+    ctx.shadowBlur = 10 + smoothEnergy * 8;
+    ctx.shadowColor = hsla(wave.opacity * 0.5 + smoothEnergy * 0.1);
+
+    const pts = wave.points;
+    const centerY = 0.5 + wave.currentYOffset;
+    const dir = wave.baseYOffset >= 0 ? 1 : -1;
+    const freqStrength = 0.05 + distFromCenter * 0.25;
+
+    for (let i = 0; i < pts.length; i++) {
+      const x = i / (pts.length - 1);
+      const animatedY = pts[i] * Math.sin(time * wave.speed + wave.phase + i * 0.04);
+      const spectrumVal = smoothedSpectrum[i];
+      const freqDisplacement = spectrumVal * dir * freqStrength;
+      const y = centerY + animatedY * wave.amplitude + freqDisplacement;
+
+      const px = x * waveW;
+      const py = y * waveH;
+
+      if (i === 0) {
+        ctx.moveTo(px, py);
+      } else {
+        const prevX = (i - 1) / (pts.length - 1);
+        const prevAnimatedY = pts[i - 1] * Math.sin(time * wave.speed + wave.phase + (i - 1) * 0.04);
+        const prevFreqDisp = smoothedSpectrum[i - 1] * dir * freqStrength;
+        const prevY = centerY + prevAnimatedY * wave.amplitude + prevFreqDisp;
+        const cpX = ((prevX + x) / 2) * waveW;
+        const cpY = ((prevY + y) / 2) * waveH;
+        ctx.quadraticCurveTo(prevX * waveW, prevY * waveH, cpX, cpY);
+      }
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Frequency scale at bottom ──
+  ctx.save();
+  const scaleY = waveH + 1;
+
+  ctx.strokeStyle = hsla(0.12);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, scaleY);
+  ctx.lineTo(waveW, scaleY);
+  ctx.stroke();
+
+  const minorFreqs = [30, 40, 60, 70, 80, 150, 300, 400, 600, 700, 800, 1500, 3000, 4000, 6000, 7000, 8000, 15000];
+  ctx.strokeStyle = hsla(0.06);
+  ctx.lineWidth = 1;
+  for (const f of minorFreqs) {
+    const nx = freqToX(f);
+    const px = nx * waveW;
+    if (px < 4 || px > waveW - 4) continue;
+    ctx.beginPath();
+    ctx.moveTo(px, scaleY);
+    ctx.lineTo(px, scaleY + 3);
+    ctx.stroke();
+  }
+
+  for (const { freq, label, major } of FREQ_LABELS) {
+    const nx = freqToX(freq);
+    const px = nx * waveW;
+    if (px < 8 || px > waveW - 8) continue;
+    const tickH = major ? 7 : 5;
+    ctx.strokeStyle = major ? hsla(0.3) : hsla(0.15);
+    ctx.lineWidth = major ? 1.5 : 1;
+    ctx.beginPath();
+    ctx.moveTo(px, scaleY);
+    ctx.lineTo(px, scaleY + tickH);
+    ctx.stroke();
+    ctx.font = major ? 'bold 10px monospace' : '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = major ? hsla(0.6) : hsla(0.35);
+    ctx.fillText(label, px, scaleY + tickH + 10);
+  }
+
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = hsla(0.25);
+  ctx.fillText('Hz', waveW - 2, scaleY + 18);
+  ctx.restore();
+}
+
+// ── Polar Sample: waveform plotted in polar coordinates ──
+function drawPolarSample(
+  ctx: CanvasRenderingContext2D,
+  tdData: Float32Array,
+  hasAudio: boolean,
+  waveW: number,
+  waveH: number,
+  hsla: (a: number) => string,
+) {
+  const cx = waveW / 2;
+  const cy = waveH / 2;
+  const maxR = Math.min(waveW, waveH) * 0.42;
+
+  // Draw grid circles
+  ctx.save();
+  for (let r = 0.25; r <= 1; r += 0.25) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, maxR * r, 0, Math.PI * 2);
+    ctx.strokeStyle = hsla(0.08);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Cross lines
+  ctx.strokeStyle = hsla(0.06);
+  ctx.beginPath();
+  ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
+  ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR);
+  ctx.stroke();
+
+  if (!hasAudio) { ctx.restore(); return; }
+
+  // Draw waveform as polar
+  const step = Math.max(1, Math.floor(tdData.length / 512));
+  ctx.beginPath();
+  for (let i = 0; i < tdData.length; i += step) {
+    const angle = (i / tdData.length) * Math.PI * 2 - Math.PI / 2;
+    const sample = tdData[i];
+    const r = (0.3 + Math.abs(sample) * 0.7) * maxR;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = hsla(0.7);
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = hsla(0.3);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ── Polar Level: frequency magnitudes in polar coordinates ──
+function drawPolarLevel(
+  ctx: CanvasRenderingContext2D,
+  data: Uint8Array,
+  hasAudio: boolean,
+  waveW: number,
+  waveH: number,
+  hsla: (a: number) => string,
+  maxBin: number,
+) {
+  const cx = waveW / 2;
+  const cy = waveH / 2;
+  const maxR = Math.min(waveW, waveH) * 0.42;
+
+  // Draw grid
+  ctx.save();
+  for (let r = 0.25; r <= 1; r += 0.25) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, maxR * r, 0, Math.PI * 2);
+    ctx.strokeStyle = hsla(0.08);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = hsla(0.06);
+  ctx.beginPath();
+  ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
+  ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR);
+  ctx.stroke();
+
+  if (!hasAudio) { ctx.restore(); return; }
+
+  // Draw frequency bars as spokes
+  const numSpokes = 128;
+  const binsPerSpoke = Math.max(1, Math.floor(maxBin / numSpokes));
+
+  ctx.beginPath();
+  for (let i = 0; i < numSpokes; i++) {
+    const angle = (i / numSpokes) * Math.PI * 2 - Math.PI / 2;
+    const binStart = Math.floor(i * maxBin / numSpokes);
+    let sum = 0;
+    for (let b = binStart; b < Math.min(binStart + binsPerSpoke, maxBin); b++) {
+      sum += data[b] / 255;
+    }
+    const mag = sum / binsPerSpoke;
+    const r = (0.15 + mag * 0.85) * maxR;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+
+  // Fill
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+  grad.addColorStop(0, hsla(0.05));
+  grad.addColorStop(1, hsla(0.15));
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.strokeStyle = hsla(0.6);
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = hsla(0.3);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ── Lissajous: X-Y plot of time-domain samples ──
+function drawLissajous(
+  ctx: CanvasRenderingContext2D,
+  tdData: Float32Array,
+  hasAudio: boolean,
+  waveW: number,
+  waveH: number,
+  hsla: (a: number) => string,
+  history: { x: number; y: number }[],
+  maxHistory: number,
+) {
+  const cx = waveW / 2;
+  const cy = waveH / 2;
+  const scale = Math.min(waveW, waveH) * 0.4;
+
+  // Grid
+  ctx.save();
+  ctx.strokeStyle = hsla(0.08);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx - scale, cy); ctx.lineTo(cx + scale, cy);
+  ctx.moveTo(cx, cy - scale); ctx.lineTo(cx, cy + scale);
+  ctx.stroke();
+
+  // Box outline
+  ctx.strokeStyle = hsla(0.06);
+  ctx.strokeRect(cx - scale, cy - scale, scale * 2, scale * 2);
+
+  if (!hasAudio) { ctx.restore(); return; }
+
+  // Build L/R-like pairs from consecutive samples (mono → phase plot)
+  const step = 2;
+  for (let i = 0; i < tdData.length - step; i += step) {
+    const x = tdData[i];
+    const y = tdData[i + 1];
+    history.push({ x, y });
+  }
+  while (history.length > maxHistory) history.shift();
+
+  // Draw with fading trail
+  for (let i = 1; i < history.length; i++) {
+    const alpha = (i / history.length) * 0.8;
+    const p = history[i];
+    const prev = history[i - 1];
+    ctx.beginPath();
+    ctx.moveTo(cx + prev.x * scale, cy + prev.y * scale);
+    ctx.lineTo(cx + p.x * scale, cy + p.y * scale);
+    ctx.strokeStyle = hsla(alpha);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Current dot
+  if (history.length > 0) {
+    const last = history[history.length - 1];
+    ctx.beginPath();
+    ctx.arc(cx + last.x * scale, cy + last.y * scale, 3, 0, Math.PI * 2);
+    ctx.fillStyle = hsla(0.9);
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = hsla(0.5);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// ── Shared: LUFS + dB meters ──
+function drawMeters(
+  ctx: CanvasRenderingContext2D,
+  clampedLufs: number,
+  clampedDb: number,
+  waveW: number,
+  waveH: number,
+  hsla: (a: number) => string,
+) {
+  ctx.save();
+  const meterW = 22;
+  const meterGap = 10;
+  const meterTop = 18;
+  const meterBottom = waveH - 8;
+  const meterH = meterBottom - meterTop;
+
+  // LUFS meter
+  const lufsX = waveW + 12;
+  ctx.fillStyle = hsla(0.06);
+  ctx.beginPath();
+  ctx.roundRect(lufsX, meterTop, meterW, meterH, 4);
+  ctx.fill();
+
+  const lufsNorm = (clampedLufs + 60) / 60;
+  const lufsFillH = lufsNorm * meterH;
+  if (lufsFillH > 0) {
+    const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+    grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
+    grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
+    grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)');
+    grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(lufsX, meterBottom - lufsFillH, meterW, lufsFillH, 4);
+    ctx.fill();
+  }
+
+  ctx.font = 'bold 13px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = hsla(0.65);
+  ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
+  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = hsla(0.4);
+  ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
+
+  // dB meter
+  const dbX = lufsX + meterW + meterGap;
+  ctx.fillStyle = hsla(0.06);
+  ctx.beginPath();
+  ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
+  ctx.fill();
+
+  const dbNorm = (clampedDb + 60) / 60;
+  const dbFillH = dbNorm * meterH;
+  if (dbFillH > 0) {
+    const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+    grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
+    grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
+    grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
+    grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+    ctx.fillStyle = grad2;
+    ctx.beginPath();
+    ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
+    ctx.fill();
+  }
+
+  ctx.font = 'bold 13px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = hsla(0.65);
+  ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 18);
+  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = hsla(0.4);
+  ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
+
+  // Tick marks
+  const tickLabels = [0, -6, -14, -24, -40, -60];
+  ctx.textAlign = 'left';
+  for (const lv of tickLabels) {
+    const norm = (lv + 60) / 60;
+    const ly = meterBottom - norm * meterH;
+    ctx.strokeStyle = hsla(0.15);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(dbX + meterW + 2, ly);
+    ctx.lineTo(dbX + meterW + 6, ly);
+    ctx.stroke();
+    ctx.font = 'bold 10px monospace';
+    ctx.fillStyle = hsla(0.45);
+    ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
+  }
+
+  ctx.restore();
+}
+
+// ── Shared: Key indicator ──
+function drawKeyIndicator(
+  ctx: CanvasRenderingContext2D,
+  detectedKey: string,
+  detectedMode: string,
+  detectedConf: number,
+  detectedCamelot: string,
+  keyDrift: number,
+  driftMessage: string,
+  keyDisplayAlpha: number,
+  waveW: number,
+  hsla: (a: number) => string,
+) {
+  ctx.save();
+  ctx.globalAlpha = keyDisplayAlpha;
+
+  const boxW = driftMessage ? Math.max(130, ctx.measureText(driftMessage).width + 24) : 90;
+  const boxH = driftMessage ? 48 : 36;
+  const kx = waveW - boxW - 8;
+  const ky = 8;
+
+  ctx.fillStyle = keyDrift >= 3
+    ? `hsla(0, 70%, 15%, 0.85)`
+    : keyDrift >= 1
+      ? `hsla(40, 70%, 15%, 0.85)`
+      : `hsla(0, 0%, 8%, 0.85)`;
+  ctx.beginPath();
+  ctx.roundRect(kx, ky, boxW, boxH, 6);
+  ctx.fill();
+
+  ctx.strokeStyle = keyDrift >= 3
+    ? `hsla(0, 80%, 50%, 0.6)`
+    : keyDrift >= 1
+      ? `hsla(40, 80%, 50%, 0.4)`
+      : hsla(0.2);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(kx, ky, boxW, boxH, 6);
+  ctx.stroke();
+
+  ctx.font = '7px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = hsla(0.35);
+  ctx.fillText('KEY', kx + 6, ky + 11);
+
+  ctx.textAlign = 'right';
+  ctx.font = '8px monospace';
+  ctx.fillStyle = hsla(0.3);
+  ctx.fillText(detectedCamelot, kx + boxW - 6, ky + 11);
+
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 14px monospace';
+  ctx.fillStyle = keyDrift >= 3
+    ? 'hsla(0, 80%, 60%, 1)'
+    : keyDrift >= 1
+      ? 'hsla(40, 80%, 60%, 1)'
+      : hsla(0.85);
+  ctx.fillText(`${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`, kx + 6, ky + 28);
+
+  const confBarX = kx + 60;
+  const confBarY = ky + 20;
+  const confBarW = boxW - 68;
+  const confBarH = 4;
+  ctx.fillStyle = hsla(0.1);
+  ctx.beginPath();
+  ctx.roundRect(confBarX, confBarY, confBarW, confBarH, 2);
+  ctx.fill();
+  const confFill = (detectedConf / 100) * confBarW;
+  ctx.fillStyle = keyDrift >= 3
+    ? 'hsla(0, 70%, 50%, 0.7)'
+    : hsla(0.4);
+  ctx.beginPath();
+  ctx.roundRect(confBarX, confBarY, confFill, confBarH, 2);
+  ctx.fill();
+
+  ctx.font = '7px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillStyle = hsla(0.3);
+  ctx.fillText(`${detectedConf}%`, kx + boxW - 6, ky + 28);
+
+  if (driftMessage) {
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = keyDrift >= 3
+      ? 'hsla(0, 80%, 65%, 0.9)'
+      : 'hsla(40, 80%, 60%, 0.8)';
+    ctx.fillText(driftMessage, kx + 6, ky + 43);
+  }
+
+  ctx.restore();
 }
