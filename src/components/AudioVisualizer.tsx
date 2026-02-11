@@ -644,7 +644,7 @@ function drawSpectrum(
   for (const { freq, label, major } of FREQ_LABELS) {
     const nx = freqToX(freq);
     const px = nx * waveW;
-    if (px < 8 || px > waveW - 8) continue;
+    if (px < 8 || px > waveW + 4) continue;
     const tickH = major ? 7 : 5;
     ctx.strokeStyle = major ? hsla(0.3) : hsla(0.15);
     ctx.lineWidth = major ? 1.5 : 1;
