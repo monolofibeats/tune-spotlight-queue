@@ -4,40 +4,17 @@ import {
   LayoutDashboard, 
   Music, 
   Search,
-  Trophy,
-  Plus,
-  Trash2,
-  DollarSign,
   Eye,
   CheckCircle,
   Loader2,
-  Tv,
-  Video,
-  Link as LinkIcon,
-  Upload
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { SessionManager } from '@/components/SessionManager';
-import { AdminSpotManager } from '@/components/AdminSpotManager';
-import { AdminPricingPanel } from '@/components/AdminPricingPanel';
-import { AdminBidSettings } from '@/components/AdminBidSettings';
-import { ScreenStreamer } from '@/components/ScreenStreamer';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
@@ -62,29 +39,9 @@ interface Submission {
   audio_file_url: string | null;
 }
 
-interface SpecialEvent {
-  id: string;
-  title: string;
-  description: string | null;
-  reward: string;
-  is_active: boolean;
-  start_time: string;
-  end_time: string | null;
-}
-
-interface StreamConfig {
-  id: string;
-  stream_type: string;
-  stream_url: string | null;
-  video_url: string | null;
-  is_active: boolean;
-}
-
 const Dashboard = () => {
-  const { user } = useAuth();
+  useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [events, setEvents] = useState<SpecialEvent[]>([]);
-  const [streamConfig, setStreamConfig] = useState<StreamConfig | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -106,17 +63,6 @@ const Dashboard = () => {
     position: 0,
   });
   
-  // New event form
-  const [newEventTitle, setNewEventTitle] = useState('');
-  const [newEventDescription, setNewEventDescription] = useState('');
-  const [newEventReward, setNewEventReward] = useState('');
-  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-
-  // Stream config form
-  const [streamType, setStreamType] = useState<string>('none');
-  const [streamUrl, setStreamUrl] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
-  const [isSavingStream, setIsSavingStream] = useState(false);
 
   const fetchSubmissions = async () => {
     const { data, error } = await supabase
@@ -132,53 +78,16 @@ const Dashboard = () => {
     setIsLoading(false);
   };
 
-  const fetchEvents = async () => {
-    const { data, error } = await supabase
-      .from('special_events')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setEvents(data);
-    }
-  };
-
-  const fetchStreamConfig = async () => {
-    // Using type assertion since stream_config table may not be in types yet
-    const { data, error } = await (supabase
-      .from('stream_config' as any)
-      .select('*')
-      .limit(1)
-      .maybeSingle()) as any;
-
-    if (!error && data) {
-      const config = data as StreamConfig;
-      setStreamConfig(config);
-      setStreamType(config.stream_type);
-      setStreamUrl(config.stream_url || '');
-      setVideoUrl(config.video_url || '');
-    }
-  };
-
   useEffect(() => {
     fetchSubmissions();
-    fetchEvents();
-    fetchStreamConfig();
 
-    // Subscribe to realtime changes
     const submissionsChannel = supabase
       .channel('dashboard_submissions')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'submissions' }, fetchSubmissions)
       .subscribe();
 
-    const eventsChannel = supabase
-      .channel('dashboard_events')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'special_events' }, fetchEvents)
-      .subscribe();
-
     return () => {
       supabase.removeChannel(submissionsChannel);
-      supabase.removeChannel(eventsChannel);
     };
   }, []);
 
@@ -202,23 +111,43 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteSubmission = async (id: string) => {
-    const { error } = await supabase
-      .from('submissions')
-      .delete()
-      .eq('id', id);
+  const handleDeleteSubmission = async (id: string, permanent = false) => {
+    if (permanent) {
+      const { error } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', id);
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete submission",
-        variant: "destructive",
-      });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to permanently delete submission",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Deleted",
+          description: "Submission permanently removed",
+        });
+      }
     } else {
-      toast({
-        title: "Deleted",
-        description: "Submission removed",
-      });
+      const { error } = await supabase
+        .from('submissions')
+        .update({ status: 'deleted' })
+        .eq('id', id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to move to trash",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Moved to trash",
+          description: "Submission moved to trash",
+        });
+      }
     }
   };
 
@@ -244,122 +173,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleCreateEvent = async () => {
-    if (!newEventTitle || !newEventReward) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in title and reward",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsCreatingEvent(true);
-
-    const { error } = await supabase
-      .from('special_events')
-      .insert({
-        title: newEventTitle,
-        description: newEventDescription || null,
-        reward: newEventReward,
-        created_by: user?.id,
-      });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create event",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Event created! 🎉",
-        description: "Your special event is now live",
-      });
-      setNewEventTitle('');
-      setNewEventDescription('');
-      setNewEventReward('');
-    }
-
-    setIsCreatingEvent(false);
-  };
-
-  const handleToggleEvent = async (id: string, isActive: boolean) => {
-    const { error } = await supabase
-      .from('special_events')
-      .update({ is_active: !isActive })
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update event",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteEvent = async (id: string) => {
-    const { error } = await supabase
-      .from('special_events')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete event",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveStreamConfig = async () => {
-    setIsSavingStream(true);
-
-    try {
-      if (streamConfig) {
-        // Using type assertion since stream_config table may not be in types yet
-        const { error } = await (supabase
-          .from('stream_config' as any)
-          .update({
-            stream_type: streamType,
-            stream_url: streamUrl || null,
-            video_url: videoUrl || null,
-          } as any)
-          .eq('id', streamConfig.id)) as any;
-
-        if (error) throw error;
-      } else {
-        // Using type assertion since stream_config table may not be in types yet
-        const { error } = await (supabase
-          .from('stream_config' as any)
-          .insert({
-            stream_type: streamType,
-            stream_url: streamUrl || null,
-            video_url: videoUrl || null,
-            is_active: true,
-          } as any)) as any;
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Stream updated! 📺",
-        description: "Homepage stream settings have been saved",
-      });
-
-      fetchStreamConfig();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save stream settings",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingStream(false);
-    }
-  };
 
   const filteredSubmissions = submissions.filter(s => {
     const matchesSearch = 
@@ -557,13 +370,7 @@ const Dashboard = () => {
           <Tabs defaultValue="submissions" className="space-y-6">
             <TabsList className="glass p-1 rounded-xl">
               <TabsTrigger value="submissions" className="rounded-lg px-6">
-                Tracks
-              </TabsTrigger>
-              <TabsTrigger value="stream" className="rounded-lg px-6">
-                Livestream
-              </TabsTrigger>
-              <TabsTrigger value="events" className="rounded-lg px-6">
-                Events
+                Submissions
               </TabsTrigger>
               <TabsTrigger value="streamers" className="rounded-lg px-6">
                 Support
@@ -662,225 +469,6 @@ const Dashboard = () => {
               />
             </TabsContent>
 
-            <TabsContent value="stream" className="space-y-6">
-              {/* Session Manager */}
-              <SessionManager />
-              
-              {/* Screen Streamer */}
-              <ScreenStreamer />
-              
-              {/* Pricing Configuration */}
-              <AdminPricingPanel />
-              
-              {/* Bid Increment Settings */}
-              <AdminBidSettings />
-              
-              {/* Pre-Stream Spots Manager */}
-              <AdminSpotManager />
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-strong rounded-2xl p-6"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <Tv className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Startseite Einstellungen</h2>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label>Art des Streams</Label>
-                    <Select value={streamType} onValueChange={setStreamType}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Stream Typ auswählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Nichts (Livestream ist off)</SelectItem>
-                        <SelectItem value="twitch">Twitch Live</SelectItem>
-                        <SelectItem value="youtube">YouTube Live</SelectItem>
-                        <SelectItem value="tiktok">TikTok Live</SelectItem>
-                        <SelectItem value="video">Looping Video</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {(streamType === 'twitch' || streamType === 'youtube' || streamType === 'tiktok') && (
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <LinkIcon className="w-4 h-4" />
-                        Stream URL
-                      </Label>
-                      <Input
-                        placeholder={
-                          streamType === 'twitch' 
-                            ? 'https://twitch.tv/yourchannel'
-                            : streamType === 'youtube'
-                            ? 'https://youtube.com/watch?v=... or https://youtube.com/live/...'
-                            : 'https://tiktok.com/@username/live'
-                        }
-                        value={streamUrl}
-                        onChange={(e) => setStreamUrl(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {streamType === 'twitch' && 'Enter your Twitch channel URL'}
-                        {streamType === 'youtube' && 'Enter the YouTube live stream or video URL'}
-                        {streamType === 'tiktok' && 'Enter your TikTok live URL (will show a link to watch)'}
-                      </p>
-                    </div>
-                  )}
-
-                  {streamType === 'video' && (
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Video className="w-4 h-4" />
-                        Video URL
-                      </Label>
-                      <Input
-                        placeholder="https://example.com/video.mp4"
-                        value={videoUrl}
-                        onChange={(e) => setVideoUrl(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Enter a direct link to an MP4 video file. It will loop automatically.
-                      </p>
-                    </div>
-                  )}
-
-                  <Button 
-                    onClick={handleSaveStreamConfig} 
-                    disabled={isSavingStream}
-                    className="w-full"
-                  >
-                    {isSavingStream ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        Livestream Einstellungen speichern
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="events" className="space-y-6">
-              {/* Create Event Form */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-strong rounded-2xl p-6"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <Trophy className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-display font-semibold">Event erstellen</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <Label className="mb-2 block">Titel des Events *</Label>
-                    <Input
-                      placeholder="z.B. der höchste Bieter bekommt einen Playlist Add"
-                      value={newEventTitle}
-                      onChange={(e) => setNewEventTitle(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label className="mb-2 block">Belohnung *</Label>
-                    <Input
-                      placeholder="z.B. du wirst zu einer Spotify Playlist mit 10K Followern hinzugefügt"
-                      value={newEventReward}
-                      onChange={(e) => setNewEventReward(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <Label className="mb-2 block">Beschreibung (optional)</Label>
-                  <Textarea
-                    placeholder="Beschreibe dein Event..."
-                    value={newEventDescription}
-                    onChange={(e) => setNewEventDescription(e.target.value)}
-                    className="min-h-[80px]"
-                  />
-                </div>
-                <Button 
-                  onClick={handleCreateEvent} 
-                  disabled={isCreatingEvent}
-                  className="w-full"
-                >
-                  {isCreatingEvent ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Event erstellen
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-
-              {/* Events List */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Aktive Events</h3>
-                {events.length === 0 ? (
-                  <div className="glass rounded-2xl p-8 text-center">
-                    <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-muted-foreground">Noch keine Events</p>
-                  </div>
-                ) : (
-                  events.map((event) => (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className={`glass rounded-xl p-4 ${!event.is_active ? 'opacity-50' : ''}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{event.title}</h4>
-                            <Badge variant={event.is_active ? 'default' : 'secondary'}>
-                              {event.is_active ? 'Active' : 'Inactive'}
-                            </Badge>
-                          </div>
-                          {event.description && (
-                            <p className="text-sm text-muted-foreground">{event.description}</p>
-                          )}
-                          <p className="text-sm">
-                            <span className="text-muted-foreground">Reward:</span>{' '}
-                            <span className="text-primary">{event.reward}</span>
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleToggleEvent(event.id, event.is_active)}
-                          >
-                            {event.is_active ? 'Deactivate' : 'Activate'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteEvent(event.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </TabsContent>
 
             {/* Streamers Tab */}
             <TabsContent value="streamers">
