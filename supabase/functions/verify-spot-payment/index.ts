@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { recordEarning } from "../_shared/record-earning.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,12 +34,10 @@ serve(async (req) => {
       throw new Error("Session ID is required");
     }
 
-    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Retrieve the checkout session
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     logStep("Session retrieved", { status: session.payment_status, spotId: session.metadata?.spot_id });
 
@@ -51,12 +50,10 @@ serve(async (req) => {
       throw new Error("Invalid session metadata");
     }
 
-    // Use the price from metadata (set during checkout from database)
     const amountPaid = metadata.price_cents 
       ? Math.round(parseInt(metadata.price_cents) / 100) 
       : Math.round((session.amount_total || 0) / 100);
 
-    // Create the submission first
     const { data: submission, error: submissionError } = await supabaseAdmin
       .from('submissions')
       .insert({
@@ -69,6 +66,7 @@ serve(async (req) => {
         is_priority: true,
         user_id: metadata.user_id,
         audio_file_url: metadata.audio_file_url || null,
+        streamer_id: metadata.streamer_id || null,
       })
       .select()
       .single();
@@ -79,7 +77,6 @@ serve(async (req) => {
     }
     logStep("Submission created", { submissionId: submission.id });
 
-    // Update the spot to mark it as purchased
     const { error: spotError } = await supabaseAdmin
       .from('pre_stream_spots')
       .update({
@@ -93,9 +90,24 @@ serve(async (req) => {
 
     if (spotError) {
       logStep("Error updating spot", { error: spotError.message });
-      // Don't throw - submission was created, spot update is secondary
     } else {
       logStep("Spot marked as purchased");
+    }
+
+    // Record earnings for the streamer
+    if (metadata.streamer_id) {
+      try {
+        await recordEarning({
+          stripeSessionId: sessionId,
+          streamerId: metadata.streamer_id,
+          submissionId: submission.id,
+          paymentType: "pre_stream_spot",
+          customerEmail: session.customer_details?.email || null,
+        });
+        logStep("Earnings recorded for streamer");
+      } catch (e) {
+        logStep("Warning: Failed to record earnings", { error: String(e) });
+      }
     }
 
     return new Response(JSON.stringify({

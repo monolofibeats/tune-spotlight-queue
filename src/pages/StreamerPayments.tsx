@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -31,11 +32,22 @@ interface Transaction {
 interface EarningsData {
   total_earnings_cents: number;
   total_platform_fee_cents: number;
+  total_stripe_fees_cents: number;
   total_payouts_cents: number;
   current_balance_cents: number;
   transactions: Transaction[];
   chart_data: Array<{ month: string; earnings: number }>;
   currency: string;
+}
+
+interface PayoutRequest {
+  id: string;
+  amount_cents: number;
+  currency: string;
+  status: string;
+  payout_method: string;
+  created_at: string;
+  admin_notes: string | null;
 }
 
 interface PayoutPref {
@@ -75,6 +87,10 @@ export default function StreamerPayments() {
   const [walletHolder, setWalletHolder] = useState('');
   const [walletPaypal, setWalletPaypal] = useState('');
   const [isSavingWallet, setIsSavingWallet] = useState(false);
+  const [payoutRequests, setPayoutRequests] = useState<PayoutRequest[]>([]);
+  const [isRequestingPayout, setIsRequestingPayout] = useState(false);
+
+  const MIN_PAYOUT_CENTS = 5000; // €50 minimum
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -114,6 +130,15 @@ export default function StreamerPayments() {
         .order('is_primary', { ascending: false });
 
       setWallets((walletData as PayoutPref[]) || []);
+
+      // Fetch payout requests
+      const { data: payoutData } = await supabase
+        .from('payout_requests')
+        .select('*')
+        .eq('streamer_id', streamer.id)
+        .order('created_at', { ascending: false });
+
+      setPayoutRequests((payoutData || []) as PayoutRequest[]);
     } catch (error: any) {
       console.error('Error loading payment data:', error);
     } finally {
@@ -198,6 +223,71 @@ export default function StreamerPayments() {
     setWalletPaypal('');
   };
 
+  const handleRequestPayout = async () => {
+    if (!streamerId || !earnings) return;
+
+    const balance = earnings.current_balance_cents;
+    if (balance < MIN_PAYOUT_CENTS) {
+      toast({
+        title: 'Minimum not reached',
+        description: `You need at least ${formatCurrency(MIN_PAYOUT_CENTS)} balance to request a payout.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check for pending payout requests
+    const hasPending = payoutRequests.some(r => r.status === 'pending' || r.status === 'approved');
+    if (hasPending) {
+      toast({
+        title: 'Payout already requested',
+        description: 'You already have a pending payout request. Please wait for it to be processed.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Find primary wallet
+    const primaryWallet = wallets.find(w => w.is_primary) || wallets[0];
+    if (!primaryWallet) {
+      toast({
+        title: 'No wallet configured',
+        description: 'Please add a payout method in the Wallets tab first.',
+        variant: 'destructive',
+      });
+      setActiveTab('wallets');
+      return;
+    }
+
+    setIsRequestingPayout(true);
+    try {
+      const payoutDetails: Record<string, string> = {};
+      if (primaryWallet.payout_method === 'paypal') {
+        payoutDetails.paypal_email = primaryWallet.paypal_email || '';
+      } else {
+        payoutDetails.account_holder = primaryWallet.bank_account_holder || '';
+        payoutDetails.iban = primaryWallet.bank_iban || '';
+        if (primaryWallet.bank_bic) payoutDetails.bic = primaryWallet.bank_bic;
+      }
+
+      const { error } = await supabase.from('payout_requests').insert({
+        streamer_id: streamerId,
+        amount_cents: balance,
+        currency: primaryWallet.currency.toLowerCase(),
+        payout_method: primaryWallet.payout_method,
+        payout_details: payoutDetails,
+      });
+
+      if (error) throw error;
+      toast({ title: 'Payout requested! 💸', description: `${formatCurrency(balance)} will be transferred to your ${primaryWallet.payout_method === 'paypal' ? 'PayPal' : 'bank account'}.` });
+      loadData();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsRequestingPayout(false);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -247,7 +337,7 @@ export default function StreamerPayments() {
 
             {/* OVERVIEW */}
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="glass-strong rounded-xl p-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
                   <p className="text-3xl font-display font-bold text-primary">
@@ -256,8 +346,14 @@ export default function StreamerPayments() {
                 </div>
                 <div className="glass-strong rounded-xl p-6 text-center">
                   <p className="text-sm text-muted-foreground mb-1">Total Earned</p>
-                  <p className="text-3xl font-display font-bold text-emerald-400">
+                  <p className="text-3xl font-display font-bold text-primary/80">
                     {formatCurrency(earnings?.total_earnings_cents || 0)}
+                  </p>
+                </div>
+                <div className="glass-strong rounded-xl p-6 text-center">
+                  <p className="text-sm text-muted-foreground mb-1">Paid Out</p>
+                  <p className="text-3xl font-display font-bold text-muted-foreground">
+                    {formatCurrency(earnings?.total_payouts_cents || 0)}
                   </p>
                 </div>
                 <div className="glass-strong rounded-xl p-6 text-center">
@@ -267,6 +363,60 @@ export default function StreamerPayments() {
                   </p>
                 </div>
               </div>
+
+              {/* Payout request */}
+              <div className="glass-strong rounded-xl p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold">Request Payout</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Minimum payout: {formatCurrency(MIN_PAYOUT_CENTS)}. Your full balance will be transferred.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleRequestPayout}
+                    disabled={isRequestingPayout || (earnings?.current_balance_cents || 0) < MIN_PAYOUT_CENTS}
+                    className="gap-2 shrink-0"
+                  >
+                    {isRequestingPayout ? <Loader2 className="w-4 h-4 animate-spin" /> : <Euro className="w-4 h-4" />}
+                    Request Payout
+                  </Button>
+                </div>
+                {(earnings?.current_balance_cents || 0) < MIN_PAYOUT_CENTS && (earnings?.current_balance_cents || 0) > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    You need {formatCurrency(MIN_PAYOUT_CENTS - (earnings?.current_balance_cents || 0))} more to reach the minimum payout.
+                  </p>
+                )}
+              </div>
+
+              {/* Payout history */}
+              {payoutRequests.length > 0 && (
+                <div className="glass-strong rounded-xl p-6">
+                  <h3 className="font-semibold mb-4">Payout History</h3>
+                  <div className="space-y-3">
+                    {payoutRequests.map((pr) => (
+                      <div key={pr.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
+                        <div>
+                          <p className="font-medium">{formatCurrency(pr.amount_cents, pr.currency)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(pr.created_at).toLocaleDateString('de-DE', {
+                              year: 'numeric', month: 'short', day: 'numeric',
+                            })}
+                            {' · '}{pr.payout_method === 'paypal' ? 'PayPal' : 'Bank Transfer'}
+                          </p>
+                        </div>
+                        <Badge variant={
+                          pr.status === 'completed' ? 'default' :
+                          pr.status === 'rejected' ? 'destructive' :
+                          'secondary'
+                        }>
+                          {pr.status.charAt(0).toUpperCase() + pr.status.slice(1)}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Simple bar chart */}
               <div className="glass-strong rounded-xl p-6">
