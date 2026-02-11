@@ -340,7 +340,7 @@ export function NowPlayingPanel({
                       />
                       
                       {/* Audio Visualizer */}
-                      <AudioVisualizer audioElement={audioEl} className="rounded-lg" />
+                      <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" />
                       
                       {/* Stem Separation */}
                       <StemSeparationPanel 
