@@ -77,31 +77,40 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bufferRef = useRef<AudioBuffer | null>(null);
   const bufferSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const isPlayingRef = useRef(false);
   const lastSrcRef = useRef('');
   const cleanupRef = useRef<(() => void) | null>(null);
   const readyRef = useRef(false);
+  const setupIdRef = useRef(0); // guard against stale async completions
+
+  // Full teardown helper
+  const teardown = () => {
+    if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
+    if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
+    if (gainNodeRef.current) { try { gainNodeRef.current.disconnect(); } catch {} gainNodeRef.current = null; }
+    freqDataRef.current = null;
+    timeDomainRef.current = null;
+    bufferRef.current = null;
+    readyRef.current = false;
+    isPlayingRef.current = false;
+  };
 
   useEffect(() => {
+    // Always clean up previous session first
     if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
+    teardown();
 
     if (!audioElement) {
-      if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
-      if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
-      freqDataRef.current = null;
-      timeDomainRef.current = null;
-      bufferRef.current = null;
       lastSrcRef.current = '';
-      readyRef.current = false;
-      isPlayingRef.current = false;
       return;
     }
 
     const src = audioElement.src;
-    if (!src) return;
+    if (!src) { lastSrcRef.current = ''; return; }
 
-    const srcChanged = src !== lastSrcRef.current;
     lastSrcRef.current = src;
+    const mySetupId = ++setupIdRef.current;
 
     const setup = async () => {
       try {
@@ -109,41 +118,38 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
 
-        if (srcChanged) {
-          if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} bufferSourceRef.current = null; }
-          isPlayingRef.current = false;
-          if (analyserRef.current) { try { analyserRef.current.disconnect(); } catch {} analyserRef.current = null; }
-        }
+        // Fetch and decode the audio file
+        const resp = await fetch(src);
+        if (!resp.ok || mySetupId !== setupIdRef.current) return;
+        const arrayBuf = await resp.arrayBuffer();
+        if (mySetupId !== setupIdRef.current) return;
+        const audioBuffer = await actx.decodeAudioData(arrayBuf);
+        if (mySetupId !== setupIdRef.current) return;
 
-        if (srcChanged || !analyserRef.current) {
-          const resp = await fetch(src);
-          if (!resp.ok) return;
-          const audioBuffer = await actx.decodeAudioData(await resp.arrayBuffer());
-          bufferRef.current = audioBuffer;
+        bufferRef.current = audioBuffer;
 
-          const analyser = actx.createAnalyser();
-          analyser.fftSize = 2048;
-          analyser.smoothingTimeConstant = 0.3;
-          const gain = actx.createGain();
-          gain.gain.value = 0;
-          analyser.connect(gain);
-          gain.connect(actx.destination);
+        const analyser = actx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.3;
+        const gain = actx.createGain();
+        gain.gain.value = 0;
+        analyser.connect(gain);
+        gain.connect(actx.destination);
 
-          analyserRef.current = analyser;
-          freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
-          timeDomainRef.current = new Float32Array(analyser.fftSize);
-        }
-
+        analyserRef.current = analyser;
+        gainNodeRef.current = gain;
+        freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+        timeDomainRef.current = new Float32Array(analyser.fftSize);
         readyRef.current = true;
 
         const startShadow = () => {
           if (!readyRef.current || !bufferRef.current || !analyserRef.current) return;
           if (bufferSourceRef.current) { try { bufferSourceRef.current.stop(); } catch {} }
-          const actx = audioCtxRef.current!;
-          if (actx.state === 'suspended') actx.resume();
-          const bs = actx.createBufferSource();
+          const actx2 = audioCtxRef.current!;
+          if (actx2.state === 'suspended') actx2.resume();
+          const bs = actx2.createBufferSource();
           bs.buffer = bufferRef.current;
-          bs.connect(analyserRef.current);
+          bs.connect(analyserRef.current!);
           bufferSourceRef.current = bs;
           bs.start(0, audioElement.currentTime || 0);
           isPlayingRef.current = true;
@@ -182,7 +188,9 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 
     return () => {
       if (cleanupRef.current) { cleanupRef.current(); cleanupRef.current = null; }
+      teardown();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioElement, audioElement?.src]);
 
   return { analyserRef, freqDataRef, timeDomainRef, isPlayingRef };
@@ -190,23 +198,27 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 
 // ── Frequency scale config ──
 const MAX_FREQ = 20000; // Hard cap at 20kHz
+const MIN_FREQ = 20;
+const MIN_LOG = Math.log10(MIN_FREQ);
+const MAX_LOG = Math.log10(MAX_FREQ);
 
 const FREQ_LABELS: { freq: number; label: string; major: boolean }[] = [
   { freq: 20, label: '20', major: true },
+  { freq: 50, label: '50', major: false },
   { freq: 100, label: '100', major: true },
-  { freq: 500, label: '500', major: true },
+  { freq: 200, label: '200', major: false },
+  { freq: 500, label: '500', major: false },
   { freq: 1000, label: '1k', major: true },
+  { freq: 2000, label: '2k', major: false },
   { freq: 5000, label: '5k', major: true },
   { freq: 10000, label: '10k', major: true },
   { freq: 20000, label: '20k', major: true },
 ];
 
-// Map frequency to normalized X position [0..1] using log scale, capped at 20kHz
+// Map frequency to normalized X position [0..1] using log scale, 20Hz→0, 20kHz→1
 function freqToX(freq: number): number {
-  const minLog = Math.log10(20);
-  const maxLog = Math.log10(MAX_FREQ);
-  const logF = Math.log10(Math.max(20, Math.min(freq, MAX_FREQ)));
-  return (logF - minLog) / (maxLog - minLog);
+  const logF = Math.log10(Math.max(MIN_FREQ, Math.min(freq, MAX_FREQ)));
+  return (logF - MIN_LOG) / (MAX_LOG - MIN_LOG);
 }
 
 // ── Key detection helpers ──
@@ -459,10 +471,7 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
       if (data) {
         for (let p = 0; p < POINT_COUNT; p++) {
           const normX = p / (POINT_COUNT - 1);
-          // Map normalized X back to frequency using log scale
-          const minLog = Math.log10(20);
-          const maxLog = Math.log10(MAX_FREQ);
-          const freq = Math.pow(10, minLog + normX * (maxLog - minLog));
+          const freq = Math.pow(10, MIN_LOG + normX * (MAX_LOG - MIN_LOG));
           const binIdx = Math.min(Math.floor(freq / (sampleRate / 2) * binCount), maxBin - 1);
           const spread = Math.max(1, Math.floor(maxBin / POINT_COUNT));
           let sum = 0, count = 0;
@@ -656,7 +665,9 @@ function drawSpectrum(
   ctx.restore();
 }
 
-// ── Polar Sample: waveform plotted in polar coordinates ──
+// ── Polar Sample: waveform plotted in polar coordinates (smoothed) ──
+const polarSampleSmoothed: Float32Array = new Float32Array(512);
+
 function drawPolarSample(
   ctx: CanvasRenderingContext2D,
   tdData: Float32Array,
@@ -688,12 +699,21 @@ function drawPolarSample(
 
   if (!hasAudio) { ctx.restore(); return; }
 
-  // Draw waveform as polar
-  const step = Math.max(1, Math.floor(tdData.length / 512));
+  // Downsample and smooth the waveform for less aggressive movement
+  const numPoints = polarSampleSmoothed.length;
+  const step = Math.max(1, Math.floor(tdData.length / numPoints));
+  const smoothing = 0.12; // lower = smoother/slower
+  for (let i = 0; i < numPoints; i++) {
+    const srcIdx = Math.min(i * step, tdData.length - 1);
+    const target = tdData[srcIdx];
+    polarSampleSmoothed[i] += (target - polarSampleSmoothed[i]) * smoothing;
+  }
+
+  // Draw smoothed waveform as polar
   ctx.beginPath();
-  for (let i = 0; i < tdData.length; i += step) {
-    const angle = (i / tdData.length) * Math.PI * 2 - Math.PI / 2;
-    const sample = tdData[i];
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i / numPoints) * Math.PI * 2 - Math.PI / 2;
+    const sample = polarSampleSmoothed[i];
     const r = (0.3 + Math.abs(sample) * 0.7) * maxR;
     const x = cx + Math.cos(angle) * r;
     const y = cy + Math.sin(angle) * r;
@@ -708,8 +728,9 @@ function drawPolarSample(
   ctx.stroke();
   ctx.restore();
 }
+// ── Polar Level: frequency magnitudes in polar coordinates (smoothed, DC-skip) ──
+const polarLevelSmoothed: Float32Array = new Float32Array(128);
 
-// ── Polar Level: frequency magnitudes in polar coordinates ──
 function drawPolarLevel(
   ctx: CanvasRenderingContext2D,
   data: Uint8Array,
@@ -741,19 +762,28 @@ function drawPolarLevel(
 
   if (!hasAudio) { ctx.restore(); return; }
 
-  // Draw frequency bars as spokes
-  const numSpokes = 128;
-  const binsPerSpoke = Math.max(1, Math.floor(maxBin / numSpokes));
+  // Draw frequency bars as spokes, skip DC bins (first ~3 bins)
+  const numSpokes = polarLevelSmoothed.length;
+  const dcSkip = 3; // skip first 3 bins (DC / sub-bass rumble)
+  const usableBins = maxBin - dcSkip;
+  const binsPerSpoke = Math.max(1, Math.floor(usableBins / numSpokes));
+
+  for (let i = 0; i < numSpokes; i++) {
+    const binStart = dcSkip + Math.floor(i * usableBins / numSpokes);
+    let sum = 0, count = 0;
+    for (let b = binStart; b < Math.min(binStart + binsPerSpoke, maxBin); b++) {
+      sum += data[b] / 255;
+      count++;
+    }
+    const target = count > 0 ? sum / count : 0;
+    // Smooth to reduce spikiness
+    polarLevelSmoothed[i] += (target - polarLevelSmoothed[i]) * 0.18;
+  }
 
   ctx.beginPath();
   for (let i = 0; i < numSpokes; i++) {
     const angle = (i / numSpokes) * Math.PI * 2 - Math.PI / 2;
-    const binStart = Math.floor(i * maxBin / numSpokes);
-    let sum = 0;
-    for (let b = binStart; b < Math.min(binStart + binsPerSpoke, maxBin); b++) {
-      sum += data[b] / 255;
-    }
-    const mag = sum / binsPerSpoke;
+    const mag = polarLevelSmoothed[i];
     const r = (0.15 + mag * 0.85) * maxR;
     const x = cx + Math.cos(angle) * r;
     const y = cy + Math.sin(angle) * r;
@@ -777,7 +807,7 @@ function drawPolarLevel(
   ctx.restore();
 }
 
-// ── Lissajous: X-Y plot of time-domain samples ──
+// ── Lissajous: X-Y plot with wider sample spacing for full quadrant coverage ──
 function drawLissajous(
   ctx: CanvasRenderingContext2D,
   tdData: Float32Array,
@@ -801,24 +831,44 @@ function drawLissajous(
   ctx.moveTo(cx, cy - scale); ctx.lineTo(cx, cy + scale);
   ctx.stroke();
 
+  // Diagonal lines for all quadrants
+  ctx.strokeStyle = hsla(0.04);
+  ctx.beginPath();
+  ctx.moveTo(cx - scale, cy - scale); ctx.lineTo(cx + scale, cy + scale);
+  ctx.moveTo(cx - scale, cy + scale); ctx.lineTo(cx + scale, cy - scale);
+  ctx.stroke();
+
   // Box outline
   ctx.strokeStyle = hsla(0.06);
   ctx.strokeRect(cx - scale, cy - scale, scale * 2, scale * 2);
 
   if (!hasAudio) { ctx.restore(); return; }
 
-  // Build L/R-like pairs from consecutive samples (mono → phase plot)
-  const step = 2;
-  for (let i = 0; i < tdData.length - step; i += step) {
-    const x = tdData[i];
-    const y = tdData[i + 1];
-    history.push({ x, y });
+  // Use a quarter-period offset for L/R-like separation (creates proper figure-8 / ellipse)
+  // This spreads the pattern across all four quadrants
+  const offset = Math.floor(tdData.length / 4);
+  const step = 4;
+  const smoothing = 0.15;
+  
+  for (let i = 0; i < tdData.length - offset; i += step) {
+    const rawX = tdData[i];
+    const rawY = tdData[i + offset];
+    // Smooth new points before adding to history
+    if (history.length > 0) {
+      const last = history[history.length - 1];
+      history.push({
+        x: last.x + (rawX - last.x) * smoothing,
+        y: last.y + (rawY - last.y) * smoothing,
+      });
+    } else {
+      history.push({ x: rawX, y: rawY });
+    }
   }
   while (history.length > maxHistory) history.shift();
 
   // Draw with fading trail
   for (let i = 1; i < history.length; i++) {
-    const alpha = (i / history.length) * 0.8;
+    const alpha = (i / history.length) * 0.6;
     const p = history[i];
     const prev = history[i - 1];
     ctx.beginPath();
