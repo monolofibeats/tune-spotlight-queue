@@ -12,7 +12,7 @@ import {
   Bell,
   Globe,
   Moon,
-  Sun,
+  
   Phone,
   Mic,
   Video,
@@ -59,8 +59,6 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
-  // Appearance
-  const [darkMode, setDarkMode] = useState(true);
 
   // Notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -108,7 +106,7 @@ export default function Settings() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setDarkMode(parsed.darkMode ?? true);
+        
         setEmailNotifications(parsed.emailNotifications ?? true);
         setPushNotifications(parsed.pushNotifications ?? false);
         setBidNotifications(parsed.bidNotifications ?? true);
@@ -121,15 +119,6 @@ export default function Settings() {
     }
   }, []);
 
-  // Apply dark mode changes immediately
-  useEffect(() => {
-    const root = document.documentElement;
-    if (darkMode) {
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-    }
-  }, [darkMode]);
 
   // Apply language changes immediately
   useEffect(() => {
@@ -188,7 +177,6 @@ export default function Settings() {
       }
 
       localStorage.setItem('upstar_settings', JSON.stringify({
-        darkMode,
         emailNotifications,
         pushNotifications,
         bidNotifications,
@@ -249,7 +237,6 @@ export default function Settings() {
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
-    { id: 'appearance', label: 'Appearance', icon: Moon },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'devices', label: 'Voice & Video', icon: Mic },
@@ -335,26 +322,6 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea id="bio" placeholder="Tell us about yourself..." value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Appearance Tab */}
-            <TabsContent value="appearance" className="space-y-6">
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">Appearance</h2>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {darkMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
-                    <div>
-                      <Label>{darkMode ? 'Dark Mode' : 'Light Mode'}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
-                      </p>
-                    </div>
-                  </div>
-                  <Switch checked={darkMode} onCheckedChange={setDarkMode} />
                 </div>
               </div>
             </TabsContent>
