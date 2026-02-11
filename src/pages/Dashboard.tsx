@@ -42,6 +42,7 @@ import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { AdminChatPanel } from '@/components/AdminChatPanel';
+import { AdminPayoutRequests } from '@/components/AdminPayoutRequests';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { BulkActionBar } from '@/components/submission/BulkActionBar';
 
@@ -567,6 +568,9 @@ const Dashboard = () => {
               <TabsTrigger value="streamers" className="rounded-lg px-6">
                 Support
               </TabsTrigger>
+              <TabsTrigger value="payouts" className="rounded-lg px-6">
+                Payouts
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="submissions" className="space-y-6">
@@ -881,6 +885,11 @@ const Dashboard = () => {
             {/* Streamers Tab */}
             <TabsContent value="streamers">
               <AdminStreamerManager />
+            </TabsContent>
+
+            {/* Payouts Tab */}
+            <TabsContent value="payouts">
+              <AdminPayoutRequests />
             </TabsContent>
           </Tabs>
         </div>

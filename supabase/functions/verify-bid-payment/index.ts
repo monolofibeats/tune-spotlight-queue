@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { recordEarning } from "../_shared/record-earning.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,7 +54,6 @@ serve(async (req) => {
 
     logStep("Processing bid", { submissionId, bidAmountCents, email });
 
-    // Check if bid record exists
     const { data: existingBid } = await supabaseAdmin
       .from('submission_bids')
       .select('*')
@@ -61,7 +61,6 @@ serve(async (req) => {
       .single();
 
     if (existingBid) {
-      // Update existing bid
       const newTotal = existingBid.total_paid_cents + bidAmountCents;
       await supabaseAdmin
         .from('submission_bids')
@@ -74,7 +73,6 @@ serve(async (req) => {
       
       logStep("Bid updated", { newTotal });
     } else {
-      // Create new bid record
       await supabaseAdmin
         .from('submission_bids')
         .insert({
@@ -88,15 +86,30 @@ serve(async (req) => {
       logStep("Bid created");
     }
 
-    // Update submission to mark as priority (convert cents to euros for boost_amount)
     const newTotalCents = (existingBid?.total_paid_cents || 0) + bidAmountCents;
     await supabaseAdmin
       .from('submissions')
       .update({
         is_priority: true,
-        boost_amount: newTotalCents / 100, // Store in euros, not cents
+        boost_amount: newTotalCents / 100,
       })
       .eq('id', submissionId);
+
+    // Record earnings for the streamer if streamer_id in metadata
+    if (metadata.streamer_id) {
+      try {
+        await recordEarning({
+          stripeSessionId: sessionId,
+          streamerId: metadata.streamer_id,
+          submissionId: submissionId,
+          paymentType: "bid",
+          customerEmail: email,
+        });
+        logStep("Earnings recorded for streamer");
+      } catch (e) {
+        logStep("Warning: Failed to record earnings", { error: String(e) });
+      }
+    }
 
     // Get bid increment config
     const { data: bidConfig } = await supabaseAdmin
@@ -105,21 +118,18 @@ serve(async (req) => {
       .eq('config_type', 'bid_increment')
       .single();
 
-    const incrementPercent = bidConfig?.min_amount_cents || 10; // Default 10%
+    const incrementPercent = bidConfig?.min_amount_cents || 10;
 
-    // Find other submissions that might be affected and create notifications
     const { data: competingBids } = await supabaseAdmin
       .from('submission_bids')
       .select('*, submissions!inner(status, song_title)')
       .neq('submission_id', submissionId)
       .order('total_paid_cents', { ascending: false });
 
-    // Notify users who were outbid (those with lower total)
     const currentTotal = (existingBid?.total_paid_cents || 0) + bidAmountCents;
     
     for (const bid of competingBids || []) {
       if (bid.total_paid_cents < currentTotal && bid.submissions?.status === 'pending') {
-        // Calculate suggested new bid (current leader + increment %)
         const suggestedBid = Math.ceil(currentTotal * (1 + incrementPercent / 100));
         
         await supabaseAdmin
@@ -127,7 +137,7 @@ serve(async (req) => {
           .insert({
             submission_id: bid.submission_id,
             email: bid.email,
-            user_id: bid.user_id || null, // Include user_id for proper RLS access
+            user_id: bid.user_id || null,
             notification_type: 'outbid',
             offer_amount_cents: suggestedBid,
           });
@@ -136,7 +146,6 @@ serve(async (req) => {
       }
     }
 
-    // Trigger email notifications for outbid users
     try {
       const emailResponse = await fetch(
         `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-bid-notification`,
@@ -151,7 +160,6 @@ serve(async (req) => {
       );
       logStep("Email notifications triggered", { status: emailResponse.status });
     } catch (emailError) {
-      // Don't fail the bid if emails fail
       logStep("Email notification trigger failed", { error: String(emailError) });
     }
 

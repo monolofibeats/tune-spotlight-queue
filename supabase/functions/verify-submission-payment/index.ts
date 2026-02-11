@@ -3,13 +3,13 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { autoCreateUserFromPayment } from "../_shared/auto-create-user.ts";
+import { recordEarning } from "../_shared/record-earning.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Input validation schema
 const requestSchema = z.object({
   sessionId: z.string().min(1).max(500),
 });
@@ -32,7 +32,6 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    // Parse and validate input
     const rawBody = await req.json();
     const validationResult = requestSchema.safeParse(rawBody);
     
@@ -61,26 +60,21 @@ serve(async (req) => {
       });
     }
 
-    // Verify this is a submission payment
     if (session.metadata?.type !== "submission") {
       throw new Error("Invalid payment type");
     }
 
-    // Get email from Stripe session (customer_details has the email from checkout)
     const stripeEmail = session.customer_details?.email || session.metadata?.email || null;
     logStep("Stripe email", { stripeEmail });
 
-    // Auto-create user account from Stripe email
     const origin = req.headers.get("origin") || "https://tune-spotlight-queue.lovable.app";
     const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
     );
 
-    // Use auto-created user ID if no user_id in metadata
     const finalUserId = session.metadata?.user_id || autoUserId || null;
 
-    // Create submission
     const { data: submission, error: insertError } = await supabaseClient
       .from('submissions')
       .insert({
@@ -115,6 +109,23 @@ serve(async (req) => {
     }
 
     logStep("Submission created", { submissionId: submission.id, accountCreated });
+
+    // Record earnings for the streamer
+    if (session.metadata.streamer_id) {
+      try {
+        await recordEarning({
+          stripeSessionId: sessionId,
+          streamerId: session.metadata.streamer_id,
+          submissionId: submission.id,
+          paymentType: "submission",
+          customerEmail: stripeEmail,
+        });
+        logStep("Earnings recorded for streamer");
+      } catch (e) {
+        logStep("Warning: Failed to record earnings", { error: String(e) });
+        // Don't fail the submission if earnings recording fails
+      }
+    }
 
     const accountMessage = accountCreated
       ? " We've sent you a login link to track your submission!"

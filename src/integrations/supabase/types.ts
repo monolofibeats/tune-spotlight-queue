@@ -153,6 +153,59 @@ export type Database = {
           },
         ]
       }
+      payout_requests: {
+        Row: {
+          admin_notes: string | null
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          payout_details: Json
+          payout_method: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          streamer_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          payout_details?: Json
+          payout_method: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          streamer_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          payout_details?: Json
+          payout_method?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          streamer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_requests_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_stream_spots: {
         Row: {
           created_at: string
@@ -717,6 +770,76 @@ export type Database = {
             columns: ["streamer_id"]
             isOneToOne: false
             referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streamer_earnings: {
+        Row: {
+          created_at: string
+          currency: string
+          customer_email: string | null
+          gross_amount_cents: number
+          id: string
+          net_amount_cents: number
+          payment_type: string
+          platform_fee_cents: number
+          streamer_id: string
+          streamer_share_cents: number
+          stripe_fee_cents: number
+          stripe_session_id: string
+          submission_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          gross_amount_cents: number
+          id?: string
+          net_amount_cents: number
+          payment_type?: string
+          platform_fee_cents: number
+          streamer_id: string
+          streamer_share_cents: number
+          stripe_fee_cents?: number
+          stripe_session_id: string
+          submission_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          gross_amount_cents?: number
+          id?: string
+          net_amount_cents?: number
+          payment_type?: string
+          platform_fee_cents?: number
+          streamer_id?: string
+          streamer_share_cents?: number
+          stripe_fee_cents?: number
+          stripe_session_id?: string
+          submission_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_earnings_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "streamer_earnings_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "streamer_earnings_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
             referencedColumns: ["id"]
           },
         ]

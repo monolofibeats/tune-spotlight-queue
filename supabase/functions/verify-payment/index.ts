@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { autoCreateUserFromPayment } from "../_shared/auto-create-user.ts";
+import { recordEarning } from "../_shared/record-earning.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,15 +52,12 @@ serve(async (req) => {
       });
     }
 
-    // Extract metadata
     const metadata = session.metadata || {};
     const amountPaid = parseFloat(metadata.amount_paid || "0");
     const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 
-    // Get email from Stripe checkout
     const stripeEmail = session.customer_details?.email || metadata.email || null;
 
-    // Auto-create user account
     const origin = req.headers.get("origin") || "https://tune-spotlight-queue.lovable.app";
     const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
       stripeEmail,
@@ -70,7 +68,6 @@ serve(async (req) => {
 
     logStep("Creating submission", { metadata, amountPaid, accountCreated });
 
-    // Create submission in database using service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { persistSession: false }
     });
@@ -100,6 +97,22 @@ serve(async (req) => {
     }
 
     logStep("Submission created", { submissionId: submission.id });
+
+    // Record earnings for the streamer
+    if (metadata.streamer_id) {
+      try {
+        await recordEarning({
+          stripeSessionId: sessionId,
+          streamerId: metadata.streamer_id,
+          submissionId: submission.id,
+          paymentType: "priority",
+          customerEmail: stripeEmail,
+        });
+        logStep("Earnings recorded for streamer");
+      } catch (e) {
+        logStep("Warning: Failed to record earnings", { error: String(e) });
+      }
+    }
 
     const accountMessage = accountCreated
       ? " We've sent you a login link to track your submission!"

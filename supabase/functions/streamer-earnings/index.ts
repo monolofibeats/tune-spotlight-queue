@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,71 +32,53 @@ serve(async (req) => {
 
     if (streamerError || !streamer) throw new Error("Streamer profile not found");
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2025-08-27.basil",
-    });
+    // Fetch earnings from DB (RLS ensures only own earnings)
+    const { data: earnings, error: earningsError } = await supabaseClient
+      .from("streamer_earnings")
+      .select("*")
+      .eq("streamer_id", streamer.id)
+      .order("created_at", { ascending: false });
 
-    // Fetch all successful checkout sessions with this streamer's metadata
-    const platformCut = 0.20; // 20% platform fee
-    
-    // Get all payment intents and filter by streamer metadata
-    // We search for charges with metadata containing the streamer_id or streamer_slug
-    const sessions = await stripe.checkout.sessions.list({
-      limit: 100,
-      status: "complete",
-    });
+    if (earningsError) throw earningsError;
 
-    const transactions: Array<{
-      id: string;
-      amount_cents: number;
-      streamer_share_cents: number;
-      platform_fee_cents: number;
-      currency: string;
-      created_at: string;
-      description: string;
-      customer_email: string | null;
-      type: string;
-    }> = [];
+    // Fetch completed payouts
+    const { data: payouts } = await supabaseClient
+      .from("payout_requests")
+      .select("amount_cents, status")
+      .eq("streamer_id", streamer.id)
+      .eq("status", "completed");
 
+    const totalPayoutsCents = (payouts || []).reduce((sum, p) => sum + p.amount_cents, 0);
+
+    // Calculate totals
     let totalEarningsCents = 0;
     let totalPlatformFeeCents = 0;
+    let totalStripeFeesCents = 0;
     const monthlyEarnings: Record<string, number> = {};
 
-    for (const session of sessions.data) {
-      // Check if this session belongs to this streamer
-      const meta = session.metadata || {};
-      if (meta.streamer_id !== streamer.id && meta.streamer_slug !== streamer.slug) {
-        continue;
-      }
+    const transactions = (earnings || []).map((e) => {
+      totalEarningsCents += e.streamer_share_cents;
+      totalPlatformFeeCents += e.platform_fee_cents;
+      totalStripeFeesCents += e.stripe_fee_cents;
 
-      const amountTotal = session.amount_total || 0;
-      const streamerShare = Math.round(amountTotal * (1 - platformCut));
-      const platformFee = amountTotal - streamerShare;
-
-      totalEarningsCents += streamerShare;
-      totalPlatformFeeCents += platformFee;
-
-      const createdDate = new Date(session.created * 1000);
+      const createdDate = new Date(e.created_at);
       const monthKey = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, "0")}`;
-      monthlyEarnings[monthKey] = (monthlyEarnings[monthKey] || 0) + streamerShare;
+      monthlyEarnings[monthKey] = (monthlyEarnings[monthKey] || 0) + e.streamer_share_cents;
 
-      transactions.push({
-        id: session.id,
-        amount_cents: amountTotal,
-        streamer_share_cents: streamerShare,
-        platform_fee_cents: platformFee,
-        currency: session.currency || "eur",
-        created_at: createdDate.toISOString(),
-        description: meta.type || "submission",
-        customer_email: session.customer_details?.email || null,
-        type: meta.type || "submission",
-      });
-    }
+      return {
+        id: e.id,
+        amount_cents: e.gross_amount_cents,
+        stripe_fee_cents: e.stripe_fee_cents,
+        streamer_share_cents: e.streamer_share_cents,
+        platform_fee_cents: e.platform_fee_cents,
+        currency: e.currency,
+        created_at: e.created_at,
+        description: e.payment_type,
+        customer_email: e.customer_email,
+        type: e.payment_type,
+      };
+    });
 
-    // Sort transactions by date descending
-    transactions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    // Build chart data from monthly earnings
     const chartData = Object.entries(monthlyEarnings)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([month, amount]) => ({
@@ -105,12 +86,15 @@ serve(async (req) => {
         earnings: amount / 100,
       }));
 
+    const currentBalanceCents = totalEarningsCents - totalPayoutsCents;
+
     return new Response(
       JSON.stringify({
         total_earnings_cents: totalEarningsCents,
         total_platform_fee_cents: totalPlatformFeeCents,
-        total_payouts_cents: 0, // Will be tracked separately when payouts are implemented
-        current_balance_cents: totalEarningsCents, // For now, balance = total earnings
+        total_stripe_fees_cents: totalStripeFeesCents,
+        total_payouts_cents: totalPayoutsCents,
+        current_balance_cents: currentBalanceCents,
         transactions,
         chart_data: chartData,
         currency: "eur",
