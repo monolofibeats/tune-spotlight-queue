@@ -148,6 +148,8 @@ const StreamerDashboard = () => {
         variant: "destructive",
       });
     } else {
+      // Optimistically update local state
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
       toast({
         title: "Status updated",
         description: `Submission marked as ${newStatus}`,
@@ -171,6 +173,7 @@ const StreamerDashboard = () => {
       if (error) {
         toast({ title: "Error", description: "Failed to permanently delete", variant: "destructive" });
       } else {
+        setSubmissions(prev => prev.filter(s => s.id !== id));
         toast({ title: "Permanently deleted", description: "Submission removed forever" });
       }
     } else {
@@ -181,6 +184,7 @@ const StreamerDashboard = () => {
       if (error) {
         toast({ title: "Error", description: "Failed to delete submission", variant: "destructive" });
       } else {
+        setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status: 'deleted' } : s));
         toast({ title: "Moved to trash", description: "Submission will be permanently deleted in 7 days" });
         if (wasPlaying) {
           advanceToNext(id);
@@ -198,6 +202,7 @@ const StreamerDashboard = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to restore", variant: "destructive" });
     } else {
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status: 'pending' } : s));
       toast({ title: "Restored", description: "Submission moved back to pending" });
     }
   };
@@ -298,6 +303,7 @@ const StreamerDashboard = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to update submissions", variant: "destructive" });
     } else {
+      setSubmissions(prev => prev.map(s => ids.includes(s.id) ? { ...s, status } : s));
       toast({ title: "Updated", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to ${status}` });
       setSelectedIds(new Set());
     }
@@ -310,6 +316,7 @@ const StreamerDashboard = () => {
       if (error) {
         toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
       } else {
+        setSubmissions(prev => prev.filter(s => !ids.includes(s.id)));
         toast({ title: "Deleted", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} permanently deleted` });
       }
     } else {
@@ -317,6 +324,7 @@ const StreamerDashboard = () => {
       if (error) {
         toast({ title: "Error", description: "Failed to move to trash", variant: "destructive" });
       } else {
+        setSubmissions(prev => prev.map(s => ids.includes(s.id) ? { ...s, status: 'deleted' } : s));
         toast({ title: "Moved to trash", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} moved to trash` });
       }
     }
@@ -329,6 +337,7 @@ const StreamerDashboard = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to restore", variant: "destructive" });
     } else {
+      setSubmissions(prev => prev.map(s => ids.includes(s.id) ? { ...s, status: 'pending' } : s));
       toast({ title: "Restored", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} restored` });
     }
     setSelectedIds(new Set());
