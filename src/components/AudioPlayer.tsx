@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, forwardRef, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -243,6 +243,7 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(0.8);
     const [isMuted, setIsMuted] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
       const audio = audioRef.current;
@@ -275,10 +276,10 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         onEnded?.();
       };
       const handleError = () => {
-        // Keep UI stable if source fails.
         setIsPlaying(false);
         setDuration(0);
         setCurrentTime(0);
+        setHasError(true);
       };
 
       audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -292,6 +293,8 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       setIsPlaying(false);
       setCurrentTime(0);
       setDuration(0);
+      setHasError(false);
+      pendingSeekRef.current = null;
       pendingSeekRef.current = null;
 
       audio.src = src ?? '';
@@ -372,6 +375,13 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         {/* Always render the audio element so refs + listeners work even when src arrives later */}
         <audio ref={audioRef} preload="metadata" />
         
+        {hasError && src && (
+          <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <span>Audio file could not be loaded – it may have been removed or is unavailable.</span>
+          </div>
+        )}
+        
         {/* Progress bar and time */}
         <div className="flex items-center gap-3">
           {/* Play/Pause button */}
@@ -383,10 +393,12 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
               e.stopPropagation();
               togglePlayback();
             }}
-            disabled={isLoading || !src}
+            disabled={isLoading || !src || hasError}
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
+            ) : hasError ? (
+              <AlertCircle className="w-5 h-5 text-destructive" />
             ) : isPlaying ? (
               <Pause className="w-5 h-5" />
             ) : (
