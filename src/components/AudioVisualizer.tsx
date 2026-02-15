@@ -762,16 +762,24 @@ function drawPolarLevel(
 
   if (!hasAudio) { ctx.restore(); return; }
 
-  // Draw frequency bars as spokes, skip DC bins (first ~3 bins)
+  // Draw frequency bars as spokes using logarithmic bin mapping for even distribution
   const numSpokes = polarLevelSmoothed.length;
   const dcSkip = 3; // skip first 3 bins (DC / sub-bass rumble)
   const usableBins = maxBin - dcSkip;
-  const binsPerSpoke = Math.max(1, Math.floor(usableBins / numSpokes));
+
+  // Logarithmic mapping: each spoke covers an equal ratio of the frequency range
+  const logMin = Math.log(dcSkip + 1);
+  const logMax = Math.log(maxBin);
 
   for (let i = 0; i < numSpokes; i++) {
-    const binStart = dcSkip + Math.floor(i * usableBins / numSpokes);
+    // Map spoke index to logarithmic bin range
+    const logStart = logMin + (i / numSpokes) * (logMax - logMin);
+    const logEnd = logMin + ((i + 1) / numSpokes) * (logMax - logMin);
+    const binStart = Math.max(dcSkip, Math.floor(Math.exp(logStart)));
+    const binEnd = Math.min(maxBin, Math.ceil(Math.exp(logEnd)));
+
     let sum = 0, count = 0;
-    for (let b = binStart; b < Math.min(binStart + binsPerSpoke, maxBin); b++) {
+    for (let b = binStart; b < binEnd; b++) {
       sum += data[b] / 255;
       count++;
     }
