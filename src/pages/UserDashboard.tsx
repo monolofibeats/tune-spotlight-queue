@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SubmissionBidPanel } from '@/components/SubmissionBidPanel';
+import { StreamerSearch } from '@/components/StreamerSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -144,9 +145,10 @@ const UserDashboard = () => {
               <LayoutDashboard className="w-6 h-6 text-primary" />
               <h1 className="text-2xl font-display font-bold">My Dashboard</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-4">
               Track your submissions and boost your songs
             </p>
+            <StreamerSearch />
           </motion.div>
 
           {/* Stats */}
