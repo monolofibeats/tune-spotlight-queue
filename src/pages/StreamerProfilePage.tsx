@@ -77,7 +77,7 @@ function StreamerProfilePageContent() {
                   <Button asChild variant="hero" className="gap-2">
                      <a href={`/${streamer.slug}/submit`}>Submit a song</a>
                   </Button>
-                  <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} />
+                  <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} streamerSlug={streamer.slug} />
 
                   {socials.length > 0 && (
                     <div className="flex flex-wrap gap-2">

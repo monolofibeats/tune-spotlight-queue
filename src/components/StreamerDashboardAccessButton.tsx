@@ -8,9 +8,10 @@ import { useAuth } from '@/hooks/useAuth';
 interface Props {
   streamerId: string;
   streamerUserId: string;
+  streamerSlug: string;
 }
 
-export function StreamerDashboardAccessButton({ streamerId, streamerUserId }: Props) {
+export function StreamerDashboardAccessButton({ streamerId, streamerUserId, streamerSlug }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
@@ -47,7 +48,7 @@ export function StreamerDashboardAccessButton({ streamerId, streamerUserId }: Pr
       variant="secondary"
       size="sm"
       className="gap-2"
-      onClick={() => navigate('/streamer/dashboard')}
+      onClick={() => navigate(`/streamer/${streamerSlug}/dashboard`)}
     >
       <LayoutDashboard className="w-4 h-4" />
       See Dashboard

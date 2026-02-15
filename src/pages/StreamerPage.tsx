@@ -116,7 +116,7 @@ function StreamerPageContent() {
             </p>
 
             <div className="mt-4">
-              <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} />
+              <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} streamerSlug={streamer.slug} />
             </div>
 
             {streamer.welcome_message && (
