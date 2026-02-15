@@ -4,3 +4,4 @@ export { BannerEditor } from './BannerEditor';
 export { PricingSettings } from './PricingSettings';
 export { LanguageSettings } from './LanguageSettings';
 export { PresetManager } from './PresetManager';
+export { TeamManager } from './TeamManager';

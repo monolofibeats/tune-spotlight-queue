@@ -950,6 +950,56 @@ export type Database = {
           },
         ]
       }
+      streamer_team_members: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invitation_status: string
+          invited_at: string
+          invited_by: string
+          role: Database["public"]["Enums"]["team_role"]
+          streamer_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invitation_status?: string
+          invited_at?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["team_role"]
+          streamer_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invitation_status?: string
+          invited_at?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          streamer_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_team_members_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streamers: {
         Row: {
           accent_color: string | null
@@ -1284,6 +1334,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user" | "streamer"
       streamer_status: "pending" | "approved" | "rejected" | "suspended"
+      team_role: "viewer" | "editor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1413,6 +1464,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user", "streamer"],
       streamer_status: ["pending", "approved", "rejected", "suspended"],
+      team_role: ["viewer", "editor", "admin"],
     },
   },
 } as const

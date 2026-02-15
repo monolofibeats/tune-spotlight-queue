@@ -12,7 +12,8 @@ import {
   DollarSign,
   Globe,
   Flag,
-  Eye
+  Eye,
+  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,7 @@ import {
   PricingSettings,
   LanguageSettings,
   PresetManager,
+  TeamManager,
 } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
@@ -270,6 +272,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'social', label: 'Social', icon: LinkIcon },
+    { id: 'team', label: 'Team', icon: Users },
   ];
 
   return (
@@ -575,6 +578,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Team Tab */}
+        <TabsContent value="team" className="space-y-6">
+          <TeamManager streamerId={streamer.id} />
         </TabsContent>
       </Tabs>
     </motion.div>
