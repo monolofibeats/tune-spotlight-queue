@@ -10,6 +10,7 @@ import { SubmissionTracker } from '@/components/SubmissionTracker';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
+import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
@@ -113,6 +114,10 @@ function StreamerPageContent() {
             <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
               {streamer.hero_subtitle || t('hero.subtitle')}
             </p>
+
+            <div className="mt-4">
+              <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} />
+            </div>
 
             {streamer.welcome_message && (
               <p className="mt-4 text-sm text-muted-foreground/80 italic max-w-lg mx-auto">

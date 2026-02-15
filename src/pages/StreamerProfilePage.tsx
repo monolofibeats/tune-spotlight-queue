@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { StreamerProvider, useStreamer } from "@/hooks/useStreamer";
 import { StreamerThemeProvider } from "@/components/StreamerThemeProvider";
+import { StreamerDashboardAccessButton } from "@/components/StreamerDashboardAccessButton";
 import { useLanguage } from "@/hooks/useLanguage";
 
 function StreamerProfilePageContent() {
@@ -74,8 +75,9 @@ function StreamerProfilePageContent() {
 
                 <div className="mt-5 flex flex-wrap items-center gap-2">
                   <Button asChild variant="hero" className="gap-2">
-                    <a href={`/${streamer.slug}/submit`}>Submit a song</a>
+                     <a href={`/${streamer.slug}/submit`}>Submit a song</a>
                   </Button>
+                  <StreamerDashboardAccessButton streamerId={streamer.id} streamerUserId={streamer.user_id} />
 
                   {socials.length > 0 && (
                     <div className="flex flex-wrap gap-2">
