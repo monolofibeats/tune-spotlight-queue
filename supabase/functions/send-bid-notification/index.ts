@@ -108,7 +108,7 @@ serve(async (req) => {
 
         if (subject && htmlContent) {
           const emailResponse = await resend.emails.send({
-            from: "UpStar <noreply@resend.dev>",
+            from: "UpStar <noreply@upstar.gg>",
             to: [notification.email],
             subject,
             html: htmlContent,
