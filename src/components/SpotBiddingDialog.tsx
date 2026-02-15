@@ -255,7 +255,7 @@ export function SpotBiddingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
@@ -286,7 +286,7 @@ export function SpotBiddingDialog({
                   onClick={() => handleSelectSpot(spot.position)}
                   disabled={isProcessing}
                   className={`
-                    w-full p-4 rounded-xl border transition-all text-left
+                    w-full p-3 sm:p-4 rounded-xl border transition-all text-left overflow-hidden
                     ${selectedSpot === spot.position 
                       ? 'border-primary bg-primary/10' 
                       : 'border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card'
@@ -294,38 +294,38 @@ export function SpotBiddingDialog({
                     ${isProcessing && selectedSpot !== spot.position ? 'opacity-50' : ''}
                   `}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full bg-secondary flex items-center justify-center ${colorClass}`}>
-                      <Icon className="w-5 h-5" />
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${colorClass}`}>
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">Spot #{spot.position}</span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-semibold text-sm sm:text-base">#{spot.position}</span>
                         {isAvailable && (
-                          <Badge variant="secondary" className="text-xs">Available</Badge>
+                          <Badge variant="secondary" className="text-[10px] sm:text-xs">Available</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          Currently: {spot.songTitle} by {spot.artistName}
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                          {spot.songTitle} – {spot.artistName}
                         </p>
                       )}
                       {!isAvailable && (
-                        <p className="text-xs text-muted-foreground">
-                          Current bid: €{spot.currentPrice.toFixed(2)}
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">
+                          Bid: €{spot.currentPrice.toFixed(2)}
                         </p>
                       )}
                     </div>
 
                     <div className="text-right shrink-0">
-                      <p className="text-lg font-bold text-primary">
+                      <p className="text-base sm:text-lg font-bold text-primary">
                         €{spot.yourPrice.toFixed(2)}
                       </p>
                       {selectedSpot === spot.position && isProcessing ? (
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
                       ) : (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">
                           {isAvailable ? 'to claim' : `+${incrementPercent}%`}
                         </p>
                       )}
