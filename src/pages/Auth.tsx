@@ -23,6 +23,9 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetLoading, setIsResetLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -213,6 +216,41 @@ export default function Auth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!resetEmail.trim()) {
+      toast({
+        title: t('common.error'),
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResetLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-welcome-email', {
+        body: { email: resetEmail.trim(), type: 'password-reset' },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Login link sent! ✉️",
+        description: "Check your inbox for a link to log in.",
+      });
+      setShowForgotPassword(false);
+      setResetEmail('');
+    } catch (error) {
+      toast({
+        title: "Failed to send link",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background bg-mesh noise flex items-center justify-center px-4">
       <motion.div
@@ -318,109 +356,171 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="admin" className="space-y-4">
-              <form onSubmit={isSignUp ? handleSignUp : handleAdminLogin} className="space-y-4">
-                <div>
-                  <label className="text-sm text-muted-foreground mb-2 block">
-                    {t('auth.email')}
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
+              {!showForgotPassword ? (
+                <>
+                  <form onSubmit={isSignUp ? handleSignUp : handleAdminLogin} className="space-y-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">
+                        {t('auth.email')}
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                          type="email"
+                          placeholder="your@email.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="text-sm text-muted-foreground mb-2 block">
-                    {t('auth.password')}
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                    />
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">
+                        {t('auth.password')}
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pl-10 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isSignUp && (
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-2 block">
+                          {t('auth.confirmPassword')}
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      size="lg"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          {isSignUp ? t('auth.creatingAccount') : t('auth.signingIn')}
+                        </>
+                      ) : isSignUp ? (
+                        <>
+                          <UserPlus className="w-5 h-5" />
+                          {t('auth.createAccount')}
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-5 h-5" />
+                          {t('auth.signIn')}
+                        </>
+                      )}
+                    </Button>
+                  </form>
+
+                  {!isSignUp && (
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        setIsSignUp(!isSignUp);
+                        setPassword('');
+                        setConfirmPassword('');
+                      }}
+                      className="text-sm text-primary hover:underline"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
                     </button>
                   </div>
-                </div>
 
-                {isSignUp && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    {isSignUp 
+                      ? t('auth.createAccountNote')
+                      : t('auth.emailLoginNote')}
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Enter your email and we'll send you a link to log in.
+                  </p>
                   <div>
-                    <label className="text-sm text-muted-foreground mb-2 block">
-                      {t('auth.confirmPassword')}
-                    </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        type="email"
+                        placeholder="your@email.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
                         className="pl-10"
                       />
                     </div>
                   </div>
-                )}
-
-                <Button
-                  type="submit"
-                  variant="hero"
-                  size="lg"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      {isSignUp ? t('auth.creatingAccount') : t('auth.signingIn')}
-                    </>
-                  ) : isSignUp ? (
-                    <>
-                      <UserPlus className="w-5 h-5" />
-                      {t('auth.createAccount')}
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-5 h-5" />
-                      {t('auth.signIn')}
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setPassword('');
-                    setConfirmPassword('');
-                  }}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
-                </button>
-              </div>
-
-              <p className="text-xs text-muted-foreground text-center">
-                {isSignUp 
-                  ? t('auth.createAccountNote')
-                  : t('auth.emailLoginNote')}
-              </p>
+                  <Button
+                    onClick={handleForgotPassword}
+                    variant="hero"
+                    size="lg"
+                    className="w-full"
+                    disabled={isResetLoading}
+                  >
+                    {isResetLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-5 h-5" />
+                        Send login link
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Back to login
+                    </button>
+                  </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 
