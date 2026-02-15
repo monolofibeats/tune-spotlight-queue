@@ -145,7 +145,7 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
@@ -160,14 +160,27 @@ export default function Auth() {
         throw error;
       }
 
-      toast({
-        title: t('auth.accountCreated'),
-        description: t('auth.checkEmail'),
-      });
+      // Send branded welcome email via Resend (fire-and-forget)
+      supabase.functions.invoke('send-welcome-email', {
+        body: { email: email.trim(), type: 'welcome' },
+      }).catch(() => {});
 
-      setIsSignUp(false);
-      setPassword('');
-      setConfirmPassword('');
+      // With auto-confirm, user is immediately signed in
+      if (data.session) {
+        toast({
+          title: t('auth.accountCreated'),
+          description: t('auth.welcomeBack'),
+        });
+        // onAuthStateChange will handle redirect
+      } else {
+        toast({
+          title: t('auth.accountCreated'),
+          description: t('auth.checkEmail'),
+        });
+        setIsSignUp(false);
+        setPassword('');
+        setConfirmPassword('');
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
       toast({
