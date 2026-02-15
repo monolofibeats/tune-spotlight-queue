@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -44,6 +45,7 @@ interface Submission {
 }
 
 const StreamerDashboard = () => {
+  const { slug } = useParams<{ slug: string }>();
   const { user, isLoading: authLoading } = useAuth();
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -71,11 +73,17 @@ const StreamerDashboard = () => {
     if (authLoading || !user) return;
 
     const fetchStreamer = async () => {
-      const { data, error } = await supabase
-        .from('streamers')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      let query = supabase.from('streamers').select('*');
+      
+      if (slug) {
+        // Load by slug (team member or owner accessing via /streamer/:slug/dashboard)
+        query = query.eq('slug', slug);
+      } else {
+        // Load by user_id (owner accessing via /streamer/dashboard)
+        query = query.eq('user_id', user.id);
+      }
+      
+      const { data, error } = await query.single();
 
       if (error) {
         console.error('Error fetching streamer:', error);
@@ -125,7 +133,7 @@ const StreamerDashboard = () => {
     };
 
     init().then(() => setIsLoading(false));
-  }, [user, authLoading]);
+  }, [user, authLoading, slug]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     const { error } = await supabase
