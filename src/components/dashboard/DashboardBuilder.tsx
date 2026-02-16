@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Pencil,
   X,
-  Save,
   Loader2,
   Plus,
   LayoutTemplate,
@@ -14,6 +13,8 @@ import {
   ExternalLink,
   PanelTopClose,
   Type,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,14 +22,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { WIDGET_REGISTRY, type WidgetDefinition } from './WidgetRegistry';
+import { WIDGET_REGISTRY, type WidgetDefinition, type WidgetConfigs, getDefaultWidgetConfig } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
 import type { Layout } from 'react-grid-layout';
 
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
+}
+
+export interface PopOutOptions {
+  /** Widget IDs that should remain visible on the main dashboard even when popped out */
+  showWhenPoppedOut: Set<string>;
 }
 
 interface DashboardBuilderProps {
@@ -38,8 +46,13 @@ interface DashboardBuilderProps {
   onLayoutChange: (layout: Layout[]) => void;
   onSave: (layout: Layout[]) => Promise<void>;
   onPopOut?: (widgetId: string) => void;
+  poppedOutWidgets?: Set<string>;
   viewOptions: DashboardViewOptions;
   onViewOptionsChange: (options: DashboardViewOptions) => void;
+  widgetConfigs: WidgetConfigs;
+  onWidgetConfigsChange: (configs: WidgetConfigs) => void;
+  popOutOptions: PopOutOptions;
+  onPopOutOptionsChange: (options: PopOutOptions) => void;
 }
 
 export function DashboardBuilder({
@@ -49,12 +62,19 @@ export function DashboardBuilder({
   onLayoutChange,
   onSave,
   onPopOut,
+  poppedOutWidgets = new Set(),
   viewOptions,
   onViewOptionsChange,
+  widgetConfigs,
+  onWidgetConfigsChange,
+  popOutOptions,
+  onPopOutOptionsChange,
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
   const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
+  const [configsBeforeEdit, setConfigsBeforeEdit] = useState<WidgetConfigs>({});
+  const [popOutOptionsBeforeEdit, setPopOutOptionsBeforeEdit] = useState<PopOutOptions>({ showWhenPoppedOut: new Set() });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
 
   const activeWidgetIds = currentLayout.map(l => l.i);
@@ -62,12 +82,16 @@ export function DashboardBuilder({
   const handleStartEditing = () => {
     setLayoutBeforeEdit([...currentLayout]);
     setViewOptionsBeforeEdit({ ...viewOptions });
+    setConfigsBeforeEdit({ ...widgetConfigs });
+    setPopOutOptionsBeforeEdit({ showWhenPoppedOut: new Set(popOutOptions.showWhenPoppedOut) });
     onToggleEditing(true);
   };
 
   const handleCancel = () => {
     onLayoutChange(layoutBeforeEdit);
     onViewOptionsChange(viewOptionsBeforeEdit);
+    onWidgetConfigsChange(configsBeforeEdit);
+    onPopOutOptionsChange(popOutOptionsBeforeEdit);
     onToggleEditing(false);
     setExpandedWidget(null);
   };
@@ -86,7 +110,11 @@ export function DashboardBuilder({
       ...(def.maxSize ? { maxW: def.maxSize.w, maxH: def.maxSize.h } : {}),
     };
     onLayoutChange([...currentLayout, newItem]);
-  }, [currentLayout, activeWidgetIds, onLayoutChange]);
+    // Initialize default config for the widget
+    if (def.configOptions && !widgetConfigs[def.id]) {
+      onWidgetConfigsChange({ ...widgetConfigs, [def.id]: getDefaultWidgetConfig(def.id) });
+    }
+  }, [currentLayout, activeWidgetIds, onLayoutChange, widgetConfigs, onWidgetConfigsChange]);
 
   const removeWidget = useCallback((id: string) => {
     onLayoutChange(currentLayout.filter(l => l.i !== id));
@@ -101,6 +129,20 @@ export function DashboardBuilder({
     const clamped = Math.max(min, Math.min(max, value));
     onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: clamped } : l));
   }, [currentLayout, onLayoutChange]);
+
+  const toggleWidgetConfig = useCallback((widgetId: string, key: string, value: boolean) => {
+    const current = widgetConfigs[widgetId] || getDefaultWidgetConfig(widgetId);
+    onWidgetConfigsChange({
+      ...widgetConfigs,
+      [widgetId]: { ...current, [key]: value },
+    });
+  }, [widgetConfigs, onWidgetConfigsChange]);
+
+  const toggleShowWhenPoppedOut = useCallback((widgetId: string, value: boolean) => {
+    const next = new Set(popOutOptions.showWhenPoppedOut);
+    if (value) next.add(widgetId); else next.delete(widgetId);
+    onPopOutOptionsChange({ ...popOutOptions, showWhenPoppedOut: next });
+  }, [popOutOptions, onPopOutOptionsChange]);
 
   const applyTemplate = useCallback((template: DashboardTemplate) => {
     onLayoutChange([...template.layout]);
@@ -192,6 +234,8 @@ export function DashboardBuilder({
                       const isActive = activeWidgetIds.includes(widget.id);
                       const isExpanded = expandedWidget === widget.id && isActive;
                       const layoutItem = currentLayout.find(l => l.i === widget.id);
+                      const isPoppedOut = poppedOutWidgets.has(widget.id);
+                      const widgetConfig = widgetConfigs[widget.id] || getDefaultWidgetConfig(widget.id);
 
                       return (
                         <div key={widget.id} className="mb-1">
@@ -212,7 +256,14 @@ export function DashboardBuilder({
                           >
                             <widget.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium truncate">{widget.label}</p>
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-xs font-medium truncate">{widget.label}</p>
+                                {isPoppedOut && (
+                                  <span className="text-[9px] px-1 py-0.5 rounded bg-accent text-accent-foreground">
+                                    popped
+                                  </span>
+                                )}
+                              </div>
                               {!isActive && (
                                 <p className="text-[10px] text-muted-foreground truncate">{widget.description}</p>
                               )}
@@ -283,6 +334,50 @@ export function DashboardBuilder({
                                     className="h-4"
                                   />
                                 </div>
+
+                                {/* Pop-out visibility */}
+                                {isPoppedOut && (
+                                  <div className="flex items-center justify-between p-2 rounded-lg bg-accent/10 border border-accent/20">
+                                    <div className="flex items-center gap-1.5">
+                                      {popOutOptions.showWhenPoppedOut.has(widget.id) ? (
+                                        <Eye className="w-3 h-3 text-accent-foreground" />
+                                      ) : (
+                                        <EyeOff className="w-3 h-3 text-muted-foreground" />
+                                      )}
+                                      <span className="text-[10px] font-medium">Show on dashboard too</span>
+                                    </div>
+                                    <Switch
+                                      checked={popOutOptions.showWhenPoppedOut.has(widget.id)}
+                                      onCheckedChange={(v) => toggleShowWhenPoppedOut(widget.id, v)}
+                                    />
+                                  </div>
+                                )}
+
+                                {/* Sub-element config toggles */}
+                                {widget.configOptions && widget.configOptions.length > 0 && (
+                                  <div>
+                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                                      Display Elements
+                                    </p>
+                                    <div className="space-y-1.5">
+                                      {widget.configOptions.map(opt => (
+                                        <div key={opt.key} className="flex items-center gap-2">
+                                          <Checkbox
+                                            id={`${widget.id}-${opt.key}`}
+                                            checked={widgetConfig[opt.key] ?? opt.defaultValue}
+                                            onCheckedChange={(checked) => toggleWidgetConfig(widget.id, opt.key, !!checked)}
+                                          />
+                                          <Label
+                                            htmlFor={`${widget.id}-${opt.key}`}
+                                            className="text-[10px] font-normal cursor-pointer"
+                                          >
+                                            {opt.label}
+                                          </Label>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
 
                                 {/* Action buttons */}
                                 <div className="flex gap-1.5">

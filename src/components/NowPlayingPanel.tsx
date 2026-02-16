@@ -79,6 +79,19 @@ interface SpotifyMetadata {
   monthlyListeners?: string;
 }
 
+export interface NowPlayingConfig {
+  showActionButtons?: boolean;
+  showVisualizer?: boolean;
+  showLUFS?: boolean;
+  showDBFS?: boolean;
+  showStemSeparation?: boolean;
+  showSubmitterInsights?: boolean;
+  showSpotifyEmbed?: boolean;
+  showSoundCloudEmbed?: boolean;
+  showMessage?: boolean;
+  showDownload?: boolean;
+}
+
 interface NowPlayingPanelProps {
   submission: Submission | null;
   audioUrl: string | null;
@@ -88,6 +101,7 @@ interface NowPlayingPanelProps {
   onDownload: () => void;
   onStatusChange?: (id: string, status: string) => void;
   onDelete?: (id: string) => void;
+  config?: NowPlayingConfig;
 }
 
 // Social platform icons mapping
@@ -112,7 +126,22 @@ export function NowPlayingPanel({
   onDownload,
   onStatusChange,
   onDelete,
+  config,
 }: NowPlayingPanelProps) {
+  const cfg = {
+    showActionButtons: true,
+    showVisualizer: true,
+    showLUFS: true,
+    showDBFS: true,
+    showStemSeparation: true,
+    showSubmitterInsights: true,
+    showSpotifyEmbed: true,
+    showSoundCloudEmbed: true,
+    showMessage: true,
+    showDownload: true,
+    ...config,
+  };
+
   const [submitterStats, setSubmitterStats] = useState<SubmitterStats | null>(null);
   const [spotifyMeta, setSpotifyMeta] = useState<SpotifyMetadata | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
@@ -323,14 +352,16 @@ export function NowPlayingPanel({
                           <Music2 className="w-4 h-4 text-primary" />
                           <span className="text-sm font-medium">Audio File</span>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={onDownload}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </Button>
+                        {cfg.showDownload && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onDownload}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        )}
                       </div>
                       
                       <AudioPlayer
@@ -340,19 +371,23 @@ export function NowPlayingPanel({
                       />
                       
                       {/* Audio Visualizer */}
-                      <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" />
+                      {cfg.showVisualizer && (
+                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" />
+                      )}
                       
                       {/* Stem Separation */}
-                      <StemSeparationPanel 
-                        submissionId={submission.id}
-                        hasAudioFile={!!submission.audio_file_url}
-                      />
+                      {cfg.showStemSeparation && (
+                        <StemSeparationPanel 
+                          submissionId={submission.id}
+                          hasAudioFile={!!submission.audio_file_url}
+                        />
+                      )}
                       
                     </div>
                   )}
 
                   {/* Spotify Embed - for Spotify links */}
-                  {submission.platform === 'spotify' && submission.song_url && (
+                  {cfg.showSpotifyEmbed && submission.platform === 'spotify' && submission.song_url && (
                     <div className="space-y-3">
                       <div className="rounded-xl overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-1">
                         {isLoadingSpotify ? (
@@ -386,7 +421,7 @@ export function NowPlayingPanel({
                   )}
 
                   {/* SoundCloud Embed - for SoundCloud links */}
-                  {submission.platform === 'soundcloud' && submission.song_url && (
+                  {cfg.showSoundCloudEmbed && submission.platform === 'soundcloud' && submission.song_url && (
                     <div className="space-y-3">
                       <div className="rounded-xl overflow-hidden border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-1">
                         <iframe
@@ -415,7 +450,7 @@ export function NowPlayingPanel({
                   )}
 
                   {/* Message */}
-                  {submission.message && (
+                  {cfg.showMessage && submission.message && (
                     <div className="p-4 rounded-xl bg-secondary/30 border border-border/30">
                       <p className="text-sm text-muted-foreground italic">
                         "{submission.message}"
@@ -424,7 +459,7 @@ export function NowPlayingPanel({
                   )}
                 </div>
 
-                {/* Collapsible Submitter Insights */}
+                {cfg.showSubmitterInsights && (
                 <div className="rounded-xl border border-border/30 overflow-hidden">
                   <button
                     onClick={() => setInsightsExpanded(!insightsExpanded)}
@@ -646,6 +681,7 @@ export function NowPlayingPanel({
                     )}
                   </AnimatePresence>
                 </div>
+                )}
               </div>
             </div>
 
