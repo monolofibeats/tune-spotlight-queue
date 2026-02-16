@@ -300,10 +300,14 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
   const rafRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizerMode>('spectrum');
   const modeRef = useRef<VisualizerMode>('spectrum');
+  const showLUFSRef = useRef(showLUFSProp);
+  const showDBFSRef = useRef(showDBFSProp);
   const { analyserRef, freqDataRef, timeDomainRef, isPlayingRef } = useAudioAnalyser(audioElement);
 
-  // Keep modeRef in sync
+  // Keep refs in sync with props
   useEffect(() => { modeRef.current = mode; }, [mode]);
+  useEffect(() => { showLUFSRef.current = showLUFSProp; }, [showLUFSProp]);
+  useEffect(() => { showDBFSRef.current = showDBFSProp; }, [showDBFSProp]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -509,8 +513,8 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       }
 
       // ── LUFS + dB meters (conditionally drawn) ──
-      if (showLUFSProp !== false || showDBFSProp !== false) {
-        drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSProp !== false, showDBFSProp !== false);
+      if (showLUFSRef.current !== false || showDBFSRef.current !== false) {
+        drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSRef.current !== false, showDBFSRef.current !== false);
       }
 
       // ── Key indicator (always drawn) ──

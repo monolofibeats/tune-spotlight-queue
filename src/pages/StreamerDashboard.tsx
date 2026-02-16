@@ -534,7 +534,7 @@ const StreamerDashboard = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-background bg-mesh noise relative transition-all ${isBuilderEditing ? 'mr-80' : ''}`}>
+    <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
       {/* Collapsible Header */}
       {viewOptions.showHeader ? (
         <Header />
