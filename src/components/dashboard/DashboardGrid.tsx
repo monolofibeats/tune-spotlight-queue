@@ -1,7 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
 import { Responsive, WidthProvider, type Layout, type Layouts } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import { WidgetWrapper } from './WidgetWrapper';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -30,7 +28,7 @@ export function DashboardGrid({
 
   return (
     <ResponsiveGridLayout
-      className="dashboard-grid"
+      className={`dashboard-grid ${isEditing ? 'is-editing' : ''}`}
       layouts={layouts}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
       cols={{ lg: 12, md: 10, sm: 6, xs: 4 }}
@@ -44,7 +42,8 @@ export function DashboardGrid({
         }
       }}
       compactType="vertical"
-      margin={[12, 12]}
+      margin={isEditing ? [8, 8] : [0, 0]}
+      containerPadding={[0, 0]}
     >
       {layout.map(item => {
         const content = widgetRenderers[item.i];
