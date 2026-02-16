@@ -12,6 +12,8 @@ export type VisualizerMode = 'spectrum' | 'polar-sample' | 'polar-level' | 'liss
 interface AudioVisualizerProps {
   audioElement: HTMLAudioElement | null;
   className?: string;
+  showLUFS?: boolean;
+  showDBFS?: boolean;
 }
 
 function parseHslTriplet(input: string) {
@@ -293,7 +295,7 @@ function keyDistance(key1: string, mode1: string, key2: string, mode2: string): 
 // ── Main Component ──
 // ═══════════════════════════════════════
 
-export function AudioVisualizer({ audioElement, className = '' }: AudioVisualizerProps) {
+export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizerMode>('spectrum');
@@ -506,8 +508,10 @@ export function AudioVisualizer({ audioElement, className = '' }: AudioVisualize
         drawLissajous(ctx, tdData, hasAudio, waveW, waveH, hsla, lissajousHistory, LISSAJOUS_MAX);
       }
 
-      // ── LUFS + dB meters (always drawn) ──
-      drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla);
+      // ── LUFS + dB meters (conditionally drawn) ──
+      if (showLUFSProp !== false || showDBFSProp !== false) {
+        drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSProp !== false, showDBFSProp !== false);
+      }
 
       // ── Key indicator (always drawn) ──
       if (detectedKey && keyDisplayAlpha > 0.01) {
@@ -909,6 +913,8 @@ function drawMeters(
   waveW: number,
   waveH: number,
   hsla: (a: number) => string,
+  showLUFS: boolean = true,
+  showDBFS: boolean = true,
 ) {
   ctx.save();
   const meterW = 22;
@@ -919,77 +925,84 @@ function drawMeters(
 
   // LUFS meter
   const lufsX = waveW + 12;
-  ctx.fillStyle = hsla(0.06);
-  ctx.beginPath();
-  ctx.roundRect(lufsX, meterTop, meterW, meterH, 4);
-  ctx.fill();
+  let nextX = lufsX;
 
-  const lufsNorm = (clampedLufs + 60) / 60;
-  const lufsFillH = lufsNorm * meterH;
-  if (lufsFillH > 0) {
-    const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-    grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
-    grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
-    grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)');
-    grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
-    ctx.fillStyle = grad;
+  if (showLUFS) {
+    ctx.fillStyle = hsla(0.06);
     ctx.beginPath();
-    ctx.roundRect(lufsX, meterBottom - lufsFillH, meterW, lufsFillH, 4);
+    ctx.roundRect(lufsX, meterTop, meterW, meterH, 4);
     ctx.fill();
-  }
 
-  ctx.font = 'bold 13px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = hsla(0.65);
-  ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
-  ctx.font = 'bold 10px monospace';
-  ctx.fillStyle = hsla(0.4);
-  ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
+    const lufsNorm = (clampedLufs + 60) / 60;
+    const lufsFillH = lufsNorm * meterH;
+    if (lufsFillH > 0) {
+      const grad = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+      grad.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
+      grad.addColorStop(0.5, 'hsla(50, 90%, 50%, 0.8)');
+      grad.addColorStop(0.85, 'hsla(20, 90%, 50%, 0.8)');
+      grad.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(lufsX, meterBottom - lufsFillH, meterW, lufsFillH, 4);
+      ctx.fill();
+    }
+
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = hsla(0.65);
+    ctx.fillText(`${Math.round(clampedLufs)}`, lufsX + meterW / 2, meterBottom + 18);
+    ctx.font = 'bold 10px monospace';
+    ctx.fillStyle = hsla(0.4);
+    ctx.fillText('LUFS', lufsX + meterW / 2, meterTop - 5);
+    nextX = lufsX + meterW + meterGap;
+  }
 
   // dB meter
-  const dbX = lufsX + meterW + meterGap;
-  ctx.fillStyle = hsla(0.06);
-  ctx.beginPath();
-  ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
-  ctx.fill();
-
-  const dbNorm = (clampedDb + 60) / 60;
-  const dbFillH = dbNorm * meterH;
-  if (dbFillH > 0) {
-    const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-    grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
-    grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
-    grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
-    grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
-    ctx.fillStyle = grad2;
+  if (showDBFS) {
+    const dbX = nextX;
+    ctx.fillStyle = hsla(0.06);
     ctx.beginPath();
-    ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
+    ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
     ctx.fill();
-  }
 
-  ctx.font = 'bold 13px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = hsla(0.65);
-  ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 18);
-  ctx.font = 'bold 10px monospace';
-  ctx.fillStyle = hsla(0.4);
-  ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
+    const dbNorm = (clampedDb + 60) / 60;
+    const dbFillH = dbNorm * meterH;
+    if (dbFillH > 0) {
+      const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+      grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
+      grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
+      grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+      ctx.fillStyle = grad2;
+      ctx.beginPath();
+      ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
+      ctx.fill();
+    }
 
-  // Tick marks
-  const tickLabels = [0, -6, -14, -24, -40, -60];
-  ctx.textAlign = 'left';
-  for (const lv of tickLabels) {
-    const norm = (lv + 60) / 60;
-    const ly = meterBottom - norm * meterH;
-    ctx.strokeStyle = hsla(0.15);
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(dbX + meterW + 2, ly);
-    ctx.lineTo(dbX + meterW + 6, ly);
-    ctx.stroke();
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = hsla(0.65);
+    ctx.fillText(`${Math.round(clampedDb)}`, dbX + meterW / 2, meterBottom + 18);
     ctx.font = 'bold 10px monospace';
-    ctx.fillStyle = hsla(0.45);
-    ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
+    ctx.fillStyle = hsla(0.4);
+    ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
+
+    // Tick marks
+    const tickLabels = [0, -6, -14, -24, -40, -60];
+    ctx.textAlign = 'left';
+    for (const lv of tickLabels) {
+      const norm = (lv + 60) / 60;
+      const ly = meterBottom - norm * meterH;
+      ctx.strokeStyle = hsla(0.15);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(dbX + meterW + 2, ly);
+      ctx.lineTo(dbX + meterW + 6, ly);
+      ctx.stroke();
+      ctx.font = 'bold 10px monospace';
+      ctx.fillStyle = hsla(0.45);
+      ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
+    }
   }
 
   ctx.restore();

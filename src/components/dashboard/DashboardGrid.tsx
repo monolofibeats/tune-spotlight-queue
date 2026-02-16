@@ -14,6 +14,8 @@ interface DashboardGridProps {
   poppedOutWidgets?: Set<string>;
   /** Widget IDs that should still show on dashboard even when popped out */
   showWhenPoppedOut?: Set<string>;
+  /** Handler to pop out a widget */
+  onPopOut?: (widgetId: string) => void;
 }
 
 export function DashboardGrid({
@@ -24,6 +26,7 @@ export function DashboardGrid({
   widgetRenderers,
   poppedOutWidgets = new Set(),
   showWhenPoppedOut = new Set(),
+  onPopOut,
 }: DashboardGridProps) {
   // Filter out popped-out widgets unless they're configured to stay visible
   const visibleLayout = useMemo(() => {
@@ -51,6 +54,19 @@ export function DashboardGrid({
       isDraggable={isEditing}
       isResizable={isEditing}
       draggableHandle=".drag-handle"
+      onDragStop={(_layout, _oldItem, newItem, _placeholder, e) => {
+        if (isEditing && onPopOut && e) {
+          const threshold = 40;
+          const x = e.clientX;
+          const y = e.clientY;
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          if (x <= threshold || x >= w - threshold || y <= threshold || y >= h - threshold) {
+            onPopOut(newItem.i);
+            return;
+          }
+        }
+      }}
       onLayoutChange={(currentLayout) => {
         if (isEditing && onLayoutChange) {
           onLayoutChange(currentLayout);

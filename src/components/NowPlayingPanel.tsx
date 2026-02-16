@@ -372,7 +372,7 @@ export function NowPlayingPanel({
                       
                       {/* Audio Visualizer */}
                       {cfg.showVisualizer && (
-                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" />
+                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} />
                       )}
                       
                       {/* Stem Separation */}

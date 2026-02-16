@@ -76,6 +76,7 @@ export function DashboardBuilder({
   const [configsBeforeEdit, setConfigsBeforeEdit] = useState<WidgetConfigs>({});
   const [popOutOptionsBeforeEdit, setPopOutOptionsBeforeEdit] = useState<PopOutOptions>({ showWhenPoppedOut: new Set() });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('add');
 
   const activeWidgetIds = currentLayout.map(l => l.i);
 
@@ -210,7 +211,7 @@ export function DashboardBuilder({
             </Button>
           </div>
 
-          <Tabs defaultValue="add" className="flex-1 flex flex-col min-h-0">
+          <Tabs defaultValue="add" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0 h-auto shrink-0">
               <TabsTrigger value="add" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
                 Widgets

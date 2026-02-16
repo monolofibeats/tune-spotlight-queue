@@ -4,9 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface EarningsWidgetProps {
   streamerId: string;
+  config?: {
+    showBalance?: boolean;
+    showRecentEarnings?: boolean;
+    showPayoutStatus?: boolean;
+  };
 }
 
-export function EarningsWidget({ streamerId }: EarningsWidgetProps) {
+export function EarningsWidget({ streamerId, config }: EarningsWidgetProps) {
+  const cfg = { showBalance: true, showRecentEarnings: true, showPayoutStatus: true, ...config };
   const [earnings, setEarnings] = useState({ total: 0, thisMonth: 0, pending: 0 });
 
   useEffect(() => {
@@ -52,28 +58,34 @@ export function EarningsWidget({ streamerId }: EarningsWidgetProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="p-2 rounded-lg bg-emerald-500/20">
-          <DollarSign className="w-4 h-4 text-emerald-500" />
+      {cfg.showBalance && (
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-emerald-500/20">
+            <DollarSign className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div>
+            <p className="text-lg font-bold font-display">{fmt(earnings.total)}</p>
+            <p className="text-[10px] text-muted-foreground">Total Earnings</p>
+          </div>
         </div>
-        <div>
-          <p className="text-lg font-bold font-display">{fmt(earnings.total)}</p>
-          <p className="text-[10px] text-muted-foreground">Total Earnings</p>
-        </div>
-      </div>
+      )}
       <div className="grid grid-cols-2 gap-2">
-        <div className="p-2 rounded-lg bg-muted/30">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
-            <TrendingUp className="w-3 h-3" /> This Month
+        {cfg.showRecentEarnings && (
+          <div className="p-2 rounded-lg bg-muted/30">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
+              <TrendingUp className="w-3 h-3" /> This Month
+            </div>
+            <p className="text-sm font-semibold">{fmt(earnings.thisMonth)}</p>
           </div>
-          <p className="text-sm font-semibold">{fmt(earnings.thisMonth)}</p>
-        </div>
-        <div className="p-2 rounded-lg bg-muted/30">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
-            <ArrowUpRight className="w-3 h-3" /> Pending
+        )}
+        {cfg.showPayoutStatus && (
+          <div className="p-2 rounded-lg bg-muted/30">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
+              <ArrowUpRight className="w-3 h-3" /> Pending
+            </div>
+            <p className="text-sm font-semibold">{fmt(earnings.pending)}</p>
           </div>
-          <p className="text-sm font-semibold">{fmt(earnings.pending)}</p>
-        </div>
+        )}
       </div>
     </div>
   );
