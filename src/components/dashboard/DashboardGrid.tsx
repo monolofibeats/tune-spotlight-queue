@@ -42,8 +42,9 @@ export function DashboardGrid({
         }
       }}
       compactType="vertical"
-      margin={isEditing ? [8, 8] : [0, 0]}
+      margin={isEditing ? [8, 8] : [4, 4]}
       containerPadding={[0, 0]}
+      useCSSTransforms={true}
     >
       {layout.map(item => {
         const content = widgetRenderers[item.i];
