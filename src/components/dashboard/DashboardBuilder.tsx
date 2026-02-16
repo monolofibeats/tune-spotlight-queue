@@ -9,10 +9,16 @@ import {
   LayoutTemplate,
   RotateCcw,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Maximize2,
+  Minimize2,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
 import { toast } from '@/hooks/use-toast';
 import { WIDGET_REGISTRY, type WidgetDefinition } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
@@ -35,6 +41,7 @@ export function DashboardBuilder({
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
+  const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
 
   const activeWidgetIds = currentLayout.map(l => l.i);
 
@@ -46,6 +53,7 @@ export function DashboardBuilder({
   const handleCancel = () => {
     onLayoutChange(layoutBeforeEdit);
     onToggleEditing(false);
+    setExpandedWidget(null);
   };
 
   const addWidget = useCallback((def: WidgetDefinition) => {
@@ -66,6 +74,11 @@ export function DashboardBuilder({
 
   const removeWidget = useCallback((id: string) => {
     onLayoutChange(currentLayout.filter(l => l.i !== id));
+    if (expandedWidget === id) setExpandedWidget(null);
+  }, [currentLayout, onLayoutChange, expandedWidget]);
+
+  const updateWidgetSize = useCallback((id: string, field: 'w' | 'h', value: number) => {
+    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: value } : l));
   }, [currentLayout, onLayoutChange]);
 
   const applyTemplate = useCallback((template: DashboardTemplate) => {
@@ -73,12 +86,33 @@ export function DashboardBuilder({
     toast({ title: `"${template.name}" applied — drag to customize` });
   }, [onLayoutChange]);
 
+  const handlePopOut = useCallback((widgetId: string) => {
+    const def = WIDGET_REGISTRY.find(w => w.id === widgetId);
+    if (!def) return;
+    const width = 500;
+    const height = 400;
+    const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
+    if (popup) {
+      popup.document.title = `UpStar — ${def.label}`;
+      popup.document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#888;background:#111;">
+          <div style="text-align:center;">
+            <h2 style="color:#fff;margin-bottom:8px;">${def.label}</h2>
+            <p style="font-size:13px;">This widget is detached from the main dashboard.<br/>
+            Hide this window from OBS to keep it private.</p>
+          </div>
+        </div>`;
+      toast({ title: `"${def.label}" popped out`, description: 'Hide this window from OBS screen capture for privacy' });
+    }
+  }, []);
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await onSave(currentLayout);
       toast({ title: 'Layout saved!' });
       onToggleEditing(false);
+      setExpandedWidget(null);
     } catch {
       toast({ title: 'Failed to save', variant: 'destructive' });
     } finally {
@@ -100,10 +134,8 @@ export function DashboardBuilder({
     );
   }
 
-  // Editing mode: render the sidebar panel
   return (
     <>
-      {/* Top bar actions (rendered inline in the header) */}
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={handleCancel} className="gap-1.5 text-xs">
           <X className="w-3.5 h-3.5" /> Cancel
@@ -117,19 +149,18 @@ export function DashboardBuilder({
         </Button>
       </div>
 
-      {/* Sidebar panel */}
       <AnimatePresence>
         <motion.div
           initial={{ x: 300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 300, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-0 right-0 bottom-0 w-72 z-40 bg-card border-l border-border shadow-2xl flex flex-col"
+          className="fixed top-0 right-0 bottom-0 w-80 z-40 bg-card border-l border-border shadow-2xl flex flex-col"
         >
           <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <LayoutTemplate className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-sm">Widgets</h3>
+              <h3 className="font-semibold text-sm">Dashboard Builder</h3>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCancel}>
               <X className="w-4 h-4" />
@@ -139,7 +170,7 @@ export function DashboardBuilder({
           <Tabs defaultValue="add" className="flex-1 flex flex-col min-h-0">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0 h-auto shrink-0">
               <TabsTrigger value="add" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
-                Add
+                Widgets
               </TabsTrigger>
               <TabsTrigger value="templates" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
                 Templates
@@ -155,26 +186,106 @@ export function DashboardBuilder({
                     </p>
                     {WIDGET_REGISTRY.filter(w => w.category === category).map(widget => {
                       const isActive = activeWidgetIds.includes(widget.id);
+                      const isExpanded = expandedWidget === widget.id && isActive;
+                      const layoutItem = currentLayout.find(l => l.i === widget.id);
+
                       return (
-                        <button
-                          key={widget.id}
-                          onClick={() => isActive ? removeWidget(widget.id) : addWidget(widget)}
-                          className={`w-full flex items-center gap-2.5 p-2 rounded-lg transition-all mb-1 text-left ${
-                            isActive
-                              ? 'bg-primary/10 border border-primary/30'
-                              : 'border border-transparent hover:bg-muted/30'
-                          }`}
-                        >
-                          <widget.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{widget.label}</p>
-                          </div>
-                          {isActive ? (
-                            <X className="w-3 h-3 text-muted-foreground shrink-0" />
-                          ) : (
-                            <Plus className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <div key={widget.id} className="mb-1">
+                          <button
+                            onClick={() => {
+                              if (!isActive) {
+                                addWidget(widget);
+                                setExpandedWidget(widget.id);
+                              } else {
+                                setExpandedWidget(isExpanded ? null : widget.id);
+                              }
+                            }}
+                            className={`w-full flex items-center gap-2.5 p-2 rounded-lg transition-all text-left ${
+                              isActive
+                                ? 'bg-primary/10 border border-primary/30'
+                                : 'border border-transparent hover:bg-muted/30'
+                            }`}
+                          >
+                            <widget.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium truncate">{widget.label}</p>
+                              {!isActive && (
+                                <p className="text-[10px] text-muted-foreground truncate">{widget.description}</p>
+                              )}
+                            </div>
+                            {isActive ? (
+                              isExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />
+                            ) : (
+                              <Plus className="w-3 h-3 text-muted-foreground shrink-0" />
+                            )}
+                          </button>
+
+                          {/* Expanded config panel */}
+                          {isExpanded && layoutItem && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="p-3 ml-6 mr-1 mt-1 mb-1 rounded-lg bg-muted/20 border border-border/50 space-y-3">
+                                {/* Width slider */}
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <label className="text-[10px] text-muted-foreground font-medium">Width</label>
+                                    <span className="text-[10px] font-mono text-primary">{layoutItem.w}/12 cols</span>
+                                  </div>
+                                  <Slider
+                                    value={[layoutItem.w]}
+                                    min={widget.minSize.w}
+                                    max={widget.maxSize?.w || 12}
+                                    step={1}
+                                    onValueChange={([v]) => updateWidgetSize(widget.id, 'w', v)}
+                                    className="h-4"
+                                  />
+                                </div>
+
+                                {/* Height slider */}
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <label className="text-[10px] text-muted-foreground font-medium">Height</label>
+                                    <span className="text-[10px] font-mono text-primary">{layoutItem.h} rows</span>
+                                  </div>
+                                  <Slider
+                                    value={[layoutItem.h]}
+                                    min={widget.minSize.h}
+                                    max={widget.maxSize?.h || 20}
+                                    step={1}
+                                    onValueChange={([v]) => updateWidgetSize(widget.id, 'h', v)}
+                                    className="h-4"
+                                  />
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex gap-1.5">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 h-7 text-[10px] gap-1"
+                                    onClick={() => handlePopOut(widget.id)}
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    Pop Out
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-[10px] gap-1 text-destructive hover:text-destructive"
+                                    onClick={() => removeWidget(widget.id)}
+                                  >
+                                    <X className="w-3 h-3" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>

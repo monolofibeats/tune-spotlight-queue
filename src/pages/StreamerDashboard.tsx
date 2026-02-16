@@ -531,11 +531,11 @@ const StreamerDashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-background bg-mesh noise relative transition-all ${isBuilderEditing ? 'mr-72' : ''}`}>
+    <div className={`min-h-screen bg-background bg-mesh noise relative transition-all ${isBuilderEditing ? 'mr-80' : ''}`}>
       <Header />
       
       <main className="pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-7xl">
+        <div className="w-full">
           {/* Dashboard Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
