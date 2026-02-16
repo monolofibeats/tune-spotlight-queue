@@ -567,6 +567,10 @@ body[data-anim-style="elegant"] * {
   position: absolute;
   width: 20px;
   height: 20px;
+  display: none;
+}
+.dashboard-grid.is-editing .react-grid-item > .react-resizable-handle {
+  display: block;
 }
 .react-grid-item > .react-resizable-handle::after {
   content: "";
@@ -575,8 +579,8 @@ body[data-anim-style="elegant"] * {
   bottom: 3px;
   width: 6px;
   height: 6px;
-  border-right: 2px solid hsl(var(--muted-foreground) / 0.4);
-  border-bottom: 2px solid hsl(var(--muted-foreground) / 0.4);
+  border-right: 2px solid hsl(var(--primary) / 0.5);
+  border-bottom: 2px solid hsl(var(--primary) / 0.5);
 }
 .react-grid-item > .react-resizable-handle.react-resizable-handle-se {
   bottom: 0;
@@ -584,9 +588,17 @@ body[data-anim-style="elegant"] * {
   cursor: se-resize;
 }
 .react-grid-placeholder {
-  background: hsl(var(--primary) / 0.15);
+  background: hsl(var(--primary) / 0.1);
   border: 2px dashed hsl(var(--primary) / 0.4);
   border-radius: 0.75rem;
   opacity: 1;
   transition: all 100ms ease;
+}
+/* Editing mode: show grid dots background */
+.dashboard-grid.is-editing {
+  background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px);
+  background-size: 40px 40px;
+  border-radius: 0.75rem;
+  padding: 4px;
+  min-height: 400px;
 }

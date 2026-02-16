@@ -531,7 +531,7 @@ const StreamerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background bg-mesh noise relative">
+    <div className={`min-h-screen bg-background bg-mesh noise relative transition-all ${isBuilderEditing ? 'mr-72' : ''}`}>
       <Header />
       
       <main className="pt-24 pb-12 px-4">
@@ -554,6 +554,8 @@ const StreamerDashboard = () => {
               </div>
               <div className="flex items-center gap-2">
                 <DashboardBuilder
+                  isEditing={isBuilderEditing}
+                  onToggleEditing={setIsBuilderEditing}
                   currentLayout={dashboardLayout}
                   onLayoutChange={setDashboardLayout}
                   onSave={handleSaveLayout}
@@ -586,6 +588,7 @@ const StreamerDashboard = () => {
                 layout={dashboardLayout}
                 isEditing={isBuilderEditing}
                 onLayoutChange={setDashboardLayout}
+                onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
                 widgetRenderers={widgetRenderers}
               />
             </TabsContent>
