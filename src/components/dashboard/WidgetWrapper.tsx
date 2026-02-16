@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { GripVertical, X } from 'lucide-react';
+import { GripVertical, X, ExternalLink } from 'lucide-react';
 import { getWidgetDef } from './WidgetRegistry';
 
 interface WidgetWrapperProps {
@@ -7,9 +7,10 @@ interface WidgetWrapperProps {
   isEditing: boolean;
   children: ReactNode;
   onRemove?: () => void;
+  isPoppedOut?: boolean;
 }
 
-export function WidgetWrapper({ widgetId, isEditing, children, onRemove }: WidgetWrapperProps) {
+export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppedOut }: WidgetWrapperProps) {
   const def = getWidgetDef(widgetId);
 
   return (
@@ -17,12 +18,15 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove }: Widge
       isEditing 
         ? 'ring-1 ring-primary/30 ring-dashed bg-card/30' 
         : ''
-    }`}>
+    } ${isPoppedOut && !isEditing ? 'opacity-50' : ''}`}>
       {/* Only show a label bar in edit mode */}
       {isEditing && (
         <div className="flex items-center gap-1.5 px-2 py-1 shrink-0 bg-primary/10 border-b border-primary/20">
           <GripVertical className="w-3.5 h-3.5 text-primary/60 cursor-grab drag-handle" />
           <span className="text-[10px] font-medium text-primary/80 flex-1 truncate">{def?.label || widgetId}</span>
+          {isPoppedOut && (
+            <ExternalLink className="w-3 h-3 text-accent-foreground" />
+          )}
           {onRemove && (
             <button
               onClick={onRemove}

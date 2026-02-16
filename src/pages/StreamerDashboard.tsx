@@ -25,13 +25,13 @@ import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { BulkActionBar } from '@/components/submission/BulkActionBar';
-import { DashboardBuilder, type DashboardViewOptions } from '@/components/dashboard/DashboardBuilder';
+import { DashboardBuilder, type DashboardViewOptions, type PopOutOptions } from '@/components/dashboard/DashboardBuilder';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { EarningsWidget } from '@/components/dashboard/widgets/EarningsWidget';
 import { QuickSettingsWidget } from '@/components/dashboard/widgets/QuickSettingsWidget';
 import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
-import { getWidgetDef } from '@/components/dashboard/WidgetRegistry';
+import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets } from '@/hooks/useStreamerPresets';
 import type { Layout } from 'react-grid-layout';
 import type { Streamer } from '@/types/streamer';
@@ -70,6 +70,14 @@ const StreamerDashboard = () => {
     showDashboardTitle: true,
   });
 
+  // Widget sub-element configs
+  const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfigs>({});
+
+  // Pop-out display options
+  const [popOutOptions, setPopOutOptions] = useState<PopOutOptions>({
+    showWhenPoppedOut: new Set(),
+  });
+
   // Dashboard layout state
   const [dashboardLayout, setDashboardLayout] = useState<Layout[]>(getDefaultLayout());
   
@@ -92,12 +100,24 @@ const StreamerDashboard = () => {
   
   useEffect(() => {
     if (activePreset?.dashboard_layout) {
-      const saved = activePreset.dashboard_layout as unknown as { grid_layout?: Layout[]; widgets?: string[]; view_options?: DashboardViewOptions };
+      const saved = activePreset.dashboard_layout as unknown as {
+        grid_layout?: Layout[];
+        widgets?: string[];
+        view_options?: DashboardViewOptions;
+        widget_configs?: WidgetConfigs;
+        show_when_popped_out?: string[];
+      };
       if (saved.grid_layout && Array.isArray(saved.grid_layout)) {
         setDashboardLayout(saved.grid_layout);
       }
       if (saved.view_options) {
         setViewOptions(saved.view_options);
+      }
+      if (saved.widget_configs) {
+        setWidgetConfigs(saved.widget_configs);
+      }
+      if (saved.show_when_popped_out) {
+        setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
       }
     }
   }, [activePreset]);
@@ -334,10 +354,21 @@ const StreamerDashboard = () => {
     });
   }, []);
 
+  // Helper to get resolved config for a widget
+  const getWidgetConfig = useCallback((widgetId: string) => {
+    return { ...getDefaultWidgetConfig(widgetId), ...(widgetConfigs[widgetId] || {}) };
+  }, [widgetConfigs]);
+
   // Save layout to preset
   const handleSaveLayout = async (layout: Layout[]) => {
     if (!streamer) return;
-    const layoutData = { grid_layout: layout, view_options: viewOptions, version: 2 };
+    const layoutData = {
+      grid_layout: layout,
+      view_options: viewOptions,
+      widget_configs: widgetConfigs,
+      show_when_popped_out: Array.from(popOutOptions.showWhenPoppedOut),
+      version: 3,
+    };
     if (activePreset) {
       await updatePreset(activePreset.id, {
         dashboard_layout: layoutData as unknown as { widgets: string[] },
@@ -349,21 +380,33 @@ const StreamerDashboard = () => {
 
   const widgetRenderers = useMemo(() => {
     if (!streamer) return {};
+
+    const npConfig = getWidgetConfig('now_playing');
+    const statsConfig = getWidgetConfig('stats');
+    const searchConfig = getWidgetConfig('search_filters');
+    const queueConfig = getWidgetConfig('queue');
+
     return {
       stats: (
         <div className="grid grid-cols-3 gap-3 h-full">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-            <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
-            <div><p className="text-xl font-display font-bold">{stats.total}</p><p className="text-[10px] text-muted-foreground">Total</p></div>
-          </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-            <div className="p-2 rounded-lg bg-primary/20"><Eye className="w-4 h-4 text-primary" /></div>
-            <div><p className="text-xl font-display font-bold">{stats.pending}</p><p className="text-[10px] text-muted-foreground">Pending</p></div>
-          </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-            <div className="p-2 rounded-lg bg-primary/20"><CheckCircle className="w-4 h-4 text-primary" /></div>
-            <div><p className="text-xl font-display font-bold">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground">Reviewed</p></div>
-          </div>
+          {statsConfig.showTotal !== false && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
+              <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
+              <div><p className="text-xl font-display font-bold">{stats.total}</p><p className="text-[10px] text-muted-foreground">Total</p></div>
+            </div>
+          )}
+          {statsConfig.showPending !== false && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
+              <div className="p-2 rounded-lg bg-primary/20"><Eye className="w-4 h-4 text-primary" /></div>
+              <div><p className="text-xl font-display font-bold">{stats.pending}</p><p className="text-[10px] text-muted-foreground">Pending</p></div>
+            </div>
+          )}
+          {statsConfig.showReviewed !== false && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
+              <div className="p-2 rounded-lg bg-primary/20"><CheckCircle className="w-4 h-4 text-primary" /></div>
+              <div><p className="text-xl font-display font-bold">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground">Reviewed</p></div>
+            </div>
+          )}
         </div>
       ),
       now_playing: (
@@ -372,27 +415,37 @@ const StreamerDashboard = () => {
             submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
             isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
             onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-            onStatusChange={handleStatusChange} onDelete={handleDeleteSubmission}
+            onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
+            onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
+            config={npConfig}
           />
         </div>
       ),
       search_filters: (
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Search tracks or artists..." value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm" />
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
-            {[{ key: 'all', label: 'All' }, { key: 'pending', label: 'Pending' }, { key: 'reviewed', label: 'Done' },
-              { key: 'skipped', label: 'Skipped' }, { key: 'deleted', label: '🗑 Trash' }
-            ].map(({ key, label }) => (
-              <Button key={key} variant={statusFilter === key ? 'default' : 'outline'}
-                size="sm" className="h-7 text-xs px-2.5" onClick={() => setStatusFilter(key)}>
-                {label}
-              </Button>
-            ))}
-          </div>
+          {searchConfig.showSearchBar !== false && (
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search tracks or artists..." value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm" />
+            </div>
+          )}
+          {searchConfig.showStatusFilters !== false && (
+            <div className="flex gap-1.5 flex-wrap">
+              {[
+                { key: 'all', label: 'All' },
+                { key: 'pending', label: 'Pending' },
+                { key: 'reviewed', label: 'Done' },
+                { key: 'skipped', label: 'Skipped' },
+                ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: '🗑 Trash' }] : []),
+              ].map(({ key, label }) => (
+                <Button key={key} variant={statusFilter === key ? 'default' : 'outline'}
+                  size="sm" className="h-7 text-xs px-2.5" onClick={() => setStatusFilter(key)}>
+                  {label}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       ),
       queue: (
@@ -400,7 +453,7 @@ const StreamerDashboard = () => {
           {filteredSubmissions.map((submission, index) => (
             <SubmissionListItem
               key={submission.id} submission={submission}
-              position={statusFilter === 'deleted' ? undefined : index + 1}
+              position={statusFilter === 'deleted' || queueConfig.showPosition === false ? undefined : index + 1}
               isAdmin={true} isTrashView={statusFilter === 'deleted'}
               isSelected={selectedIds.has(submission.id)} isSelectionMode={isSelectionMode}
               onToggleSelect={handleToggleSelect} onStatusChange={handleStatusChange}
@@ -418,11 +471,13 @@ const StreamerDashboard = () => {
               </p>
             </div>
           )}
-          <BulkActionBar selectedCount={selectedIds.size} totalCount={filteredSubmissions.length}
-            isTrashView={statusFilter === 'deleted'} onSelectAll={handleSelectAll}
-            onDeselectAll={handleDeselectAll} onBulkStatusChange={handleBulkStatusChange}
-            onBulkDelete={handleBulkDelete} onBulkRestore={handleBulkRestore}
-          />
+          {queueConfig.showBulkActions !== false && (
+            <BulkActionBar selectedCount={selectedIds.size} totalCount={filteredSubmissions.length}
+              isTrashView={statusFilter === 'deleted'} onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll} onBulkStatusChange={handleBulkStatusChange}
+              onBulkDelete={handleBulkDelete} onBulkRestore={handleBulkRestore}
+            />
+          )}
         </div>
       ),
       earnings: <EarningsWidget streamerId={streamer.id} />,
@@ -433,7 +488,7 @@ const StreamerDashboard = () => {
         </div>
       ),
     };
-  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode]);
+  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode, widgetConfigs, getWidgetConfig]);
 
   if (isLoading || authLoading) {
     return (
@@ -459,6 +514,22 @@ const StreamerDashboard = () => {
       </div>
     );
   }
+
+  const builderProps = {
+    isEditing: isBuilderEditing,
+    onToggleEditing: setIsBuilderEditing,
+    currentLayout: dashboardLayout,
+    onLayoutChange: setDashboardLayout,
+    onSave: handleSaveLayout,
+    onPopOut: handlePopOut,
+    poppedOutWidgets,
+    viewOptions,
+    onViewOptionsChange: setViewOptions,
+    widgetConfigs,
+    onWidgetConfigsChange: setWidgetConfigs,
+    popOutOptions,
+    onPopOutOptionsChange: setPopOutOptions,
+  };
 
   return (
     <div className={`min-h-screen bg-background bg-mesh noise relative transition-all ${isBuilderEditing ? 'mr-80' : ''}`}>
@@ -499,16 +570,7 @@ const StreamerDashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <DashboardBuilder
-                    isEditing={isBuilderEditing}
-                    onToggleEditing={setIsBuilderEditing}
-                    currentLayout={dashboardLayout}
-                    onLayoutChange={setDashboardLayout}
-                    onSave={handleSaveLayout}
-                    onPopOut={handlePopOut}
-                    viewOptions={viewOptions}
-                    onViewOptionsChange={setViewOptions}
-                  />
+                  <DashboardBuilder {...builderProps} />
                   <Button variant="outline" asChild className="gap-2">
                     <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-4 h-4" />
@@ -523,16 +585,7 @@ const StreamerDashboard = () => {
           {/* When title is hidden, show minimal controls */}
           {!viewOptions.showDashboardTitle && (
             <div className="flex items-center justify-end gap-2 mb-4">
-              <DashboardBuilder
-                isEditing={isBuilderEditing}
-                onToggleEditing={setIsBuilderEditing}
-                currentLayout={dashboardLayout}
-                onLayoutChange={setDashboardLayout}
-                onSave={handleSaveLayout}
-                onPopOut={handlePopOut}
-                viewOptions={viewOptions}
-                onViewOptionsChange={setViewOptions}
-              />
+              <DashboardBuilder {...builderProps} />
               <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
                 <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-3 h-3" />
@@ -562,6 +615,8 @@ const StreamerDashboard = () => {
                 onLayoutChange={setDashboardLayout}
                 onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
                 widgetRenderers={widgetRenderers}
+                poppedOutWidgets={poppedOutWidgets}
+                showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
               />
             </TabsContent>
 

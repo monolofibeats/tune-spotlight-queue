@@ -10,6 +10,10 @@ interface DashboardGridProps {
   onLayoutChange?: (layout: Layout[]) => void;
   onRemoveWidget?: (id: string) => void;
   widgetRenderers: Record<string, ReactNode>;
+  /** Widget IDs currently in pop-out windows */
+  poppedOutWidgets?: Set<string>;
+  /** Widget IDs that should still show on dashboard even when popped out */
+  showWhenPoppedOut?: Set<string>;
 }
 
 export function DashboardGrid({
@@ -18,13 +22,24 @@ export function DashboardGrid({
   onLayoutChange,
   onRemoveWidget,
   widgetRenderers,
+  poppedOutWidgets = new Set(),
+  showWhenPoppedOut = new Set(),
 }: DashboardGridProps) {
+  // Filter out popped-out widgets unless they're configured to stay visible
+  const visibleLayout = useMemo(() => {
+    if (isEditing) return layout; // Show all during editing
+    return layout.filter(item => {
+      if (!poppedOutWidgets.has(item.i)) return true;
+      return showWhenPoppedOut.has(item.i);
+    });
+  }, [layout, isEditing, poppedOutWidgets, showWhenPoppedOut]);
+
   const layouts: Layouts = useMemo(() => ({
-    lg: layout,
-    md: layout.map(l => ({ ...l, w: Math.min(l.w, 10) })),
-    sm: layout.map(l => ({ ...l, x: 0, w: 6 })),
-    xs: layout.map(l => ({ ...l, x: 0, w: 4 })),
-  }), [layout]);
+    lg: visibleLayout,
+    md: visibleLayout.map(l => ({ ...l, w: Math.min(l.w, 10) })),
+    sm: visibleLayout.map(l => ({ ...l, x: 0, w: 6 })),
+    xs: visibleLayout.map(l => ({ ...l, x: 0, w: 4 })),
+  }), [visibleLayout]);
 
   return (
     <ResponsiveGridLayout
@@ -46,15 +61,17 @@ export function DashboardGrid({
       containerPadding={[0, 0]}
       useCSSTransforms={true}
     >
-      {layout.map(item => {
+      {visibleLayout.map(item => {
         const content = widgetRenderers[item.i];
         if (!content) return null;
+        const isPoppedOut = poppedOutWidgets.has(item.i);
         return (
           <div key={item.i}>
             <WidgetWrapper
               widgetId={item.i}
               isEditing={isEditing}
               onRemove={onRemoveWidget ? () => onRemoveWidget(item.i) : undefined}
+              isPoppedOut={isPoppedOut}
             >
               {content}
             </WidgetWrapper>
