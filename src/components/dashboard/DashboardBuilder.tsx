@@ -11,18 +11,25 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
-  Maximize2,
-  Minimize2,
   ExternalLink,
+  PanelTopClose,
+  Type,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { WIDGET_REGISTRY, type WidgetDefinition } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
 import type { Layout } from 'react-grid-layout';
+
+export interface DashboardViewOptions {
+  showHeader: boolean;
+  showDashboardTitle: boolean;
+}
 
 interface DashboardBuilderProps {
   isEditing: boolean;
@@ -30,6 +37,9 @@ interface DashboardBuilderProps {
   currentLayout: Layout[];
   onLayoutChange: (layout: Layout[]) => void;
   onSave: (layout: Layout[]) => Promise<void>;
+  onPopOut?: (widgetId: string) => void;
+  viewOptions: DashboardViewOptions;
+  onViewOptionsChange: (options: DashboardViewOptions) => void;
 }
 
 export function DashboardBuilder({
@@ -38,20 +48,26 @@ export function DashboardBuilder({
   currentLayout,
   onLayoutChange,
   onSave,
+  onPopOut,
+  viewOptions,
+  onViewOptionsChange,
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
+  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
 
   const activeWidgetIds = currentLayout.map(l => l.i);
 
   const handleStartEditing = () => {
     setLayoutBeforeEdit([...currentLayout]);
+    setViewOptionsBeforeEdit({ ...viewOptions });
     onToggleEditing(true);
   };
 
   const handleCancel = () => {
     onLayoutChange(layoutBeforeEdit);
+    onViewOptionsChange(viewOptionsBeforeEdit);
     onToggleEditing(false);
     setExpandedWidget(null);
   };
@@ -78,33 +94,18 @@ export function DashboardBuilder({
   }, [currentLayout, onLayoutChange, expandedWidget]);
 
   const updateWidgetSize = useCallback((id: string, field: 'w' | 'h', value: number) => {
-    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: value } : l));
+    const def = WIDGET_REGISTRY.find(w => w.id === id);
+    if (!def) return;
+    const min = field === 'w' ? def.minSize.w : def.minSize.h;
+    const max = field === 'w' ? (def.maxSize?.w || 12) : (def.maxSize?.h || 20);
+    const clamped = Math.max(min, Math.min(max, value));
+    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: clamped } : l));
   }, [currentLayout, onLayoutChange]);
 
   const applyTemplate = useCallback((template: DashboardTemplate) => {
     onLayoutChange([...template.layout]);
     toast({ title: `"${template.name}" applied — drag to customize` });
   }, [onLayoutChange]);
-
-  const handlePopOut = useCallback((widgetId: string) => {
-    const def = WIDGET_REGISTRY.find(w => w.id === widgetId);
-    if (!def) return;
-    const width = 500;
-    const height = 400;
-    const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
-    if (popup) {
-      popup.document.title = `UpStar — ${def.label}`;
-      popup.document.body.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#888;background:#111;">
-          <div style="text-align:center;">
-            <h2 style="color:#fff;margin-bottom:8px;">${def.label}</h2>
-            <p style="font-size:13px;">This widget is detached from the main dashboard.<br/>
-            Hide this window from OBS to keep it private.</p>
-          </div>
-        </div>`;
-      toast({ title: `"${def.label}" popped out`, description: 'Hide this window from OBS screen capture for privacy' });
-    }
-  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -172,6 +173,9 @@ export function DashboardBuilder({
               <TabsTrigger value="add" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
                 Widgets
               </TabsTrigger>
+              <TabsTrigger value="layout" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
+                Layout
+              </TabsTrigger>
               <TabsTrigger value="templates" className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary py-2 text-xs">
                 Templates
               </TabsTrigger>
@@ -220,7 +224,6 @@ export function DashboardBuilder({
                             )}
                           </button>
 
-                          {/* Expanded config panel */}
                           {isExpanded && layoutItem && (
                             <motion.div
                               initial={{ height: 0, opacity: 0 }}
@@ -229,11 +232,21 @@ export function DashboardBuilder({
                               className="overflow-hidden"
                             >
                               <div className="p-3 ml-6 mr-1 mt-1 mb-1 rounded-lg bg-muted/20 border border-border/50 space-y-3">
-                                {/* Width slider */}
+                                {/* Width control */}
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
                                     <label className="text-[10px] text-muted-foreground font-medium">Width</label>
-                                    <span className="text-[10px] font-mono text-primary">{layoutItem.w}/12 cols</span>
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        type="number"
+                                        value={layoutItem.w}
+                                        min={widget.minSize.w}
+                                        max={widget.maxSize?.w || 12}
+                                        onChange={(e) => updateWidgetSize(widget.id, 'w', parseInt(e.target.value) || widget.minSize.w)}
+                                        className="h-5 w-12 text-[10px] text-center p-0 font-mono"
+                                      />
+                                      <span className="text-[10px] text-muted-foreground">cols</span>
+                                    </div>
                                   </div>
                                   <Slider
                                     value={[layoutItem.w]}
@@ -245,11 +258,21 @@ export function DashboardBuilder({
                                   />
                                 </div>
 
-                                {/* Height slider */}
+                                {/* Height control */}
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
                                     <label className="text-[10px] text-muted-foreground font-medium">Height</label>
-                                    <span className="text-[10px] font-mono text-primary">{layoutItem.h} rows</span>
+                                    <div className="flex items-center gap-1">
+                                      <Input
+                                        type="number"
+                                        value={layoutItem.h}
+                                        min={widget.minSize.h}
+                                        max={widget.maxSize?.h || 20}
+                                        onChange={(e) => updateWidgetSize(widget.id, 'h', parseInt(e.target.value) || widget.minSize.h)}
+                                        className="h-5 w-12 text-[10px] text-center p-0 font-mono"
+                                      />
+                                      <span className="text-[10px] text-muted-foreground">rows</span>
+                                    </div>
                                   </div>
                                   <Slider
                                     value={[layoutItem.h]}
@@ -263,15 +286,17 @@ export function DashboardBuilder({
 
                                 {/* Action buttons */}
                                 <div className="flex gap-1.5">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 h-7 text-[10px] gap-1"
-                                    onClick={() => handlePopOut(widget.id)}
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                    Pop Out
-                                  </Button>
+                                  {onPopOut && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex-1 h-7 text-[10px] gap-1"
+                                      onClick={() => onPopOut(widget.id)}
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                      Pop Out
+                                    </Button>
+                                  )}
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -290,6 +315,42 @@ export function DashboardBuilder({
                     })}
                   </div>
                 ))}
+              </TabsContent>
+
+              <TabsContent value="layout" className="p-3 mt-0 space-y-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-3">
+                    Visibility
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-2 rounded-lg border border-border/50">
+                      <div className="flex items-center gap-2">
+                        <PanelTopClose className="w-4 h-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs font-medium">Site Header</p>
+                          <p className="text-[10px] text-muted-foreground">Navigation bar at the top</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={viewOptions.showHeader}
+                        onCheckedChange={(checked) => onViewOptionsChange({ ...viewOptions, showHeader: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg border border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Type className="w-4 h-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs font-medium">Dashboard Title</p>
+                          <p className="text-[10px] text-muted-foreground">Title bar and action buttons</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={viewOptions.showDashboardTitle}
+                        onCheckedChange={(checked) => onViewOptionsChange({ ...viewOptions, showDashboardTitle: checked })}
+                      />
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="templates" className="p-3 mt-0 space-y-2">

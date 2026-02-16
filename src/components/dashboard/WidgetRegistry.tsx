@@ -27,7 +27,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Song list with filters, search, and bulk actions',
     icon: ListMusic,
     defaultSize: { w: 8, h: 10 },
-    minSize: { w: 4, h: 6 },
+    minSize: { w: 3, h: 4 },
     category: 'core',
   },
   {
@@ -36,7 +36,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Audio player, visualizer, and track details',
     icon: Play,
     defaultSize: { w: 12, h: 5 },
-    minSize: { w: 6, h: 3 },
+    minSize: { w: 3, h: 2 },
     category: 'core',
   },
   {
@@ -45,7 +45,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Total, pending, and reviewed submission counts',
     icon: BarChart3,
     defaultSize: { w: 12, h: 2 },
-    minSize: { w: 4, h: 2 },
+    minSize: { w: 2, h: 2 },
     maxSize: { w: 12, h: 3 },
     category: 'analytics',
   },
@@ -55,7 +55,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Balance, recent revenue, and payout status',
     icon: DollarSign,
     defaultSize: { w: 4, h: 4 },
-    minSize: { w: 3, h: 3 },
+    minSize: { w: 2, h: 2 },
     category: 'analytics',
   },
   {
@@ -64,7 +64,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Search bar with status filter buttons',
     icon: Search,
     defaultSize: { w: 12, h: 2 },
-    minSize: { w: 6, h: 1 },
+    minSize: { w: 4, h: 1 },
     maxSize: { w: 12, h: 2 },
     category: 'tools',
   },
@@ -74,7 +74,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Private chat with platform admins',
     icon: MessageSquare,
     defaultSize: { w: 4, h: 6 },
-    minSize: { w: 3, h: 4 },
+    minSize: { w: 2, h: 3 },
     category: 'tools',
   },
   {
@@ -83,7 +83,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     description: 'Toggle submissions open/closed, go live, etc.',
     icon: Settings,
     defaultSize: { w: 4, h: 3 },
-    minSize: { w: 3, h: 2 },
+    minSize: { w: 2, h: 2 },
     category: 'tools',
   },
 ];
