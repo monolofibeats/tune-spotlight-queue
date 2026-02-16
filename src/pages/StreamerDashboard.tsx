@@ -385,6 +385,7 @@ const StreamerDashboard = () => {
     const statsConfig = getWidgetConfig('stats');
     const searchConfig = getWidgetConfig('search_filters');
     const queueConfig = getWidgetConfig('queue');
+    const earningsConfig = getWidgetConfig('earnings');
 
     return {
       stats: (
@@ -459,6 +460,7 @@ const StreamerDashboard = () => {
               onToggleSelect={handleToggleSelect} onStatusChange={handleStatusChange}
               onDelete={handleDeleteSubmission} onRestore={handleRestoreSubmission}
               onUpdate={handleUpdateSubmission}
+              showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
             />
           ))}
@@ -480,7 +482,7 @@ const StreamerDashboard = () => {
           )}
         </div>
       ),
-      earnings: <EarningsWidget streamerId={streamer.id} />,
+      earnings: <EarningsWidget streamerId={streamer.id} config={earningsConfig} />,
       quick_settings: <QuickSettingsWidget streamer={streamer} onUpdate={setStreamer} />,
       chat: (
         <div className="h-full min-h-[200px]">
@@ -617,6 +619,7 @@ const StreamerDashboard = () => {
                 widgetRenderers={widgetRenderers}
                 poppedOutWidgets={poppedOutWidgets}
                 showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
+                onPopOut={handlePopOut}
               />
             </TabsContent>
 

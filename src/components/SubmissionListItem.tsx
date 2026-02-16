@@ -109,6 +109,7 @@ interface SubmissionListItemProps {
     email: string | null;
   }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
+  showPriorityBadge?: boolean;
 }
 
 export function SubmissionListItem({ 
@@ -123,7 +124,8 @@ export function SubmissionListItem({
   onDelete,
   onRestore,
   onUpdate,
-  onPlayAudio 
+  onPlayAudio,
+  showPriorityBadge = true,
 }: SubmissionListItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -267,7 +269,7 @@ export function SubmissionListItem({
         )}
 
         {/* Priority indicator */}
-        {submission.is_priority && (
+        {showPriorityBadge && submission.is_priority && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
             <Zap className="w-2.5 h-2.5" />
             Priority
