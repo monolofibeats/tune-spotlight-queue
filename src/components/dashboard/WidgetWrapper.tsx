@@ -8,10 +8,12 @@ interface WidgetWrapperProps {
   children: ReactNode;
   onRemove?: () => void;
   isPoppedOut?: boolean;
+  textScale?: number;
 }
 
-export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppedOut }: WidgetWrapperProps) {
+export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppedOut, textScale = 100 }: WidgetWrapperProps) {
   const def = getWidgetDef(widgetId);
+  const zoomStyle = textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined;
 
   return (
     <div className={`h-full flex flex-col overflow-hidden rounded-xl transition-all ${
@@ -38,7 +40,7 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
         </div>
       )}
       {/* Content — container queries let widgets adapt to their size */}
-      <div className="flex-1 overflow-auto widget-container" style={{ containerType: 'size' }}>
+      <div className="flex-1 overflow-auto widget-container" style={{ containerType: 'size', ...zoomStyle }}>
         {children}
       </div>
     </div>
