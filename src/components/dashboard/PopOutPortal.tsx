@@ -13,11 +13,15 @@ interface PopOutPortalProps {
 export function PopOutPortal({ widgetId, title, children, onClose, width = 600, height = 500 }: PopOutPortalProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const windowRef = useRef<Window | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  // Keep the ref in sync without re-triggering the effect
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
     const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
     if (!popup) {
-      onClose();
+      onCloseRef.current();
       return;
     }
 
@@ -57,20 +61,21 @@ export function PopOutPortal({ widgetId, title, children, onClose, width = 600, 
     const checkClosed = setInterval(() => {
       if (popup.closed) {
         clearInterval(checkClosed);
-        onClose();
+        onCloseRef.current();
       }
     }, 500);
 
     popup.addEventListener('beforeunload', () => {
       clearInterval(checkClosed);
-      onClose();
+      onCloseRef.current();
     });
 
     return () => {
       clearInterval(checkClosed);
       if (!popup.closed) popup.close();
     };
-  }, [widgetId, title, width, height, onClose]);
+  // Only re-run when widgetId, title, or dimensions change — NOT onClose
+  }, [widgetId, title, width, height]);
 
   if (!container) return null;
 
