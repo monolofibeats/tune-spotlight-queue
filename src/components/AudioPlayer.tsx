@@ -70,11 +70,13 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      // Use the window that owns this element (critical for pop-out portals)
+      const win = trackRef.current?.ownerDocument?.defaultView ?? window;
+      win.addEventListener('mousemove', handleMouseMove);
+      win.addEventListener('mouseup', handleMouseUp);
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        win.removeEventListener('mousemove', handleMouseMove);
+        win.removeEventListener('mouseup', handleMouseUp);
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
@@ -186,11 +188,12 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      const win = trackRef.current?.ownerDocument?.defaultView ?? window;
+      win.addEventListener('mousemove', handleMouseMove);
+      win.addEventListener('mouseup', handleMouseUp);
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        win.removeEventListener('mousemove', handleMouseMove);
+        win.removeEventListener('mouseup', handleMouseUp);
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
