@@ -104,18 +104,34 @@ export default function StreamerPayments() {
 
   const loadData = async () => {
     try {
-      // Get streamer id
-      const { data: streamer } = await supabase
+      // Get streamer id - first try as owner, then as team member
+      let streamerIdResult: string | null = null;
+      
+      const { data: ownStreamer } = await supabase
         .from('streamers')
         .select('id')
         .eq('user_id', user!.id)
-        .single();
+        .maybeSingle();
 
-      if (!streamer) {
+      if (ownStreamer) {
+        streamerIdResult = ownStreamer.id;
+      } else {
+        // Check if user is a team member
+        const { data: teamMember } = await supabase
+          .from('streamer_team_members')
+          .select('streamer_id')
+          .eq('user_id', user!.id)
+          .eq('invitation_status', 'accepted')
+          .limit(1)
+          .maybeSingle();
+        if (teamMember) streamerIdResult = teamMember.streamer_id;
+      }
+
+      if (!streamerIdResult) {
         navigate('/');
         return;
       }
-      setStreamerId(streamer.id);
+      setStreamerId(streamerIdResult);
 
       // Fetch earnings from edge function
       const { data: earningsData, error: earningsError } = await supabase.functions.invoke('streamer-earnings');
@@ -126,7 +142,7 @@ export default function StreamerPayments() {
       const { data: walletData } = await supabase
         .from('payout_preferences')
         .select('*')
-        .eq('streamer_id', streamer.id)
+        .eq('streamer_id', streamerIdResult)
         .order('is_primary', { ascending: false });
 
       setWallets((walletData as PayoutPref[]) || []);
@@ -135,7 +151,7 @@ export default function StreamerPayments() {
       const { data: payoutData } = await supabase
         .from('payout_requests')
         .select('*')
-        .eq('streamer_id', streamer.id)
+        .eq('streamer_id', streamerIdResult)
         .order('created_at', { ascending: false });
 
       setPayoutRequests((payoutData || []) as PayoutRequest[]);

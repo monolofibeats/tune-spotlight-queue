@@ -27,12 +27,23 @@ export function Header() {
   const { user, isAdmin, isStreamer } = useAuth();
   const { t } = useLanguage();
 
-  // Fetch streamer ID for support chat
+  // Fetch streamer ID for support chat (owner or team member)
   useEffect(() => {
     if (!user || !isStreamer) return;
-    supabase.from('streamers').select('id').eq('user_id', user.id).single().then(({ data }) => {
-      if (data) setStreamerId(data.id);
-    });
+    const fetchStreamerId = async () => {
+      const { data: own } = await supabase.from('streamers').select('id').eq('user_id', user.id).maybeSingle();
+      if (own) { setStreamerId(own.id); return; }
+      // Check team membership
+      const { data: team } = await supabase
+        .from('streamer_team_members')
+        .select('streamer_id')
+        .eq('user_id', user.id)
+        .eq('invitation_status', 'accepted')
+        .limit(1)
+        .maybeSingle();
+      if (team) setStreamerId(team.streamer_id);
+    };
+    fetchStreamerId();
   }, [user, isStreamer]);
 
   return (

@@ -6,14 +6,15 @@ import {
   TrendingUp, 
   Clock, 
   Loader2,
-  Zap
+  Zap,
+  Radio
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Badge } from '@/components/ui/badge';
 import { AnimatedButton } from '@/components/AnimatedButton';
 import { MusicEmbed } from '@/components/MusicEmbed';
 import { SubmissionBidPanel } from '@/components/SubmissionBidPanel';
-import { StreamerSearch } from '@/components/StreamerSearch';
+import { StreamerSearch, getRecentSearches } from '@/components/StreamerSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
@@ -149,6 +150,36 @@ const UserDashboard = () => {
               Track your submissions and boost your songs
             </p>
             <StreamerSearch />
+
+            {/* Quick Access - Recent Searches */}
+            {(() => {
+              const recent = getRecentSearches();
+              if (recent.length === 0) return null;
+              return (
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> Quick:
+                  </span>
+                  {recent.map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => navigate(`/${s.slug}`)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border/50 bg-card/50 hover:bg-accent/50 transition-colors text-xs"
+                    >
+                      {s.avatar_url ? (
+                        <img src={s.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary">
+                          {s.display_name[0]}
+                        </div>
+                      )}
+                      <span className="font-medium">{s.display_name}</span>
+                      {s.is_live && <Radio className="w-3 h-3 text-red-400" />}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
           </motion.div>
 
           {/* Stats */}
