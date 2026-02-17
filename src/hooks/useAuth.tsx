@@ -31,21 +31,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkRoles = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Check user_roles table
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
 
-      if (error) {
-        console.error('Error checking roles:', error);
-        return { isAdmin: false, isStreamer: false };
+      if (roleError) {
+        console.error('Error checking roles:', roleError);
       }
       
-      const roles = data?.map(r => r.role) || [];
-      return {
-        isAdmin: roles.includes('admin'),
-        isStreamer: roles.includes('streamer'),
-      };
+      const roles = roleData?.map(r => r.role) || [];
+      let isAdmin = roles.includes('admin');
+      let isStreamer = roles.includes('streamer');
+
+      // Also check if user owns a streamer page (streamers table)
+      if (!isStreamer) {
+        const { data: streamerData } = await supabase
+          .from('streamers')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('status', 'approved')
+          .maybeSingle();
+        if (streamerData) isStreamer = true;
+      }
+
+      return { isAdmin, isStreamer };
     } catch (error) {
       console.error('Error checking roles:', error);
       return { isAdmin: false, isStreamer: false };
