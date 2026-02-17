@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,40 +7,47 @@ import { MessageSquare, HelpCircle } from 'lucide-react';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
 
 const faqs = [
   {
-    q: "How do I submit a song to a streamer?",
-    a: "Visit the streamer's profile page and click on 'Submit a Song'. Fill in the required details including the song link, artist name, and any optional message. Once submitted, your song will appear in the streamer's queue."
+    q: "How do I set up my streamer page?",
+    a: "Once approved, head to your Streamer Dashboard and click on Settings. You can customise your page slug, hero text, colors, background style, banner, and more. Changes are saved automatically and reflected on your public profile."
   },
   {
-    q: "How does the queue system work?",
-    a: "Songs are played in the order they are submitted. Priority submissions and boosted songs may move higher in the queue. The streamer decides when to play each song during their live session."
+    q: "How do payouts work?",
+    a: "Navigate to Payments from the gear menu. You can set up PayPal or bank transfer as your preferred payout method, then request a payout once your balance meets the minimum threshold. Our team processes requests manually and you'll be notified once it's completed."
   },
   {
-    q: "What payment methods are accepted?",
-    a: "We accept all major credit and debit cards through our secure payment provider Stripe. Payments are processed in the currency configured by each streamer."
+    q: "What fees does the platform charge?",
+    a: "A small platform fee is deducted from each submission payment. The exact split is visible in your Payments & Statistics pages. Stripe processing fees are also deducted before your share is calculated."
   },
   {
-    q: "Can I get a refund?",
-    a: "Refund policies vary by streamer. If your song was not played during the session, please reach out via the support chat and we'll help resolve the situation."
+    q: "How do I manage my submission queue?",
+    a: "Your dashboard shows all incoming submissions sorted by priority and payment amount. You can mark songs as 'playing', 'reviewed', or 'skipped'. Use the bulk action bar to manage multiple submissions at once."
   },
   {
-    q: "How do I become a streamer on UpStar?",
-    a: "You can apply to become a streamer through the application form on the Discovery page. Once approved by our admin team, you'll get access to your own dashboard and customisable submission page."
+    q: "Can I invite team members to help manage my page?",
+    a: "Yes! Go to your Streamer Settings and open the Team Manager section. You can invite team members by email and assign them roles like Viewer, Editor, or Admin. Editors and Admins can manage your queue and settings."
   },
   {
-    q: "How do payouts work for streamers?",
-    a: "Streamers can request payouts from their Payments page. We support PayPal and bank transfers. A small platform fee is deducted from each transaction."
+    q: "How do presets work?",
+    a: "Presets let you save different dashboard layouts and theme configurations for different occasions (e.g. a chill lofi session vs. a high-energy review stream). You can switch between presets from your dashboard."
   },
   {
-    q: "Is there a minimum payout amount?",
-    a: "Yes, the minimum payout threshold is displayed on your Payments page and depends on your chosen payout method and currency."
+    q: "How do I customise my submission form?",
+    a: "In Streamer Settings, use the Form Field Builder to add, reorder, or remove custom fields on your submission page. You can set fields as required, add placeholders, and choose field types like text, select, or textarea."
   },
   {
-    q: "How can I change my account settings?",
-    a: "Navigate to Settings from the gear icon in the header. There you can update your profile, display name, and other preferences."
+    q: "What should I do if I have a payment dispute?",
+    a: "Contact us via the Support chat below. Provide the submission ID and any relevant details, and our team will investigate and resolve the issue as quickly as possible."
+  },
+  {
+    q: "How do I go live and show my stream on my page?",
+    a: "Enable the stream embed in your Streamer Settings and configure the stream URL (Twitch, YouTube, etc.). When you're live, toggle your live status and viewers will see your stream directly on your profile page."
+  },
+  {
+    q: "How can I track my earnings and performance?",
+    a: "Visit the Statistics page from the gear menu. You'll find charts and breakdowns of your earnings over time, submission counts, and other performance metrics."
   },
 ];
 
@@ -51,7 +58,7 @@ export default function Support() {
 
   useEffect(() => {
     if (!user || !isStreamer) return;
-    const fetch = async () => {
+    const fetchId = async () => {
       const { data: own } = await supabase.from('streamers').select('id').eq('user_id', user.id).maybeSingle();
       if (own) { setStreamerId(own.id); return; }
       const { data: team } = await supabase
@@ -63,7 +70,7 @@ export default function Support() {
         .maybeSingle();
       if (team) setStreamerId(team.streamer_id);
     };
-    fetch();
+    fetchId();
   }, [user, isStreamer]);
 
   return (
@@ -90,9 +97,11 @@ export default function Support() {
         <section className="rounded-xl border border-border bg-card p-6 text-center">
           <h2 className="text-xl font-semibold mb-2">Still need help?</h2>
           <p className="text-muted-foreground mb-4">
-            {user
+            {user && isStreamer
               ? "Start a live chat with our support team and we'll get back to you as soon as possible."
-              : "Sign in to start a live chat with our support team."}
+              : user
+              ? "Support chat is available for streamers and team members. If you need help, please reach out via the contact form."
+              : "Sign in to access support features."}
           </p>
           {user && isStreamer && streamerId ? (
             <Button onClick={() => setChatOpen(prev => !prev)} className="gap-2">

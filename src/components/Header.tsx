@@ -24,6 +24,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [supportChatOpen, setSupportChatOpen] = useState(false);
   const [streamerId, setStreamerId] = useState<string | null>(null);
+  const [isStreamerOwner, setIsStreamerOwner] = useState(false);
   const { user, isAdmin, isStreamer } = useAuth();
   const { t } = useLanguage();
 
@@ -32,7 +33,7 @@ export function Header() {
     if (!user || !isStreamer) return;
     const fetchStreamerId = async () => {
       const { data: own } = await supabase.from('streamers').select('id').eq('user_id', user.id).maybeSingle();
-      if (own) { setStreamerId(own.id); return; }
+      if (own) { setStreamerId(own.id); setIsStreamerOwner(true); return; }
       // Check team membership
       const { data: team } = await supabase
         .from('streamer_team_members')
@@ -67,11 +68,19 @@ export function Header() {
             {user && <BidNotificationBell />}
             
           {/* Dashboard Link */}
-            {isStreamer && (
+            {isStreamer && isStreamerOwner && (
               <Link to="/streamer/dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                   <LayoutDashboard className="w-3.5 h-3.5" />
                   My Dashboard
+                </Button>
+              </Link>
+            )}
+            {isStreamer && !isStreamerOwner && (
+              <Link to="/streamer/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  Team Dashboard
                 </Button>
               </Link>
             )}

@@ -138,11 +138,36 @@ const StreamerDashboard = () => {
       } else {
         query = query.eq('user_id', user.id);
       }
-      const { data, error } = await query.single();
-      if (error) {
+      const { data, error } = await query.maybeSingle();
+      
+      // If no owned streamer profile, check team membership
+      if (!data && !slug) {
+        const { data: team } = await supabase
+          .from('streamer_team_members')
+          .select('streamer_id')
+          .eq('user_id', user.id)
+          .eq('invitation_status', 'accepted')
+          .limit(1)
+          .maybeSingle();
+        if (team) {
+          const { data: teamStreamer } = await supabase
+            .from('streamers')
+            .select('*')
+            .eq('id', team.streamer_id)
+            .single();
+          if (teamStreamer) {
+            setStreamer(teamStreamer as Streamer);
+            return teamStreamer;
+          }
+        }
+        setIsLoading(false);
+        return null;
+      }
+      
+      if (error || !data) {
         console.error('Error fetching streamer:', error);
         setIsLoading(false);
-        return;
+        return null;
       }
       setStreamer(data as Streamer);
       return data;
