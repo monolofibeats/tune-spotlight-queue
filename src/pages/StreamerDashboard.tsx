@@ -32,7 +32,7 @@ import { QuickSettingsWidget } from '@/components/dashboard/widgets/QuickSetting
 import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
-import { useStreamerPresets } from '@/hooks/useStreamerPresets';
+import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
 import type { Layout } from 'react-grid-layout';
 import type { Streamer } from '@/types/streamer';
 
@@ -96,7 +96,7 @@ const StreamerDashboard = () => {
   });
 
   // Load saved layout from preset
-  const { activePreset, updatePreset, createPreset } = useStreamerPresets(streamer?.id);
+  const { presets, activePreset, updatePreset, createPreset, deletePreset } = useStreamerPresets(streamer?.id);
   
   useEffect(() => {
     if (activePreset?.dashboard_layout) {
@@ -521,6 +521,66 @@ const StreamerDashboard = () => {
     );
   }
 
+  const handleSaveAsPreset = async (name: string) => {
+    if (!streamer) return;
+    const layoutData = {
+      grid_layout: dashboardLayout,
+      view_options: viewOptions,
+      widget_configs: widgetConfigs,
+      show_when_popped_out: Array.from(popOutOptions.showWhenPoppedOut),
+      version: 3,
+    };
+    await createPreset();
+    // The createPreset creates with default data, so we need to find the newest and update it
+    const { data } = await supabase
+      .from('streamer_presets')
+      .select('*')
+      .eq('streamer_id', streamer.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (data) {
+      await updatePreset(data.id, {
+        name,
+        dashboard_layout: layoutData as unknown as { widgets: string[] },
+      });
+    }
+  };
+
+  const handleLoadPreset = (preset: StreamerPreset) => {
+    const saved = preset.dashboard_layout as unknown as {
+      grid_layout?: Layout[];
+      view_options?: DashboardViewOptions;
+      widget_configs?: WidgetConfigs;
+      show_when_popped_out?: string[];
+    };
+    if (saved.grid_layout && Array.isArray(saved.grid_layout)) {
+      setDashboardLayout(saved.grid_layout);
+    }
+    if (saved.view_options) {
+      setViewOptions(saved.view_options);
+    }
+    if (saved.widget_configs) {
+      setWidgetConfigs(saved.widget_configs);
+    }
+    if (saved.show_when_popped_out) {
+      setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
+    }
+    toast({ title: `Loaded "${preset.name}"` });
+  };
+
+  const handleDeletePreset = async (presetId: string) => {
+    await deletePreset(presetId);
+  };
+
+  const handleRenamePreset = async (presetId: string, newName: string) => {
+    await updatePreset(presetId, { name: newName });
+    toast({ title: `Renamed to "${newName}"` });
+  };
+
+  // Filter out the active preset from user presets list (it's the "current" one)
+  const savedUserPresets = presets.filter(p => !p.is_active);
+
   const builderProps = {
     isEditing: isBuilderEditing,
     onToggleEditing: setIsBuilderEditing,
@@ -535,6 +595,11 @@ const StreamerDashboard = () => {
     onWidgetConfigsChange: setWidgetConfigs,
     popOutOptions,
     onPopOutOptionsChange: setPopOutOptions,
+    userPresets: savedUserPresets,
+    onSaveAsPreset: handleSaveAsPreset,
+    onLoadPreset: handleLoadPreset,
+    onDeletePreset: handleDeletePreset,
+    onRenamePreset: handleRenamePreset,
   };
 
   return (
