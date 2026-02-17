@@ -63,6 +63,7 @@ const StreamerDashboard = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
+  const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
 
   // View options for header/title visibility
   const [viewOptions, setViewOptions] = useState<DashboardViewOptions>({
@@ -120,8 +121,8 @@ const StreamerDashboard = () => {
       if (saved.show_when_popped_out) {
         setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
       }
-      if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets)) {
-        setPoppedOutWidgets(new Set(saved.popped_out_widgets));
+      if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets) && saved.popped_out_widgets.length > 0) {
+        setPendingPopOuts(saved.popped_out_widgets);
       }
     }
   }, [activePreset]);
@@ -591,10 +592,12 @@ const StreamerDashboard = () => {
     if (saved.show_when_popped_out) {
       setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
     }
-    if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets)) {
-      setPoppedOutWidgets(new Set(saved.popped_out_widgets));
+    if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets) && saved.popped_out_widgets.length > 0) {
+      setPoppedOutWidgets(new Set());
+      setPendingPopOuts(saved.popped_out_widgets);
     } else {
       setPoppedOutWidgets(new Set());
+      setPendingPopOuts([]);
     }
     toast({ title: `Loaded "${preset.name}"` });
   };
@@ -720,8 +723,26 @@ const StreamerDashboard = () => {
 
       {/* Floating chat — only show if chat widget is NOT in the grid at all (never added) */}
 
+      {/* Pending pop-out banner */}
+      {pendingPopOuts.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+          <button
+            onClick={() => {
+              // Open all windows from this click handler (user gesture) to avoid popup blocker
+              const widgetIds = [...pendingPopOuts];
+              setPendingPopOuts([]);
+              setPoppedOutWidgets(new Set(widgetIds));
+            }}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open {pendingPopOuts.length} pop-out window{pendingPopOuts.length > 1 ? 's' : ''}
+          </button>
+        </div>
+      )}
+
       {/* Pop-out portals */}
-      {Array.from(poppedOutWidgets).map((widgetId, index) => {
+      {Array.from(poppedOutWidgets).map((widgetId) => {
         const def = getWidgetDef(widgetId);
         const content = widgetRenderers[widgetId];
         if (!def || !content) return null;
@@ -731,7 +752,6 @@ const StreamerDashboard = () => {
             widgetId={widgetId}
             title={def.label}
             onClose={() => handlePopOutClose(widgetId)}
-            openDelay={index * 300}
           >
             <div className="min-h-[200px]">
               {content}
