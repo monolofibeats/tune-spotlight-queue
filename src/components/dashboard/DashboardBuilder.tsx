@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -163,8 +162,7 @@ export function DashboardBuilder({
     const def = WIDGET_REGISTRY.find(w => w.id === id);
     if (!def) return;
     const min = field === 'w' ? def.minSize.w : def.minSize.h;
-    const max = field === 'w' ? (def.maxSize?.w || 12) : (def.maxSize?.h || 20);
-    const clamped = Math.max(min, Math.min(max, value));
+    const clamped = Math.max(min, value);
     onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: clamped } : l));
   }, [currentLayout, onLayoutChange]);
 
@@ -311,6 +309,7 @@ export function DashboardBuilder({
                         <Switch
                           checked={viewOptions.showHeader}
                           onCheckedChange={(checked) => onViewOptionsChange({ ...viewOptions, showHeader: checked })}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
                       <div className="flex items-center justify-between p-2 rounded-lg border border-border/50">
@@ -323,7 +322,10 @@ export function DashboardBuilder({
                         </div>
                         <Switch
                           checked={viewOptions.showDashboardTitle}
-                          onCheckedChange={(checked) => onViewOptionsChange({ ...viewOptions, showDashboardTitle: checked })}
+                          onCheckedChange={(checked) => {
+                            onViewOptionsChange({ ...viewOptions, showDashboardTitle: checked });
+                          }}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
                     </div>
@@ -432,28 +434,24 @@ function WidgetsTab({
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[10px] text-muted-foreground font-medium">Width</label>
                           <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.w} min={widget.minSize.w} max={widget.maxSize?.w || 12}
+                            <Input type="number" value={layoutItem.w} min={widget.minSize.w}
                               onChange={(e) => updateWidgetSize(widget.id, 'w', parseInt(e.target.value) || widget.minSize.w)}
-                              className="h-5 w-12 text-[10px] text-center p-0 font-mono" />
+                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
                             <span className="text-[10px] text-muted-foreground">cols</span>
                           </div>
                         </div>
-                        <Slider value={[layoutItem.w]} min={widget.minSize.w} max={widget.maxSize?.w || 12} step={1}
-                          onValueChange={([v]) => updateWidgetSize(widget.id, 'w', v)} className="h-4" />
                       </div>
                       {/* Height */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[10px] text-muted-foreground font-medium">Height</label>
                           <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.h} min={widget.minSize.h} max={widget.maxSize?.h || 20}
+                            <Input type="number" value={layoutItem.h} min={widget.minSize.h}
                               onChange={(e) => updateWidgetSize(widget.id, 'h', parseInt(e.target.value) || widget.minSize.h)}
-                              className="h-5 w-12 text-[10px] text-center p-0 font-mono" />
+                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
                             <span className="text-[10px] text-muted-foreground">rows</span>
                           </div>
                         </div>
-                        <Slider value={[layoutItem.h]} min={widget.minSize.h} max={widget.maxSize?.h || 20} step={1}
-                          onValueChange={([v]) => updateWidgetSize(widget.id, 'h', v)} className="h-4" />
                       </div>
 
                       {/* Pop-out visibility */}
