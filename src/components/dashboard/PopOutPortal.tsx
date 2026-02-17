@@ -8,80 +8,74 @@ interface PopOutPortalProps {
   onClose: () => void;
   width?: number;
   height?: number;
-  /** Stagger opening to avoid browser popup blockers */
-  openDelay?: number;
 }
 
-export function PopOutPortal({ widgetId, title, children, onClose, width = 600, height = 500, openDelay = 0 }: PopOutPortalProps) {
+export function PopOutPortal({ widgetId, title, children, onClose, width = 600, height = 500 }: PopOutPortalProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const windowRef = useRef<Window | null>(null);
   const onCloseRef = useRef(onClose);
-  const checkClosedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Keep the ref in sync without re-triggering the effect
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
-      if (!popup) {
-        onCloseRef.current();
-        return;
+    const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
+    if (!popup) {
+      onCloseRef.current();
+      return;
+    }
+
+    windowRef.current = popup;
+    popup.document.title = `UpStar — ${title}`;
+
+    // Copy stylesheets from parent
+    const parentStyles = document.querySelectorAll('link[rel="stylesheet"], style');
+    parentStyles.forEach(style => {
+      popup.document.head.appendChild(style.cloneNode(true));
+    });
+
+    // Add base styles
+    const baseStyle = popup.document.createElement('style');
+    baseStyle.textContent = `
+      body {
+        margin: 0;
+        padding: 16px;
+        background: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-family: inherit;
+        overflow: auto;
       }
+      :root {
+        ${getComputedCSSVars()}
+      }
+    `;
+    popup.document.head.appendChild(baseStyle);
 
-      windowRef.current = popup;
-      popup.document.title = `UpStar — ${title}`;
+    // Create render container
+    const div = popup.document.createElement('div');
+    div.id = 'pop-out-root';
+    popup.document.body.appendChild(div);
+    setContainer(div);
 
-      // Copy stylesheets from parent
-      const parentStyles = document.querySelectorAll('link[rel="stylesheet"], style');
-      parentStyles.forEach(style => {
-        popup.document.head.appendChild(style.cloneNode(true));
-      });
-
-      // Add base styles
-      const baseStyle = popup.document.createElement('style');
-      baseStyle.textContent = `
-        body {
-          margin: 0;
-          padding: 16px;
-          background: hsl(var(--background));
-          color: hsl(var(--foreground));
-          font-family: inherit;
-          overflow: auto;
-        }
-        :root {
-          ${getComputedCSSVars()}
-        }
-      `;
-      popup.document.head.appendChild(baseStyle);
-
-      // Create render container
-      const div = popup.document.createElement('div');
-      div.id = 'pop-out-root';
-      popup.document.body.appendChild(div);
-      setContainer(div);
-
-      // Handle window close
-      checkClosedRef.current = setInterval(() => {
-        if (popup.closed) {
-          if (checkClosedRef.current) clearInterval(checkClosedRef.current);
-          onCloseRef.current();
-        }
-      }, 500);
-
-      popup.addEventListener('beforeunload', () => {
-        if (checkClosedRef.current) clearInterval(checkClosedRef.current);
+    // Handle window close
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
         onCloseRef.current();
-      });
-    }, openDelay);
+      }
+    }, 500);
+
+    popup.addEventListener('beforeunload', () => {
+      clearInterval(checkClosed);
+      onCloseRef.current();
+    });
 
     return () => {
-      clearTimeout(timeoutId);
-      if (checkClosedRef.current) clearInterval(checkClosedRef.current);
-      if (windowRef.current && !windowRef.current.closed) windowRef.current.close();
+      clearInterval(checkClosed);
+      if (!popup.closed) popup.close();
     };
   // Only re-run when widgetId, title, or dimensions change — NOT onClose
-  }, [widgetId, title, width, height, openDelay]);
+  }, [widgetId, title, width, height]);
 
   if (!container) return null;
 
