@@ -533,15 +533,18 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     };
   }, []);
 
+  // Container ref for rendering dropdowns inside pop-out windows
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       {/* Mode selector */}
       <div className="absolute top-2 left-2 z-10">
         <Select value={mode} onValueChange={(v) => setMode(v as VisualizerMode)}>
           <SelectTrigger className="h-7 w-[140px] text-[11px] bg-background/80 border-border/50 backdrop-blur-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent container={containerRef.current}>
             <SelectItem value="spectrum">Spectrum</SelectItem>
             <SelectItem value="polar-sample">Polar Sample</SelectItem>
             <SelectItem value="polar-level">Polar Level</SelectItem>
