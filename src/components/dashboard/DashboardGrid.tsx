@@ -86,7 +86,7 @@ export function DashboardGrid({
         const isPoppedOut = poppedOutWidgets.has(item.i);
         const textScale = (widgetConfigs[item.i]?.textScale as number) ?? 100;
         return (
-          <div key={item.i} style={textScale !== 100 ? { fontSize: `${textScale / 100}rem` } : undefined}>
+          <div key={item.i} style={textScale !== 100 ? { zoom: textScale / 100 } : undefined}>
             <WidgetWrapper
               widgetId={item.i}
               isEditing={isEditing}
