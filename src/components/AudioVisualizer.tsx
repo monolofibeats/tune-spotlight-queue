@@ -349,7 +349,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     const LISSAJOUS_MAX = 2048;
 
     const BOTTOM_MARGIN = 28;
-    const RIGHT_MARGIN = 120;
+    const RIGHT_MARGIN = 80;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
