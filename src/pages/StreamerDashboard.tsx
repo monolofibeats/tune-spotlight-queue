@@ -96,7 +96,7 @@ const StreamerDashboard = () => {
   });
 
   // Load saved layout from preset
-  const { presets, activePreset, updatePreset, createPreset, deletePreset } = useStreamerPresets(streamer?.id);
+  const { presets, activePreset, updatePreset, deletePreset, refetch: refetchPresets } = useStreamerPresets(streamer?.id);
   
   useEffect(() => {
     if (activePreset?.dashboard_layout) {
@@ -378,7 +378,23 @@ const StreamerDashboard = () => {
         dashboard_layout: layoutData as unknown as { widgets: string[] },
       });
     } else {
-      await createPreset();
+      // Create an initial active preset with the current layout
+      const { error } = await supabase
+        .from('streamer_presets')
+        .insert({
+          streamer_id: streamer.id,
+          name: 'Default',
+          platform_type: 'custom',
+          occasion_type: 'custom',
+          is_active: true,
+          theme_config: {} as unknown as Record<string, never>,
+          dashboard_layout: layoutData as unknown as Record<string, never>,
+          form_template: null,
+        });
+      if (error) {
+        toast({ title: 'Failed to save', variant: 'destructive' });
+      }
+      refetchPresets();
     }
   };
 
@@ -530,21 +546,23 @@ const StreamerDashboard = () => {
       show_when_popped_out: Array.from(popOutOptions.showWhenPoppedOut),
       version: 3,
     };
-    await createPreset();
-    // The createPreset creates with default data, so we need to find the newest and update it
-    const { data } = await supabase
+    const { error } = await supabase
       .from('streamer_presets')
-      .select('*')
-      .eq('streamer_id', streamer.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-    if (data) {
-      await updatePreset(data.id, {
+      .insert({
+        streamer_id: streamer.id,
         name,
-        dashboard_layout: layoutData as unknown as { widgets: string[] },
+        platform_type: 'custom',
+        occasion_type: 'custom',
+        is_active: false,
+        theme_config: {} as unknown as Record<string, never>,
+        dashboard_layout: layoutData as unknown as Record<string, never>,
+        form_template: null,
       });
+    if (error) {
+      toast({ title: 'Failed to save preset', variant: 'destructive' });
+      throw error;
     }
+    await refetchPresets();
   };
 
   const handleLoadPreset = (preset: StreamerPreset) => {
