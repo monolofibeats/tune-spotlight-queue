@@ -623,7 +623,17 @@ const StreamerDashboard = () => {
     onSave: handleSaveLayout,
     onPopOut: handlePopOut,
     poppedOutWidgets,
-    onPoppedOutWidgetsChange: setPoppedOutWidgets,
+    onPoppedOutWidgetsChange: (newSet: Set<string>) => {
+      // Route through pendingPopOuts so user gets click-to-open buttons
+      const newIds = [...newSet];
+      if (newIds.length > 0) {
+        setPoppedOutWidgets(new Set());
+        setPendingPopOuts(newIds);
+      } else {
+        setPoppedOutWidgets(new Set());
+        setPendingPopOuts([]);
+      }
+    },
     viewOptions,
     onViewOptionsChange: setViewOptions,
     widgetConfigs,
