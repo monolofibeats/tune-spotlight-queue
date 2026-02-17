@@ -29,7 +29,7 @@ export function QuickSettingsWidget({ streamer, onUpdate }: QuickSettingsWidgetP
   };
 
   return (
-    <div className="space-y-4">
+    <div className="widget-quick-settings space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-primary" />

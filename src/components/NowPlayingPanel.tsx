@@ -271,7 +271,7 @@ export function NowPlayingPanel({
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="mb-6 overflow-hidden"
         >
-          <div className="glass-strong rounded-2xl border-2 border-primary/40 overflow-hidden shadow-lg shadow-primary/10">
+          <div className="widget-now-playing glass-strong rounded-2xl border-2 border-primary/40 overflow-hidden shadow-lg shadow-primary/10">
             {/* Header */}
             <div className="px-6 py-4 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-border/30">
               <div className="flex items-center gap-4">
@@ -295,7 +295,7 @@ export function NowPlayingPanel({
 
             {/* Main Content */}
             <div className="p-6">
-              <div className="flex flex-col gap-6">
+              <div className="np-main-content flex flex-col gap-6">
                 {/* Song Info & Player - Full Width */}
                 <div className="space-y-4">
                   {/* Song Header */}
