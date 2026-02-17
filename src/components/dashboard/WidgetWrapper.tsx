@@ -37,8 +37,8 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
           )}
         </div>
       )}
-      {/* Content — no extra padding, widgets control their own spacing */}
-      <div className="flex-1 overflow-auto">
+      {/* Content — container queries let widgets adapt to their size */}
+      <div className="flex-1 overflow-auto widget-container" style={{ containerType: 'size' }}>
         {children}
       </div>
     </div>

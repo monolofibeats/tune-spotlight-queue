@@ -57,7 +57,7 @@ export function EarningsWidget({ streamerId, config }: EarningsWidgetProps) {
   const fmt = (cents: number) => `€${(cents / 100).toFixed(2)}`;
 
   return (
-    <div className="space-y-3">
+    <div className="widget-earnings space-y-3">
       {cfg.showBalance && (
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-emerald-500/20">

@@ -393,7 +393,7 @@ const StreamerDashboard = () => {
 
     return {
       stats: (
-        <div className="grid grid-cols-3 gap-3 h-full">
+        <div className="widget-stats-grid grid grid-cols-3 gap-3 h-full">
           {statsConfig.showTotal !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
@@ -427,7 +427,7 @@ const StreamerDashboard = () => {
         </div>
       ),
       search_filters: (
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="widget-search-filters flex flex-col sm:flex-row gap-3">
           {searchConfig.showSearchBar !== false && (
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -454,7 +454,7 @@ const StreamerDashboard = () => {
         </div>
       ),
       queue: (
-        <div className="space-y-2">
+        <div className="widget-queue space-y-2">
           {filteredSubmissions.map((submission, index) => (
             <SubmissionListItem
               key={submission.id} submission={submission}
@@ -489,7 +489,7 @@ const StreamerDashboard = () => {
       earnings: <EarningsWidget streamerId={streamer.id} config={earningsConfig} />,
       quick_settings: <QuickSettingsWidget streamer={streamer} onUpdate={setStreamer} />,
       chat: (
-        <div className="h-full min-h-[200px] overflow-hidden">
+        <div className="widget-chat h-full min-h-[200px] overflow-hidden">
           <AdminStreamerChat streamerId={streamer.id} role="streamer" />
         </div>
       ),
