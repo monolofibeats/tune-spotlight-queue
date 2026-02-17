@@ -278,7 +278,7 @@ export function SubmissionListItem({
 
         {/* Artist - Title */}
         <div className="flex-1 min-w-0">
-          <p className={`font-medium truncate ${styles.title}`}>
+          <p className={`font-medium truncate scalable-text ${styles.title}`}>
             <span className="text-muted-foreground">{submission.artist_name}</span>
             <span className="mx-1.5 text-muted-foreground/50">•</span>
             <span>{submission.song_title}</span>

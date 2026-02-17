@@ -308,7 +308,7 @@ export function NowPlayingPanel({
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-2xl font-display font-bold truncate">
+                      <h2 className="text-2xl font-display font-bold truncate scalable-text">
                           {submission.song_title}
                         </h2>
                         {submission.is_priority && (
