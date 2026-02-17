@@ -721,7 +721,7 @@ const StreamerDashboard = () => {
       {/* Floating chat — only show if chat widget is NOT in the grid at all (never added) */}
 
       {/* Pop-out portals */}
-      {Array.from(poppedOutWidgets).map(widgetId => {
+      {Array.from(poppedOutWidgets).map((widgetId, index) => {
         const def = getWidgetDef(widgetId);
         const content = widgetRenderers[widgetId];
         if (!def || !content) return null;
@@ -731,6 +731,7 @@ const StreamerDashboard = () => {
             widgetId={widgetId}
             title={def.label}
             onClose={() => handlePopOutClose(widgetId)}
+            openDelay={index * 300}
           >
             <div className="min-h-[200px]">
               {content}
