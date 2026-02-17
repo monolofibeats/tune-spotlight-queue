@@ -11,12 +11,11 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
   {
     id: 'compact',
     name: 'Compact',
-    description: 'Stats, queue & now playing — tight and efficient',
+    description: 'Now playing + queue — tight and efficient',
     layout: [
-      { i: 'stats', x: 0, y: 0, w: 12, h: 2, minW: 4, minH: 2 },
-      { i: 'now_playing', x: 0, y: 2, w: 12, h: 5, minW: 6, minH: 3 },
-      { i: 'search_filters', x: 0, y: 7, w: 12, h: 2, minW: 6, minH: 1 },
-      { i: 'queue', x: 0, y: 9, w: 12, h: 10, minW: 4, minH: 6 },
+      { i: 'now_playing', x: 0, y: 0, w: 12, h: 9.3, minW: 6, minH: 3 },
+      { i: 'search_filters', x: 0, y: 9.3, w: 12, h: 1.4, minW: 6, minH: 1 },
+      { i: 'queue', x: 0, y: 10.7, w: 12, h: 20, minW: 4, minH: 6 },
     ],
   },
   {
