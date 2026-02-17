@@ -275,7 +275,7 @@ export function DashboardBuilder({
                 ))}
               </div>
 
-              <ScrollArea className="max-h-[50vh]">
+              <ScrollArea className="max-h-[70vh] overflow-y-auto">
                 <div className="p-3">
                   {activeTab === 'widgets' && (
                     <WidgetsTab
