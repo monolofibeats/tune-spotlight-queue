@@ -132,15 +132,13 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {isStreamer && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setSupportChatOpen(prev => !prev)} className="flex items-center gap-2 cursor-pointer">
-                        <MessageSquare className="w-4 h-4" />
-                        Support
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/support" className="flex items-center gap-2 cursor-pointer">
+                      <MessageSquare className="w-4 h-4" />
+                      Support
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -212,10 +210,12 @@ export function Header() {
                     Settings
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm" onClick={() => { setMobileMenuOpen(false); setSupportChatOpen(prev => !prev); }}>
-                  <MessageSquare className="w-4 h-4" />
-                  Support
-                </Button>
+                <Link to="/support" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
+                    <MessageSquare className="w-4 h-4" />
+                    Support
+                  </Button>
+                </Link>
               </>
             )}
             
