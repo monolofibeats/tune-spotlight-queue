@@ -51,6 +51,7 @@ interface DashboardBuilderProps {
   onSave: (layout: Layout[]) => Promise<void>;
   onPopOut?: (widgetId: string) => void;
   poppedOutWidgets?: Set<string>;
+  onPoppedOutWidgetsChange?: (widgets: Set<string>) => void;
   viewOptions: DashboardViewOptions;
   onViewOptionsChange: (options: DashboardViewOptions) => void;
   widgetConfigs: WidgetConfigs;
@@ -75,6 +76,7 @@ export function DashboardBuilder({
   onSave,
   onPopOut,
   poppedOutWidgets = new Set(),
+  onPoppedOutWidgetsChange,
   viewOptions,
   onViewOptionsChange,
   widgetConfigs,
@@ -203,8 +205,13 @@ export function DashboardBuilder({
 
   const applyTemplate = useCallback((template: DashboardTemplate) => {
     onLayoutChange([...template.layout]);
+    if (template.poppedOutWidgets && onPoppedOutWidgetsChange) {
+      onPoppedOutWidgetsChange(new Set(template.poppedOutWidgets));
+    } else if (onPoppedOutWidgetsChange) {
+      onPoppedOutWidgetsChange(new Set());
+    }
     toast({ title: `"${template.name}" applied — drag to customize` });
-  }, [onLayoutChange]);
+  }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
     setIsSaving(true);

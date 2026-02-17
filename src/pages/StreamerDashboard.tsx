@@ -106,6 +106,7 @@ const StreamerDashboard = () => {
         view_options?: DashboardViewOptions;
         widget_configs?: WidgetConfigs;
         show_when_popped_out?: string[];
+        popped_out_widgets?: string[];
       };
       if (saved.grid_layout && Array.isArray(saved.grid_layout)) {
         setDashboardLayout(saved.grid_layout);
@@ -118,6 +119,9 @@ const StreamerDashboard = () => {
       }
       if (saved.show_when_popped_out) {
         setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
+      }
+      if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets)) {
+        setPoppedOutWidgets(new Set(saved.popped_out_widgets));
       }
     }
   }, [activePreset]);
@@ -371,6 +375,7 @@ const StreamerDashboard = () => {
       view_options: viewOptions,
       widget_configs: widgetConfigs,
       show_when_popped_out: Array.from(popOutOptions.showWhenPoppedOut),
+      popped_out_widgets: Array.from(poppedOutWidgets),
       version: 3,
     };
     if (activePreset) {
@@ -544,6 +549,7 @@ const StreamerDashboard = () => {
       view_options: viewOptions,
       widget_configs: widgetConfigs,
       show_when_popped_out: Array.from(popOutOptions.showWhenPoppedOut),
+      popped_out_widgets: Array.from(poppedOutWidgets),
       version: 3,
     };
     const { error } = await supabase
@@ -571,6 +577,7 @@ const StreamerDashboard = () => {
       view_options?: DashboardViewOptions;
       widget_configs?: WidgetConfigs;
       show_when_popped_out?: string[];
+      popped_out_widgets?: string[];
     };
     if (saved.grid_layout && Array.isArray(saved.grid_layout)) {
       setDashboardLayout(saved.grid_layout);
@@ -583,6 +590,11 @@ const StreamerDashboard = () => {
     }
     if (saved.show_when_popped_out) {
       setPopOutOptions({ showWhenPoppedOut: new Set(saved.show_when_popped_out) });
+    }
+    if (saved.popped_out_widgets && Array.isArray(saved.popped_out_widgets)) {
+      setPoppedOutWidgets(new Set(saved.popped_out_widgets));
+    } else {
+      setPoppedOutWidgets(new Set());
     }
     toast({ title: `Loaded "${preset.name}"` });
   };
@@ -607,6 +619,7 @@ const StreamerDashboard = () => {
     onSave: handleSaveLayout,
     onPopOut: handlePopOut,
     poppedOutWidgets,
+    onPoppedOutWidgetsChange: setPoppedOutWidgets,
     viewOptions,
     onViewOptionsChange: setViewOptions,
     widgetConfigs,
