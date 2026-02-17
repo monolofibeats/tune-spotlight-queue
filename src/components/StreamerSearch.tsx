@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Radio } from 'lucide-react';
+import { Search, Radio, Clock, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,17 +13,40 @@ interface StreamerResult {
   is_live: boolean;
 }
 
+const RECENT_SEARCHES_KEY = 'upstar_recent_searches';
+const MAX_RECENT = 5;
+
+export function getRecentSearches(): StreamerResult[] {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveRecentSearch(streamer: StreamerResult) {
+  const recent = getRecentSearches().filter(s => s.id !== streamer.id);
+  recent.unshift(streamer);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+}
+
+export function clearRecentSearches() {
+  localStorage.removeItem(RECENT_SEARCHES_KEY);
+}
+
 export function StreamerSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<StreamerResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<StreamerResult[]>([]);
   const navigate = useNavigate();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setRecentSearches(getRecentSearches());
+  }, []);
+
+  useEffect(() => {
     if (query.length < 1) {
       setResults([]);
-      setIsOpen(false);
       return;
     }
 
@@ -55,6 +78,18 @@ export function StreamerSearch() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  const handleSelect = (s: StreamerResult) => {
+    saveRecentSearch(s);
+    setRecentSearches(getRecentSearches());
+    navigate(`/${s.slug}`);
+    setIsOpen(false);
+    setQuery('');
+  };
+
+  const showRecent = isOpen && query.length === 0 && recentSearches.length > 0;
+  const showResults = isOpen && query.length >= 1 && results.length > 0;
+  const showEmpty = isOpen && query.length >= 1 && results.length === 0;
+
   return (
     <div ref={wrapperRef} className="relative w-full max-w-md">
       <div className="relative">
@@ -64,26 +99,35 @@ export function StreamerSearch() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a streamer..."
           className="pl-10 h-10"
-          onFocus={() => results.length > 0 && setIsOpen(true)}
+          onFocus={() => setIsOpen(true)}
         />
       </div>
 
       <AnimatePresence>
-        {isOpen && results.length > 0 && (
+        {(showRecent || showResults) && (
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             className="absolute z-50 top-full mt-2 w-full rounded-xl border border-border bg-card shadow-lg overflow-hidden"
           >
-            {results.map((s) => (
+            {showRecent && (
+              <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Recent
+                </span>
+                <button
+                  onClick={() => { clearRecentSearches(); setRecentSearches([]); }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+            {(showRecent ? recentSearches : results).map((s) => (
               <button
                 key={s.id}
-                onClick={() => {
-                  navigate(`/${s.slug}`);
-                  setIsOpen(false);
-                  setQuery('');
-                }}
+                onClick={() => handleSelect(s)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors text-left"
               >
                 {s.avatar_url ? (
@@ -107,7 +151,7 @@ export function StreamerSearch() {
             ))}
           </motion.div>
         )}
-        {isOpen && query.length >= 1 && results.length === 0 && (
+        {showEmpty && (
           <motion.div
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}

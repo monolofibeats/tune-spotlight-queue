@@ -30,7 +30,24 @@ const StreamerStatistics = () => {
     if (!user) { navigate('/auth'); return; }
 
     const init = async () => {
-      const { data: s } = await supabase.from('streamers').select('*').eq('user_id', user.id).single();
+      // Try as owner first, then as team member
+      let s: any = null;
+      const { data: ownStreamer } = await supabase.from('streamers').select('*').eq('user_id', user.id).maybeSingle();
+      if (ownStreamer) {
+        s = ownStreamer;
+      } else {
+        const { data: teamMember } = await supabase
+          .from('streamer_team_members')
+          .select('streamer_id')
+          .eq('user_id', user.id)
+          .eq('invitation_status', 'accepted')
+          .limit(1)
+          .maybeSingle();
+        if (teamMember) {
+          const { data: teamStreamer } = await supabase.from('streamers').select('*').eq('id', teamMember.streamer_id).single();
+          s = teamStreamer;
+        }
+      }
       if (!s) { navigate('/'); return; }
       setStreamer(s as Streamer);
 
