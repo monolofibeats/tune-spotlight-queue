@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let isAdmin = roles.includes('admin');
       let isStreamer = roles.includes('streamer');
 
-      // Also check if user owns a streamer page (streamers table)
+      // Also check if user owns a streamer page or is a team member
       if (!isStreamer) {
         const { data: streamerData } = await supabase
           .from('streamers')
@@ -53,7 +53,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('user_id', userId)
           .eq('status', 'approved')
           .maybeSingle();
-        if (streamerData) isStreamer = true;
+        if (streamerData) {
+          isStreamer = true;
+        } else {
+          // Check if user is an accepted team member of any streamer
+          const { data: teamData } = await supabase
+            .from('streamer_team_members')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('invitation_status', 'accepted')
+            .limit(1);
+          if (teamData && teamData.length > 0) isStreamer = true;
+        }
       }
 
       return { isAdmin, isStreamer };
