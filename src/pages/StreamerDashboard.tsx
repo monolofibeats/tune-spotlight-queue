@@ -724,27 +724,37 @@ const StreamerDashboard = () => {
 
       {/* Floating chat — only show if chat widget is NOT in the grid at all (never added) */}
 
-      {/* Pending pop-out banner */}
+      {/* Pending pop-out placeholders — one button per widget, each click = one user gesture = one popup */}
       {pendingPopOuts.length > 0 && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-          <button
-            onClick={() => {
-              // Pre-open ALL windows synchronously in this click handler (user gesture)
-              const widgetIds = [...pendingPopOuts];
-              for (const wId of widgetIds) {
-                const popup = window.open('', `widget_${wId}`, 'width=600,height=500,menubar=no,toolbar=no,location=no,status=no');
-                if (popup) {
-                  preOpenedWindowsRef.current.set(wId, popup);
-                }
-              }
-              setPendingPopOuts([]);
-              setPoppedOutWidgets(new Set(widgetIds));
-            }}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Open {pendingPopOuts.length} pop-out window{pendingPopOuts.length > 1 ? 's' : ''}
-          </button>
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+          {pendingPopOuts.map((widgetId) => {
+            const def = getWidgetDef(widgetId);
+            if (!def) return null;
+            const IconComp = def.icon;
+            return (
+              <button
+                key={widgetId}
+                onClick={() => {
+                  // Single window.open in direct click handler — bypasses popup blocker
+                  const popup = window.open('', `widget_${widgetId}`, 'width=600,height=500,menubar=no,toolbar=no,location=no,status=no');
+                  if (popup) {
+                    preOpenedWindowsRef.current.set(widgetId, popup);
+                  }
+                  setPendingPopOuts(prev => prev.filter(id => id !== widgetId));
+                  setPoppedOutWidgets(prev => {
+                    const next = new Set(prev);
+                    next.add(widgetId);
+                    return next;
+                  });
+                }}
+                className="bg-card border border-border text-foreground px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium hover:bg-accent transition-colors min-w-[220px]"
+              >
+                <IconComp className="w-4 h-4 text-primary" />
+                <span>Open {def.label}</span>
+                <ExternalLink className="w-3.5 h-3.5 ml-auto text-muted-foreground" />
+              </button>
+            );
+          })}
         </div>
       )}
 
