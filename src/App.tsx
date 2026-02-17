@@ -29,6 +29,7 @@ import Imprint from "./pages/Imprint";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
                       <Route path="/privacy" element={<PrivacyPolicy />} />
                       <Route path="/terms" element={<TermsOfService />} />
                       <Route path="/cookies" element={<CookiePolicy />} />
+                      <Route path="/support" element={<Support />} />
                       <Route path="/library" element={<Library />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/admin/dashboard" element={<Auth />} />
