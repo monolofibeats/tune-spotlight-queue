@@ -558,6 +558,17 @@ const StreamerDashboard = () => {
       
       <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
         <div className="w-full">
+          {/* Single DashboardBuilder instance — never remounts on title toggle */}
+          <div className="flex items-center justify-end gap-2 mb-4">
+            <DashboardBuilder {...builderProps} />
+            <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
+              <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-3 h-3" />
+                View Page
+              </a>
+            </Button>
+          </div>
+
           {/* Collapsible Dashboard Header */}
           {viewOptions.showDashboardTitle && (
             <motion.div
@@ -565,40 +576,16 @@ const StreamerDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard className="w-8 h-8 text-primary" />
-                  <div>
-                    <h1 className="text-3xl font-display font-bold">Streamer Dashboard</h1>
-                    <p className="text-muted-foreground">
-                      Manage your page at <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DashboardBuilder {...builderProps} />
-                  <Button variant="outline" asChild className="gap-2">
-                    <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-4 h-4" />
-                      View My Page
-                    </a>
-                  </Button>
+              <div className="flex items-center gap-3">
+                <LayoutDashboard className="w-8 h-8 text-primary" />
+                <div>
+                  <h1 className="text-3xl font-display font-bold">Streamer Dashboard</h1>
+                  <p className="text-muted-foreground">
+                    Manage your page at <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
+                  </p>
                 </div>
               </div>
             </motion.div>
-          )}
-
-          {/* When title is hidden, show minimal controls */}
-          {!viewOptions.showDashboardTitle && (
-            <div className="flex items-center justify-end gap-2 mb-4">
-              <DashboardBuilder {...builderProps} />
-              <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
-                <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-3 h-3" />
-                  View Page
-                </a>
-              </Button>
-            </div>
           )}
 
           {/* Tabs */}

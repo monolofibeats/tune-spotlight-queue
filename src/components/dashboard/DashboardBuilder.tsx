@@ -163,7 +163,7 @@ export function DashboardBuilder({
     if (!def) return;
     const min = field === 'w' ? def.minSize.w : def.minSize.h;
     const clamped = Math.max(min, value);
-    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: clamped } : l));
+    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: parseFloat(clamped.toFixed(1)) } : l));
   }, [currentLayout, onLayoutChange]);
 
   const toggleWidgetConfig = useCallback((widgetId: string, key: string, value: boolean) => {
@@ -434,8 +434,8 @@ function WidgetsTab({
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[10px] text-muted-foreground font-medium">Width</label>
                           <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.w} min={widget.minSize.w}
-                              onChange={(e) => updateWidgetSize(widget.id, 'w', parseInt(e.target.value) || widget.minSize.w)}
+                            <Input type="number" value={layoutItem.w} min={widget.minSize.w} step="0.1"
+                              onChange={(e) => updateWidgetSize(widget.id, 'w', parseFloat(e.target.value) || widget.minSize.w)}
                               className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
                             <span className="text-[10px] text-muted-foreground">cols</span>
                           </div>
@@ -446,8 +446,8 @@ function WidgetsTab({
                         <div className="flex items-center justify-between mb-1">
                           <label className="text-[10px] text-muted-foreground font-medium">Height</label>
                           <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.h} min={widget.minSize.h}
-                              onChange={(e) => updateWidgetSize(widget.id, 'h', parseInt(e.target.value) || widget.minSize.h)}
+                            <Input type="number" value={layoutItem.h} min={widget.minSize.h} step="0.1"
+                              onChange={(e) => updateWidgetSize(widget.id, 'h', parseFloat(e.target.value) || widget.minSize.h)}
                               className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
                             <span className="text-[10px] text-muted-foreground">rows</span>
                           </div>
