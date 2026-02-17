@@ -56,7 +56,7 @@ export function Header() {
             {user && <BidNotificationBell />}
             
             {/* Streamer Dropdown Menu */}
-            {isStreamer && !isAdmin && (
+            {isStreamer && (
               <>
                 <Link to="/streamer/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
@@ -90,6 +90,14 @@ export function Header() {
                         Settings
                       </Link>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <LayoutDashboard className="w-4 h-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setSupportChatOpen(prev => !prev)} className="flex items-center gap-2 cursor-pointer">
                       <MessageSquare className="w-4 h-4" />
@@ -117,7 +125,7 @@ export function Header() {
               </>
             )}
             
-            {isAdmin ? (
+            {isAdmin && !isStreamer ? (
               <>
                 <Link to="/dashboard">
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
