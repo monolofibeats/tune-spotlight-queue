@@ -33,6 +33,7 @@ import type { Layout } from 'react-grid-layout';
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
+  textScale?: number;
 }
 
 export interface PopOutOptions {
@@ -74,7 +75,7 @@ export function DashboardBuilder({
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
-  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
+  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true, textScale: 100 });
   const [configsBeforeEdit, setConfigsBeforeEdit] = useState<WidgetConfigs>({});
   const [popOutOptionsBeforeEdit, setPopOutOptionsBeforeEdit] = useState<PopOutOptions>({ showWhenPoppedOut: new Set() });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
