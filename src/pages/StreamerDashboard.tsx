@@ -397,19 +397,19 @@ const StreamerDashboard = () => {
           {statsConfig.showTotal !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold">{stats.total}</p><p className="text-[10px] text-muted-foreground">Total</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.total}</p><p className="text-[10px] text-muted-foreground scalable-text">Total</p></div>
             </div>
           )}
           {statsConfig.showPending !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><Eye className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold">{stats.pending}</p><p className="text-[10px] text-muted-foreground">Pending</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.pending}</p><p className="text-[10px] text-muted-foreground scalable-text">Pending</p></div>
             </div>
           )}
           {statsConfig.showReviewed !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><CheckCircle className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground">Reviewed</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground scalable-text">Reviewed</p></div>
             </div>
           )}
         </div>
@@ -489,7 +489,7 @@ const StreamerDashboard = () => {
       earnings: <EarningsWidget streamerId={streamer.id} config={earningsConfig} />,
       quick_settings: <QuickSettingsWidget streamer={streamer} onUpdate={setStreamer} />,
       chat: (
-        <div className="h-full min-h-[200px]">
+        <div className="h-full min-h-[200px] overflow-hidden">
           <AdminStreamerChat streamerId={streamer.id} role="streamer" />
         </div>
       ),

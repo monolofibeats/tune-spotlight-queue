@@ -64,26 +64,26 @@ export function EarningsWidget({ streamerId, config }: EarningsWidgetProps) {
             <DollarSign className="w-4 h-4 text-emerald-500" />
           </div>
           <div>
-            <p className="text-lg font-bold font-display">{fmt(earnings.total)}</p>
-            <p className="text-[10px] text-muted-foreground">Total Earnings</p>
+            <p className="text-lg font-bold font-display scalable-text">{fmt(earnings.total)}</p>
+            <p className="text-[10px] text-muted-foreground scalable-text">Total Earnings</p>
           </div>
         </div>
       )}
       <div className="grid grid-cols-2 gap-2">
         {cfg.showRecentEarnings && (
           <div className="p-2 rounded-lg bg-muted/30">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5 scalable-text">
               <TrendingUp className="w-3 h-3" /> This Month
             </div>
-            <p className="text-sm font-semibold">{fmt(earnings.thisMonth)}</p>
+            <p className="text-sm font-semibold scalable-text">{fmt(earnings.thisMonth)}</p>
           </div>
         )}
         {cfg.showPayoutStatus && (
           <div className="p-2 rounded-lg bg-muted/30">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5 scalable-text">
               <ArrowUpRight className="w-3 h-3" /> Pending
             </div>
-            <p className="text-sm font-semibold">{fmt(earnings.pending)}</p>
+            <p className="text-sm font-semibold scalable-text">{fmt(earnings.pending)}</p>
           </div>
         )}
       </div>
