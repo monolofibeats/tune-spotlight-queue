@@ -85,10 +85,12 @@ export default function Settings() {
     if (user) fetchProfile();
   }, [user, authLoading, navigate]);
 
+  // Only load devices when user opens the Voice & Video tab
   useEffect(() => {
+    if (activeTab !== 'devices') return;
     const loadDevices = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
+        await navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
         const devices = await navigator.mediaDevices.enumerateDevices();
         setAudioDevices(devices.filter(d => d.kind === 'audioinput'));
         setVideoDevices(devices.filter(d => d.kind === 'videoinput'));
@@ -98,7 +100,7 @@ export default function Settings() {
       }
     };
     loadDevices();
-  }, []);
+  }, [activeTab]);
 
   // Load saved preferences from localStorage
   useEffect(() => {
