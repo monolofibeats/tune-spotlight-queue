@@ -341,9 +341,13 @@ const StreamerDashboard = () => {
     }
   };
 
-  // Pop-out handler
+  // Pop-out handler — when popping out, the widget is removed from main grid display
   const handlePopOut = useCallback((widgetId: string) => {
-    setPoppedOutWidgets(prev => new Set(prev).add(widgetId));
+    setPoppedOutWidgets(prev => {
+      const next = new Set(prev);
+      next.add(widgetId);
+      return next;
+    });
   }, []);
 
   const handlePopOutClose = useCallback((widgetId: string) => {
@@ -630,10 +634,7 @@ const StreamerDashboard = () => {
         </div>
       </main>
 
-      {/* Floating chat if not in grid */}
-      {!dashboardLayout.some(l => l.i === 'chat') && (
-        <AdminStreamerChat streamerId={streamer.id} role="streamer" />
-      )}
+      {/* Floating chat — only show if chat widget is NOT in the grid at all (never added) */}
 
       {/* Pop-out portals */}
       {Array.from(poppedOutWidgets).map(widgetId => {
