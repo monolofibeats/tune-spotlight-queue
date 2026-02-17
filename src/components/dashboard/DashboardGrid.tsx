@@ -87,12 +87,13 @@ export function DashboardGrid({
         const textScale = (widgetConfigs[item.i]?.textScale as number) ?? 100;
         
         return (
-          <div key={item.i} style={textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined}>
+          <div key={item.i}>
             <WidgetWrapper
               widgetId={item.i}
               isEditing={isEditing}
               onRemove={onRemoveWidget ? () => onRemoveWidget(item.i) : undefined}
               isPoppedOut={isPoppedOut}
+              textScale={textScale}
             >
               {content}
             </WidgetWrapper>
