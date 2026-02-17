@@ -9,11 +9,14 @@ export interface DashboardTemplate {
 
 export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
   {
-    id: 'minimal',
-    name: 'Minimal',
-    description: 'Just the queue — clean and focused',
+    id: 'compact',
+    name: 'Compact',
+    description: 'Stats, queue & now playing — tight and efficient',
     layout: [
-      { i: 'queue', x: 0, y: 0, w: 12, h: 12, minW: 4, minH: 6 },
+      { i: 'stats', x: 0, y: 0, w: 12, h: 2, minW: 4, minH: 2 },
+      { i: 'now_playing', x: 0, y: 2, w: 12, h: 5, minW: 6, minH: 3 },
+      { i: 'search_filters', x: 0, y: 7, w: 12, h: 2, minW: 6, minH: 1 },
+      { i: 'queue', x: 0, y: 9, w: 12, h: 10, minW: 4, minH: 6 },
     ],
   },
   {
