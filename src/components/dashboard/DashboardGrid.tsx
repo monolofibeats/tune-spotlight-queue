@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { Responsive, WidthProvider, type Layout, type Layouts } from 'react-grid-layout';
 import { WidgetWrapper } from './WidgetWrapper';
+import type { WidgetConfigs } from './WidgetRegistry';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -16,6 +17,8 @@ interface DashboardGridProps {
   showWhenPoppedOut?: Set<string>;
   /** Handler to pop out a widget */
   onPopOut?: (widgetId: string) => void;
+  /** Per-widget config (includes textScale) */
+  widgetConfigs?: WidgetConfigs;
 }
 
 export function DashboardGrid({
@@ -27,6 +30,7 @@ export function DashboardGrid({
   poppedOutWidgets = new Set(),
   showWhenPoppedOut = new Set(),
   onPopOut,
+  widgetConfigs = {},
 }: DashboardGridProps) {
   // Filter out popped-out widgets unless they're configured to stay visible
   const visibleLayout = useMemo(() => {
@@ -80,8 +84,9 @@ export function DashboardGrid({
         const content = widgetRenderers[item.i];
         if (!content) return null;
         const isPoppedOut = poppedOutWidgets.has(item.i);
+        const textScale = (widgetConfigs[item.i]?.textScale as number) ?? 100;
         return (
-          <div key={item.i}>
+          <div key={item.i} style={textScale !== 100 ? { fontSize: `${textScale / 100}rem` } : undefined}>
             <WidgetWrapper
               widgetId={item.i}
               isEditing={isEditing}
