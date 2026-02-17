@@ -55,92 +55,86 @@ export function Header() {
             
             {user && <BidNotificationBell />}
             
-            {/* Streamer Dropdown Menu */}
+          {/* Dashboard Link */}
             {isStreamer && (
-              <>
-                <Link to="/streamer/dashboard">
+              <Link to="/streamer/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  My Dashboard
+                </Button>
+              </Link>
+            )}
+            {isAdmin && !isStreamer && (
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  {t('nav.dashboard')}
+                </Button>
+              </Link>
+            )}
+            {user && !isAdmin && !isStreamer && (
+              <Link to="/user/dashboard">
+                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  {t('nav.mySongs')}
+                </Button>
+              </Link>
+            )}
+
+            {/* Gear icon — ALWAYS a dropdown for logged-in users */}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    My Dashboard
+                    <Settings className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3 h-3" />
                   </Button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                      <Settings className="w-3.5 h-3.5" />
-                      <ChevronDown className="w-3 h-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-popover z-[60]">
-                    <DropdownMenuItem asChild>
-                      <Link to="/streamer/payments" className="flex items-center gap-2 cursor-pointer">
-                        <Wallet className="w-4 h-4" />
-                        Payments
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/streamer/statistics" className="flex items-center gap-2 cursor-pointer">
-                        <BarChart3 className="w-4 h-4" />
-                        Statistics
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
-                        <Settings className="w-4 h-4" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    {isAdmin && (
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-popover z-[60]">
+                  {isStreamer && (
+                    <>
                       <DropdownMenuItem asChild>
-                        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                          <LayoutDashboard className="w-4 h-4" />
-                          Admin Panel
+                        <Link to="/streamer/payments" className="flex items-center gap-2 cursor-pointer">
+                          <Wallet className="w-4 h-4" />
+                          Payments
                         </Link>
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setSupportChatOpen(prev => !prev)} className="flex items-center gap-2 cursor-pointer">
-                      <MessageSquare className="w-4 h-4" />
-                      Support
+                      <DropdownMenuItem asChild>
+                        <Link to="/streamer/statistics" className="flex items-center gap-2 cursor-pointer">
+                          <BarChart3 className="w-4 h-4" />
+                          Statistics
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
+                      <Settings className="w-4 h-4" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Admin Panel
+                      </Link>
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+                  )}
+                  {isStreamer && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setSupportChatOpen(prev => !prev)} className="flex items-center gap-2 cursor-pointer">
+                        <MessageSquare className="w-4 h-4" />
+                        Support
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
-            
-            {/* Regular User Links */}
-            {user && !isAdmin && !isStreamer && (
-              <>
-                <Link to="/user/dashboard">
-                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    {t('nav.mySongs')}
-                  </Button>
-                </Link>
-                <Link to="/settings">
-                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <Settings className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-              </>
-            )}
-            
-            {isAdmin && !isStreamer ? (
-              <>
-                <Link to="/dashboard">
-                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    {t('nav.dashboard')}
-                  </Button>
-                </Link>
-                <Link to="/settings">
-                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                    <Settings className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-                <SignOutDialog variant="icon" />
-              </>
-            ) : user ? (
+
+            {user ? (
               <SignOutDialog variant="icon" />
             ) : (
               <Link to="/auth">
