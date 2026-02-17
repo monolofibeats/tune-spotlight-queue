@@ -33,7 +33,6 @@ import type { Layout } from 'react-grid-layout';
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
-  textScale?: number;
 }
 
 export interface PopOutOptions {
@@ -75,7 +74,7 @@ export function DashboardBuilder({
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
-  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true, textScale: 100 });
+  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
   const [configsBeforeEdit, setConfigsBeforeEdit] = useState<WidgetConfigs>({});
   const [popOutOptionsBeforeEdit, setPopOutOptionsBeforeEdit] = useState<PopOutOptions>({ showWhenPoppedOut: new Set() });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
@@ -168,6 +167,11 @@ export function DashboardBuilder({
   }, [currentLayout, onLayoutChange]);
 
   const toggleWidgetConfig = useCallback((widgetId: string, key: string, value: boolean) => {
+    const current = widgetConfigs[widgetId] || getDefaultWidgetConfig(widgetId);
+    onWidgetConfigsChange({ ...widgetConfigs, [widgetId]: { ...current, [key]: value } });
+  }, [widgetConfigs, onWidgetConfigsChange]);
+
+  const updateWidgetConfigValue = useCallback((widgetId: string, key: string, value: number) => {
     const current = widgetConfigs[widgetId] || getDefaultWidgetConfig(widgetId);
     onWidgetConfigsChange({ ...widgetConfigs, [widgetId]: { ...current, [key]: value } });
   }, [widgetConfigs, onWidgetConfigsChange]);
@@ -291,6 +295,7 @@ export function DashboardBuilder({
                       removeWidget={removeWidget}
                       updateWidgetSize={updateWidgetSize}
                       toggleWidgetConfig={toggleWidgetConfig}
+                      updateWidgetConfigValue={updateWidgetConfigValue}
                       toggleShowWhenPoppedOut={toggleShowWhenPoppedOut}
                       onPopOut={onPopOut}
                     />
@@ -327,41 +332,10 @@ export function DashboardBuilder({
                             onViewOptionsChange({ ...viewOptions, showDashboardTitle: checked });
                           }}
                           onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 mt-4">Typography</p>
-                      <div className="p-2 rounded-lg border border-border/50 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Type className="w-4 h-4 text-muted-foreground" />
-                            <p className="text-xs font-medium">Text Size</p>
-                          </div>
-                          <span className="text-[10px] font-mono text-muted-foreground">{viewOptions.textScale ?? 100}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={70}
-                          max={150}
-                          step={5}
-                          value={viewOptions.textScale ?? 100}
-                          onChange={(e) => onViewOptionsChange({ ...viewOptions, textScale: parseInt(e.target.value) })}
-                          className="w-full h-1.5 accent-primary cursor-pointer"
-                        />
-                        <div className="flex justify-between text-[9px] text-muted-foreground">
-                          <span>70%</span>
-                          <button
-                            className="text-primary hover:underline"
-                            onClick={() => onViewOptionsChange({ ...viewOptions, textScale: 100 })}
-                          >
-                            Reset
-                          </button>
-                          <span>150%</span>
-                        </div>
+                         />
                       </div>
                     </div>
                   )}
-
                   {activeTab === 'templates' && (
                     <div className="space-y-2">
                       {DASHBOARD_TEMPLATES.map(template => (
@@ -410,6 +384,7 @@ interface WidgetsTabProps {
   removeWidget: (id: string) => void;
   updateWidgetSize: (id: string, field: 'w' | 'h', value: number) => void;
   toggleWidgetConfig: (widgetId: string, key: string, value: boolean) => void;
+  updateWidgetConfigValue: (widgetId: string, key: string, value: number) => void;
   toggleShowWhenPoppedOut: (widgetId: string, value: boolean) => void;
   onPopOut?: (widgetId: string) => void;
 }
@@ -417,7 +392,7 @@ interface WidgetsTabProps {
 function WidgetsTab({
   activeWidgetIds, currentLayout, expandedWidget, setExpandedWidget,
   poppedOutWidgets, widgetConfigs, popOutOptions,
-  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, toggleShowWhenPoppedOut, onPopOut,
+  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, updateWidgetConfigValue, toggleShowWhenPoppedOut, onPopOut,
 }: WidgetsTabProps) {
   return (
     <>
@@ -485,7 +460,34 @@ function WidgetsTab({
                         </div>
                       </div>
 
-                      {/* Pop-out visibility */}
+                      {/* Text Size */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[10px] text-muted-foreground font-medium">Text Size</label>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-mono text-muted-foreground">{(widgetConfig.textScale as number) ?? 100}%</span>
+                          </div>
+                        </div>
+                        <input
+                          type="range"
+                          min={70}
+                          max={150}
+                          step={5}
+                          value={(widgetConfig.textScale as number) ?? 100}
+                          onChange={(e) => updateWidgetConfigValue(widget.id, 'textScale', parseInt(e.target.value))}
+                          className="w-full h-1.5 accent-primary cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
+                          <span>70%</span>
+                          <button
+                            className="text-primary hover:underline"
+                            onClick={() => updateWidgetConfigValue(widget.id, 'textScale', 100)}
+                          >
+                            Reset
+                          </button>
+                          <span>150%</span>
+                        </div>
+                      </div>
                       {isPoppedOut && (
                         <div className="flex items-center justify-between p-2 rounded-lg bg-accent/10 border border-accent/20">
                           <div className="flex items-center gap-1.5">
@@ -504,7 +506,7 @@ function WidgetsTab({
                             {widget.configOptions.map(opt => (
                               <div key={opt.key} className="flex items-center gap-2">
                                 <Checkbox id={`${widget.id}-${opt.key}`}
-                                  checked={widgetConfig[opt.key] ?? opt.defaultValue}
+                                  checked={!!(widgetConfig[opt.key] ?? opt.defaultValue)}
                                   onCheckedChange={(checked) => toggleWidgetConfig(widget.id, opt.key, !!checked)} />
                                 <Label htmlFor={`${widget.id}-${opt.key}`} className="text-[10px] font-normal cursor-pointer">{opt.label}</Label>
                               </div>

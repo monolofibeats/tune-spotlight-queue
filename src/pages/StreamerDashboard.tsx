@@ -538,7 +538,7 @@ const StreamerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-mesh noise relative transition-all" style={{ fontSize: `${(viewOptions.textScale ?? 100) / 100}rem` }}>
+    <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
       {/* Collapsible Header */}
       {viewOptions.showHeader ? (
         <Header />
@@ -611,6 +611,7 @@ const StreamerDashboard = () => {
                 poppedOutWidgets={poppedOutWidgets}
                 showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
                 onPopOut={handlePopOut}
+                widgetConfigs={widgetConfigs}
               />
             </TabsContent>
 

@@ -28,7 +28,7 @@ export interface WidgetDefinition {
   configOptions?: WidgetConfigOption[];
 }
 
-export type WidgetConfigs = Record<string, Record<string, boolean>>;
+export type WidgetConfigs = Record<string, Record<string, boolean | number>>;
 
 export const WIDGET_REGISTRY: WidgetDefinition[] = [
   {
