@@ -33,6 +33,7 @@ import type { Layout } from 'react-grid-layout';
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
+  textScale?: number;
 }
 
 export interface PopOutOptions {
@@ -74,7 +75,7 @@ export function DashboardBuilder({
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
-  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
+  const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true, textScale: 100 });
   const [configsBeforeEdit, setConfigsBeforeEdit] = useState<WidgetConfigs>({});
   const [popOutOptionsBeforeEdit, setPopOutOptionsBeforeEdit] = useState<PopOutOptions>({ showWhenPoppedOut: new Set() });
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
@@ -327,6 +328,36 @@ export function DashboardBuilder({
                           }}
                           onClick={(e) => e.stopPropagation()}
                         />
+                      </div>
+
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 mt-4">Typography</p>
+                      <div className="p-2 rounded-lg border border-border/50 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Type className="w-4 h-4 text-muted-foreground" />
+                            <p className="text-xs font-medium">Text Size</p>
+                          </div>
+                          <span className="text-[10px] font-mono text-muted-foreground">{viewOptions.textScale ?? 100}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={70}
+                          max={150}
+                          step={5}
+                          value={viewOptions.textScale ?? 100}
+                          onChange={(e) => onViewOptionsChange({ ...viewOptions, textScale: parseInt(e.target.value) })}
+                          className="w-full h-1.5 accent-primary cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[9px] text-muted-foreground">
+                          <span>70%</span>
+                          <button
+                            className="text-primary hover:underline"
+                            onClick={() => onViewOptionsChange({ ...viewOptions, textScale: 100 })}
+                          >
+                            Reset
+                          </button>
+                          <span>150%</span>
+                        </div>
                       </div>
                     </div>
                   )}

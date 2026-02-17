@@ -349,7 +349,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     const LISSAJOUS_MAX = 2048;
 
     const BOTTOM_MARGIN = 28;
-    const RIGHT_MARGIN = 120;
+    const RIGHT_MARGIN = 80;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -993,23 +993,6 @@ function drawMeters(
     ctx.font = 'bold 10px monospace';
     ctx.fillStyle = hsla(0.4);
     ctx.fillText('dBFS', dbX + meterW / 2, meterTop - 5);
-
-    // Tick marks
-    const tickLabels = [0, -6, -14, -24, -40, -60];
-    ctx.textAlign = 'left';
-    for (const lv of tickLabels) {
-      const norm = (lv + 60) / 60;
-      const ly = meterBottom - norm * meterH;
-      ctx.strokeStyle = hsla(0.15);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(dbX + meterW + 2, ly);
-      ctx.lineTo(dbX + meterW + 6, ly);
-      ctx.stroke();
-      ctx.font = 'bold 10px monospace';
-      ctx.fillStyle = hsla(0.45);
-      ctx.fillText(`${lv}`, dbX + meterW + 8, ly + 4);
-    }
   }
 
   ctx.restore();
