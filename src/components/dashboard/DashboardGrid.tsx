@@ -87,7 +87,7 @@ export function DashboardGrid({
         const textScale = (widgetConfigs[item.i]?.textScale as number) ?? 100;
         console.log(`[DashboardGrid] widget=${item.i} textScale=${textScale} configs=`, widgetConfigs[item.i]);
         return (
-          <div key={item.i} data-text-scale={textScale !== 100 ? true : undefined} style={textScale !== 100 ? { '--widget-text-scale': `${textScale / 100}` } as React.CSSProperties : undefined}>
+          <div key={item.i} style={textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined}>
             <WidgetWrapper
               widgetId={item.i}
               isEditing={isEditing}
