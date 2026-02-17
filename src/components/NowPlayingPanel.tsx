@@ -318,7 +318,7 @@ export function NowPlayingPanel({
                           </Badge>
                         )}
                       </div>
-                      <p className="text-lg text-muted-foreground truncate">
+                      <p className="text-lg text-muted-foreground truncate scalable-text">
                         {submission.artist_name}
                       </p>
                       
