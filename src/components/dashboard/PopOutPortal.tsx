@@ -8,9 +8,11 @@ interface PopOutPortalProps {
   onClose: () => void;
   width?: number;
   height?: number;
+  /** A window that was pre-opened synchronously from a user click (to bypass popup blockers) */
+  preOpenedWindow?: Window;
 }
 
-export function PopOutPortal({ widgetId, title, children, onClose, width = 600, height = 500 }: PopOutPortalProps) {
+export function PopOutPortal({ widgetId, title, children, onClose, width = 600, height = 500, preOpenedWindow }: PopOutPortalProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const windowRef = useRef<Window | null>(null);
   const onCloseRef = useRef(onClose);
@@ -19,7 +21,8 @@ export function PopOutPortal({ widgetId, title, children, onClose, width = 600, 
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
-    const popup = window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
+    // Use pre-opened window if available, otherwise try to open a new one
+    const popup = preOpenedWindow || window.open('', `widget_${widgetId}`, `width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no`);
     if (!popup) {
       onCloseRef.current();
       return;
@@ -27,6 +30,10 @@ export function PopOutPortal({ widgetId, title, children, onClose, width = 600, 
 
     windowRef.current = popup;
     popup.document.title = `UpStar — ${title}`;
+
+    // Clear any existing content (for pre-opened windows)
+    popup.document.head.innerHTML = '';
+    popup.document.body.innerHTML = '';
 
     // Copy stylesheets from parent
     const parentStyles = document.querySelectorAll('link[rel="stylesheet"], style');
@@ -75,7 +82,7 @@ export function PopOutPortal({ widgetId, title, children, onClose, width = 600, 
       if (!popup.closed) popup.close();
     };
   // Only re-run when widgetId, title, or dimensions change — NOT onClose
-  }, [widgetId, title, width, height]);
+  }, [widgetId, title, width, height, preOpenedWindow]);
 
   if (!container) return null;
 

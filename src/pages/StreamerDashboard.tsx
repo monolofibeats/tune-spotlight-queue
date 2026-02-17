@@ -64,6 +64,7 @@ const StreamerDashboard = () => {
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
+  const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
 
   // View options for header/title visibility
   const [viewOptions, setViewOptions] = useState<DashboardViewOptions>({
@@ -728,8 +729,14 @@ const StreamerDashboard = () => {
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
           <button
             onClick={() => {
-              // Open all windows from this click handler (user gesture) to avoid popup blocker
+              // Pre-open ALL windows synchronously in this click handler (user gesture)
               const widgetIds = [...pendingPopOuts];
+              for (const wId of widgetIds) {
+                const popup = window.open('', `widget_${wId}`, 'width=600,height=500,menubar=no,toolbar=no,location=no,status=no');
+                if (popup) {
+                  preOpenedWindowsRef.current.set(wId, popup);
+                }
+              }
               setPendingPopOuts([]);
               setPoppedOutWidgets(new Set(widgetIds));
             }}
@@ -751,7 +758,11 @@ const StreamerDashboard = () => {
             key={widgetId}
             widgetId={widgetId}
             title={def.label}
-            onClose={() => handlePopOutClose(widgetId)}
+            onClose={() => {
+              preOpenedWindowsRef.current.delete(widgetId);
+              handlePopOutClose(widgetId);
+            }}
+            preOpenedWindow={preOpenedWindowsRef.current.get(widgetId)}
           >
             <div className="min-h-[200px]">
               {content}
