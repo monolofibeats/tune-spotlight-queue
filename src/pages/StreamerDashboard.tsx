@@ -538,7 +538,7 @@ const StreamerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
+    <div className="min-h-screen bg-background bg-mesh noise relative transition-all" style={{ fontSize: `${(viewOptions.textScale ?? 100) / 100}rem` }}>
       {/* Collapsible Header */}
       {viewOptions.showHeader ? (
         <Header />
