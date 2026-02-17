@@ -30,12 +30,11 @@ export function DashboardGrid({
 }: DashboardGridProps) {
   // Filter out popped-out widgets unless they're configured to stay visible
   const visibleLayout = useMemo(() => {
-    if (isEditing) return layout; // Show all during editing
     return layout.filter(item => {
       if (!poppedOutWidgets.has(item.i)) return true;
       return showWhenPoppedOut.has(item.i);
     });
-  }, [layout, isEditing, poppedOutWidgets, showWhenPoppedOut]);
+  }, [layout, poppedOutWidgets, showWhenPoppedOut]);
 
   const layouts: Layouts = useMemo(() => ({
     lg: visibleLayout,
