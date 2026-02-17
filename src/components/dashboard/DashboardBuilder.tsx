@@ -18,6 +18,9 @@ import {
   GripVertical,
   Minimize2,
   Maximize2,
+  Save,
+  Trash2,
+  PencilLine,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -29,6 +32,7 @@ import { toast } from '@/hooks/use-toast';
 import { WIDGET_REGISTRY, type WidgetDefinition, type WidgetConfigs, getDefaultWidgetConfig } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
 import type { Layout } from 'react-grid-layout';
+import type { StreamerPreset } from '@/hooks/useStreamerPresets';
 
 export interface DashboardViewOptions {
   showHeader: boolean;
@@ -53,6 +57,12 @@ interface DashboardBuilderProps {
   onWidgetConfigsChange: (configs: WidgetConfigs) => void;
   popOutOptions: PopOutOptions;
   onPopOutOptionsChange: (options: PopOutOptions) => void;
+  // User presets
+  userPresets?: StreamerPreset[];
+  onSaveAsPreset?: (name: string) => Promise<void>;
+  onLoadPreset?: (preset: StreamerPreset) => void;
+  onDeletePreset?: (presetId: string) => Promise<void>;
+  onRenamePreset?: (presetId: string, newName: string) => Promise<void>;
 }
 
 type BuilderTab = 'widgets' | 'layout' | 'templates';
@@ -71,6 +81,11 @@ export function DashboardBuilder({
   onWidgetConfigsChange,
   popOutOptions,
   onPopOutOptionsChange,
+  userPresets = [],
+  onSaveAsPreset,
+  onLoadPreset,
+  onDeletePreset,
+  onRenamePreset,
 }: DashboardBuilderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
@@ -80,6 +95,10 @@ export function DashboardBuilder({
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<BuilderTab>('widgets');
   const [isMinimized, setIsMinimized] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [isSavingPreset, setIsSavingPreset] = useState(false);
+  const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
+  const [editingPresetName, setEditingPresetName] = useState('');
 
   // Draggable floating panel state
   const [panelPos, setPanelPos] = useState({ x: 0, y: 0 });
@@ -337,27 +356,133 @@ export function DashboardBuilder({
                     </div>
                   )}
                   {activeTab === 'templates' && (
-                    <div className="space-y-2">
-                      {DASHBOARD_TEMPLATES.map(template => (
-                        <button
-                          key={template.id}
-                          onClick={() => applyTemplate(template)}
-                          className="w-full text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                        >
-                          <p className="text-xs font-medium">{template.name}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{template.description}</p>
-                          <div className="flex gap-1 mt-1.5 flex-wrap">
-                            {template.layout.map(l => {
-                              const def = WIDGET_REGISTRY.find(w => w.id === l.i);
-                              return def ? (
-                                <span key={l.i} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                  {def.label}
-                                </span>
-                              ) : null;
-                            })}
+                    <div className="space-y-3">
+                      {/* Save current as preset */}
+                      {onSaveAsPreset && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Save Current Layout</p>
+                          <div className="flex gap-1.5">
+                            <Input
+                              placeholder="Preset name…"
+                              value={newPresetName}
+                              onChange={(e) => setNewPresetName(e.target.value)}
+                              className="h-7 text-xs"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && newPresetName.trim()) {
+                                  setIsSavingPreset(true);
+                                  onSaveAsPreset(newPresetName.trim()).then(() => {
+                                    setNewPresetName('');
+                                    toast({ title: `Preset "${newPresetName.trim()}" saved!` });
+                                  }).finally(() => setIsSavingPreset(false));
+                                }
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              className="h-7 px-2 text-xs gap-1"
+                              disabled={!newPresetName.trim() || isSavingPreset}
+                              onClick={() => {
+                                setIsSavingPreset(true);
+                                onSaveAsPreset(newPresetName.trim()).then(() => {
+                                  setNewPresetName('');
+                                  toast({ title: `Preset "${newPresetName.trim()}" saved!` });
+                                }).finally(() => setIsSavingPreset(false));
+                              }}
+                            >
+                              {isSavingPreset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                              Save
+                            </Button>
                           </div>
-                        </button>
-                      ))}
+                        </div>
+                      )}
+
+                      {/* User presets */}
+                      {userPresets.length > 0 && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">My Presets</p>
+                          {userPresets.map(preset => (
+                            <div
+                              key={preset.id}
+                              className="group flex items-center gap-2 p-2 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
+                            >
+                              {editingPresetId === preset.id ? (
+                                <div className="flex-1 flex gap-1">
+                                  <Input
+                                    value={editingPresetName}
+                                    onChange={(e) => setEditingPresetName(e.target.value)}
+                                    className="h-6 text-xs"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' && editingPresetName.trim() && onRenamePreset) {
+                                        onRenamePreset(preset.id, editingPresetName.trim());
+                                        setEditingPresetId(null);
+                                      } else if (e.key === 'Escape') {
+                                        setEditingPresetId(null);
+                                      }
+                                    }}
+                                  />
+                                  <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => {
+                                    if (editingPresetName.trim() && onRenamePreset) {
+                                      onRenamePreset(preset.id, editingPresetName.trim());
+                                    }
+                                    setEditingPresetId(null);
+                                  }}>
+                                    <Check className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <>
+                                  <button
+                                    className="flex-1 text-left"
+                                    onClick={() => onLoadPreset?.(preset)}
+                                  >
+                                    <p className="text-xs font-medium">{preset.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {new Date(preset.updated_at).toLocaleDateString()}
+                                    </p>
+                                  </button>
+                                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => {
+                                      setEditingPresetId(preset.id);
+                                      setEditingPresetName(preset.name);
+                                    }}>
+                                      <PencilLine className="w-3 h-3" />
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive hover:text-destructive" onClick={() => onDeletePreset?.(preset.id)}>
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Built-in templates */}
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Built-in Templates</p>
+                        {DASHBOARD_TEMPLATES.map(template => (
+                          <button
+                            key={template.id}
+                            onClick={() => applyTemplate(template)}
+                            className="w-full text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
+                          >
+                            <p className="text-xs font-medium">{template.name}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{template.description}</p>
+                            <div className="flex gap-1 mt-1.5 flex-wrap">
+                              {template.layout.map(l => {
+                                const def = WIDGET_REGISTRY.find(w => w.id === l.i);
+                                return def ? (
+                                  <span key={l.i} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                    {def.label}
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
