@@ -3,17 +3,12 @@ import { motion } from 'framer-motion';
 import { 
   Save, 
   Loader2, 
-  User, 
   Palette, 
   Layout, 
-  Link as LinkIcon,
-  Image,
   FileText,
   DollarSign,
-  Globe,
   Flag,
   Eye,
-  Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,11 +24,8 @@ import {
   DesignCustomizer, 
   BannerEditor, 
   PricingSettings,
-  LanguageSettings,
   PresetManager,
-  TeamManager,
 } from '@/components/streamer-settings';
-import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
@@ -60,13 +52,9 @@ interface StreamerSettingsPanelProps {
 export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('presets');
 
-  // Form state - Profile
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [bannerUrl, setBannerUrl] = useState('');
+  // Form state - Content
   
   // Form state - Content
   const [heroTitle, setHeroTitle] = useState('');
@@ -95,24 +83,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
   
-  // Form state - Social
-  const [twitchUrl, setTwitchUrl] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [twitterUrl, setTwitterUrl] = useState('');
-  
-  // Form state - Language
-  const [pageLanguage, setPageLanguage] = useState('de');
 
   useEffect(() => {
     const s = streamer;
     
-    // Populate form - Profile
-    setDisplayName(s.display_name || '');
-    setBio(s.bio || '');
-    setAvatarUrl(s.avatar_url || '');
-    setBannerUrl(s.banner_url || '');
+    // Content
     
     // Content
     setHeroTitle(s.hero_title || '');
@@ -141,15 +116,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     setShowStreamEmbed(s.show_stream_embed ?? true);
     setCustomCss(s.custom_css || '');
     
-    // Social
-    setTwitchUrl(s.twitch_url || '');
-    setYoutubeUrl(s.youtube_url || '');
-    setTiktokUrl(s.tiktok_url || '');
-    setInstagramUrl(s.instagram_url || '');
-    setTwitterUrl(s.twitter_url || '');
-    
-    // Language
-    setPageLanguage(s.page_language || 'de');
   }, [streamer]);
 
   const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
@@ -192,12 +158,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
       const { data, error } = await supabase
         .from('streamers')
         .update({
-          // Profile
-          display_name: displayName,
-          bio: bio || null,
-          avatar_url: avatarUrl || null,
-          banner_url: bannerUrl || null,
-          
           // Content
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
@@ -224,16 +184,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
-          
-          // Social
-          twitch_url: twitchUrl || null,
-          youtube_url: youtubeUrl || null,
-          tiktok_url: tiktokUrl || null,
-          instagram_url: instagramUrl || null,
-          twitter_url: twitterUrl || null,
-          
-          // Language
-          page_language: pageLanguage,
         })
         .eq('id', streamer.id)
         .select('*')
@@ -264,15 +214,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
 
   const tabs = [
     { id: 'presets', label: 'Presets', icon: Palette },
-    { id: 'profile', label: 'Profile', icon: User },
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'form', label: 'Form', icon: Layout },
     { id: 'design', label: 'Design', icon: Palette },
     { id: 'banner', label: 'Banner', icon: Flag },
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
-    { id: 'language', label: 'Language', icon: Globe },
-    { id: 'social', label: 'Social', icon: LinkIcon },
-    { id: 'team', label: 'Team', icon: Users },
   ];
 
   return (
@@ -326,68 +272,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         {/* Presets Tab */}
         <TabsContent value="presets" className="space-y-6">
           <PresetManager streamerId={streamer.id} />
-        </TabsContent>
-
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-6">
-          <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">Basic Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your streamer name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Profile URL</Label>
-                <div className="flex items-center h-12 px-4 bg-muted rounded-lg text-muted-foreground">
-                  upstar.gg/{streamer.slug}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell viewers about yourself..."
-                rows={3}
-              />
-            </div>
-          </div>
-
-          <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Image className="w-5 h-5" />
-              Images
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <ImageUploadInput
-                  streamerId={streamer.id}
-                  variant="avatar"
-                  value={avatarUrl}
-                  onChange={setAvatarUrl}
-                />
-              </div>
-              <div className="space-y-3">
-                <ImageUploadInput
-                  streamerId={streamer.id}
-                  variant="banner"
-                  value={bannerUrl}
-                  onChange={setBannerUrl}
-                />
-              </div>
-            </div>
-          </div>
         </TabsContent>
 
         {/* Content Tab */}
@@ -514,76 +398,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           <PricingSettings streamerId={streamer.id} />
         </TabsContent>
 
-        {/* Language Tab */}
-        <TabsContent value="language" className="space-y-6">
-          <LanguageSettings
-            language={pageLanguage}
-            onChange={setPageLanguage}
-          />
-        </TabsContent>
-
-        {/* Social Tab */}
-        <TabsContent value="social" className="space-y-6">
-          <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">Social Links</h3>
-            <p className="text-sm text-muted-foreground">
-              Add your social media links to display on your page.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="twitchUrl">Twitch</Label>
-                <Input
-                  id="twitchUrl"
-                  value={twitchUrl}
-                  onChange={(e) => setTwitchUrl(e.target.value)}
-                  placeholder="https://twitch.tv/..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="youtubeUrl">YouTube</Label>
-                <Input
-                  id="youtubeUrl"
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="https://youtube.com/..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tiktokUrl">TikTok</Label>
-                <Input
-                  id="tiktokUrl"
-                  value={tiktokUrl}
-                  onChange={(e) => setTiktokUrl(e.target.value)}
-                  placeholder="https://tiktok.com/@..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="instagramUrl">Instagram</Label>
-                <Input
-                  id="instagramUrl"
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
-                  placeholder="https://instagram.com/..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="twitterUrl">X (Twitter)</Label>
-                <Input
-                  id="twitterUrl"
-                  value={twitterUrl}
-                  onChange={(e) => setTwitterUrl(e.target.value)}
-                  placeholder="https://x.com/..."
-                />
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Team Tab */}
-        <TabsContent value="team" className="space-y-6">
-          <TeamManager streamerId={streamer.id} />
-        </TabsContent>
       </Tabs>
     </motion.div>
   );

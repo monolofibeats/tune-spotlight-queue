@@ -12,11 +12,13 @@ import {
   Bell,
   Globe,
   Moon,
-  
   Phone,
   Mic,
   Video,
   Monitor,
+  Link as LinkIcon,
+  Users,
+  Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,12 +28,16 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { LanguageSettings, TeamManager } from '@/components/streamer-settings';
+import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
+import type { Streamer } from '@/types/streamer';
 
 interface Profile {
   id: string;
@@ -44,7 +50,7 @@ interface Profile {
 }
 
 export default function Settings() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isStreamer } = useAuth();
   const { language: currentLanguage, setLanguage: setAppLanguage } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +75,19 @@ export default function Settings() {
   // Language
   const [language, setLanguage] = useState<string>(currentLanguage || 'de');
 
+  // Streamer-specific state
+  const [streamerData, setStreamerData] = useState<Streamer | null>(null);
+  const [streamerDisplayName, setStreamerDisplayName] = useState('');
+  const [streamerBio, setStreamerBio] = useState('');
+  const [streamerAvatarUrl, setStreamerAvatarUrl] = useState('');
+  const [streamerBannerUrl, setStreamerBannerUrl] = useState('');
+  const [pageLanguage, setPageLanguage] = useState('de');
+  const [twitchUrl, setTwitchUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+
   // Voice & Video
   const [selectedMicrophone, setSelectedMicrophone] = useState('default');
   const [selectedCamera, setSelectedCamera] = useState('default');
@@ -82,8 +101,44 @@ export default function Settings() {
       navigate('/auth');
       return;
     }
-    if (user) fetchProfile();
-  }, [user, authLoading, navigate]);
+    if (user) {
+      fetchProfile();
+      if (isStreamer) fetchStreamerData();
+    }
+  }, [user, authLoading, navigate, isStreamer]);
+
+  const fetchStreamerData = async () => {
+    if (!user) return;
+    // Check if owner
+    let { data } = await supabase.from('streamers').select('*').eq('user_id', user.id).maybeSingle();
+    // Check team membership
+    if (!data) {
+      const { data: team } = await supabase
+        .from('streamer_team_members')
+        .select('streamer_id')
+        .eq('user_id', user.id)
+        .eq('invitation_status', 'accepted')
+        .limit(1)
+        .maybeSingle();
+      if (team) {
+        const { data: teamStreamer } = await supabase.from('streamers').select('*').eq('id', team.streamer_id).maybeSingle();
+        data = teamStreamer;
+      }
+    }
+    if (data) {
+      setStreamerData(data as Streamer);
+      setStreamerDisplayName(data.display_name || '');
+      setStreamerBio(data.bio || '');
+      setStreamerAvatarUrl(data.avatar_url || '');
+      setStreamerBannerUrl(data.banner_url || '');
+      setPageLanguage(data.page_language || 'de');
+      setTwitchUrl(data.twitch_url || '');
+      setYoutubeUrl(data.youtube_url || '');
+      setTiktokUrl(data.tiktok_url || '');
+      setInstagramUrl(data.instagram_url || '');
+      setTwitterUrl(data.twitter_url || '');
+    }
+  };
 
   // Only load devices when user opens the Voice & Video tab
   useEffect(() => {
@@ -189,6 +244,26 @@ export default function Settings() {
         phoneNumber,
       }));
 
+      // Save streamer data if applicable
+      if (streamerData) {
+        const { error: streamerError } = await supabase
+          .from('streamers')
+          .update({
+            display_name: streamerDisplayName,
+            bio: streamerBio || null,
+            avatar_url: streamerAvatarUrl || null,
+            banner_url: streamerBannerUrl || null,
+            page_language: pageLanguage,
+            twitch_url: twitchUrl || null,
+            youtube_url: youtubeUrl || null,
+            tiktok_url: tiktokUrl || null,
+            instagram_url: instagramUrl || null,
+            twitter_url: twitterUrl || null,
+          })
+          .eq('id', streamerData.id);
+        if (streamerError) throw streamerError;
+      }
+
       toast({ title: 'Settings saved! ✨', description: 'Your preferences have been updated.' });
       fetchProfile();
     } catch (error) {
@@ -242,6 +317,12 @@ export default function Settings() {
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'devices', label: 'Voice & Video', icon: Mic },
+    ...(isStreamer && streamerData ? [
+      { id: 'streamer-profile', label: 'Streamer Profile', icon: User },
+      { id: 'social', label: 'Social', icon: LinkIcon },
+      { id: 'page-language', label: 'Page Language', icon: Globe },
+      { id: 'team', label: 'Team', icon: Users },
+    ] : []),
   ];
 
   return (
@@ -274,14 +355,16 @@ export default function Settings() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="glass p-1 rounded-xl w-full flex flex-wrap">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="rounded-lg px-4 gap-2 flex-1 min-w-0">
-                  <tab.icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <ScrollArea className="w-full">
+              <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="rounded-lg px-4 gap-2 whitespace-nowrap">
+                    <tab.icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
@@ -459,6 +542,117 @@ export default function Settings() {
                 </div>
               </div>
             </TabsContent>
+
+            {/* Streamer Profile Tab */}
+            {isStreamer && streamerData && (
+              <TabsContent value="streamer-profile" className="space-y-6">
+                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Streamer Profile</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your public streamer profile — upstar.gg/{streamerData.slug}
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="streamerDisplayName">Display Name</Label>
+                      <Input
+                        id="streamerDisplayName"
+                        value={streamerDisplayName}
+                        onChange={(e) => setStreamerDisplayName(e.target.value)}
+                        placeholder="Your streamer name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Profile URL</Label>
+                      <div className="flex items-center h-10 px-4 bg-muted rounded-lg text-muted-foreground text-sm">
+                        upstar.gg/{streamerData.slug}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="streamerBio">Bio</Label>
+                    <Textarea
+                      id="streamerBio"
+                      value={streamerBio}
+                      onChange={(e) => setStreamerBio(e.target.value)}
+                      placeholder="Tell viewers about yourself..."
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <Image className="w-5 h-5" />
+                    Images
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ImageUploadInput
+                      streamerId={streamerData.id}
+                      variant="avatar"
+                      value={streamerAvatarUrl}
+                      onChange={setStreamerAvatarUrl}
+                    />
+                    <ImageUploadInput
+                      streamerId={streamerData.id}
+                      variant="banner"
+                      value={streamerBannerUrl}
+                      onChange={setStreamerBannerUrl}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+
+            {/* Social Tab */}
+            {isStreamer && streamerData && (
+              <TabsContent value="social" className="space-y-6">
+                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Social Links</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Add your social media links to display on your page.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="twitchUrl">Twitch</Label>
+                      <Input id="twitchUrl" value={twitchUrl} onChange={(e) => setTwitchUrl(e.target.value)} placeholder="https://twitch.tv/..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="youtubeUrl">YouTube</Label>
+                      <Input id="youtubeUrl" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="tiktokUrl">TikTok</Label>
+                      <Input id="tiktokUrl" value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} placeholder="https://tiktok.com/@..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="instagramUrl">Instagram</Label>
+                      <Input id="instagramUrl" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="twitterUrl">X (Twitter)</Label>
+                      <Input id="twitterUrl" value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/..." />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+
+            {/* Page Language Tab */}
+            {isStreamer && streamerData && (
+              <TabsContent value="page-language" className="space-y-6">
+                <LanguageSettings language={pageLanguage} onChange={setPageLanguage} />
+              </TabsContent>
+            )}
+
+            {/* Team Tab */}
+            {isStreamer && streamerData && (
+              <TabsContent value="team" className="space-y-6">
+                <TeamManager streamerId={streamerData.id} />
+              </TabsContent>
+            )}
           </Tabs>
         </motion.div>
       </main>
