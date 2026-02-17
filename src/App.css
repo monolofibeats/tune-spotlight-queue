@@ -42,9 +42,9 @@
 }
 
 /* Per-widget text scaling — only affects headings and explicitly marked text */
-[data-text-scale] :is(h1, h2, h3, h4, h5, h6) {
-  font-size: calc(1em * var(--widget-text-scale, 1));
-}
+/* Uses scale() so it works regardless of Tailwind's font-size utilities */
+[data-text-scale] :is(h1, h2, h3, h4, h5, h6),
 [data-text-scale] .scalable-text {
-  font-size: calc(1em * var(--widget-text-scale, 1));
+  transform: scale(var(--widget-text-scale, 1));
+  transform-origin: left center;
 }
