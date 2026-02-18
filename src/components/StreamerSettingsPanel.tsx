@@ -352,8 +352,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
 
         {/* Stream Tab */}
         <TabsContent value="stream" className="space-y-6">
-          <SessionManager />
-          <StreamEmbedConfig />
+          <SessionManager streamerId={initialStreamer.id} />
+          <StreamEmbedConfig streamerId={initialStreamer.id} />
           <ScreenStreamer />
         </TabsContent>
 

@@ -2,6 +2,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
+import { StreamSessionProvider } from '@/hooks/useStreamSession';
 import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
@@ -18,12 +19,15 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
+
 function StreamerPageContent() {
   const { slug } = useParams<{ slug: string }>();
   const { streamer, isLoading, error } = useStreamer();
-  const { isLive } = useStreamSession();
   const { t } = useLanguage();
   const { currentSubmissions, trackSubmission } = useTrackedSubmission(slug || null);
+
+  // useStreamSession is provided by StreamSessionProvider scoped to this streamer in StreamerPage
+  const { isLive } = useStreamSession();
 
   if (isLoading) {
     return (
@@ -50,7 +54,8 @@ function StreamerPageContent() {
     );
   }
 
-  const isStreamerLive = streamer.is_live || isLive;
+  // isLive is already scoped to this streamer's sessions via StreamSessionProvider
+  const isStreamerLive = isLive;
 
   return (
     <StreamerThemeProvider streamer={streamer}>
@@ -159,6 +164,15 @@ function StreamerPageContent() {
         </div>
       </section>
 
+      {/* Stream Embed (looping video, Twitch, YouTube etc.) */}
+      {streamer.show_stream_embed !== false && (
+        <section className="pb-4 px-4">
+          <div className="container mx-auto max-w-3xl">
+            <StreamEmbed streamerId={streamer.id} />
+          </div>
+        </section>
+      )}
+
       {/* Tracked Submissions - below the form */}
       {currentSubmissions.length > 0 && (
         <section className="pb-8 px-4">
@@ -192,7 +206,17 @@ export default function StreamerPage() {
 
   return (
     <StreamerProvider slug={slug}>
-      <StreamerPageContent />
+      <StreamerPageWithSession slug={slug} />
     </StreamerProvider>
+  );
+}
+
+// Inner wrapper that reads the streamer ID to scope the session provider
+function StreamerPageWithSession({ slug }: { slug: string }) {
+  const { streamer } = useStreamer();
+  return (
+    <StreamSessionProvider streamerId={streamer?.id}>
+      <StreamerPageContent />
+    </StreamSessionProvider>
   );
 }

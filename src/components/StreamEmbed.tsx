@@ -13,16 +13,20 @@ interface StreamConfig {
   is_active: boolean;
 }
 
-export function StreamEmbed() {
+interface StreamEmbedProps {
+  streamerId: string;
+}
+
+export function StreamEmbed({ streamerId }: StreamEmbedProps) {
   const [config, setConfig] = useState<StreamConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchConfig();
+    if (streamerId) fetchConfig();
 
     // Subscribe to realtime updates
     const channel = supabase
-      .channel('stream_config_changes')
+      .channel(`stream_config_changes_${streamerId}`)
       .on(
         'postgres_changes',
         {
@@ -39,15 +43,14 @@ export function StreamEmbed() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [streamerId]);
 
   const fetchConfig = async () => {
     try {
-      // Using type assertion since stream_config table may not be in types yet
       const { data, error } = await (supabase
         .from('stream_config' as any)
         .select('*')
-        .eq('is_active', true)
+        .eq('streamer_id', streamerId)
         .limit(1)
         .maybeSingle()) as any;
 
