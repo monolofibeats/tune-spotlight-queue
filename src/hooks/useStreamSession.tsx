@@ -8,13 +8,14 @@ interface StreamSession {
   is_active: boolean;
   title: string | null;
   created_by: string | null;
+  streamer_id: string | null;
 }
 
 interface StreamSessionContextType {
   currentSession: StreamSession | null;
   isLive: boolean;
   isLoading: boolean;
-  startSession: (title?: string) => Promise<void>;
+  startSession: (title?: string, streamerId?: string) => Promise<void>;
   endSession: () => Promise<void>;
 }
 
@@ -26,19 +27,30 @@ const StreamSessionContext = createContext<StreamSessionContextType>({
   endSession: async () => {},
 });
 
-export function StreamSessionProvider({ children }: { children: ReactNode }) {
+interface StreamSessionProviderProps {
+  children: ReactNode;
+  streamerId?: string; // scope to a specific streamer
+}
+
+export function StreamSessionProvider({ children, streamerId }: StreamSessionProviderProps) {
   const [currentSession, setCurrentSession] = useState<StreamSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchActiveSession = async () => {
     try {
-      const { data, error } = await (supabase
+      let query = (supabase
         .from('stream_sessions' as any)
         .select('*')
         .eq('is_active', true)
         .order('started_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()) as any;
+        .limit(1)) as any;
+
+      // If a streamer ID is provided, scope to their sessions only
+      if (streamerId) {
+        query = query.eq('streamer_id', streamerId);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       setCurrentSession(data as StreamSession | null);
@@ -54,7 +66,7 @@ export function StreamSessionProvider({ children }: { children: ReactNode }) {
 
     // Subscribe to realtime updates
     const channel = supabase
-      .channel('stream_session_changes')
+      .channel(`stream_session_changes_${streamerId || 'global'}`)
       .on(
         'postgres_changes',
         {
@@ -71,22 +83,31 @@ export function StreamSessionProvider({ children }: { children: ReactNode }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [streamerId]);
 
-  const startSession = async (title?: string) => {
+  const startSession = async (title?: string, overrideStreamerId?: string) => {
+    const sid = overrideStreamerId || streamerId;
+    if (!sid) {
+      console.error('Cannot start session: no streamer_id provided');
+      throw new Error('No streamer ID available');
+    }
     try {
-      // First, end any existing active sessions
+      // End any existing active sessions for this streamer
       await (supabase
         .from('stream_sessions' as any)
         .update({ is_active: false, ended_at: new Date().toISOString() })
-        .eq('is_active', true)) as any;
+        .eq('is_active', true)
+        .eq('streamer_id', sid)) as any;
 
-      // Create new session
+      // Create new session with streamer_id
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await (supabase
         .from('stream_sessions' as any)
         .insert({
           title: title || 'Live Stream',
           is_active: true,
+          streamer_id: sid,
+          created_by: user?.id,
         })) as any;
 
       if (error) throw error;

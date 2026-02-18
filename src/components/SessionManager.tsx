@@ -8,7 +8,11 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 
-export function SessionManager() {
+interface SessionManagerProps {
+  streamerId?: string;
+}
+
+export function SessionManager({ streamerId }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
   const [sessionTitle, setSessionTitle] = useState('');
@@ -17,7 +21,7 @@ export function SessionManager() {
   const handleStartSession = async () => {
     setIsLoading(true);
     try {
-      await startSession(sessionTitle || undefined);
+      await startSession(sessionTitle || undefined, streamerId);
       play('live');
       toast({
         title: "Stream Started! 🔴",

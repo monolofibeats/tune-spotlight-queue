@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
-import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
@@ -72,13 +71,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stream Section */}
-      <section className="pb-8 px-4">
-        <div className="container mx-auto max-w-3xl">
-          <StreamEmbed />
-        </div>
-      </section>
-
       <LanguageSwitcher />
       <Footer />
     </div>
@@ -86,3 +78,4 @@ const Index = () => {
 };
 
 export default Index;
+

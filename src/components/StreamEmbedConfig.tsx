@@ -15,6 +15,7 @@ interface StreamConfig {
   stream_url: string | null;
   video_url: string | null;
   is_active: boolean;
+  streamer_id: string | null;
 }
 
 const STREAM_TYPES: { id: StreamType; label: string; icon: React.ComponentType<{ className?: string }>; placeholder: string; description: string }[] = [
@@ -25,7 +26,11 @@ const STREAM_TYPES: { id: StreamType; label: string; icon: React.ComponentType<{
   { id: 'video', label: 'Looping Video', icon: Video, placeholder: 'https://...mp4 or storage URL', description: 'Loop a background/highlight video' },
 ];
 
-export function StreamEmbedConfig() {
+interface StreamEmbedConfigProps {
+  streamerId: string;
+}
+
+export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
   const [config, setConfig] = useState<StreamConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,15 +39,15 @@ export function StreamEmbedConfig() {
   const [videoUrl, setVideoUrl] = useState('');
 
   useEffect(() => {
-    fetchConfig();
-  }, []);
+    if (streamerId) fetchConfig();
+  }, [streamerId]);
 
   const fetchConfig = async () => {
     try {
       const { data, error } = await supabase
         .from('stream_config')
         .select('*')
-        .eq('is_active', true)
+        .eq('streamer_id', streamerId)
         .limit(1)
         .maybeSingle();
 
@@ -53,6 +58,11 @@ export function StreamEmbedConfig() {
         setSelectedType((data.stream_type as StreamType) || 'none');
         setStreamUrl(data.stream_url || '');
         setVideoUrl(data.video_url || '');
+      } else {
+        setConfig(null);
+        setSelectedType('none');
+        setStreamUrl('');
+        setVideoUrl('');
       }
     } catch (err) {
       console.error('Error fetching stream config:', err);
@@ -68,6 +78,8 @@ export function StreamEmbedConfig() {
         stream_type: selectedType,
         stream_url: selectedType !== 'video' && selectedType !== 'none' ? streamUrl || null : null,
         video_url: selectedType === 'video' ? videoUrl || null : null,
+        streamer_id: streamerId,
+        is_active: true,
       };
 
       if (config) {
@@ -79,7 +91,7 @@ export function StreamEmbedConfig() {
       } else {
         const { data, error } = await supabase
           .from('stream_config')
-          .insert({ ...payload, is_active: true })
+          .insert(payload)
           .select()
           .single();
         if (error) throw error;
