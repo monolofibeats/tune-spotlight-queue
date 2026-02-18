@@ -12,6 +12,7 @@ import {
   Loader2,
   ChevronUp,
   ChevronDown,
+  Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,8 +20,20 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+
+// Core fields that always exist in the submission form — their field_type is fixed by the form design
+const CORE_FIELD_NAMES = new Set(['song_url', 'artist_name', 'song_title', 'email', 'message']);
+// Core field types that should be locked (cannot be changed by streamer)
+const CORE_FIELD_TYPE_MAP: Record<string, string> = {
+  song_url: 'url',
+  artist_name: 'text',
+  song_title: 'text',
+  email: 'email',
+  message: 'textarea',
+};
 
 interface FormField {
   id: string;
@@ -108,9 +121,11 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
     }
   };
 
-  // Update field both locally and in DB, then refetch to ensure UI is in sync
+  // Update field optimistically in local state, then persist to DB.
+  // We do NOT refetch after success — the optimistic state IS the correct state.
+  // Refetch only on error to restore DB truth.
   const updateField = async (id: string, updates: Partial<FormField>) => {
-    // Optimistic update
+    // Optimistic update — immediate UI feedback
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
 
     const { error } = await supabase
@@ -120,9 +135,9 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
 
     if (error) {
       toast({ title: 'Failed to save change', variant: 'destructive' });
+      // Restore from DB on failure
+      await fetchFields();
     }
-    // Always refetch to ensure UI reflects actual DB state
-    await fetchFields();
   };
 
   const deleteField = async (id: string) => {
@@ -181,133 +196,160 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
             </div>
           ) : (
             <div className="space-y-3">
-              {fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className={`p-4 rounded-lg border transition-colors ${field.is_enabled ? 'bg-card border-border' : 'bg-muted/30 border-border/50 opacity-60'}`}
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Up/Down reorder */}
-                    <div className="flex flex-col gap-1 pt-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        disabled={index === 0}
-                        onClick={() => moveField(index, 'up')}
-                      >
-                        <ChevronUp className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        disabled={index === fields.length - 1}
-                        onClick={() => moveField(index, 'down')}
-                      >
-                        <ChevronDown className="w-3 h-3" />
-                      </Button>
-                    </div>
+              {fields.map((field, index) => {
+                const isCoreField = CORE_FIELD_NAMES.has(field.field_name);
+                // For core fields, always use the correct locked type (fix corrupted DB data on save)
+                const displayType = isCoreField
+                  ? (CORE_FIELD_TYPE_MAP[field.field_name] ?? field.field_type)
+                  : field.field_type;
+                const typeInfo = FIELD_TYPES.find(t => t.value === displayType);
 
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-                      {/* Label */}
-                    <div className="space-y-1.5">
-                        <Label className="text-xs">Label</Label>
-                        <Input
-                          key={`label-${field.id}-${field.field_label}`}
-                          defaultValue={field.field_label}
-                          onBlur={(e) => {
-                            const val = e.target.value;
-                            void updateField(field.id, { field_label: val });
-                          }}
-                          className="h-9"
-                        />
+                return (
+                  <div
+                    key={field.id}
+                    className={`p-4 rounded-lg border transition-colors ${field.is_enabled ? 'bg-card border-border' : 'bg-muted/30 border-border/50 opacity-60'}`}
+                  >
+                    {isCoreField && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Lock className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Core field — type is fixed</span>
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">built-in</Badge>
                       </div>
-
-                      {/* Type */}
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Type</Label>
-                        <Select
-                          value={field.field_type}
-                          onValueChange={(value) => {
-                            void updateField(field.id, { field_type: value });
-                          }}
+                    )}
+                    <div className="flex items-start gap-3">
+                      {/* Up/Down reorder */}
+                      <div className="flex flex-col gap-1 pt-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={index === 0}
+                          onClick={() => moveField(index, 'up')}
                         >
-                          <SelectTrigger className="h-9">
-                            <SelectValue>
-                              {(() => {
-                                const t = FIELD_TYPES.find(t => t.value === field.field_type);
-                                return t ? (
-                                  <div className="flex items-center gap-2">
-                                    <t.icon className="w-3 h-3" />
-                                    {t.label}
-                                  </div>
-                                ) : <span>Select type</span>;
-                              })()}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {FIELD_TYPES.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                <div className="flex items-center gap-2">
-                                  <type.icon className="w-3 h-3" />
-                                  {type.label}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <ChevronUp className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          disabled={index === fields.length - 1}
+                          onClick={() => moveField(index, 'down')}
+                        >
+                          <ChevronDown className="w-3 h-3" />
+                        </Button>
                       </div>
 
-                      {/* Placeholder */}
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Placeholder</Label>
-                        <Input
-                          defaultValue={field.placeholder || ''}
-                          onBlur={(e) => {
-                            const val = e.target.value;
-                            void updateField(field.id, { placeholder: val });
-                          }}
-                          placeholder="Hint text..."
-                          className="h-9"
-                        />
-                      </div>
-
-                      {/* Required */}
-                      <div className="flex items-end gap-4 pb-1">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            id={`required-${field.id}`}
-                            checked={field.is_required}
-                            onCheckedChange={(checked) => {
-                              void updateField(field.id, { is_required: checked });
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
+                        {/* Label */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Label</Label>
+                          <Input
+                            key={`label-${field.id}-${field.field_label}`}
+                            defaultValue={field.field_label}
+                            onBlur={(e) => {
+                              const val = e.target.value;
+                              void updateField(field.id, { field_label: val });
                             }}
+                            className="h-9"
                           />
-                          <Label htmlFor={`required-${field.id}`} className="text-xs">Required</Label>
+                        </div>
+
+                        {/* Type — locked for core fields */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Type</Label>
+                          {isCoreField ? (
+                            <div className="h-9 flex items-center gap-2 px-3 rounded-md border border-border/50 bg-muted/30 text-sm text-muted-foreground">
+                              {typeInfo && <typeInfo.icon className="w-3 h-3 shrink-0" />}
+                              <span>{typeInfo?.label ?? displayType}</span>
+                              <Lock className="w-3 h-3 ml-auto shrink-0 opacity-50" />
+                            </div>
+                          ) : (
+                            <Select
+                              value={field.field_type}
+                              onValueChange={(value) => {
+                                void updateField(field.id, { field_type: value });
+                              }}
+                            >
+                              <SelectTrigger className="h-9">
+                                <SelectValue>
+                                  {(() => {
+                                    const t = FIELD_TYPES.find(t => t.value === field.field_type);
+                                    return t ? (
+                                      <div className="flex items-center gap-2">
+                                        <t.icon className="w-3 h-3" />
+                                        {t.label}
+                                      </div>
+                                    ) : <span>Select type</span>;
+                                  })()}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {FIELD_TYPES.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    <div className="flex items-center gap-2">
+                                      <type.icon className="w-3 h-3" />
+                                      {type.label}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </div>
+
+                        {/* Placeholder */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Placeholder</Label>
+                          <Input
+                            key={`placeholder-${field.id}-${field.placeholder}`}
+                            defaultValue={field.placeholder || ''}
+                            onBlur={(e) => {
+                              const val = e.target.value;
+                              void updateField(field.id, { placeholder: val });
+                            }}
+                            placeholder="Hint text..."
+                            className="h-9"
+                          />
+                        </div>
+
+                        {/* Required */}
+                        <div className="flex items-end gap-4 pb-1">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              id={`required-${field.id}`}
+                              checked={field.is_required}
+                              onCheckedChange={(checked) => {
+                                void updateField(field.id, { is_required: checked });
+                              }}
+                            />
+                            <Label htmlFor={`required-${field.id}`} className="text-xs">Required</Label>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Enable toggle + Delete */}
-                    <div className="flex items-center gap-2 pt-5 shrink-0">
-                      <Switch
-                        checked={field.is_enabled}
-                        onCheckedChange={(checked) => {
-                          void updateField(field.id, { is_enabled: checked });
-                        }}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteField(field.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {/* Enable toggle + Delete (core fields cannot be deleted) */}
+                      <div className="flex items-center gap-2 pt-5 shrink-0">
+                        <Switch
+                          checked={field.is_enabled}
+                          onCheckedChange={(checked) => {
+                            void updateField(field.id, { is_enabled: checked });
+                          }}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => !isCoreField && deleteField(field.id)}
+                          disabled={isCoreField}
+                          className="text-destructive hover:text-destructive disabled:opacity-30"
+                          title={isCoreField ? 'Core fields cannot be deleted' : 'Delete field'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
