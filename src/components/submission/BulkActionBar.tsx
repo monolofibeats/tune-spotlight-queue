@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface BulkActionBarProps {
   selectedCount: number;
@@ -34,6 +35,7 @@ export function BulkActionBar({
   onBulkDelete,
   onBulkRestore,
 }: BulkActionBarProps) {
+  const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const allSelected = selectedCount === totalCount && totalCount > 0;
@@ -61,7 +63,7 @@ export function BulkActionBar({
           <div className="glass-strong rounded-xl border border-primary/30 shadow-lg shadow-primary/10 px-4 py-3 flex items-center gap-3 flex-wrap">
             {/* Selection info */}
             <span className="text-sm font-medium whitespace-nowrap">
-              {selectedCount} selected
+              {selectedCount} {t('bulk.selected')}
             </span>
 
             {/* Select / Deselect all */}
@@ -74,12 +76,12 @@ export function BulkActionBar({
               {allSelected ? (
                 <>
                   <Square className="w-3 h-3" />
-                  Deselect All
+                  {t('bulk.deselectAll')}
                 </>
               ) : (
                 <>
                   <CheckSquare className="w-3 h-3" />
-                  Select All ({totalCount})
+                  {t('bulk.selectAll')} ({totalCount})
                 </>
               )}
             </Button>
@@ -92,14 +94,14 @@ export function BulkActionBar({
             ) : isTrashView ? (
               <>
                 {onBulkRestore && (
-                  <Button
+                <Button
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs gap-1"
                     onClick={() => handleAction(() => onBulkRestore())}
                   >
                     <RotateCcw className="w-3 h-3" />
-                    Restore
+                    {t('bulk.restore')}
                   </Button>
                 )}
                 <Button
@@ -109,7 +111,7 @@ export function BulkActionBar({
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2 className="w-3 h-3" />
-                  Delete Forever
+                  {t('bulk.deleteForever')}
                 </Button>
               </>
             ) : (
@@ -121,7 +123,7 @@ export function BulkActionBar({
                   onClick={() => handleAction(() => onBulkStatusChange('reviewed'))}
                 >
                   <CheckCircle className="w-3 h-3" />
-                  Done
+                  {t('bulk.done')}
                 </Button>
                 <Button
                   variant="outline"
@@ -130,7 +132,7 @@ export function BulkActionBar({
                   onClick={() => handleAction(() => onBulkStatusChange('skipped'))}
                 >
                   <XCircle className="w-3 h-3" />
-                  Skip
+                  {t('bulk.skip')}
                 </Button>
                 <Button
                   variant="outline"
@@ -138,7 +140,7 @@ export function BulkActionBar({
                   className="h-7 text-xs gap-1"
                   onClick={() => handleAction(() => onBulkStatusChange('pending'))}
                 >
-                  Pending
+                  {t('bulk.pending')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -147,7 +149,7 @@ export function BulkActionBar({
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   <Trash2 className="w-3 h-3" />
-                  Trash
+                  {t('bulk.trash')}
                 </Button>
               </>
             )}
@@ -162,7 +164,7 @@ export function BulkActionBar({
               onClick={onDeselectAll}
             >
               <X className="w-3 h-3" />
-              Cancel
+              {t('bulk.cancel')}
             </Button>
           </div>
         </motion.div>
@@ -172,21 +174,21 @@ export function BulkActionBar({
         <AlertDialogContent className="glass-strong">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isTrashView ? 'Permanently delete?' : 'Move to Trash?'}
+              {isTrashView ? t('bulk.permanentDeleteTitle') : t('bulk.moveToTrashTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isTrashView
-                ? `This will permanently delete ${selectedCount} submission${selectedCount > 1 ? 's' : ''}. This cannot be undone.`
-                : `This will move ${selectedCount} submission${selectedCount > 1 ? 's' : ''} to the trash. You can restore them within 7 days.`}
+                ? t('bulk.permanentDeleteDesc').replace('{count}', String(selectedCount)).replace('{plural}', selectedCount > 1 ? 'en' : '')
+                : t('bulk.moveToTrashDesc').replace('{count}', String(selectedCount)).replace('{plural}', selectedCount > 1 ? 'en' : '')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('bulk.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => handleAction(() => onBulkDelete(isTrashView))}
             >
-              {isTrashView ? 'Delete Forever' : 'Move to Trash'}
+              {isTrashView ? t('bulk.deleteForever') : t('bulk.trash')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { SubmissionListItem } from '@/components/SubmissionListItem';
 import { NowPlayingPanel } from '@/components/NowPlayingPanel';
 import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
@@ -56,6 +57,7 @@ interface Submission {
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user, isLoading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -446,19 +448,19 @@ const StreamerDashboard = () => {
           {statsConfig.showTotal !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.total}</p><p className="text-[10px] text-muted-foreground scalable-text">Total</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.total}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.total')}</p></div>
             </div>
           )}
           {statsConfig.showPending !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><Eye className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.pending}</p><p className="text-[10px] text-muted-foreground scalable-text">Pending</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.pending}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.pending')}</p></div>
             </div>
           )}
           {statsConfig.showReviewed !== false && (
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
               <div className="p-2 rounded-lg bg-primary/20"><CheckCircle className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground scalable-text">Reviewed</p></div>
+              <div><p className="text-xl font-display font-bold scalable-text">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.reviewed')}</p></div>
             </div>
           )}
         </div>
@@ -480,18 +482,18 @@ const StreamerDashboard = () => {
           {searchConfig.showSearchBar !== false && (
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search tracks or artists..." value={searchQuery}
+              <Input placeholder={t('dashboard.searchTracksArtists')} value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm" />
             </div>
           )}
           {searchConfig.showStatusFilters !== false && (
             <div className="flex gap-1.5 flex-wrap">
               {[
-                { key: 'all', label: 'All' },
-                { key: 'pending', label: 'Pending' },
-                { key: 'reviewed', label: 'Done' },
-                { key: 'skipped', label: 'Skipped' },
-                ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: '🗑 Trash' }] : []),
+                { key: 'all', label: t('dashboard.filterAll') },
+                { key: 'pending', label: t('dashboard.filterPending') },
+                { key: 'reviewed', label: t('dashboard.filterDone') },
+                { key: 'skipped', label: t('dashboard.filterSkipped') },
+                ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
               ].map(({ key, label }) => (
                 <Button key={key} variant={statusFilter === key ? 'default' : 'outline'}
                   size="sm" className="h-7 text-xs px-2.5" onClick={() => setStatusFilter(key)}>
@@ -520,9 +522,9 @@ const StreamerDashboard = () => {
           {filteredSubmissions.length === 0 && (
             <div className="rounded-2xl p-8 text-center bg-muted/10">
               <Music className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <h3 className="font-semibold text-sm mb-1">No submissions found</h3>
+              <h3 className="font-semibold text-sm mb-1">{t('dashboard.noSubmissions')}</h3>
               <p className="text-xs text-muted-foreground">
-                {searchQuery ? 'Try a different search term' : 'Waiting for submissions...'}
+                {searchQuery ? t('dashboard.tryDifferentSearch') : t('dashboard.waitingSubmissions')}
               </p>
             </div>
           )}
@@ -559,11 +561,9 @@ const StreamerDashboard = () => {
         <Header />
         <main className="pt-24 pb-12 px-4">
           <div className="container mx-auto max-w-2xl text-center">
-            <h1 className="text-2xl font-bold mb-4">No Streamer Profile Found</h1>
-            <p className="text-muted-foreground mb-6">
-              You don't have a streamer profile yet. Please apply to become a streamer.
-            </p>
-            <Button asChild><a href="/">Apply Now</a></Button>
+            <h1 className="text-2xl font-bold mb-4">{t('dashboard.noProfileFound')}</h1>
+            <p className="text-muted-foreground mb-6">{t('dashboard.noProfileDesc')}</p>
+            <Button asChild><a href="/">{t('dashboard.applyNow')}</a></Button>
           </div>
         </main>
       </div>
@@ -677,7 +677,7 @@ const StreamerDashboard = () => {
     <StreamSessionProvider streamerId={streamer.id}>
       <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
         {/* Collapsible Header */}
-        {viewOptions.showHeader ? (
+            {viewOptions.showHeader ? (
           <Header />
         ) : (
           <div className="fixed top-2 left-2 z-50">
@@ -686,7 +686,7 @@ const StreamerDashboard = () => {
               size="icon"
               className="h-8 w-8 bg-card/80 backdrop-blur-sm"
               onClick={() => setViewOptions(prev => ({ ...prev, showHeader: true }))}
-              title="Show header"
+              title={t('dashboard.showHeader')}
             >
               <ChevronDown className="w-4 h-4" />
             </Button>
@@ -695,13 +695,12 @@ const StreamerDashboard = () => {
         
         <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
           <div className="w-full">
-            {/* Single DashboardBuilder instance — never remounts on title toggle */}
             <div className="flex items-center justify-end gap-2 mb-4">
               <DashboardBuilder {...builderProps} />
               <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
                 <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-3 h-3" />
-                  View Page
+                  {t('dashboard.viewPage')}
                 </a>
               </Button>
             </div>
@@ -716,25 +715,24 @@ const StreamerDashboard = () => {
                 <div className="flex items-center gap-3">
                   <LayoutDashboard className="w-8 h-8 text-primary" />
                   <div>
-                    <h1 className="text-3xl font-display font-bold">Streamer Dashboard</h1>
+                    <h1 className="text-3xl font-display font-bold">{t('dashboard.streamerDashboard')}</h1>
                     <p className="text-muted-foreground">
-                      Manage your page at <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
+                      {t('dashboard.managePageAt')} <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
                     </p>
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {/* Tabs */}
             <Tabs defaultValue="submissions" className="space-y-6">
               <TabsList className="glass p-1 rounded-xl">
                 <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
                   <Music className="w-4 h-4" />
-                  Submissions
+                  {t('dashboard.submissions')}
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
                   <Settings className="w-4 h-4" />
-                  My Page Settings
+                  {t('dashboard.myPageSettings')}
                 </TabsTrigger>
               </TabsList>
 
