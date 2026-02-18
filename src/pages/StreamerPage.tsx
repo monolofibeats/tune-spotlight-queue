@@ -24,7 +24,7 @@ function StreamerPageContent() {
   const { slug } = useParams<{ slug: string }>();
   const { streamer, isLoading, error } = useStreamer();
   const { t } = useLanguage();
-  const { currentSubmissions, trackSubmission } = useTrackedSubmission(slug || null);
+  const { currentSubmissions, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   // useStreamSession is provided by StreamSessionProvider scoped to this streamer in StreamerPage
   const { isLive } = useStreamSession();
@@ -175,7 +175,7 @@ function StreamerPageContent() {
       {currentSubmissions.length > 0 && (
         <section className="pb-8 px-4">
           <div className="container mx-auto max-w-xl">
-            <SubmissionTracker submissions={currentSubmissions} />
+            <SubmissionTracker submissions={currentSubmissions} onDismiss={(trackedAt) => clearSubmission(slug || null, trackedAt)} />
           </div>
         </section>
       )}

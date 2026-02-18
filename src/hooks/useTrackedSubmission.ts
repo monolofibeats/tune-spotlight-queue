@@ -13,6 +13,7 @@ export interface TrackedSubmission {
   streamerId: string | null;
   streamerSlug: string | null;
   trackedAt: number; // timestamp
+  doneStatus?: 'reviewed' | 'skipped' | 'deleted'; // set when streamer processes it
 }
 
 function getTrackedSubmissions(): TrackedSubmission[] {
@@ -36,11 +37,12 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
     setSubmissions(getTrackedSubmissions());
   }, []);
 
-  // Poll Supabase to remove submissions that are no longer pending
+  // Poll Supabase to mark submissions as done when streamer processes them
   useEffect(() => {
     const checkStatuses = async () => {
       const all = getTrackedSubmissions();
-      const withIds = all.filter((s) => s.submissionId);
+      // Only check submissions that are still "pending" (no doneStatus yet)
+      const withIds = all.filter((s) => s.submissionId && !s.doneStatus);
       if (withIds.length === 0) return;
 
       const ids = withIds.map((s) => s.submissionId!);
@@ -51,21 +53,38 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
 
       if (!data) return;
 
-      const nonPendingIds = new Set(
-        data.filter((r) => r.status !== 'pending').map((r) => r.id)
-      );
+      // Map processed submissions to their new status
+      const statusMap = new Map(data.map((r) => [r.id, r.status]));
 
-      if (nonPendingIds.size === 0) return;
+      let changed = false;
+      const updated = all.map((s) => {
+        if (!s.submissionId || s.doneStatus) return s;
+        const dbStatus = statusMap.get(s.submissionId);
+        if (dbStatus && dbStatus !== 'pending') {
+          changed = true;
+          const doneStatus =
+            dbStatus === 'reviewed' ? 'reviewed'
+            : dbStatus === 'skipped' ? 'skipped'
+            : 'deleted';
+          return { ...s, doneStatus } as TrackedSubmission;
+        }
+        // If not found in DB at all, treat as deleted
+        if (!statusMap.has(s.submissionId) && data.length > 0) {
+          // Only mark deleted if we specifically queried for it and it's missing
+          changed = true;
+          return { ...s, doneStatus: 'deleted' as const };
+        }
+        return s;
+      });
 
-      const updated = all.filter(
-        (s) => !s.submissionId || !nonPendingIds.has(s.submissionId)
-      );
-      saveTrackedSubmissions(updated);
-      setSubmissions(updated);
+      if (changed) {
+        saveTrackedSubmissions(updated);
+        setSubmissions(updated);
+      }
     };
 
     checkStatuses();
-    const interval = setInterval(checkStatuses, 30_000);
+    const interval = setInterval(checkStatuses, 15_000);
     return () => clearInterval(interval);
   }, []);
 
