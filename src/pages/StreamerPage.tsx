@@ -55,6 +55,29 @@ function StreamerPageContent() {
   return (
     <StreamerThemeProvider streamer={streamer}>
       <div className="min-h-screen relative">
+        {/* Background layer — gradient at low opacity, image with blur */}
+        {streamer.background_type === 'gradient' && streamer.background_gradient && (
+          <div
+            className="fixed inset-0 -z-10 pointer-events-none"
+            style={{ background: streamer.background_gradient, opacity: 0.28 }}
+          />
+        )}
+        {streamer.background_type === 'image' && streamer.background_image_url && (
+          <div
+            className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+          >
+            <div
+              className="absolute inset-[-20px]"
+              style={{
+                backgroundImage: `url(${streamer.background_image_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(10px)',
+                opacity: 0.55,
+              }}
+            />
+          </div>
+        )}
         {/* Streamer Announcement Banner - at very top */}
         <StreamerAnnouncementBanner streamer={streamer} />
         
