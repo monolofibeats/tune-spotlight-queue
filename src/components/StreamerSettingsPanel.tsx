@@ -8,6 +8,7 @@ import {
   FileText,
   DollarSign,
   Eye,
+  Radio,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,8 @@ import {
   PricingSettings,
   PresetManager,
 } from '@/components/streamer-settings';
+import { SessionManager } from '@/components/SessionManager';
+import { ScreenStreamer } from '@/components/ScreenStreamer';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
@@ -50,7 +53,7 @@ interface StreamerSettingsPanelProps {
 export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('presets');
+  const [activeTab, setActiveTab] = useState('form');
 
   // Form state - Content
   
@@ -215,11 +218,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
   };
 
   const tabs = [
-    { id: 'presets', label: 'Presets', icon: Palette },
-    { id: 'content', label: 'Content', icon: FileText },
     { id: 'form', label: 'Form', icon: Layout },
-    { id: 'design', label: 'Design', icon: Palette },
+    { id: 'content', label: 'Content', icon: FileText },
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
+    { id: 'design', label: 'Design', icon: Palette },
+    { id: 'presets', label: 'Preset', icon: Palette },
+    { id: 'stream', label: 'Stream', icon: Radio },
   ];
 
   return (
@@ -270,9 +274,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           </TabsList>
         </ScrollArea>
 
-        {/* Presets Tab */}
-        <TabsContent value="presets" className="space-y-6">
-          <PresetManager streamerId={streamer.id} />
+        {/* Form Tab */}
+        <TabsContent value="form" className="space-y-6">
+          <FormFieldBuilder streamerId={streamer.id} />
         </TabsContent>
 
         {/* Content Tab */}
@@ -282,86 +286,51 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
             <p className="text-sm text-muted-foreground">
               These texts appear prominently on your page. Changes go live immediately but are logged for admin review.
             </p>
-            
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="heroTitle">Hero Title</Label>
-                <Input
-                  id="heroTitle"
-                  value={heroTitle}
-                  onChange={(e) => setHeroTitle(e.target.value)}
-                  placeholder="Submit Your Music"
-                />
+                <Input id="heroTitle" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder="Submit Your Music" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
-                <Input
-                  id="heroSubtitle"
-                  value={heroSubtitle}
-                  onChange={(e) => setHeroSubtitle(e.target.value)}
-                  placeholder="Get your tracks reviewed live on stream"
-                />
+                <Input id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Get your tracks reviewed live on stream" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="welcomeMessage">Welcome Message</Label>
-                <Textarea
-                  id="welcomeMessage"
-                  value={welcomeMessage}
-                  onChange={(e) => setWelcomeMessage(e.target.value)}
-                  placeholder="A personal message shown below the hero (optional)"
-                  rows={2}
-                />
+                <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder="A personal message shown below the hero (optional)" rows={2} />
               </div>
             </div>
           </div>
-
           <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
             <h3 className="font-semibold text-lg">Layout Options</h3>
-            
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Show "How It Works" Section</Label>
                   <p className="text-sm text-muted-foreground">Display the step-by-step guide</p>
                 </div>
-                <Switch
-                  checked={showHowItWorks}
-                  onCheckedChange={setShowHowItWorks}
-                />
+                <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <Label>Show Stream Embed</Label>
                   <p className="text-sm text-muted-foreground">Display live stream on your page</p>
                 </div>
-                <Switch
-                  checked={showStreamEmbed}
-                  onCheckedChange={setShowStreamEmbed}
-                />
+                <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
               </div>
             </div>
           </div>
         </TabsContent>
 
-        {/* Form Tab */}
-        <TabsContent value="form" className="space-y-6">
-          <FormFieldBuilder streamerId={streamer.id} />
+        {/* Pricing Tab */}
+        <TabsContent value="pricing" className="space-y-6">
+          <PricingSettings streamerId={streamer.id} />
         </TabsContent>
 
         {/* Design Tab */}
         <TabsContent value="design" className="space-y-6">
           <DesignCustomizer
-            settings={{
-              primaryColor,
-              fontFamily,
-              buttonStyle,
-              backgroundType,
-              backgroundImageUrl,
-              backgroundGradient,
-              animationStyle,
-              cardStyle,
-              streamerId: streamer.id,
-            }}
+            settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
             onChange={(newSettings) => {
               if (newSettings.primaryColor !== undefined) setPrimaryColor(newSettings.primaryColor);
               if (newSettings.fontFamily !== undefined) setFontFamily(newSettings.fontFamily);
@@ -375,12 +344,19 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           />
         </TabsContent>
 
-        {/* Pricing Tab */}
-        <TabsContent value="pricing" className="space-y-6">
-          <PricingSettings streamerId={streamer.id} />
+        {/* Preset Tab */}
+        <TabsContent value="presets" className="space-y-6">
+          <PresetManager streamerId={streamer.id} />
+        </TabsContent>
+
+        {/* Stream Tab */}
+        <TabsContent value="stream" className="space-y-6">
+          <SessionManager />
+          <ScreenStreamer />
         </TabsContent>
 
       </Tabs>
     </motion.div>
   );
 }
+
