@@ -10,54 +10,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 
 
-const faqs = [
-  {
-    q: "How do I set up my streamer page?",
-    a: "Once approved, head to your Streamer Dashboard and click on Settings. You can customise your page slug, hero text, colors, background style, banner, and more. Changes are saved automatically and reflected on your public profile."
-  },
-  {
-    q: "How do payouts work?",
-    a: "Navigate to Payments from the gear menu. You can set up PayPal or bank transfer as your preferred payout method, then request a payout once your balance meets the minimum threshold. Our team processes requests manually and you'll be notified once it's completed."
-  },
-  {
-    q: "What fees does the platform charge?",
-    a: "A small platform fee is deducted from each submission payment. The exact split is visible in your Payments & Statistics pages. Stripe processing fees are also deducted before your share is calculated."
-  },
-  {
-    q: "How do I manage my submission queue?",
-    a: "Your dashboard shows all incoming submissions sorted by priority and payment amount. You can mark songs as 'playing', 'reviewed', or 'skipped'. Use the bulk action bar to manage multiple submissions at once."
-  },
-  {
-    q: "Can I invite team members to help manage my page?",
-    a: "Yes! Go to your Streamer Settings and open the Team Manager section. You can invite team members by email and assign them roles like Viewer, Editor, or Admin. Editors and Admins can manage your queue and settings."
-  },
-  {
-    q: "How do presets work?",
-    a: "Presets let you save different dashboard layouts and theme configurations for different occasions (e.g. a chill lofi session vs. a high-energy review stream). You can switch between presets from your dashboard."
-  },
-  {
-    q: "How do I customise my submission form?",
-    a: "In Streamer Settings, use the Form Field Builder to add, reorder, or remove custom fields on your submission page. You can set fields as required, add placeholders, and choose field types like text, select, or textarea."
-  },
-  {
-    q: "What should I do if I have a payment dispute?",
-    a: "Contact us via the Support chat below. Provide the submission ID and any relevant details, and our team will investigate and resolve the issue as quickly as possible."
-  },
-  {
-    q: "How do I go live and show my stream on my page?",
-    a: "Enable the stream embed in your Streamer Settings and configure the stream URL (Twitch, YouTube, etc.). When you're live, toggle your live status and viewers will see your stream directly on your profile page."
-  },
-  {
-    q: "How can I track my earnings and performance?",
-    a: "Visit the Statistics page from the gear menu. You'll find charts and breakdowns of your earnings over time, submission counts, and other performance metrics."
-  },
-];
+const FAQ_COUNT = 10;
 
 export default function Support() {
   const { user, isStreamer } = useAuth();
   const { t } = useLanguage();
   const [chatOpen, setChatOpen] = useState(false);
   const [streamerId, setStreamerId] = useState<string | null>(null);
+
+  const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
+    q: t(`support.faq.${i}.q`),
+    a: t(`support.faq.${i}.a`),
+  }));
 
 
   useEffect(() => {
