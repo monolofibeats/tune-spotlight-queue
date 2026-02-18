@@ -524,6 +524,33 @@ const StreamerSettings = () => {
 
             {/* Design Tab */}
             <TabsContent value="design" className="space-y-6">
+              {/* Live Preview */}
+              <div className="bg-card/50 border border-border/50 rounded-xl p-4 space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Live Preview</p>
+                <div
+                  className="w-full h-40 rounded-lg overflow-hidden border border-border/30 flex items-center justify-center relative"
+                  style={{
+                    background:
+                      backgroundType === 'gradient' && backgroundGradient
+                        ? backgroundGradient
+                        : backgroundType === 'image' && backgroundImageUrl
+                        ? `url(${backgroundImageUrl}) center/cover no-repeat`
+                        : `hsl(var(--background))`,
+                  }}
+                >
+                  <div
+                    className="px-5 py-3 text-sm font-semibold shadow-lg"
+                    style={{
+                      backgroundColor: `hsl(${primaryColor})`,
+                      color: '#fff',
+                      borderRadius: buttonStyle === 'pill' ? '9999px' : buttonStyle === 'sharp' ? '0' : buttonStyle === 'soft' ? '14px' : '8px',
+                    }}
+                  >
+                    Submit Track
+                  </div>
+                </div>
+              </div>
+
               <DesignCustomizer
                 settings={{
                   primaryColor,
