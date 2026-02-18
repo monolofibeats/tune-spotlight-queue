@@ -38,19 +38,19 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
 
   const fetchActiveSession = async () => {
     try {
-      let query = (supabase
-        .from('stream_sessions' as any)
+      let query = supabase
+        .from('stream_sessions')
         .select('*')
         .eq('is_active', true)
         .order('started_at', { ascending: false })
-        .limit(1)) as any;
+        .limit(1);
 
       // If a streamer ID is provided, scope to their sessions only
       if (streamerId) {
-        query = query.eq('streamer_id', streamerId);
+        query = (query as any).eq('streamer_id', streamerId);
       }
 
-      const { data, error } = await query.maybeSingle();
+      const { data, error } = await (query as any).maybeSingle();
 
       if (error) throw error;
       setCurrentSession(data as StreamSession | null);
@@ -87,30 +87,43 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
 
   const startSession = async (title?: string, overrideStreamerId?: string) => {
     const sid = overrideStreamerId || streamerId;
+
+    // Get current auth user first
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Cannot start session: not authenticated', authError);
+      throw new Error('Not authenticated');
+    }
+
     if (!sid) {
       console.error('Cannot start session: no streamer_id provided');
       throw new Error('No streamer ID available');
     }
+
+    console.log('[startSession] auth uid:', user.id, 'streamer_id:', sid);
+
     try {
       // End any existing active sessions for this streamer
-      await (supabase
-        .from('stream_sessions' as any)
+      await supabase
+        .from('stream_sessions')
         .update({ is_active: false, ended_at: new Date().toISOString() })
         .eq('is_active', true)
-        .eq('streamer_id', sid)) as any;
+        .eq('streamer_id', sid);
 
       // Create new session with streamer_id
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await (supabase
-        .from('stream_sessions' as any)
+      const { error } = await supabase
+        .from('stream_sessions')
         .insert({
           title: title || 'Live Stream',
           is_active: true,
           streamer_id: sid,
-          created_by: user?.id,
-        })) as any;
+          created_by: user.id,
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[startSession] INSERT error:', error, 'streamer_id used:', sid, 'auth uid:', user.id);
+        throw error;
+      }
       await fetchActiveSession();
     } catch (error) {
       console.error('Error starting session:', error);
@@ -122,13 +135,13 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
     if (!currentSession) return;
 
     try {
-      const { error } = await (supabase
-        .from('stream_sessions' as any)
+      const { error } = await supabase
+        .from('stream_sessions')
         .update({ 
           is_active: false, 
           ended_at: new Date().toISOString() 
         })
-        .eq('id', currentSession.id)) as any;
+        .eq('id', currentSession.id);
 
       if (error) throw error;
       setCurrentSession(null);
