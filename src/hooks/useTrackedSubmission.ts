@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'upstar_tracked_submissions';
 
@@ -33,6 +34,39 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
 
   useEffect(() => {
     setSubmissions(getTrackedSubmissions());
+  }, []);
+
+  // Poll Supabase to remove submissions that are no longer pending
+  useEffect(() => {
+    const checkStatuses = async () => {
+      const all = getTrackedSubmissions();
+      const withIds = all.filter((s) => s.submissionId);
+      if (withIds.length === 0) return;
+
+      const ids = withIds.map((s) => s.submissionId!);
+      const { data } = await supabase
+        .from('submissions')
+        .select('id, status')
+        .in('id', ids);
+
+      if (!data) return;
+
+      const nonPendingIds = new Set(
+        data.filter((r) => r.status !== 'pending').map((r) => r.id)
+      );
+
+      if (nonPendingIds.size === 0) return;
+
+      const updated = all.filter(
+        (s) => !s.submissionId || !nonPendingIds.has(s.submissionId)
+      );
+      saveTrackedSubmissions(updated);
+      setSubmissions(updated);
+    };
+
+    checkStatuses();
+    const interval = setInterval(checkStatuses, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   // Get all submissions for the current streamer

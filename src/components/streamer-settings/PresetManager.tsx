@@ -58,29 +58,6 @@ export function PresetManager({ streamerId }: PresetManagerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Quick-start templates */}
-      <Card className="bg-card/50 border-border/50">
-        <CardHeader>
-          <CardTitle className="text-lg">Create from Template</CardTitle>
-          <CardDescription>Start with a pre-configured preset for your platform or occasion</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {TEMPLATE_OPTIONS.map((tmpl) => (
-              <Button
-                key={tmpl.key}
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2 hover:border-primary/50"
-                onClick={() => createPreset(tmpl.key)}
-              >
-                <tmpl.icon className={`w-6 h-6 ${tmpl.color}`} />
-                <span className="text-xs font-medium text-center">{tmpl.label}</span>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Custom preset */}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">Your Presets</h3>

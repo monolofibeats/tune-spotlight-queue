@@ -140,18 +140,22 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
 
     setIsSaving(true);
 
-    // Log text content changes for admin review
-    if (heroTitle !== streamer.hero_title) {
-      await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
-    }
-    if (heroSubtitle !== streamer.hero_subtitle) {
-      await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
-    }
-    if (welcomeMessage !== streamer.welcome_message) {
-      await logContentChange('welcome_message', streamer.welcome_message || '', welcomeMessage);
-    }
-    if (bannerText !== streamer.banner_text) {
-      await logContentChange('banner_text', streamer.banner_text || '', bannerText);
+    // Log text content changes for admin review (non-blocking)
+    try {
+      if (heroTitle !== streamer.hero_title) {
+        await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
+      }
+      if (heroSubtitle !== streamer.hero_subtitle) {
+        await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
+      }
+      if (welcomeMessage !== streamer.welcome_message) {
+        await logContentChange('welcome_message', streamer.welcome_message || '', welcomeMessage);
+      }
+      if (bannerText !== streamer.banner_text) {
+        await logContentChange('banner_text', streamer.banner_text || '', bannerText);
+      }
+    } catch (e) {
+      console.log('Content change logging skipped:', e);
     }
 
     try {
