@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Monitor, 
@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 import upstarLogo from '@/assets/upstar-logo.png';
 
 interface OverlaySettings {
@@ -37,6 +38,7 @@ interface PeerConnection {
 export function ScreenStreamer() {
   const { user } = useAuth();
   const { play } = useSoundEffects();
+  const { t } = useLanguage();
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -237,15 +239,15 @@ export function ScreenStreamer() {
       setIsStreaming(true);
       play('success');
       toast({
-        title: "Screen share started! 📺",
-        description: "Your screen is now live on the homepage",
+        title: t('toast.streamStarted'),
+        description: t('toast.streamLive'),
       });
 
     } catch (error: any) {
       console.error('Error starting stream:', error);
       toast({
-        title: "Failed to start",
-        description: error.message || "Could not access screen",
+        title: t('common.error'),
+        description: error.message || t('screenshare.noActive'),
         variant: "destructive",
       });
     } finally {
@@ -287,8 +289,8 @@ export function ScreenStreamer() {
     setViewerCount(0);
 
     toast({
-      title: "Stream ended",
-      description: "Screen share has stopped",
+      title: t('toast.streamEnded'),
+      description: t('toast.streamStopped'),
     });
   };
 
@@ -308,9 +310,9 @@ export function ScreenStreamer() {
             )}
           </div>
           <div>
-            <h2 className="text-xl font-display font-semibold">Bildschirm live teilen</h2>
+            <h2 className="text-xl font-display font-semibold">{t('screenshare.title')}</h2>
             <p className="text-sm text-muted-foreground">
-              Teile deinen Screen mit den Zuschauern
+              {t('screenshare.subtitle')}
             </p>
           </div>
         </div>
@@ -319,7 +321,7 @@ export function ScreenStreamer() {
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="gap-1">
               <Users className="w-3 h-3" />
-              {viewerCount} watching
+              {viewerCount} {t('screenshare.watching')}
             </Badge>
             <Button
               variant="ghost"
@@ -373,7 +375,7 @@ export function ScreenStreamer() {
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <MonitorOff className="w-16 h-16 text-muted-foreground" />
-            <p className="text-muted-foreground">No active screen share</p>
+            <p className="text-muted-foreground">{t('screenshare.noActive')}</p>
           </div>
         )}
       </div>
@@ -389,7 +391,7 @@ export function ScreenStreamer() {
           >
             <h3 className="font-semibold flex items-center gap-2">
               <Settings className="w-4 h-4" />
-              Overlay Settings
+              {t('screenshare.overlaySettings')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -398,7 +400,7 @@ export function ScreenStreamer() {
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" />
-                    Show Logo
+                    {t('screenshare.showLogo')}
                   </Label>
                   <Switch
                     checked={overlay.showLogo}
@@ -428,7 +430,7 @@ export function ScreenStreamer() {
                 <div className="flex items-center justify-between">
                   <Label className="flex items-center gap-2">
                     <Type className="w-4 h-4" />
-                    Show Banner
+                    {t('screenshare.showBanner')}
                   </Label>
                   <Switch
                     checked={overlay.showBanner}
@@ -438,7 +440,7 @@ export function ScreenStreamer() {
                 
                 {overlay.showBanner && (
                   <Input
-                    placeholder="Enter banner text..."
+                    placeholder={t('screenshare.bannerPlaceholder')}
                     value={overlay.bannerText}
                     onChange={(e) => setOverlay(o => ({ ...o, bannerText: e.target.value }))}
                   />
@@ -458,7 +460,7 @@ export function ScreenStreamer() {
             onClick={stopStreaming}
           >
             <Square className="w-4 h-4 mr-2" />
-            Stop Streaming
+            {t('screenshare.stop')}
           </Button>
         ) : (
           <Button
@@ -471,14 +473,13 @@ export function ScreenStreamer() {
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            {isStarting ? 'Startet...' : 'Bildschirm teilen'}
+            {isStarting ? t('screenshare.starting') : t('screenshare.start')}
           </Button>
         )}
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Dein Browser wird dich fragen welchen Bildschirm, Fenster oder Tab du teilen willst.
-        Zuschauer werden es dann live auf der Website sehen.
+        {t('screenshare.browserPrompt')}
       </p>
     </motion.div>
   );
