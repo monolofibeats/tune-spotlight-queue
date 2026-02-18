@@ -263,25 +263,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
               </div>
             </div>
           </div>
-          <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">{t('pageSettings.layout.title')}</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>{t('pageSettings.layout.showHowItWorks')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('pageSettings.layout.showHowItWorksDesc')}</p>
-                </div>
-                <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>{t('pageSettings.layout.showStreamEmbed')}</Label>
-                  <p className="text-sm text-muted-foreground">{t('pageSettings.layout.showStreamEmbedDesc')}</p>
-                </div>
-                <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
-              </div>
-            </div>
-          </div>
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-6">
