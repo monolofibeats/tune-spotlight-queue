@@ -77,6 +77,7 @@ export default function Settings() {
 
   // Streamer-specific state
   const [streamerData, setStreamerData] = useState<Streamer | null>(null);
+  const [streamerTeamRole, setStreamerTeamRole] = useState<'viewer' | 'editor' | 'admin' | null>(null); // null = owner
   const [streamerDisplayName, setStreamerDisplayName] = useState('');
   const [streamerBio, setStreamerBio] = useState('');
   const [streamerAvatarUrl, setStreamerAvatarUrl] = useState('');
@@ -116,7 +117,7 @@ export default function Settings() {
     if (!data) {
       const { data: team } = await supabase
         .from('streamer_team_members')
-        .select('streamer_id')
+        .select('streamer_id, role')
         .eq('user_id', user.id)
         .eq('invitation_status', 'accepted')
         .limit(1)
@@ -124,7 +125,12 @@ export default function Settings() {
       if (team) {
         const { data: teamStreamer } = await supabase.from('streamers').select('*').eq('id', team.streamer_id).maybeSingle();
         data = teamStreamer;
+        if (teamStreamer) {
+          setStreamerTeamRole(team.role as 'viewer' | 'editor' | 'admin');
+        }
       }
+    } else {
+      setStreamerTeamRole(null); // owner
     }
     if (data) {
       setStreamerData(data as Streamer);
@@ -314,6 +320,8 @@ export default function Settings() {
   }
 
   const hasStreamerAccess = (isStreamer || isAdmin) && !!streamerData;
+  // Team management only for owners (streamerTeamRole === null) and team admins
+  const canManageTeam = hasStreamerAccess && (streamerTeamRole === null || streamerTeamRole === 'admin' || isAdmin);
 
   const tabs = [
     { id: 'profile', label: t('settings.tab.profile'), icon: User },
@@ -323,7 +331,7 @@ export default function Settings() {
     ...(hasStreamerAccess ? [
       { id: 'streamer-profile', label: t('settings.tab.streamerProfile'), icon: User },
       { id: 'social', label: t('settings.tab.social'), icon: LinkIcon },
-      { id: 'team', label: t('settings.tab.team'), icon: Users },
+      ...(canManageTeam ? [{ id: 'team', label: t('settings.tab.team'), icon: Users }] : []),
     ] : []),
   ];
 
@@ -644,7 +652,7 @@ export default function Settings() {
             )}
 
             {/* Team Tab */}
-            {hasStreamerAccess && (
+            {canManageTeam && (
               <TabsContent value="team" className="space-y-6">
                 <TeamManager streamerId={streamerData!.id} />
               </TabsContent>
