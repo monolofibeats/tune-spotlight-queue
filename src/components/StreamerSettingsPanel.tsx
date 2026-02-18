@@ -356,7 +356,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           <DesignCustomizer
             settings={{
               primaryColor,
-              accentColor,
               fontFamily,
               buttonStyle,
               backgroundType,
@@ -364,10 +363,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
               backgroundGradient,
               animationStyle,
               cardStyle,
+              streamerId: streamer.id,
             }}
             onChange={(newSettings) => {
               if (newSettings.primaryColor !== undefined) setPrimaryColor(newSettings.primaryColor);
-              if (newSettings.accentColor !== undefined) setAccentColor(newSettings.accentColor);
               if (newSettings.fontFamily !== undefined) setFontFamily(newSettings.fontFamily);
               if (newSettings.buttonStyle !== undefined) setButtonStyle(newSettings.buttonStyle);
               if (newSettings.backgroundType !== undefined) setBackgroundType(newSettings.backgroundType);
