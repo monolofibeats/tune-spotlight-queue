@@ -336,7 +336,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-3xl mx-auto"
+          className="max-w-5xl mx-auto"
         >
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 gap-2">
             <ArrowLeft className="w-4 h-4" />
@@ -361,9 +361,9 @@ export default function Settings() {
             <ScrollArea className="w-full">
               <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
-                  <TabsTrigger key={tab.id} value={tab.id} className="rounded-lg px-4 gap-2 whitespace-nowrap">
-                    <tab.icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
+                  <TabsTrigger key={tab.id} value={tab.id} className="rounded-lg px-3 gap-1.5 whitespace-nowrap text-sm">
+                    <tab.icon className="w-4 h-4 shrink-0" />
+                    <span>{tab.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
