@@ -24,7 +24,7 @@ function StreamerPageContent() {
   const { slug } = useParams<{ slug: string }>();
   const { streamer, isLoading, error } = useStreamer();
   const { t } = useLanguage();
-  const { currentSubmissions, trackSubmission } = useTrackedSubmission(slug || null);
+  const { currentSubmissions, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   // useStreamSession is provided by StreamSessionProvider scoped to this streamer in StreamerPage
   const { isLive } = useStreamSession();
