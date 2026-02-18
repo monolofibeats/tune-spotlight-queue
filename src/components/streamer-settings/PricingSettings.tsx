@@ -69,8 +69,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   }, [streamerId]);
 
   const fetchConfigs = async () => {
-    // Try streamer-specific configs first
-    let { data, error } = await supabase
+    const { data, error } = await supabase
       .from('pricing_config')
       .select('*')
       .eq('streamer_id', streamerId);
@@ -81,42 +80,13 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
       return;
     }
 
-    // If no streamer-specific configs, create from globals
-    if (!data || data.length === 0) {
-      const { data: globalConfigs } = await supabase
-        .from('pricing_config')
-        .select('*')
-        .is('streamer_id', null);
-
-      if (globalConfigs && globalConfigs.length > 0) {
-        const newConfigs = globalConfigs.map(gc => ({
-          config_type: gc.config_type,
-          min_amount_cents: gc.min_amount_cents,
-          max_amount_cents: gc.max_amount_cents,
-          step_cents: gc.step_cents,
-          is_active: gc.is_active,
-          streamer_id: streamerId,
-        }));
-
-        const { data: insertedConfigs, error: insertError } = await supabase
-          .from('pricing_config')
-          .insert(newConfigs)
-          .select();
-
-        if (!insertError && insertedConfigs) {
-          data = insertedConfigs;
-        }
-      }
-    }
-
-    if (data) {
+    if (data && data.length > 0) {
       const configMap: Record<string, PricingConfig> = {};
-      data.forEach(c => {
-        configMap[c.config_type] = c;
-      });
+      data.forEach(c => { configMap[c.config_type] = c; });
       setConfigs(configMap);
       syncFormState(configMap);
     }
+    // If no streamer-specific configs exist, leave defaults in local state — save will upsert them
 
     setIsLoading(false);
   };
@@ -194,42 +164,51 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
     setIsSaving(true);
 
     try {
-      // Update submissions open
-      if (configs['submissions_open']) {
-        const { error } = await supabase.from('pricing_config').update({ is_active: submissionsOpen }).eq('id', configs['submissions_open'].id);
-        if (error) throw error;
-      }
-
-      // Update skip line
-      if (configs['skip_line']) {
-        const { error } = await supabase.from('pricing_config').update({
+      // Upsert all config types for this streamer (creates rows if they don't exist yet)
+      const upsertRows = [
+        {
+          ...(configs['submissions_open'] ? { id: configs['submissions_open'].id } : {}),
+          config_type: 'submissions_open',
+          streamer_id: streamerId,
+          is_active: submissionsOpen,
+          min_amount_cents: 0,
+          max_amount_cents: 0,
+          step_cents: 0,
+        },
+        {
+          ...(configs['skip_line'] ? { id: configs['skip_line'].id } : {}),
+          config_type: 'skip_line',
+          streamer_id: streamerId,
+          is_active: skipLine.isActive,
           min_amount_cents: Math.round(skipLine.min * 100),
           max_amount_cents: Math.round(skipLine.max * 100),
           step_cents: Math.round(skipLine.step * 100),
-          is_active: skipLine.isActive,
-        }).eq('id', configs['skip_line'].id);
-        if (error) throw error;
-      }
-
-      // Update submission
-      if (configs['submission']) {
-        const { error } = await supabase.from('pricing_config').update({
+        },
+        {
+          ...(configs['submission'] ? { id: configs['submission'].id } : {}),
+          config_type: 'submission',
+          streamer_id: streamerId,
+          is_active: submission.isActive,
           min_amount_cents: Math.round(submission.min * 100),
           max_amount_cents: Math.round(submission.max * 100),
           step_cents: Math.round(submission.step * 100),
-          is_active: submission.isActive,
-        }).eq('id', configs['submission'].id);
-        if (error) throw error;
-      }
-
-      // Update bid increment
-      if (configs['bid_increment']) {
-        const { error } = await supabase.from('pricing_config').update({
-          min_amount_cents: bidIncrementPercent,
+        },
+        {
+          ...(configs['bid_increment'] ? { id: configs['bid_increment'].id } : {}),
+          config_type: 'bid_increment',
+          streamer_id: streamerId,
           is_active: bidIncrementActive,
-        }).eq('id', configs['bid_increment'].id);
-        if (error) throw error;
-      }
+          min_amount_cents: bidIncrementPercent,
+          max_amount_cents: 100,
+          step_cents: 5,
+        },
+      ];
+
+      const { error } = await supabase
+        .from('pricing_config')
+        .upsert(upsertRows, { onConflict: 'streamer_id,config_type' });
+
+      if (error) throw error;
 
       toast({
         title: 'Pricing updated! 💰',
@@ -240,10 +219,10 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
             : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`,
       });
 
-      // Refetch to sync
       await fetchConfigs();
       setHasChanges(false);
     } catch (error) {
+      console.error('Pricing save error:', error);
       toast({ title: 'Failed to save', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
     }
 
@@ -549,7 +528,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
       {/* Save Button */}
       <Button
         onClick={handleSave}
-        disabled={isSaving || !hasChanges || skipLine.min >= skipLine.max}
+        disabled={isSaving || skipLine.min >= skipLine.max}
         className="w-full"
         size="lg"
       >
