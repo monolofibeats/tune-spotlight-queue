@@ -51,7 +51,7 @@ interface Profile {
 
 export default function Settings() {
   const { user, isLoading: authLoading, isStreamer, isAdmin } = useAuth();
-  const { language: currentLanguage, setLanguage: setAppLanguage } = useLanguage();
+  const { language: currentLanguage, setLanguage: setAppLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -265,11 +265,11 @@ export default function Settings() {
         if (streamerError) throw streamerError;
       }
 
-      toast({ title: 'Settings saved! ✨', description: 'Your preferences have been updated.' });
+      toast({ title: t('settings.saved'), description: t('settings.savedDesc') });
       fetchProfile();
     } catch (error) {
       console.error('Error saving:', error);
-      toast({ title: 'Error', description: 'Failed to save settings', variant: 'destructive' });
+      toast({ title: t('settings.error'), description: t('settings.errorDesc'), variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -316,14 +316,14 @@ export default function Settings() {
   const hasStreamerAccess = (isStreamer || isAdmin) && !!streamerData;
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'language', label: 'Language', icon: Globe },
-    { id: 'devices', label: 'Voice & Video', icon: Mic },
+    { id: 'profile', label: t('settings.tab.profile'), icon: User },
+    { id: 'notifications', label: t('settings.tab.notifications'), icon: Bell },
+    { id: 'language', label: t('settings.tab.language'), icon: Globe },
+    { id: 'devices', label: t('settings.tab.devices'), icon: Mic },
     ...(hasStreamerAccess ? [
-      { id: 'streamer-profile', label: 'Streamer Profile', icon: User },
-      { id: 'social', label: 'Social', icon: LinkIcon },
-      { id: 'team', label: 'Team', icon: Users },
+      { id: 'streamer-profile', label: t('settings.tab.streamerProfile'), icon: User },
+      { id: 'social', label: t('settings.tab.social'), icon: LinkIcon },
+      { id: 'team', label: t('settings.tab.team'), icon: Users },
     ] : []),
   ];
 
@@ -339,20 +339,20 @@ export default function Settings() {
         >
           <Button variant="ghost" onClick={() => window.history.back()} className="mb-6 gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t('settings.back')}
           </Button>
 
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <SettingsIcon className="w-8 h-8 text-primary" />
               <div>
-                <h1 className="text-3xl font-display font-bold">Settings</h1>
-                <p className="text-muted-foreground text-sm">Manage your account and preferences</p>
+                <h1 className="text-3xl font-display font-bold">{t('settings.title')}</h1>
+                <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
               </div>
             </div>
             <Button onClick={handleSave} disabled={isSaving} className="gap-2">
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Save
+              {isSaving ? t('settings.saving') : t('settings.save')}
             </Button>
           </div>
 
@@ -371,7 +371,7 @@ export default function Settings() {
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">Profile Information</h2>
+                <h2 className="font-semibold text-lg">{t('settings.profile.title')}</h2>
 
                 <div className="flex items-center gap-6">
                   <Avatar className="w-20 h-20 border-2 border-primary/30">
@@ -384,31 +384,31 @@ export default function Settings() {
                     <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
                     <div className="inline-flex items-center gap-2 rounded-md text-sm font-medium border border-border bg-transparent hover:bg-secondary h-9 px-3 transition-colors cursor-pointer">
                       <Camera className="w-4 h-4" />
-                      Change Avatar
+                      {t('settings.profile.changeAvatar')}
                     </div>
                   </label>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input id="username" placeholder="Your display name" value={username} onChange={(e) => setUsername(e.target.value)} />
+                    <Label htmlFor="username">{t('settings.profile.username')}</Label>
+                    <Input id="username" placeholder={t('settings.profile.usernamePlaceholder')} value={username} onChange={(e) => setUsername(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="displayEmail">Display Email</Label>
+                    <Label htmlFor="displayEmail">{t('settings.profile.displayEmail')}</Label>
                     <Input id="displayEmail" type="email" placeholder="your@email.com" value={displayEmail} onChange={(e) => setDisplayEmail(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">Login: {user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{t('settings.profile.loginEmail')} {user?.email}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+49 123 456789" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                  <Label htmlFor="phone">{t('settings.profile.phone')}</Label>
+                  <Input id="phone" type="tel" placeholder={t('settings.profile.phonePlaceholder')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" placeholder="Tell us about yourself..." value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
+                  <Label htmlFor="bio">{t('settings.profile.bio')}</Label>
+                  <Textarea id="bio" placeholder={t('settings.profile.bioPlaceholder')} value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
                 </div>
               </div>
             </TabsContent>
@@ -416,34 +416,34 @@ export default function Settings() {
             {/* Notifications Tab */}
             <TabsContent value="notifications" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">Notifications</h2>
+                <h2 className="font-semibold text-lg">{t('settings.notifications.title')}</h2>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                      <Label>{t('settings.notifications.email')}</Label>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.emailDesc')}</p>
                     </div>
                     <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Push Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Browser push notifications</p>
+                      <Label>{t('settings.notifications.push')}</Label>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.pushDesc')}</p>
                     </div>
                     <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Bid Notifications</Label>
-                      <p className="text-sm text-muted-foreground">When someone outbids you</p>
+                      <Label>{t('settings.notifications.bid')}</Label>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.bidDesc')}</p>
                     </div>
                     <Switch checked={bidNotifications} onCheckedChange={setBidNotifications} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Status Updates</Label>
-                      <p className="text-sm text-muted-foreground">When your submission is reviewed</p>
+                      <Label>{t('settings.notifications.status')}</Label>
+                      <p className="text-sm text-muted-foreground">{t('settings.notifications.statusDesc')}</p>
                     </div>
                     <Switch checked={statusNotifications} onCheckedChange={setStatusNotifications} />
                   </div>
@@ -454,24 +454,20 @@ export default function Settings() {
             {/* Language Tab */}
             <TabsContent value="language" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">Language & Region</h2>
+                <h2 className="font-semibold text-lg">{t('settings.language.title')}</h2>
 
                 <div className="space-y-2">
-                  <Label>Platform Language</Label>
+                  <Label>{t('settings.language.platform')}</Label>
                   <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="de">Deutsch</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
-                      <SelectItem value="tr">Türkçe</SelectItem>
+                      <SelectItem value="de">🇩🇪 {t('settings.language.de')}</SelectItem>
+                      <SelectItem value="en">🇬🇧 {t('settings.language.en')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Changes apply immediately across the platform.</p>
+                  <p className="text-xs text-muted-foreground">{t('settings.language.platformDesc')}</p>
                 </div>
               </div>
 
@@ -484,20 +480,20 @@ export default function Settings() {
             {/* Voice & Video Tab */}
             <TabsContent value="devices" className="space-y-6">
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">Voice & Video</h2>
+                <h2 className="font-semibold text-lg">{t('settings.devices.title')}</h2>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Mic className="w-4 h-4" />
-                      Microphone
+                      {t('settings.devices.microphone')}
                     </Label>
                     <Select value={selectedMicrophone} onValueChange={setSelectedMicrophone}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select microphone" />
+                        <SelectValue placeholder={t('settings.devices.selectMicrophone')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="default">System Default</SelectItem>
+                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
                         {audioDevices.filter(d => d.deviceId).map((d) => (
                           <SelectItem key={d.deviceId} value={d.deviceId}>
                             {d.label || `Microphone ${d.deviceId.slice(0, 8)}`}
@@ -510,14 +506,14 @@ export default function Settings() {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Monitor className="w-4 h-4" />
-                      Speaker
+                      {t('settings.devices.speaker')}
                     </Label>
                     <Select value={selectedSpeaker} onValueChange={setSelectedSpeaker}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select speaker" />
+                        <SelectValue placeholder={t('settings.devices.selectSpeaker')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="default">System Default</SelectItem>
+                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
                         {speakerDevices.filter(d => d.deviceId).map((d) => (
                           <SelectItem key={d.deviceId} value={d.deviceId}>
                             {d.label || `Speaker ${d.deviceId.slice(0, 8)}`}
@@ -530,14 +526,14 @@ export default function Settings() {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Video className="w-4 h-4" />
-                      Camera
+                      {t('settings.devices.camera')}
                     </Label>
                     <Select value={selectedCamera} onValueChange={setSelectedCamera}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select camera" />
+                        <SelectValue placeholder={t('settings.devices.selectCamera')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="default">System Default</SelectItem>
+                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
                         {videoDevices.filter(d => d.deviceId).map((d) => (
                           <SelectItem key={d.deviceId} value={d.deviceId}>
                             {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
@@ -554,23 +550,23 @@ export default function Settings() {
             {hasStreamerAccess && (
               <TabsContent value="streamer-profile" className="space-y-6">
                 <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">Streamer Profile</h3>
+                  <h3 className="font-semibold text-lg">{t('settings.streamer.title')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Manage your public streamer profile — upstar.gg/{streamerData.slug}
+                    {t('settings.streamer.subtitle')} — upstar.gg/{streamerData.slug}
                   </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="streamerDisplayName">Display Name</Label>
+                      <Label htmlFor="streamerDisplayName">{t('settings.streamer.displayName')}</Label>
                       <Input
                         id="streamerDisplayName"
                         value={streamerDisplayName}
                         onChange={(e) => setStreamerDisplayName(e.target.value)}
-                        placeholder="Your streamer name"
+                        placeholder={t('settings.streamer.displayNamePlaceholder')}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Profile URL</Label>
+                      <Label>{t('settings.streamer.profileUrl')}</Label>
                       <div className="flex items-center h-10 px-4 bg-muted rounded-lg text-muted-foreground text-sm">
                         upstar.gg/{streamerData.slug}
                       </div>
@@ -578,12 +574,12 @@ export default function Settings() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="streamerBio">Bio</Label>
+                    <Label htmlFor="streamerBio">{t('settings.streamer.bio')}</Label>
                     <Textarea
                       id="streamerBio"
                       value={streamerBio}
                       onChange={(e) => setStreamerBio(e.target.value)}
-                      placeholder="Tell viewers about yourself..."
+                      placeholder={t('settings.streamer.bioPlaceholder')}
                       rows={3}
                     />
                   </div>
@@ -592,7 +588,7 @@ export default function Settings() {
                 <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <Image className="w-5 h-5" />
-                    Images
+                    {t('settings.streamer.images')}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ImageUploadInput
@@ -616,9 +612,9 @@ export default function Settings() {
             {hasStreamerAccess && (
               <TabsContent value="social" className="space-y-6">
                 <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">Social Links</h3>
+                  <h3 className="font-semibold text-lg">{t('settings.social.title')}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Add your social media links to display on your page.
+                    {t('settings.social.subtitle')}
                   </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
