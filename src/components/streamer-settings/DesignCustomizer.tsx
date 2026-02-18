@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useState } from 'react';
 import { 
   Palette, 
   Type, 
@@ -7,7 +6,9 @@ import {
   Image as ImageIcon,
   Sparkles,
   Layers,
-  Upload
+  Upload,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,10 +16,11 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface DesignSettings {
   primaryColor: string;
-  accentColor: string;
   fontFamily: string;
   buttonStyle: string;
   backgroundType: string;
@@ -26,6 +28,7 @@ interface DesignSettings {
   backgroundGradient: string;
   animationStyle: string;
   cardStyle: string;
+  streamerId?: string;
 }
 
 interface DesignCustomizerProps {
@@ -83,6 +86,135 @@ const COLOR_PRESETS = [
   { label: 'Cyan', value: '185 84% 45%' },
 ];
 
+function BackgroundImageUploader({ streamerId, value, onChange }: {
+  streamerId?: string;
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Invalid file', description: 'Please upload an image.', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 10MB for background images.', variant: 'destructive' });
+      return;
+    }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const filePath = `streamers/${streamerId ?? 'unknown'}/background-${Date.now()}.${ext}`;
+
+    setIsUploading(true);
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('stream-media')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('stream-media').getPublicUrl(filePath);
+      onChange(urlData.publicUrl);
+      toast({ title: 'Image uploaded ✓', description: 'Click Save Changes to apply.' });
+    } catch (e) {
+      console.error('Background upload failed:', e);
+      toast({ title: 'Upload failed', description: 'Please try again.', variant: 'destructive' });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleFile(file);
+          e.currentTarget.value = '';
+        }}
+      />
+
+      {/* Preview / drop zone */}
+      <button
+        type="button"
+        onClick={() => !isUploading && inputRef.current?.click()}
+        className="relative w-full overflow-hidden rounded-xl border border-dashed border-border/60 bg-card/40 hover:bg-card/60 transition-colors"
+      >
+        {value ? (
+          <img
+            src={value}
+            alt="Background preview"
+            className="w-full h-36 object-cover rounded-xl"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+            {isUploading ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span className="text-sm">Uploading…</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-6 h-6" />
+                <span className="text-sm">Click to upload image (max 10MB)</span>
+              </>
+            )}
+          </div>
+        )}
+        {isUploading && value && (
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex items-center justify-center rounded-xl">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        )}
+      </button>
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-2 flex-1"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <Upload className="w-3.5 h-3.5" />
+          {value ? 'Replace Image' : 'Upload Image'}
+        </Button>
+        {value && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-destructive hover:text-destructive"
+            onClick={() => onChange('')}
+            disabled={isUploading}
+          >
+            <X className="w-3.5 h-3.5" />
+            Remove
+          </Button>
+        )}
+      </div>
+
+      {/* URL fallback */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Or paste an image URL</Label>
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://..."
+          className="text-sm"
+        />
+      </div>
+    </div>
+  );
+}
+
 export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) {
   return (
     <div className="space-y-6">
@@ -106,67 +238,39 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           </TabsTrigger>
         </TabsList>
 
-        {/* Colors Tab */}
+        {/* Colors Tab — accent color removed */}
         <TabsContent value="colors" className="space-y-4">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Brand Colors</CardTitle>
-              <CardDescription>Choose your primary and accent colors (HSL format)</CardDescription>
+              <CardTitle className="text-lg">Primary Color</CardTitle>
+              <CardDescription>Main brand color used for buttons, highlights, and accents</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label>Primary Color</Label>
-                <div className="flex flex-wrap gap-2">
-                  {COLOR_PRESETS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      onClick={() => onChange({ primaryColor: preset.value })}
-                      className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                        settings.primaryColor === preset.value 
-                          ? 'border-foreground scale-110' 
-                          : 'border-transparent hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: `hsl(${preset.value})` }}
-                      title={preset.label}
-                    />
-                  ))}
-                </div>
-                <Input
-                  value={settings.primaryColor}
-                  onChange={(e) => onChange({ primaryColor: e.target.value })}
-                  placeholder="45 90% 50%"
-                  className="font-mono"
-                />
-                <div 
-                  className="h-12 rounded-lg border border-border"
-                  style={{ backgroundColor: `hsl(${settings.primaryColor})` }}
-                />
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {COLOR_PRESETS.map((preset) => (
+                  <button
+                    key={preset.value}
+                    onClick={() => onChange({ primaryColor: preset.value })}
+                    className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                      settings.primaryColor === preset.value 
+                        ? 'border-foreground scale-110' 
+                        : 'border-transparent hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: `hsl(${preset.value})` }}
+                    title={preset.label}
+                  />
+                ))}
               </div>
-
-              <div className="space-y-3">
-                <Label>Accent Color</Label>
-                <div className="flex flex-wrap gap-2">
-                  {COLOR_PRESETS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      onClick={() => onChange({ accentColor: preset.value })}
-                      className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                        settings.accentColor === preset.value 
-                          ? 'border-foreground scale-110' 
-                          : 'border-transparent hover:scale-105'
-                      }`}
-                      style={{ backgroundColor: `hsl(${preset.value})` }}
-                      title={preset.label}
-                    />
-                  ))}
-                </div>
-                <Input
-                  value={settings.accentColor}
-                  onChange={(e) => onChange({ accentColor: e.target.value })}
-                  placeholder="45 90% 50%"
-                  className="font-mono"
-                />
-              </div>
+              <Input
+                value={settings.primaryColor}
+                onChange={(e) => onChange({ primaryColor: e.target.value })}
+                placeholder="45 90% 50%"
+                className="font-mono"
+              />
+              <div 
+                className="h-12 rounded-lg border border-border"
+                style={{ backgroundColor: `hsl(${settings.primaryColor})` }}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -233,6 +337,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
               <CardTitle className="text-lg">Background Type</CardTitle>
+              <CardDescription>Choose how your page background looks. Changes apply on your public page after saving.</CardDescription>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -320,20 +425,14 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
                 <CardTitle className="text-lg">Background Image</CardTitle>
-                <CardDescription>Enter a URL or upload an image</CardDescription>
+                <CardDescription>Upload an image or paste a URL. Applied to your public page after saving.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <Input
+              <CardContent>
+                <BackgroundImageUploader
+                  streamerId={settings.streamerId}
                   value={settings.backgroundImageUrl}
-                  onChange={(e) => onChange({ backgroundImageUrl: e.target.value })}
-                  placeholder="https://..."
+                  onChange={(url) => onChange({ backgroundImageUrl: url })}
                 />
-                {settings.backgroundImageUrl && (
-                  <div 
-                    className="h-32 rounded-lg bg-cover bg-center border border-border"
-                    style={{ backgroundImage: `url(${settings.backgroundImageUrl})` }}
-                  />
-                )}
               </CardContent>
             </Card>
           )}

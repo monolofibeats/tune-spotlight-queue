@@ -527,7 +527,6 @@ const StreamerSettings = () => {
               <DesignCustomizer
                 settings={{
                   primaryColor,
-                  accentColor,
                   fontFamily,
                   buttonStyle,
                   backgroundType,
@@ -535,10 +534,10 @@ const StreamerSettings = () => {
                   backgroundGradient,
                   animationStyle,
                   cardStyle,
+                  streamerId: streamer.id,
                 }}
                 onChange={(updates) => {
                   if (updates.primaryColor !== undefined) setPrimaryColor(updates.primaryColor);
-                  if (updates.accentColor !== undefined) setAccentColor(updates.accentColor);
                   if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily);
                   if (updates.buttonStyle !== undefined) setButtonStyle(updates.buttonStyle);
                   if (updates.backgroundType !== undefined) setBackgroundType(updates.backgroundType);
