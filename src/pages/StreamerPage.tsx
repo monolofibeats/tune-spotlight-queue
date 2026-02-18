@@ -105,10 +105,7 @@ function StreamerPageContent() {
             </div>
             
             <h1 className="text-3xl md:text-5xl font-display font-bold mb-3 leading-tight">
-              {streamer.hero_title || 'Submit Your Music'}{' '}
-              <span className={isStreamerLive ? 'text-primary' : 'text-muted-foreground'}>
-                {streamer.display_name}
-              </span>
+              {streamer.hero_title || 'Submit Your Music'}
             </h1>
             
             <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto">
