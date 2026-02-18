@@ -677,6 +677,15 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!submissionsOpen && !isAdmin) {
+      toast({
+        title: "Submissions Closed",
+        description: "New submissions are temporarily disabled.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Required fields
     if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
@@ -1167,62 +1176,64 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           </div>
 
           {/* Submit Buttons - Stacked on mobile */}
-          <div className="flex flex-col gap-2">
-            {/* Free/Default Submit Button - Dark style */}
-            <Button
-              type="submit"
-              size="lg"
-              variant={submissionPaid && !isAdmin ? "default" : "secondary"}
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {submissionPaid && !isAdmin ? 'Processing...' : 'Submitting...'}
-                </>
-              ) : submissionPaid && !isAdmin ? (
-                <>
-                  <DollarSign className="w-4 h-4" />
-                  Submit (€{submissionPrice.toFixed(2)})
-                </>
-              ) : isAdmin && submissionPaid ? (
-                <>
-                  <Shield className="w-4 h-4" />
-                  {t('submission.submitAdminFree')}
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  {t('submission.submitFree')}
-                </>
-              )}
-            </Button>
-
-            {/* Skip Line Button - Bright/Primary style */}
-            {skipLineActive && (
+          {(submissionsOpen || isAdmin) && (
+            <div className="flex flex-col gap-2">
+              {/* Free/Default Submit Button - Dark style */}
               <Button
-                type="button"
-                onClick={handleSkipTheLine}
-                variant="hero"
+                type="submit"
                 size="lg"
+                variant={submissionPaid && !isAdmin ? "default" : "secondary"}
                 className="w-full"
-                disabled={isUploadingFile || isSubmitting}
+                disabled={isSubmitting}
               >
-                {isUploadingFile ? (
+                {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Uploading...
+                    {submissionPaid && !isAdmin ? 'Processing...' : 'Submitting...'}
+                  </>
+                ) : submissionPaid && !isAdmin ? (
+                  <>
+                    <DollarSign className="w-4 h-4" />
+                    Submit (€{submissionPrice.toFixed(2)})
+                  </>
+                ) : isAdmin && submissionPaid ? (
+                  <>
+                    <Shield className="w-4 h-4" />
+                    {t('submission.submitAdminFree')}
                   </>
                 ) : (
                   <>
-                    <Zap className="w-4 h-4" />
-                    {t('submission.skipWaitingList')}
+                    <Send className="w-4 h-4" />
+                    {t('submission.submitFree')}
                   </>
                 )}
               </Button>
-            )}
-          </div>
+
+              {/* Skip Line Button - Bright/Primary style */}
+              {skipLineActive && (
+                <Button
+                  type="button"
+                  onClick={handleSkipTheLine}
+                  variant="hero"
+                  size="lg"
+                  className="w-full"
+                  disabled={isUploadingFile || isSubmitting}
+                >
+                  {isUploadingFile ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" />
+                      {t('submission.skipWaitingList')}
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
         </form>
       </motion.div>
 
