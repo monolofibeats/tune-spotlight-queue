@@ -323,7 +323,6 @@ export default function Settings() {
     ...(hasStreamerAccess ? [
       { id: 'streamer-profile', label: 'Streamer Profile', icon: User },
       { id: 'social', label: 'Social', icon: LinkIcon },
-      { id: 'page-language', label: 'Page Language', icon: Globe },
       { id: 'team', label: 'Team', icon: Users },
     ] : []),
   ];
@@ -475,6 +474,11 @@ export default function Settings() {
                   <p className="text-xs text-muted-foreground">Changes apply immediately across the platform.</p>
                 </div>
               </div>
+
+              {/* Page Language (streamer only) */}
+              {hasStreamerAccess && (
+                <LanguageSettings language={pageLanguage} onChange={setPageLanguage} />
+              )}
             </TabsContent>
 
             {/* Voice & Video Tab */}
@@ -640,13 +644,6 @@ export default function Settings() {
                     </div>
                   </div>
                 </div>
-              </TabsContent>
-            )}
-
-            {/* Page Language Tab */}
-            {hasStreamerAccess && (
-              <TabsContent value="page-language" className="space-y-6">
-                <LanguageSettings language={pageLanguage} onChange={setPageLanguage} />
               </TabsContent>
             )}
 
