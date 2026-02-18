@@ -108,12 +108,11 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
     }
   };
 
-  // Separate optimistic local update from DB persist to avoid stale closure issues
-  const updateFieldInState = (id: string, updates: Partial<FormField>) => {
+  // Update field both locally and in DB, then refetch to ensure UI is in sync
+  const updateField = async (id: string, updates: Partial<FormField>) => {
+    // Optimistic update
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
-  };
 
-  const persistToDB = async (id: string, updates: Partial<FormField>) => {
     const { error } = await supabase
       .from('streamer_form_fields')
       .update(updates)
@@ -121,8 +120,9 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
 
     if (error) {
       toast({ title: 'Failed to save change', variant: 'destructive' });
-      fetchFields(); // revert on error
     }
+    // Always refetch to ensure UI reflects actual DB state
+    await fetchFields();
   };
 
   const deleteField = async (id: string) => {
@@ -217,8 +217,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                           defaultValue={field.field_label}
                           onBlur={(e) => {
                             const val = e.target.value;
-                            updateFieldInState(field.id, { field_label: val });
-                            persistToDB(field.id, { field_label: val });
+                            void updateField(field.id, { field_label: val });
                           }}
                           className="h-9"
                         />
@@ -230,8 +229,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                         <Select
                           value={field.field_type}
                           onValueChange={(value) => {
-                            updateFieldInState(field.id, { field_type: value });
-                            persistToDB(field.id, { field_type: value });
+                            void updateField(field.id, { field_type: value });
                           }}
                         >
                           <SelectTrigger className="h-9">
@@ -257,8 +255,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                           defaultValue={field.placeholder || ''}
                           onBlur={(e) => {
                             const val = e.target.value;
-                            updateFieldInState(field.id, { placeholder: val });
-                            persistToDB(field.id, { placeholder: val });
+                            void updateField(field.id, { placeholder: val });
                           }}
                           placeholder="Hint text..."
                           className="h-9"
@@ -272,8 +269,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                             id={`required-${field.id}`}
                             checked={field.is_required}
                             onCheckedChange={(checked) => {
-                              updateFieldInState(field.id, { is_required: checked });
-                              persistToDB(field.id, { is_required: checked });
+                              void updateField(field.id, { is_required: checked });
                             }}
                           />
                           <Label htmlFor={`required-${field.id}`} className="text-xs">Required</Label>
@@ -286,8 +282,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                       <Switch
                         checked={field.is_enabled}
                         onCheckedChange={(checked) => {
-                          updateFieldInState(field.id, { is_enabled: checked });
-                          persistToDB(field.id, { is_enabled: checked });
+                          void updateField(field.id, { is_enabled: checked });
                         }}
                       />
                       <Button
