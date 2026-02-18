@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SessionManagerProps {
   streamerId?: string; // kept for backwards compat but context is used
@@ -15,6 +16,7 @@ interface SessionManagerProps {
 export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
+  const { t } = useLanguage();
   const [sessionTitle, setSessionTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,14 +26,14 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
       await startSession(sessionTitle || undefined);
       play('live');
       toast({
-        title: "Stream Started! 🔴",
-        description: "Your livestream session is now active",
+        title: t('session.startStream') + '! 🔴',
+        description: t('session.sessionActive'),
       });
       setSessionTitle('');
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to start session",
+        title: t('common.error'),
+        description: t('session.startStream'),
         variant: "destructive",
       });
     } finally {
@@ -45,13 +47,13 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
       await endSession();
       play('notification');
       toast({
-        title: "Stream Ended",
-        description: "Your livestream session has ended",
+        title: t('session.endStream'),
+        description: t('session.noActiveSession'),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to end session",
+        title: t('common.error'),
+        description: t('session.endStream'),
         variant: "destructive",
       });
     } finally {
@@ -67,9 +69,9 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
             <Radio className={`w-5 h-5 ${isLive ? 'text-red-500' : 'text-muted-foreground'}`} />
           </div>
           <div>
-            <h3 className="font-semibold">Stream Session</h3>
+            <h3 className="font-semibold">{t('session.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              {isLive ? `Live: ${currentSession?.title || 'Untitled'}` : 'No active session'}
+              {isLive ? `Live: ${currentSession?.title || 'Untitled'}` : t('session.noActiveSession')}
             </p>
           </div>
         </div>
@@ -109,10 +111,10 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
       {!isLive && (
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="session-title">Session Title (optional)</Label>
+            <Label htmlFor="session-title">{t('session.sessionTitle')}</Label>
             <Input
               id="session-title"
-              placeholder="e.g., Saturday Night Reviews"
+              placeholder={t('session.sessionTitlePlaceholder')}
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
             />
@@ -131,7 +133,7 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
         ) : (
           <Power className="w-4 h-4 mr-2" />
         )}
-        {isLive ? 'End Session' : 'Start Session'}
+        {isLive ? t('session.endStream') : t('session.startStream')}
       </Button>
     </div>
   );

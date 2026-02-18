@@ -40,7 +40,7 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
         </div>
       )}
       {/* Content — container queries let widgets adapt to their size */}
-      <div className="flex-1 overflow-auto widget-container" style={{ containerType: 'size', ...zoomStyle }}>
+      <div className="flex-1 min-h-0 overflow-auto widget-container" style={{ containerType: 'size', ...zoomStyle }}>
         {children}
       </div>
     </div>

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 type StreamType = 'none' | 'twitch' | 'youtube' | 'tiktok' | 'video';
 
@@ -31,6 +32,7 @@ interface StreamEmbedConfigProps {
 }
 
 export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
+  const { t } = useLanguage();
   const [config, setConfig] = useState<StreamConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -98,11 +100,11 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
         setConfig(data);
       }
 
-      toast({ title: 'Embed saved!', description: 'Stream embed updated on your page.' });
+      toast({ title: t('streamEmbed.saved'), description: t('streamEmbed.savedDesc') });
       fetchConfig();
     } catch (err: any) {
       console.error('Error saving stream config:', err);
-      toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
+      toast({ title: t('streamEmbed.saveFailed'), description: err.message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -115,6 +117,14 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
       </div>
     );
   }
+
+  const STREAM_TYPES: { id: StreamType; label: string; icon: React.ComponentType<{ className?: string }>; description: string; placeholder: string }[] = [
+    { id: 'none', label: t('streamSettings.none'), icon: X, description: t('streamEmbed.desc.none'), placeholder: '' },
+    { id: 'twitch', label: 'Twitch', icon: Twitch, description: t('streamEmbed.desc.twitch'), placeholder: 'https://twitch.tv/yourchannel' },
+    { id: 'youtube', label: 'YouTube', icon: Youtube, description: t('streamEmbed.desc.youtube'), placeholder: 'https://youtube.com/watch?v=...' },
+    { id: 'tiktok', label: 'TikTok', icon: Tv2, description: t('streamEmbed.desc.tiktok'), placeholder: 'https://tiktok.com/@username/live' },
+    { id: 'video', label: t('streamSettings.video'), icon: Video, description: t('streamEmbed.desc.video'), placeholder: 'https://...mp4 or storage URL' },
+  ];
 
   const activeTypeDef = STREAM_TYPES.find(t => t.id === selectedType);
 
@@ -129,8 +139,8 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
           <Link className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h3 className="font-semibold">Stream Embed Widget</h3>
-          <p className="text-sm text-muted-foreground">Configure what appears in the live embed on your page</p>
+          <h3 className="font-semibold">{t('streamEmbed.title')}</h3>
+          <p className="text-sm text-muted-foreground">{t('streamEmbed.subtitle')}</p>
         </div>
       </div>
 
@@ -162,7 +172,7 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
 
           {selectedType === 'video' ? (
             <div className="space-y-2">
-              <Label htmlFor="video-url">Video URL (.mp4)</Label>
+              <Label htmlFor="video-url">{t('streamEmbed.videoUrl')}</Label>
               <Input
                 id="video-url"
                 value={videoUrl}
@@ -190,14 +200,15 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
 
       {selectedType === 'none' && (
         <p className="text-sm text-muted-foreground italic">
-          The stream embed section will be hidden on your page.
+          {t('streamEmbed.noEmbed')}
         </p>
       )}
 
       <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-        Save Embed Settings
+        {t('streamEmbed.save')}
       </Button>
     </motion.div>
   );
 }
+
