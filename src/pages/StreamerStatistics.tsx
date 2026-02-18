@@ -8,6 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import type { Streamer } from '@/types/streamer';
+import { useLanguage } from '@/hooks/useLanguage';
+
 
 interface SubmissionStats {
   total: number;
@@ -20,9 +22,11 @@ interface SubmissionStats {
 const StreamerStatistics = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<SubmissionStats>({ total: 0, pending: 0, reviewed: 0, skipped: 0, totalEarned: 0 });
+
   const [monthlyData, setMonthlyData] = useState<{ month: string; submissions: number; earnings: number }[]>([]);
 
   useEffect(() => {
@@ -98,12 +102,12 @@ const StreamerStatistics = () => {
   }
 
   const statCards = [
-    { label: 'Total Submissions', value: stats.total, icon: Music, color: 'text-primary' },
-    { label: 'Pending', value: stats.pending, icon: Eye, color: 'text-yellow-500' },
-    { label: 'Reviewed', value: stats.reviewed, icon: CheckCircle, color: 'text-emerald-500' },
-    { label: 'Skipped', value: stats.skipped, icon: TrendingUp, color: 'text-muted-foreground' },
-    { label: 'Total Earned', value: `€${(stats.totalEarned / 100).toFixed(2)}`, icon: DollarSign, color: 'text-primary' },
-    { label: 'Avg per Submission', value: stats.total > 0 ? `€${(stats.totalEarned / stats.total / 100).toFixed(2)}` : '€0', icon: Users, color: 'text-primary' },
+    { label: t('statistics.totalSubmissions'), value: stats.total, icon: Music, color: 'text-primary' },
+    { label: t('statistics.pending'), value: stats.pending, icon: Eye, color: 'text-yellow-500' },
+    { label: t('statistics.reviewed'), value: stats.reviewed, icon: CheckCircle, color: 'text-emerald-500' },
+    { label: t('statistics.skipped'), value: stats.skipped, icon: TrendingUp, color: 'text-muted-foreground' },
+    { label: t('statistics.totalEarned'), value: `€${(stats.totalEarned / 100).toFixed(2)}`, icon: DollarSign, color: 'text-primary' },
+    { label: t('statistics.avgPerSubmission'), value: stats.total > 0 ? `€${(stats.totalEarned / stats.total / 100).toFixed(2)}` : '€0', icon: Users, color: 'text-primary' },
   ];
 
   return (
@@ -115,8 +119,8 @@ const StreamerStatistics = () => {
             <div className="flex items-center gap-3">
               <BarChart3 className="w-8 h-8 text-primary" />
               <div>
-                <h1 className="text-3xl font-display font-bold">Statistics</h1>
-                <p className="text-muted-foreground">Performance overview for {streamer?.display_name}</p>
+                <h1 className="text-3xl font-display font-bold">{t('statistics.title')}</h1>
+                <p className="text-muted-foreground">{t('statistics.subtitle').replace('{name}', streamer?.display_name || '')}</p>
               </div>
             </div>
           </motion.div>
@@ -138,7 +142,7 @@ const StreamerStatistics = () => {
           </div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass rounded-xl p-6 mb-8">
-            <h2 className="font-semibold text-lg mb-4">Monthly Submissions</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('statistics.monthlySubmissions')}</h2>
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyData}>
@@ -150,12 +154,12 @@ const StreamerStatistics = () => {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-muted-foreground text-center py-12">No data yet</p>
+              <p className="text-muted-foreground text-center py-12">{t('statistics.noData')}</p>
             )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass rounded-xl p-6">
-            <h2 className="font-semibold text-lg mb-4">Monthly Earnings (€)</h2>
+            <h2 className="font-semibold text-lg mb-4">{t('statistics.monthlyEarnings')}</h2>
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData}>
@@ -167,7 +171,7 @@ const StreamerStatistics = () => {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-muted-foreground text-center py-12">No data yet</p>
+              <p className="text-muted-foreground text-center py-12">{t('statistics.noData')}</p>
             )}
           </motion.div>
         </div>

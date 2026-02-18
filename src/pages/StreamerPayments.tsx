@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
+
 
 interface Transaction {
   id: string;
@@ -71,10 +73,12 @@ const formatCurrency = (cents: number, currency = 'eur') => {
 
 export default function StreamerPayments() {
   const { user, isLoading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   const [wallets, setWallets] = useState<PayoutPref[]>([]);
   const [streamerId, setStreamerId] = useState<string | null>(null);
 
@@ -324,14 +328,14 @@ export default function StreamerPayments() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t('payments.back')}
           </Button>
 
           <div className="flex items-center gap-3 mb-8">
             <PiggyBank className="w-8 h-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-display font-bold">Payments</h1>
-              <p className="text-muted-foreground">Track your earnings and manage payouts</p>
+              <h1 className="text-3xl font-display font-bold">{t('payments.title')}</h1>
+              <p className="text-muted-foreground">{t('payments.subtitle')}</p>
             </div>
           </div>
 
@@ -339,15 +343,15 @@ export default function StreamerPayments() {
             <TabsList className="glass p-1 rounded-xl mb-6">
               <TabsTrigger value="overview" className="rounded-lg gap-2">
                 <TrendingUp className="w-4 h-4" />
-                Overview
+                {t('payments.tab.overview')}
               </TabsTrigger>
               <TabsTrigger value="transactions" className="rounded-lg gap-2">
                 <Receipt className="w-4 h-4" />
-                Transactions
+                {t('payments.tab.transactions')}
               </TabsTrigger>
               <TabsTrigger value="wallets" className="rounded-lg gap-2">
                 <Wallet className="w-4 h-4" />
-                Wallets
+                {t('payments.tab.wallets')}
               </TabsTrigger>
             </TabsList>
 
@@ -355,25 +359,25 @@ export default function StreamerPayments() {
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="glass-strong rounded-xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Current Balance</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('payments.balance')}</p>
                   <p className="text-3xl font-display font-bold text-primary">
                     {formatCurrency(earnings?.current_balance_cents || 0)}
                   </p>
                 </div>
                 <div className="glass-strong rounded-xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Total Earned</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('payments.totalEarned')}</p>
                   <p className="text-3xl font-display font-bold text-primary/80">
                     {formatCurrency(earnings?.total_earnings_cents || 0)}
                   </p>
                 </div>
                 <div className="glass-strong rounded-xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Paid Out</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('payments.paidOut')}</p>
                   <p className="text-3xl font-display font-bold text-muted-foreground">
                     {formatCurrency(earnings?.total_payouts_cents || 0)}
                   </p>
                 </div>
                 <div className="glass-strong rounded-xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Platform Fees (20%)</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('payments.platformFees')}</p>
                   <p className="text-3xl font-display font-bold text-muted-foreground">
                     {formatCurrency(earnings?.total_platform_fee_cents || 0)}
                   </p>
@@ -384,9 +388,9 @@ export default function StreamerPayments() {
               <div className="glass-strong rounded-xl p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold">Request Payout</h3>
+                    <h3 className="font-semibold">{t('payments.requestPayout')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Minimum payout: {formatCurrency(MIN_PAYOUT_CENTS)}. Your full balance will be transferred.
+                      {t('payments.requestPayoutDesc').replace('{min}', formatCurrency(MIN_PAYOUT_CENTS))}
                     </p>
                   </div>
                   <Button
@@ -395,12 +399,12 @@ export default function StreamerPayments() {
                     className="gap-2 shrink-0"
                   >
                     {isRequestingPayout ? <Loader2 className="w-4 h-4 animate-spin" /> : <Euro className="w-4 h-4" />}
-                    Request Payout
+                    {t('payments.requestPayoutBtn')}
                   </Button>
                 </div>
                 {(earnings?.current_balance_cents || 0) < MIN_PAYOUT_CENTS && (earnings?.current_balance_cents || 0) > 0 && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    You need {formatCurrency(MIN_PAYOUT_CENTS - (earnings?.current_balance_cents || 0))} more to reach the minimum payout.
+                    {t('payments.needMore').replace('{amount}', formatCurrency(MIN_PAYOUT_CENTS - (earnings?.current_balance_cents || 0)))}
                   </p>
                 )}
               </div>
@@ -408,7 +412,7 @@ export default function StreamerPayments() {
               {/* Payout history */}
               {payoutRequests.length > 0 && (
                 <div className="glass-strong rounded-xl p-6">
-                  <h3 className="font-semibold mb-4">Payout History</h3>
+                  <h3 className="font-semibold mb-4">{t('payments.payoutHistory')}</h3>
                   <div className="space-y-3">
                     {payoutRequests.map((pr) => (
                       <div key={pr.id} className="flex items-center justify-between p-3 bg-secondary/30 rounded-lg">
@@ -436,7 +440,7 @@ export default function StreamerPayments() {
 
               {/* Simple bar chart */}
               <div className="glass-strong rounded-xl p-6">
-                <h3 className="font-semibold mb-4">Monthly Earnings</h3>
+                <h3 className="font-semibold mb-4">{t('payments.monthlyEarnings')}</h3>
                 {earnings?.chart_data?.length ? (
                   <div className="flex items-end gap-2 h-48">
                     {earnings.chart_data.map((d) => (
@@ -452,7 +456,7 @@ export default function StreamerPayments() {
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm text-center py-12">
-                    No earnings data yet. Once you receive payments, your chart will appear here.
+                    {t('payments.noEarningsYet')}
                   </p>
                 )}
               </div>
@@ -479,11 +483,11 @@ export default function StreamerPayments() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-emerald-400">
+                        <p className="font-semibold text-emerald-500">
                           +{formatCurrency(tx.streamer_share_cents, tx.currency)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Fee: {formatCurrency(tx.platform_fee_cents, tx.currency)}
+                          {t('payments.fee')} {formatCurrency(tx.platform_fee_cents, tx.currency)}
                         </p>
                       </div>
                     </div>
@@ -492,7 +496,7 @@ export default function StreamerPayments() {
               ) : (
                 <div className="glass-strong rounded-xl p-12 text-center">
                   <Receipt className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">No transactions yet</p>
+                  <p className="text-muted-foreground">{t('payments.noTransactions')}</p>
                 </div>
               )}
             </TabsContent>
@@ -501,30 +505,30 @@ export default function StreamerPayments() {
             <TabsContent value="wallets" className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Add your preferred payout method and currency
+                  {t('payments.addWalletDesc')}
                 </p>
                 <Button size="sm" onClick={() => setShowWalletForm(true)} className="gap-1.5">
-                  <Plus className="w-4 h-4" /> Add Wallet
+                  <Plus className="w-4 h-4" /> {t('payments.addWallet')}
                 </Button>
               </div>
 
               {showWalletForm && (
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="glass-strong rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold">New Payout Method</h3>
+                  <h3 className="font-semibold">{t('payments.newPayoutMethod')}</h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Payout Method</Label>
+                      <Label>{t('payments.payoutMethod')}</Label>
                       <Select value={walletMethod} onValueChange={setWalletMethod}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="bank_transfer">Bank Transfer (SEPA)</SelectItem>
+                          <SelectItem value="bank_transfer">{t('payments.bankTransfer')}</SelectItem>
                           <SelectItem value="paypal">PayPal</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Currency</Label>
+                      <Label>{t('payments.currency')}</Label>
                       <Select value={walletCurrency} onValueChange={setWalletCurrency}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -540,16 +544,16 @@ export default function StreamerPayments() {
                   {walletMethod === 'bank_transfer' && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Account Holder Name</Label>
+                        <Label>{t('payments.accountHolder')}</Label>
                         <Input value={walletHolder} onChange={(e) => setWalletHolder(e.target.value)} placeholder="Max Mustermann" />
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>IBAN</Label>
+                          <Label>{t('payments.iban')}</Label>
                           <Input value={walletIban} onChange={(e) => setWalletIban(e.target.value)} placeholder="DE89 3704 0044 0532 0130 00" />
                         </div>
                         <div className="space-y-2">
-                          <Label>BIC (optional)</Label>
+                          <Label>{t('payments.bic')}</Label>
                           <Input value={walletBic} onChange={(e) => setWalletBic(e.target.value)} placeholder="COBADEFFXXX" />
                         </div>
                       </div>
@@ -558,15 +562,15 @@ export default function StreamerPayments() {
 
                   {walletMethod === 'paypal' && (
                     <div className="space-y-2">
-                      <Label>PayPal Email</Label>
+                      <Label>{t('payments.paypalEmail')}</Label>
                       <Input type="email" value={walletPaypal} onChange={(e) => setWalletPaypal(e.target.value)} placeholder="your@paypal.com" />
                     </div>
                   )}
 
                   <div className="flex gap-2 justify-end">
-                    <Button variant="ghost" onClick={() => { setShowWalletForm(false); resetWalletForm(); }}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => { setShowWalletForm(false); resetWalletForm(); }}>{t('payments.cancel')}</Button>
                     <Button onClick={handleSaveWallet} disabled={isSavingWallet}>
-                      {isSavingWallet ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Wallet'}
+                      {isSavingWallet ? <Loader2 className="w-4 h-4 animate-spin" /> : t('payments.saveWallet')}
                     </Button>
                   </div>
                 </motion.div>
@@ -584,7 +588,7 @@ export default function StreamerPayments() {
                           <p className="font-medium capitalize">
                             {w.payout_method.replace(/_/g, ' ')}
                             {w.is_primary && (
-                              <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Primary</span>
+                              <span className="ml-2 text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{t('payments.primary')}</span>
                             )}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -594,7 +598,7 @@ export default function StreamerPayments() {
                       </div>
                       <div className="flex gap-2">
                         {!w.is_primary && (
-                          <Button variant="ghost" size="sm" onClick={() => handleSetPrimary(w.id)}>Set Primary</Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleSetPrimary(w.id)}>{t('payments.setPrimary')}</Button>
                         )}
                         <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteWallet(w.id)}>
                           <Trash2 className="w-4 h-4" />
@@ -606,8 +610,8 @@ export default function StreamerPayments() {
               ) : !showWalletForm ? (
                 <div className="glass-strong rounded-xl p-12 text-center">
                   <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">No wallets configured yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Add a payout method to receive your earnings</p>
+                  <p className="text-muted-foreground">{t('payments.noWallets')}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('payments.noWalletsDesc')}</p>
                 </div>
               ) : null}
             </TabsContent>
