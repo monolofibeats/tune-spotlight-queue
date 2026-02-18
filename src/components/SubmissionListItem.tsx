@@ -37,6 +37,7 @@ import { getSignedAudioUrl } from '@/lib/storage';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { SubmissionEditForm } from '@/components/submission/SubmissionEditForm';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Check if URL is a playable embed (Spotify, SoundCloud)
 const isPlayableEmbed = (url: string) => {
@@ -127,6 +128,7 @@ export function SubmissionListItem({
   onPlayAudio,
   showPriorityBadge = true,
 }: SubmissionListItemProps) {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -159,8 +161,8 @@ export function SubmissionListItem({
       await navigator.clipboard.writeText(submission.email);
       setCopiedContact(true);
       toast({
-        title: "Copied!",
-        description: "Contact email copied to clipboard",
+        title: t('submission.copied'),
+        description: t('submission.copyContactDesc'),
       });
       setTimeout(() => setCopiedContact(false), 2000);
     }
@@ -169,8 +171,8 @@ export function SubmissionListItem({
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(submission.song_url);
     toast({
-      title: "Copied!",
-      description: "Song link copied to clipboard",
+      title: t('submission.copyLinkCopied'),
+      description: t('submission.copyLinkDesc'),
     });
   };
 
@@ -179,7 +181,6 @@ export function SubmissionListItem({
     if (!submission.audio_file_url) return;
     
     try {
-      // Get a fresh signed URL for download
       const downloadUrl = await getSignedAudioUrl(submission.audio_file_url);
       if (downloadUrl) {
         const link = document.createElement('a');
@@ -193,8 +194,8 @@ export function SubmissionListItem({
     } catch (error) {
       console.error('Download failed:', error);
       toast({
-        title: "Download failed",
-        description: "Could not download the audio file",
+        title: t('submission.downloadFailed'),
+        description: t('submission.downloadFailedDesc'),
         variant: "destructive",
       });
     }
@@ -203,7 +204,6 @@ export function SubmissionListItem({
   const handleOpenNowPlaying = async () => {
     if (!onPlayAudio) return;
     
-    // For audio files, fetch signed URL
     if (submission.audio_file_url) {
       if (audioUrl) {
         onPlayAudio(submission, audioUrl, false);
@@ -221,9 +221,14 @@ export function SubmissionListItem({
         setIsLoadingAudio(false);
       }
     } else {
-      // For links (Spotify, SoundCloud, etc.), just open the panel
       onPlayAudio(submission, null, false);
     }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const key = `submission.status.${status}`;
+    const translated = t(key);
+    return translated !== key ? translated : status;
   };
 
   return (
@@ -259,7 +264,7 @@ export function SubmissionListItem({
             e.stopPropagation();
             onToggleSelect?.(submission.id);
           }}
-          aria-label={isSelected ? 'Deselect' : 'Select'}
+          aria-label={isSelected ? t('submission.deselect') : t('submission.select')}
         >
           {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
         </button>
@@ -272,7 +277,7 @@ export function SubmissionListItem({
         {showPriorityBadge && submission.is_priority && (
           <Badge variant="premium" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
             <Zap className="w-2.5 h-2.5" />
-            Priority
+            {t('submission.priority')}
           </Badge>
         )}
 
@@ -285,7 +290,6 @@ export function SubmissionListItem({
           </p>
         </div>
 
-
         {/* Status Badge */}
         <Badge 
           variant={
@@ -295,7 +299,7 @@ export function SubmissionListItem({
           }
           className="text-[10px] shrink-0"
         >
-          {submission.status}
+          {getStatusLabel(submission.status)}
         </Badge>
 
         {/* Expand Icon */}
@@ -320,7 +324,6 @@ export function SubmissionListItem({
               {/* Song Link */}
               <div className="flex items-center gap-2">
                 {isPlayableEmbed(submission.song_url) ? (
-                  // For Spotify/SoundCloud: open in Now Playing panel
                   <button 
                     className="flex items-center gap-1.5 text-xs text-primary hover:underline truncate flex-1 text-left"
                     onClick={(e) => {
@@ -332,7 +335,6 @@ export function SubmissionListItem({
                     <span className="truncate">{submission.song_url}</span>
                   </button>
                 ) : (
-                  // For other links: open in new tab
                   <a 
                     href={submission.song_url} 
                     target="_blank" 
@@ -363,7 +365,7 @@ export function SubmissionListItem({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <FileAudio className="w-4 h-4 text-primary shrink-0" />
-                      <p className="text-xs text-muted-foreground">Hochgeladene Audio Datei</p>
+                      <p className="text-xs text-muted-foreground">{t('submission.uploadedAudio')}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button
@@ -376,7 +378,7 @@ export function SubmissionListItem({
                         }}
                       >
                         <Play className="w-3.5 h-3.5 mr-1" />
-                        Play
+                        {t('submission.play')}
                       </Button>
                       <Button
                         variant="outline"
@@ -388,7 +390,7 @@ export function SubmissionListItem({
                         }}
                       >
                         <Download className="w-3.5 h-3.5 mr-1" />
-                        Download
+                        {t('submission.download')}
                       </Button>
                     </div>
                   </div>
@@ -417,7 +419,7 @@ export function SubmissionListItem({
                       }}
                     >
                       <Mail className="w-3 h-3 mr-1" />
-                      Kontaktinformation
+                      {t('submission.contactInfo')}
                     </Button>
                   ) : (
                     <Button
@@ -432,12 +434,12 @@ export function SubmissionListItem({
                       {copiedContact ? (
                         <>
                           <Check className="w-3 h-3 mr-1" />
-                          Kopiert!
+                          {t('submission.copied')}
                         </>
                       ) : (
                         <>
                           <Copy className="w-3 h-3 mr-1" />
-                          Kontaktinformation kopieren
+                          {t('submission.copyContact')}
                         </>
                       )}
                     </Button>
@@ -453,7 +455,7 @@ export function SubmissionListItem({
                     await onUpdate(id, updates);
                     setIsEditing(false);
                     toast({
-                      title: "Saved!",
+                      title: t('common.success'),
                       description: "Submission updated successfully",
                     });
                   }}
@@ -463,7 +465,6 @@ export function SubmissionListItem({
                 /* Actions */
                 <div className="flex items-center gap-1.5 pt-1 flex-wrap">
                   {isTrashView ? (
-                    // Trash view: restore or permanently delete
                     <>
                       {onRestore && (
                         <Button
@@ -476,7 +477,7 @@ export function SubmissionListItem({
                           }}
                         >
                           <Eye className="w-3 h-3" />
-                          Restore
+                          {t('submission.restore')}
                         </Button>
                       )}
                       <Button
@@ -489,11 +490,10 @@ export function SubmissionListItem({
                         }}
                       >
                         <Trash2 className="w-3 h-3" />
-                        Delete Forever
+                        {t('submission.deleteForever')}
                       </Button>
                     </>
                   ) : (
-                    // Normal view actions
                     <>
                       {isAdmin && onUpdate && (
                         <Button
@@ -506,7 +506,7 @@ export function SubmissionListItem({
                           }}
                         >
                           <Pencil className="w-3 h-3" />
-                          Edit
+                          {t('submission.edit')}
                         </Button>
                       )}
                       <Button
@@ -520,7 +520,7 @@ export function SubmissionListItem({
                         disabled={submission.status === 'reviewed'}
                       >
                         <CheckCircle className="w-3 h-3" />
-                        Done
+                        {t('submission.done')}
                       </Button>
                       <Button
                         variant="ghost"
@@ -532,7 +532,7 @@ export function SubmissionListItem({
                         }}
                       >
                         <XCircle className="w-3 h-3" />
-                        Skip
+                        {t('submission.skip')}
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -547,18 +547,18 @@ export function SubmissionListItem({
                         </AlertDialogTrigger>
                         <AlertDialogContent className="glass-strong" onClick={(e) => e.stopPropagation()}>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Move to Trash?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('submission.moveToTrash')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will move "{submission.artist_name} – {submission.song_title}" to the trash. You can restore it within 7 days.
+                              {t('submission.moveToTrashDesc').replace('{name}', `${submission.artist_name} – ${submission.song_title}`)}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('submission.cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => onDelete(submission.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
-                              Move to Trash
+                              {t('submission.moveToTrash')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

@@ -30,6 +30,7 @@ import { StemSeparationPanel } from '@/components/StemSeparationPanel';
 import { PositionBadge } from '@/components/queue/PositionBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Submission {
   id: string;
@@ -128,6 +129,7 @@ export function NowPlayingPanel({
   onDelete,
   config,
 }: NowPlayingPanelProps) {
+  const { t } = useLanguage();
   const cfg = {
     showActionButtons: true,
     showVisualizer: true,
@@ -247,8 +249,8 @@ export function NowPlayingPanel({
       await navigator.clipboard.writeText(submission.email);
       setCopiedContact(true);
       toast({
-        title: "Copied!",
-        description: "Contact email copied to clipboard",
+        title: t('nowPlaying.copied'),
+        description: t('nowPlaying.copiedDesc'),
       });
       setTimeout(() => setCopiedContact(false), 2000);
     }
@@ -276,9 +278,9 @@ export function NowPlayingPanel({
             <div className="px-6 py-4 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-border/30">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Music2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold text-primary">Now Playing</span>
-                </div>
+                   <Music2 className="w-5 h-5 text-primary" />
+                   <span className="text-sm font-semibold text-primary">{t('nowPlaying.title')}</span>
+                 </div>
                 
                 <div className="flex-1" />
                 
@@ -337,7 +339,7 @@ export function NowPlayingPanel({
                             className="flex items-center gap-1 text-xs text-primary hover:underline"
                           >
                             <ExternalLink className="w-3 h-3" />
-                            Open Link
+                            {t('nowPlaying.openLink')}
                           </a>
                         )}
                       </div>
@@ -350,7 +352,7 @@ export function NowPlayingPanel({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Music2 className="w-4 h-4 text-primary" />
-                          <span className="text-sm font-medium">Audio File</span>
+                          <span className="text-sm font-medium">{t('nowPlaying.audioFile')}</span>
                         </div>
                         {cfg.showDownload && (
                           <Button
@@ -415,7 +417,7 @@ export function NowPlayingPanel({
                         className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors"
                       >
                         <ExternalLink className="w-4 h-4" />
-                        Open in Spotify
+                        {t('nowPlaying.openInSpotify')}
                       </a>
                     </div>
                   )}
@@ -467,7 +469,7 @@ export function NowPlayingPanel({
                   >
                     <div className="flex items-center gap-2">
                       <User className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-xs font-semibold text-muted-foreground">Submitter Insights</span>
+                      <span className="text-xs font-semibold text-muted-foreground">{t('nowPlaying.submitterInsights')}</span>
                       {submitterStats && (
                         <span className="text-[10px] text-muted-foreground/60">
                           · {submitterStats.username || submission?.email?.split('@')[0] || 'Anonymous'}
@@ -496,9 +498,9 @@ export function NowPlayingPanel({
                             {/* Spotify Artist Card - if Spotify submission */}
                             {submission?.platform === 'spotify' && (
                               <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
-                                <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                                  <Disc3 className="w-4 h-4 text-green-400" />
-                                  Artist Profile
+                                 <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                                   <Disc3 className="w-4 h-4 text-green-400" />
+                                   {t('nowPlaying.artistProfile')}
                                 </h3>
                                 
                                 {isLoadingSpotify ? (
@@ -526,7 +528,7 @@ export function NowPlayingPanel({
                                       {spotifyMeta.monthlyListeners && (
                                         <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
                                           <Users className="w-3 h-3" />
-                                          {spotifyMeta.monthlyListeners} monthly listeners
+                                          {spotifyMeta.monthlyListeners} {t('nowPlaying.monthlyListeners')}
                                         </div>
                                       )}
                                     </div>
@@ -541,7 +543,7 @@ export function NowPlayingPanel({
 
                                     {spotifyMeta.artistTopTracks && spotifyMeta.artistTopTracks.length > 0 && (
                                       <div>
-                                        <p className="text-xs font-medium text-muted-foreground mb-2">Top Tracks</p>
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">{t('nowPlaying.topTracks')}</p>
                                         <div className="space-y-1">
                                           {spotifyMeta.artistTopTracks.slice(0, 5).map((track, index) => (
                                             <a
@@ -588,7 +590,7 @@ export function NowPlayingPanel({
                                         className="flex items-center justify-center gap-1.5 text-xs text-green-400 hover:underline mt-2"
                                       >
                                         <ExternalLink className="w-3 h-3" />
-                                        View Artist on Spotify
+                                        {t('nowPlaying.viewArtistOnSpotify')}
                                       </a>
                                     )}
                                   </div>
@@ -640,14 +642,14 @@ export function NowPlayingPanel({
                                       onClick={handleCopyContact}
                                     >
                                       {copiedContact ? (
-                                        <>
-                                          <Check className="w-3 h-3 mr-2 text-green-500" />
-                                          Copied!
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Copy className="w-3 h-3 mr-2" />
-                                          Copy Contact
+                                          <>
+                                           <Check className="w-3 h-3 mr-2 text-green-500" />
+                                           {t('nowPlaying.copied')}
+                                         </>
+                                       ) : (
+                                         <>
+                                           <Copy className="w-3 h-3 mr-2" />
+                                           {t('nowPlaying.copyContact')}
                                         </>
                                       )}
                                     </Button>
@@ -659,7 +661,7 @@ export function NowPlayingPanel({
                                         <Send className="w-3 h-3" />
                                       </div>
                                       <p className="text-lg font-bold">{submitterStats?.total_submissions || 1}</p>
-                                      <p className="text-[10px] text-muted-foreground">Submissions</p>
+                                      <p className="text-[10px] text-muted-foreground">{t('nowPlaying.submissions')}</p>
                                     </div>
                                     
                                     <div className="text-center p-2 rounded-lg bg-secondary/30">
@@ -669,7 +671,7 @@ export function NowPlayingPanel({
                                       <p className="text-xs font-medium">
                                         {formatDate(submitterStats?.created_at || submission?.created_at || '')}
                                       </p>
-                                      <p className="text-[10px] text-muted-foreground">Submitted</p>
+                                      <p className="text-[10px] text-muted-foreground">{t('nowPlaying.submitted')}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -689,7 +691,7 @@ export function NowPlayingPanel({
               {onStatusChange && submission && (
                 <div className="px-6 py-4 border-t border-border/30 bg-card/30">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground mr-2">Actions:</span>
+                    <span className="text-xs text-muted-foreground mr-2">{t('nowPlaying.actions')}</span>
                     <Button
                       variant="default"
                       size="sm"
@@ -697,7 +699,7 @@ export function NowPlayingPanel({
                       onClick={() => onStatusChange(submission.id, 'reviewed')}
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
-                      Done
+                      {t('nowPlaying.done')}
                     </Button>
                     <Button
                       variant="ghost"
@@ -706,7 +708,7 @@ export function NowPlayingPanel({
                       onClick={() => onStatusChange(submission.id, 'skipped')}
                     >
                       <SkipForward className="w-3.5 h-3.5" />
-                      Skip
+                      {t('nowPlaying.skip')}
                     </Button>
                     {onDelete && (
                       <Button
@@ -716,7 +718,7 @@ export function NowPlayingPanel({
                         onClick={() => onDelete(submission.id)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        Trash
+                        {t('nowPlaying.trash')}
                       </Button>
                     )}
                   </div>
