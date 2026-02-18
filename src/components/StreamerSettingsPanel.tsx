@@ -191,7 +191,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         })
         .eq('id', streamer.id)
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
