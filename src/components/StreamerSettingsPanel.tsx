@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 import { 
   FormFieldBuilder, 
   DesignCustomizer, 
@@ -52,18 +53,15 @@ interface StreamerSettingsPanelProps {
 }
 
 export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
+  const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
 
-  // Form state - Content
-  
-  // Form state - Content
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
   
-  // Form state - Design
   const [primaryColor, setPrimaryColor] = useState('');
   const [accentColor, setAccentColor] = useState('');
   const [fontFamily, setFontFamily] = useState('system');
@@ -74,29 +72,20 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
   const [animationStyle, setAnimationStyle] = useState('subtle');
   const [cardStyle, setCardStyle] = useState('glass');
   
-  // Form state - Banner
   const [bannerEnabled, setBannerEnabled] = useState(false);
   const [bannerText, setBannerText] = useState('');
   const [bannerLink, setBannerLink] = useState('');
   const [bannerColor, setBannerColor] = useState('45 90% 50%');
   
-  // Form state - Layout
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
-  
 
   useEffect(() => {
     const s = streamer;
-    
-    // Content
-    
-    // Content
     setHeroTitle(s.hero_title || '');
     setHeroSubtitle(s.hero_subtitle || '');
     setWelcomeMessage(s.welcome_message || '');
-    
-    // Design
     setPrimaryColor(s.primary_color || '45 90% 50%');
     setAccentColor(s.accent_color || '45 90% 50%');
     setFontFamily(s.font_family || 'system');
@@ -106,23 +95,17 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     setBackgroundGradient(s.background_gradient || '');
     setAnimationStyle(s.animation_style || 'subtle');
     setCardStyle(s.card_style || 'glass');
-    
-    // Banner
     setBannerEnabled(s.banner_enabled || false);
     setBannerText(s.banner_text || '');
     setBannerLink(s.banner_link || '');
     setBannerColor(s.banner_color || '45 90% 50%');
-    
-    // Layout
     setShowHowItWorks(s.show_how_it_works ?? true);
     setShowStreamEmbed(s.show_stream_embed ?? true);
     setCustomCss(s.custom_css || '');
-    
   }, [streamer]);
 
   const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
     if (!streamer || oldValue === newValue) return;
-    
     try {
       await supabase
         .from('streamer_content_changes')
@@ -139,23 +122,13 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
 
   const handleSave = async () => {
     if (!streamer) return;
-
     setIsSaving(true);
 
-    // Log text content changes for admin review (non-blocking)
     try {
-      if (heroTitle !== streamer.hero_title) {
-        await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
-      }
-      if (heroSubtitle !== streamer.hero_subtitle) {
-        await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
-      }
-      if (welcomeMessage !== streamer.welcome_message) {
-        await logContentChange('welcome_message', streamer.welcome_message || '', welcomeMessage);
-      }
-      if (bannerText !== streamer.banner_text) {
-        await logContentChange('banner_text', streamer.banner_text || '', bannerText);
-      }
+      if (heroTitle !== streamer.hero_title) await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
+      if (heroSubtitle !== streamer.hero_subtitle) await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
+      if (welcomeMessage !== streamer.welcome_message) await logContentChange('welcome_message', streamer.welcome_message || '', welcomeMessage);
+      if (bannerText !== streamer.banner_text) await logContentChange('banner_text', streamer.banner_text || '', bannerText);
     } catch (e) {
       console.log('Content change logging skipped:', e);
     }
@@ -164,12 +137,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
       const { data, error } = await supabase
         .from('streamers')
         .update({
-          // Content
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
           welcome_message: welcomeMessage || null,
-          
-          // Design
           primary_color: primaryColor || '45 90% 50%',
           accent_color: accentColor || '45 90% 50%',
           font_family: fontFamily,
@@ -179,14 +149,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           background_gradient: backgroundGradient || null,
           animation_style: animationStyle,
           card_style: cardStyle,
-          
-          // Banner
           banner_enabled: bannerEnabled,
           banner_text: bannerText || null,
           banner_link: bannerLink || null,
           banner_color: bannerColor,
-          
-          // Layout
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
@@ -203,14 +169,14 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
       }
 
       toast({
-        title: "Settings saved! ✨",
-        description: "Your profile has been updated. Changes are live now.",
+        title: t('pageSettings.saved'),
+        description: t('pageSettings.savedDesc'),
       });
     } catch (error) {
       console.error('Save error:', error);
       toast({
-        title: "Save failed",
-        description: "Could not save your settings. Please try again.",
+        title: t('pageSettings.saveFailed'),
+        description: t('pageSettings.saveFailedDesc'),
         variant: "destructive",
       });
     } finally {
@@ -219,12 +185,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
   };
 
   const tabs = [
-    { id: 'form', label: 'Form', icon: Layout },
-    { id: 'content', label: 'Content', icon: FileText },
-    { id: 'pricing', label: 'Pricing', icon: DollarSign },
-    { id: 'design', label: 'Design', icon: Palette },
-    { id: 'presets', label: 'Preset', icon: Palette },
-    { id: 'stream', label: 'Stream', icon: Radio },
+    { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
+    { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
+    { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
+    { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
+    { id: 'presets', label: t('pageSettings.tab.presets'), icon: Palette },
+    { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
   return (
@@ -233,10 +199,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      {/* Header with Save Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
         <div>
-          <h2 className="text-xl font-semibold">Customize Your Page</h2>
+          <h2 className="text-xl font-semibold">{t('pageSettings.customizePage')}</h2>
           <p className="text-muted-foreground text-sm">
             upstar.gg/{streamer.slug}
           </p>
@@ -245,7 +210,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           <Button variant="outline" asChild>
             <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <Eye className="w-4 h-4" />
-              Preview
+              {t('pageSettings.preview')}
             </a>
           </Button>
           <Button onClick={handleSave} disabled={isSaving} className="gap-2">
@@ -254,7 +219,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
             ) : (
               <Save className="w-4 h-4" />
             )}
-            Save Changes
+            {t('pageSettings.saveChanges')}
           </Button>
         </div>
       </div>
@@ -275,47 +240,43 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           </TabsList>
         </ScrollArea>
 
-        {/* Form Tab */}
         <TabsContent value="form" className="space-y-6">
           <FormFieldBuilder streamerId={streamer.id} />
         </TabsContent>
 
-        {/* Content Tab */}
         <TabsContent value="content" className="space-y-6">
           <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">Hero Section Text</h3>
-            <p className="text-sm text-muted-foreground">
-              These texts appear prominently on your page. Changes go live immediately but are logged for admin review.
-            </p>
+            <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('pageSettings.hero.desc')}</p>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="heroTitle">Hero Title</Label>
-                <Input id="heroTitle" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder="Submit Your Music" />
+                <Label htmlFor="heroTitle">{t('pageSettings.hero.titleLabel')}</Label>
+                <Input id="heroTitle" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder={t('pageSettings.hero.titlePlaceholder')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
-                <Input id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder="Get your tracks reviewed live on stream" />
+                <Label htmlFor="heroSubtitle">{t('pageSettings.hero.subtitleLabel')}</Label>
+                <Input id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder={t('pageSettings.hero.subtitlePlaceholder')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="welcomeMessage">Welcome Message</Label>
-                <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder="A personal message shown below the hero (optional)" rows={2} />
+                <Label htmlFor="welcomeMessage">{t('pageSettings.hero.welcomeLabel')}</Label>
+                <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder={t('pageSettings.hero.welcomePlaceholder')} rows={2} />
               </div>
             </div>
           </div>
           <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">Layout Options</h3>
+            <h3 className="font-semibold text-lg">{t('pageSettings.layout.title')}</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Show "How It Works" Section</Label>
-                  <p className="text-sm text-muted-foreground">Display the step-by-step guide</p>
+                  <Label>{t('pageSettings.layout.showHowItWorks')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('pageSettings.layout.showHowItWorksDesc')}</p>
                 </div>
                 <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Show Stream Embed</Label>
-                  <p className="text-sm text-muted-foreground">Display live stream on your page</p>
+                  <Label>{t('pageSettings.layout.showStreamEmbed')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('pageSettings.layout.showStreamEmbedDesc')}</p>
                 </div>
                 <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
               </div>
@@ -323,12 +284,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           </div>
         </TabsContent>
 
-        {/* Pricing Tab */}
         <TabsContent value="pricing" className="space-y-6">
           <PricingSettings streamerId={streamer.id} />
         </TabsContent>
 
-        {/* Design Tab */}
         <TabsContent value="design" className="space-y-6">
           <DesignCustomizer
             settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
@@ -345,20 +304,16 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
           />
         </TabsContent>
 
-        {/* Preset Tab */}
         <TabsContent value="presets" className="space-y-6">
           <PresetManager streamerId={streamer.id} />
         </TabsContent>
 
-        {/* Stream Tab */}
         <TabsContent value="stream" className="space-y-6">
           <SessionManager streamerId={initialStreamer.id} />
           <StreamEmbedConfig streamerId={initialStreamer.id} />
           <ScreenStreamer />
         </TabsContent>
-
       </Tabs>
     </motion.div>
   );
 }
-

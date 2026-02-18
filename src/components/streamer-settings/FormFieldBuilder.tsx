@@ -23,10 +23,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
-// Core fields that always exist in the submission form — their field_type is fixed by the form design
 const CORE_FIELD_NAMES = new Set(['song_url', 'artist_name', 'song_title', 'email', 'message']);
-// Core field types that should be locked (cannot be changed by streamer)
 const CORE_FIELD_TYPE_MAP: Record<string, string> = {
   song_url: 'url',
   artist_name: 'text',
@@ -62,6 +61,7 @@ const FIELD_TYPES = [
 ];
 
 export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
+  const { t } = useLanguage();
   const [fields, setFields] = useState<FormField[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -117,15 +117,11 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
         options: data.options as { values: string[] } | undefined,
       }]);
     } else {
-      toast({ title: 'Failed to add field', variant: 'destructive' });
+      toast({ title: t('formBuilder.failedAdd'), variant: 'destructive' });
     }
   };
 
-  // Update field optimistically in local state, then persist to DB.
-  // We do NOT refetch after success — the optimistic state IS the correct state.
-  // Refetch only on error to restore DB truth.
   const updateField = async (id: string, updates: Partial<FormField>) => {
-    // Optimistic update — immediate UI feedback
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
 
     const { error } = await supabase
@@ -134,8 +130,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       .eq('id', id);
 
     if (error) {
-      toast({ title: 'Failed to save change', variant: 'destructive' });
-      // Restore from DB on failure
+      toast({ title: t('formBuilder.failedSave'), variant: 'destructive' });
       await fetchFields();
     }
   };
@@ -148,7 +143,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       .eq('id', id);
 
     if (error) {
-      toast({ title: 'Failed to delete field', variant: 'destructive' });
+      toast({ title: t('formBuilder.failedDelete'), variant: 'destructive' });
       fetchFields();
     }
   };
@@ -181,24 +176,23 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       <Card className="bg-card/50 border-border/50">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-lg">Form Fields</CardTitle>
-            <CardDescription>Configure what submitters fill in</CardDescription>
+            <CardTitle className="text-lg">{t('formBuilder.title')}</CardTitle>
+            <CardDescription>{t('formBuilder.desc')}</CardDescription>
           </div>
           <Button onClick={addField} size="sm" className="gap-2">
             <Plus className="w-4 h-4" />
-            Add Field
+            {t('formBuilder.addField')}
           </Button>
         </CardHeader>
         <CardContent>
           {fields.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No fields yet. Add fields manually.</p>
+              <p>{t('formBuilder.noFields')}</p>
             </div>
           ) : (
             <div className="space-y-3">
               {fields.map((field, index) => {
                 const isCoreField = CORE_FIELD_NAMES.has(field.field_name);
-                // For core fields, always use the correct locked type (fix corrupted DB data on save)
                 const displayType = isCoreField
                   ? (CORE_FIELD_TYPE_MAP[field.field_name] ?? field.field_type)
                   : field.field_type;
@@ -212,51 +206,33 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                     {isCoreField && (
                       <div className="flex items-center gap-1.5 mb-2">
                         <Lock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Core field — type is fixed</span>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">built-in</Badge>
+                        <span className="text-xs text-muted-foreground">{t('formBuilder.coreField')}</span>
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{t('formBuilder.builtIn')}</Badge>
                       </div>
                     )}
                     <div className="flex items-start gap-3">
-                      {/* Up/Down reorder */}
                       <div className="flex flex-col gap-1 pt-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          disabled={index === 0}
-                          onClick={() => moveField(index, 'up')}
-                        >
+                        <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index === 0} onClick={() => moveField(index, 'up')}>
                           <ChevronUp className="w-3 h-3" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          disabled={index === fields.length - 1}
-                          onClick={() => moveField(index, 'down')}
-                        >
+                        <Button variant="ghost" size="icon" className="h-6 w-6" disabled={index === fields.length - 1} onClick={() => moveField(index, 'down')}>
                           <ChevronDown className="w-3 h-3" />
                         </Button>
                       </div>
 
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
-                        {/* Label */}
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Label</Label>
+                          <Label className="text-xs">{t('formBuilder.label')}</Label>
                           <Input
                             key={`label-${field.id}-${field.field_label}`}
                             defaultValue={field.field_label}
-                            onBlur={(e) => {
-                              const val = e.target.value;
-                              void updateField(field.id, { field_label: val });
-                            }}
+                            onBlur={(e) => { const val = e.target.value; void updateField(field.id, { field_label: val }); }}
                             className="h-9"
                           />
                         </div>
 
-                        {/* Type — locked for core fields */}
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Type</Label>
+                          <Label className="text-xs">{t('formBuilder.type')}</Label>
                           {isCoreField ? (
                             <div className="h-9 flex items-center gap-2 px-3 rounded-md border border-border/50 bg-muted/30 text-sm text-muted-foreground">
                               {typeInfo && <typeInfo.icon className="w-3 h-3 shrink-0" />}
@@ -264,20 +240,15 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                               <Lock className="w-3 h-3 ml-auto shrink-0 opacity-50" />
                             </div>
                           ) : (
-                            <Select
-                              value={field.field_type}
-                              onValueChange={(value) => {
-                                void updateField(field.id, { field_type: value });
-                              }}
-                            >
+                            <Select value={field.field_type} onValueChange={(value) => { void updateField(field.id, { field_type: value }); }}>
                               <SelectTrigger className="h-9">
                                 <SelectValue>
                                   {(() => {
-                                    const t = FIELD_TYPES.find(t => t.value === field.field_type);
-                                    return t ? (
+                                    const ft = FIELD_TYPES.find(ft => ft.value === field.field_type);
+                                    return ft ? (
                                       <div className="flex items-center gap-2">
-                                        <t.icon className="w-3 h-3" />
-                                        {t.label}
+                                        <ft.icon className="w-3 h-3" />
+                                        {ft.label}
                                       </div>
                                     ) : <span>Select type</span>;
                                   })()}
@@ -297,43 +268,33 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                           )}
                         </div>
 
-                        {/* Placeholder */}
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Placeholder</Label>
+                          <Label className="text-xs">{t('formBuilder.placeholder')}</Label>
                           <Input
                             key={`placeholder-${field.id}-${field.placeholder}`}
                             defaultValue={field.placeholder || ''}
-                            onBlur={(e) => {
-                              const val = e.target.value;
-                              void updateField(field.id, { placeholder: val });
-                            }}
-                            placeholder="Hint text..."
+                            onBlur={(e) => { const val = e.target.value; void updateField(field.id, { placeholder: val }); }}
+                            placeholder={t('formBuilder.placeholderHint')}
                             className="h-9"
                           />
                         </div>
 
-                        {/* Required */}
                         <div className="flex items-end gap-4 pb-1">
                           <div className="flex items-center gap-2">
                             <Switch
                               id={`required-${field.id}`}
                               checked={field.is_required}
-                              onCheckedChange={(checked) => {
-                                void updateField(field.id, { is_required: checked });
-                              }}
+                              onCheckedChange={(checked) => { void updateField(field.id, { is_required: checked }); }}
                             />
-                            <Label htmlFor={`required-${field.id}`} className="text-xs">Required</Label>
+                            <Label htmlFor={`required-${field.id}`} className="text-xs">{t('formBuilder.required')}</Label>
                           </div>
                         </div>
                       </div>
 
-                      {/* Enable toggle + Delete (core fields cannot be deleted) */}
                       <div className="flex items-center gap-2 pt-5 shrink-0">
                         <Switch
                           checked={field.is_enabled}
-                          onCheckedChange={(checked) => {
-                            void updateField(field.id, { is_enabled: checked });
-                          }}
+                          onCheckedChange={(checked) => { void updateField(field.id, { is_enabled: checked }); }}
                         />
                         <Button
                           variant="ghost"
@@ -341,7 +302,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                           onClick={() => !isCoreField && deleteField(field.id)}
                           disabled={isCoreField}
                           className="text-destructive hover:text-destructive disabled:opacity-30"
-                          title={isCoreField ? 'Core fields cannot be deleted' : 'Delete field'}
+                          title={isCoreField ? t('formBuilder.cannotDelete') : t('formBuilder.deleteField')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
