@@ -175,7 +175,7 @@ function StreamerPageContent() {
       {currentSubmissions.length > 0 && (
         <section className="pb-8 px-4">
           <div className="container mx-auto max-w-xl">
-            <SubmissionTracker submissions={currentSubmissions} />
+            <SubmissionTracker submissions={currentSubmissions} onDismiss={(trackedAt) => clearSubmission(slug || null, trackedAt)} />
           </div>
         </section>
       )}
