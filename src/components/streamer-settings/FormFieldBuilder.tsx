@@ -233,7 +233,17 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                           }}
                         >
                           <SelectTrigger className="h-9">
-                            <SelectValue />
+                            <SelectValue>
+                              {(() => {
+                                const t = FIELD_TYPES.find(t => t.value === field.field_type);
+                                return t ? (
+                                  <div className="flex items-center gap-2">
+                                    <t.icon className="w-3 h-3" />
+                                    {t.label}
+                                  </div>
+                                ) : <span>Select type</span>;
+                              })()}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {FIELD_TYPES.map((type) => (
