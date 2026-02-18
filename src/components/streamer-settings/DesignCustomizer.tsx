@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface DesignSettings {
   primaryColor: string;
@@ -46,18 +47,25 @@ const FONT_OPTIONS = [
 ];
 
 const BUTTON_STYLES = [
-  { value: 'rounded', label: 'Rounded', className: 'rounded-lg' },
-  { value: 'pill', label: 'Pill', className: 'rounded-full' },
-  { value: 'sharp', label: 'Sharp', className: 'rounded-none' },
-  { value: 'soft', label: 'Soft', className: 'rounded-xl' },
+  { value: 'rounded', labelKey: 'Rounded', className: 'rounded-lg' },
+  { value: 'pill', labelKey: 'Pill', className: 'rounded-full' },
+  { value: 'sharp', labelKey: 'Sharp', className: 'rounded-none' },
+  { value: 'soft', labelKey: 'Soft', className: 'rounded-xl' },
 ];
 
-const ANIMATION_STYLES = [
-  { value: 'none', label: 'None', description: 'No animations' },
-  { value: 'subtle', label: 'Subtle', description: 'Gentle fade and slide effects' },
-  { value: 'playful', label: 'Playful', description: 'Bouncy, energetic animations' },
-  { value: 'elegant', label: 'Elegant', description: 'Smooth, sophisticated transitions' },
+const ANIMATION_STYLES_KEYS = [
+  { value: 'none', labelKey: 'None', descKey: 'design.anim.noneDesc' },
+  { value: 'subtle', labelKey: 'Subtle', descKey: 'design.anim.subtleDesc' },
+  { value: 'playful', labelKey: 'Playful', descKey: 'design.anim.playfulDesc' },
+  { value: 'elegant', labelKey: 'Elegant', descKey: 'design.anim.elegantDesc' },
 ];
+
+const ANIMATION_DESC: Record<string, string> = {
+  none: 'No animations',
+  subtle: 'Gentle fade and slide effects',
+  playful: 'Bouncy, energetic animations',
+  elegant: 'Smooth, sophisticated transitions',
+};
 
 const CARD_STYLES = [
   { value: 'glass', label: 'Glassmorphism', className: 'bg-card/50 backdrop-blur border-border/50' },
@@ -91,6 +99,7 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
   value: string;
   onChange: (url: string) => void;
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -140,7 +149,6 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
         }}
       />
 
-      {/* Preview / drop zone */}
       <button
         type="button"
         onClick={() => !isUploading && inputRef.current?.click()}
@@ -157,12 +165,12 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
             {isUploading ? (
               <>
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <span className="text-sm">Uploading…</span>
+                <span className="text-sm">{t('design.bg.uploading')}</span>
               </>
             ) : (
               <>
                 <Upload className="w-6 h-6" />
-                <span className="text-sm">Click to upload image (max 10MB)</span>
+                <span className="text-sm">{t('design.bg.uploadClick')}</span>
               </>
             )}
           </div>
@@ -184,7 +192,7 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
           disabled={isUploading}
         >
           <Upload className="w-3.5 h-3.5" />
-          {value ? 'Replace Image' : 'Upload Image'}
+          {value ? t('design.bg.replaceImage') : t('design.bg.uploadImage')}
         </Button>
         {value && (
           <Button
@@ -196,14 +204,13 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
             disabled={isUploading}
           >
             <X className="w-3.5 h-3.5" />
-            Remove
+            {t('design.bg.removeImage')}
           </Button>
         )}
       </div>
 
-      {/* URL fallback */}
       <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Or paste an image URL</Label>
+        <Label className="text-xs text-muted-foreground">{t('design.bg.orPasteUrl')}</Label>
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -216,34 +223,36 @@ function BackgroundImageUploader({ streamerId, value, onChange }: {
 }
 
 export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="colors" className="space-y-4">
         <TabsList className="glass p-1 rounded-xl w-full grid grid-cols-4">
           <TabsTrigger value="colors" className="gap-2 rounded-lg">
             <Palette className="w-4 h-4" />
-            <span className="hidden sm:inline">Colors</span>
+            <span className="hidden sm:inline">{t('design.tab.colors')}</span>
           </TabsTrigger>
           <TabsTrigger value="typography" className="gap-2 rounded-lg">
             <Type className="w-4 h-4" />
-            <span className="hidden sm:inline">Typography</span>
+            <span className="hidden sm:inline">{t('design.tab.typography')}</span>
           </TabsTrigger>
           <TabsTrigger value="background" className="gap-2 rounded-lg">
             <ImageIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Background</span>
+            <span className="hidden sm:inline">{t('design.tab.background')}</span>
           </TabsTrigger>
           <TabsTrigger value="effects" className="gap-2 rounded-lg">
             <Sparkles className="w-4 h-4" />
-            <span className="hidden sm:inline">Effects</span>
+            <span className="hidden sm:inline">{t('design.tab.effects')}</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Colors Tab — accent color removed */}
+        {/* Colors Tab */}
         <TabsContent value="colors" className="space-y-4">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Primary Color</CardTitle>
-              <CardDescription>Main brand color used for buttons, highlights, and accents</CardDescription>
+              <CardTitle className="text-lg">{t('design.colors.title')}</CardTitle>
+              <CardDescription>{t('design.colors.desc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
@@ -279,8 +288,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
         <TabsContent value="typography" className="space-y-4">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Font Family</CardTitle>
-              <CardDescription>Choose the primary font for your page</CardDescription>
+              <CardTitle className="text-lg">{t('design.typography.fontTitle')}</CardTitle>
+              <CardDescription>{t('design.typography.fontDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -308,8 +317,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Button Style</CardTitle>
-              <CardDescription>Choose the shape of buttons</CardDescription>
+              <CardTitle className="text-lg">{t('design.typography.buttonTitle')}</CardTitle>
+              <CardDescription>{t('design.typography.buttonDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -324,7 +333,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                     }`}
                   >
                     <div className={`h-8 bg-primary/20 ${style.className}`} />
-                    <span className="text-sm mt-2 block">{style.label}</span>
+                    <span className="text-sm mt-2 block">{style.labelKey}</span>
                   </button>
                 ))}
               </div>
@@ -336,8 +345,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
         <TabsContent value="background" className="space-y-4">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Background Type</CardTitle>
-              <CardDescription>Choose how your page background looks. Changes apply on your public page after saving.</CardDescription>
+              <CardTitle className="text-lg">{t('design.bg.title')}</CardTitle>
+              <CardDescription>{t('design.bg.desc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -355,7 +364,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                 >
                   <RadioGroupItem value="solid" id="bg-solid" />
                   <Square className="w-8 h-8" />
-                  <span className="text-sm">Solid</span>
+                  <span className="text-sm">{t('design.bg.solid')}</span>
                 </Label>
                 <Label
                   htmlFor="bg-gradient"
@@ -367,7 +376,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                 >
                   <RadioGroupItem value="gradient" id="bg-gradient" />
                   <Layers className="w-8 h-8" />
-                  <span className="text-sm">Gradient</span>
+                  <span className="text-sm">{t('design.bg.gradient')}</span>
                 </Label>
                 <Label
                   htmlFor="bg-image"
@@ -379,7 +388,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                 >
                   <RadioGroupItem value="image" id="bg-image" />
                   <ImageIcon className="w-8 h-8" />
-                  <span className="text-sm">Image</span>
+                  <span className="text-sm">{t('design.bg.image')}</span>
                 </Label>
               </RadioGroup>
             </CardContent>
@@ -388,7 +397,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           {settings.backgroundType === 'gradient' && (
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-lg">Gradient Presets</CardTitle>
+                <CardTitle className="text-lg">{t('design.bg.gradientPresets')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
@@ -409,7 +418,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                   ))}
                 </div>
                 <div className="mt-4 space-y-2">
-                  <Label>Custom Gradient CSS</Label>
+                  <Label>{t('design.bg.customGradient')}</Label>
                   <Input
                     value={settings.backgroundGradient}
                     onChange={(e) => onChange({ backgroundGradient: e.target.value })}
@@ -424,8 +433,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           {settings.backgroundType === 'image' && (
             <Card className="bg-card/50 border-border/50">
               <CardHeader>
-                <CardTitle className="text-lg">Background Image</CardTitle>
-                <CardDescription>Upload an image or paste a URL. Applied to your public page after saving.</CardDescription>
+                <CardTitle className="text-lg">{t('design.bg.imageTitle')}</CardTitle>
+                <CardDescription>{t('design.bg.imageDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <BackgroundImageUploader
@@ -442,8 +451,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
         <TabsContent value="effects" className="space-y-4">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Animation Style</CardTitle>
-              <CardDescription>Control how elements animate on your page</CardDescription>
+              <CardTitle className="text-lg">{t('design.effects.animTitle')}</CardTitle>
+              <CardDescription>{t('design.effects.animDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -451,7 +460,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                 onValueChange={(value) => onChange({ animationStyle: value })}
                 className="grid grid-cols-2 gap-3"
               >
-                {ANIMATION_STYLES.map((style) => (
+                {ANIMATION_STYLES_KEYS.map((style) => (
                   <Label
                     key={style.value}
                     htmlFor={`anim-${style.value}`}
@@ -463,9 +472,9 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
                   >
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value={style.value} id={`anim-${style.value}`} />
-                      <span className="font-medium">{style.label}</span>
+                      <span className="font-medium">{style.labelKey}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground pl-6">{style.description}</span>
+                    <span className="text-xs text-muted-foreground pl-6">{ANIMATION_DESC[style.value]}</span>
                   </Label>
                 ))}
               </RadioGroup>
@@ -474,8 +483,8 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
-              <CardTitle className="text-lg">Card Style</CardTitle>
-              <CardDescription>Choose the appearance of content cards</CardDescription>
+              <CardTitle className="text-lg">{t('design.effects.cardTitle')}</CardTitle>
+              <CardDescription>{t('design.effects.cardDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

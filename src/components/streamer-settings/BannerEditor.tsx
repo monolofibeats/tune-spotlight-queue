@@ -1,19 +1,16 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Flag, 
-  Eye, 
-  EyeOff, 
   Link2, 
   Type,
   Palette,
   Sparkles
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface BannerSettings {
   bannerEnabled: boolean;
@@ -37,6 +34,8 @@ const BANNER_COLORS = [
 ];
 
 export function BannerEditor({ settings, onChange }: BannerEditorProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <Card className="bg-card/50 border-border/50">
@@ -45,11 +44,9 @@ export function BannerEditor({ settings, onChange }: BannerEditorProps) {
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Flag className="w-5 h-5" />
-                Announcement Banner
+                {t('banner.title')}
               </CardTitle>
-              <CardDescription>
-                Display a prominent banner at the top of your page
-              </CardDescription>
+              <CardDescription>{t('banner.desc')}</CardDescription>
             </div>
             <Switch
               checked={settings.bannerEnabled}
@@ -66,7 +63,6 @@ export function BannerEditor({ settings, onChange }: BannerEditorProps) {
               exit={{ height: 0, opacity: 0 }}
             >
               <CardContent className="space-y-6 pt-0">
-                {/* Preview */}
                 <div 
                   className="p-3 rounded-lg text-center font-medium text-sm"
                   style={{ 
@@ -77,31 +73,31 @@ export function BannerEditor({ settings, onChange }: BannerEditorProps) {
                   }}
                 >
                   <Sparkles className="w-4 h-4 inline mr-2" />
-                  {settings.bannerText || 'Your announcement text here...'}
+                  {settings.bannerText || t('banner.previewText')}
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="bannerText" className="flex items-center gap-2">
                       <Type className="w-4 h-4" />
-                      Banner Text
+                      {t('banner.textLabel')}
                     </Label>
                     <Input
                       id="bannerText"
                       value={settings.bannerText}
                       onChange={(e) => onChange({ bannerText: e.target.value })}
-                      placeholder="🎉 Special stream tonight at 8 PM!"
+                      placeholder={t('banner.textPlaceholder')}
                       maxLength={100}
                     />
                     <p className="text-xs text-muted-foreground">
-                      {settings.bannerText?.length || 0}/100 characters
+                      {settings.bannerText?.length || 0}/100
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="bannerLink" className="flex items-center gap-2">
                       <Link2 className="w-4 h-4" />
-                      Banner Link (optional)
+                      {t('banner.linkLabel')}
                     </Label>
                     <Input
                       id="bannerLink"
@@ -114,7 +110,7 @@ export function BannerEditor({ settings, onChange }: BannerEditorProps) {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Palette className="w-4 h-4" />
-                      Banner Color
+                      {t('banner.colorLabel')}
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {BANNER_COLORS.map((color) => (

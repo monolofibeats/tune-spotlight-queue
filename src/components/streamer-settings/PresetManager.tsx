@@ -11,29 +11,21 @@ import {
   Star,
   Instagram,
   Radio,
-  Copy,
   Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useStreamerPresets, PLATFORM_TEMPLATES, type StreamerPreset } from '@/hooks/useStreamerPresets';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface PresetManagerProps {
   streamerId: string;
 }
 
-const TEMPLATE_OPTIONS = [
-  { key: 'twitch_music', label: 'Twitch Music Review', icon: Tv, color: 'text-purple-400' },
-  { key: 'youtube_music', label: 'YouTube Music Review', icon: Youtube, color: 'text-red-400' },
-  { key: 'tiktok_live', label: 'TikTok Live', icon: Radio, color: 'text-pink-400' },
-  { key: 'game_review', label: 'Game Review', icon: Gamepad2, color: 'text-green-400' },
-  { key: 'profile_review', label: 'Profile Review', icon: Instagram, color: 'text-orange-400' },
-  { key: 'general', label: 'General Rating', icon: Star, color: 'text-yellow-400' },
-];
-
 export function PresetManager({ streamerId }: PresetManagerProps) {
+  const { t } = useLanguage();
   const { presets, activePreset, isLoading, createPreset, activatePreset, updatePreset, deletePreset } = useStreamerPresets(streamerId);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -58,19 +50,18 @@ export function PresetManager({ streamerId }: PresetManagerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Custom preset */}
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Your Presets</h3>
+        <h3 className="font-semibold">{t('presets.yourPresets')}</h3>
         <Button size="sm" variant="outline" onClick={() => createPreset()} className="gap-2">
           <Plus className="w-4 h-4" />
-          Custom Preset
+          {t('presets.customPreset')}
         </Button>
       </div>
 
       {presets.length === 0 ? (
         <Card className="bg-card/50 border-border/50">
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p>No presets yet. Create one from a template or start from scratch.</p>
+            <p>{t('presets.noPresets')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -87,7 +78,7 @@ export function PresetManager({ streamerId }: PresetManagerProps) {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {preset.is_active && (
-                        <Badge variant="default" className="shrink-0 text-xs">Active</Badge>
+                        <Badge variant="default" className="shrink-0 text-xs">{t('presets.active')}</Badge>
                       )}
                       
                       {editingId === preset.id ? (
@@ -114,30 +105,15 @@ export function PresetManager({ streamerId }: PresetManagerProps) {
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleStartEdit(preset)}
-                        className="h-8 w-8"
-                      >
+                      <Button size="icon" variant="ghost" onClick={() => handleStartEdit(preset)} className="h-8 w-8">
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
                       {!preset.is_active && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => activatePreset(preset.id)}
-                          className="text-xs"
-                        >
-                          Activate
+                        <Button size="sm" variant="outline" onClick={() => activatePreset(preset.id)} className="text-xs">
+                          {t('presets.activate')}
                         </Button>
                       )}
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deletePreset(preset.id)}
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                      >
+                      <Button size="icon" variant="ghost" onClick={() => deletePreset(preset.id)} className="h-8 w-8 text-destructive hover:text-destructive">
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>

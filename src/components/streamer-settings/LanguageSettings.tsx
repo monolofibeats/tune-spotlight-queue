@@ -5,6 +5,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface LanguageSettingsProps {
   language: string;
@@ -27,18 +28,18 @@ const LANGUAGES = [
 ];
 
 export function LanguageSettings({ language, onChange }: LanguageSettingsProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6">
       <Card className="bg-card/50 border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Globe className="w-5 h-5" />
-            Page Language
+            {t('langSettings.title')}
           </CardTitle>
           <CardDescription>
-            Choose the primary language for your submission page. 
-            All interface elements will be displayed in this language.
-            Visitors can also use the translate button (🌐) to auto-translate into any language.
+            {t('langSettings.desc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,8 +80,7 @@ export function LanguageSettings({ language, onChange }: LanguageSettingsProps) 
       <Card className="bg-muted/30 border-border/50">
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground">
-            <strong>Note:</strong> This setting affects how your page is displayed to visitors. 
-            They can use the 🌐 button in the language switcher to auto-translate the page into any language via Google Translate.
+            <strong>Note:</strong> {t('langSettings.note')}
           </p>
         </CardContent>
       </Card>
