@@ -111,12 +111,12 @@ serve(async (req) => {
       }
     }
 
-    // Get bid increment config
-    const { data: bidConfig } = await supabaseAdmin
+    // Get bid increment config (prefer global, fall back to first available)
+    const { data: bidConfigs } = await supabaseAdmin
       .from('pricing_config')
       .select('*')
-      .eq('config_type', 'bid_increment')
-      .single();
+      .eq('config_type', 'bid_increment');
+    const bidConfig = bidConfigs?.find(r => r.streamer_id === null) ?? bidConfigs?.[0];
 
     const incrementPercent = bidConfig?.min_amount_cents || 10;
 

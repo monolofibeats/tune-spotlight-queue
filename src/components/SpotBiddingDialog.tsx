@@ -97,15 +97,8 @@ export function SpotBiddingDialog({
         ?? skipConfigs?.find(r => r.streamer_id === null)
         ?? skipConfigs?.[0];
 
-      if (skipError || !skipConfig) {
-        console.error('Failed to load skip_line config:', skipError);
-        toast({
-          title: 'Error',
-          description: 'Failed to load pricing configuration',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
+      if (skipError) {
+        console.warn('Failed to load skip_line config, using default:', skipError);
       }
 
 
