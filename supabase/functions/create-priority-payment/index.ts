@@ -43,12 +43,14 @@ serve(async (req) => {
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug });
 
-    // Fetch minimum amount from pricing_config
-    const { data: pricingConfig } = await supabase
+    // Fetch minimum amount from pricing_config (prefer streamer-specific, fall back to global)
+    const { data: pricingConfigs } = await supabase
       .from('pricing_config')
-      .select('min_amount_cents')
-      .eq('config_type', 'skip_line')
-      .single();
+      .select('min_amount_cents, streamer_id')
+      .eq('config_type', 'skip_line');
+    const pricingConfig = pricingConfigs?.find(r => streamerId && r.streamer_id === streamerId)
+      ?? pricingConfigs?.find(r => r.streamer_id === null)
+      ?? pricingConfigs?.[0];
 
     const minAmountCents = pricingConfig?.min_amount_cents ?? 50; // Default to €0.50
     const amountCents = Math.round(amount * 100);

@@ -29,13 +29,14 @@ export function AdminBidSettings() {
     const { data, error } = await supabase
       .from('pricing_config')
       .select('*')
-      .eq('config_type', 'bid_increment')
-      .single();
+      .eq('config_type', 'bid_increment');
 
-    if (!error && data) {
-      setConfig(data);
-      setIncrementPercent(data.min_amount_cents); // Using min_amount_cents to store %
-      setIsActive(data.is_active);
+    if (!error && data && data.length > 0) {
+      // Prefer global row (streamer_id IS NULL), fall back to first available
+      const globalRow = data.find(r => r.streamer_id === null) ?? data[0];
+      setConfig(globalRow);
+      setIncrementPercent(globalRow.min_amount_cents); // Using min_amount_cents to store %
+      setIsActive(globalRow.is_active);
     }
     setIsLoading(false);
   };
