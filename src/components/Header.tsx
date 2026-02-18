@@ -72,7 +72,7 @@ export function Header() {
               <Link to="/streamer/dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                   <LayoutDashboard className="w-3.5 h-3.5" />
-                  My Dashboard
+                  {t('nav.myDashboard')}
                 </Button>
               </Link>
             )}
@@ -80,7 +80,7 @@ export function Header() {
               <Link to="/streamer/dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
                   <LayoutDashboard className="w-3.5 h-3.5" />
-                  Team Dashboard
+                  {t('nav.teamDashboard')}
                 </Button>
               </Link>
             )}
@@ -116,13 +116,13 @@ export function Header() {
                       <DropdownMenuItem asChild>
                         <Link to="/streamer/payments" className="flex items-center gap-2 cursor-pointer">
                           <Wallet className="w-4 h-4" />
-                          Payments
+                          {t('nav.payments')}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/streamer/statistics" className="flex items-center gap-2 cursor-pointer">
                           <BarChart3 className="w-4 h-4" />
-                          Statistics
+                          {t('nav.statistics')}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -130,14 +130,14 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/settings" className="flex items-center gap-2 cursor-pointer">
                       <Settings className="w-4 h-4" />
-                      Settings
+                      {t('nav.settings')}
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
                         <LayoutDashboard className="w-4 h-4" />
-                        Admin Panel
+                        {t('nav.adminPanel')}
                       </Link>
                     </DropdownMenuItem>
                   )}
@@ -145,7 +145,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/support" className="flex items-center gap-2 cursor-pointer">
                       <MessageSquare className="w-4 h-4" />
-                      Support
+                      {t('nav.support')}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -198,31 +198,31 @@ export function Header() {
                 <Link to="/streamer/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <LayoutDashboard className="w-4 h-4" />
-                    My Dashboard
+                    {t('nav.myDashboard')}
                   </Button>
                 </Link>
                 <Link to="/streamer/payments" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Wallet className="w-4 h-4" />
-                    Payments
+                    {t('nav.payments')}
                   </Button>
                 </Link>
                 <Link to="/streamer/statistics" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <BarChart3 className="w-4 h-4" />
-                    Statistics
+                    {t('nav.statistics')}
                   </Button>
                 </Link>
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
-                    Settings
+                    {t('nav.settings')}
                   </Button>
                 </Link>
                 <Link to="/support" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <MessageSquare className="w-4 h-4" />
-                    Support
+                    {t('nav.support')}
                   </Button>
                 </Link>
               </>
@@ -240,7 +240,7 @@ export function Header() {
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
-                    Settings
+                    {t('nav.settings')}
                   </Button>
                 </Link>
               </>
@@ -257,7 +257,7 @@ export function Header() {
                 <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
                     <Settings className="w-4 h-4" />
-                    Settings
+                    {t('nav.settings')}
                   </Button>
                 </Link>
                 <SignOutDialog variant="full" onSignOut={() => setMobileMenuOpen(false)} />
