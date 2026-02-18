@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
+
 
 interface TeamMember {
   id: string;
@@ -44,11 +46,13 @@ const roleConfig = {
 };
 
 export function TeamManager({ streamerId }: TeamManagerProps) {
+  const { t } = useLanguage();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'viewer' | 'editor' | 'admin'>('viewer');
+
 
   const fetchMembers = async () => {
     setIsLoading(true);
@@ -140,11 +144,11 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
   const statusBadge = (status: string) => {
     switch (status) {
       case 'accepted':
-        return <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30"><Check className="w-3 h-3 mr-1" /> Active</Badge>;
+        return <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30"><Check className="w-3 h-3 mr-1" /> {t('team.statusActive')}</Badge>;
       case 'pending':
-        return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30"><Mail className="w-3 h-3 mr-1" /> Pending</Badge>;
+        return <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30"><Mail className="w-3 h-3 mr-1" /> {t('team.statusPending')}</Badge>;
       case 'declined':
-        return <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30"><X className="w-3 h-3 mr-1" /> Declined</Badge>;
+        return <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30"><X className="w-3 h-3 mr-1" /> {t('team.statusDeclined')}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -156,26 +160,26 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
       <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-lg">Invite Team Member</h3>
+          <h3 className="font-semibold text-lg">{t('team.inviteTitle')}</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Add team members to help manage your streamer dashboard. They'll receive an email invitation.
+          {t('team.inviteDesc')}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3 items-end">
           <div className="space-y-2">
-            <Label htmlFor="inviteEmail">Email Address</Label>
+            <Label htmlFor="inviteEmail">{t('team.emailLabel')}</Label>
             <Input
               id="inviteEmail"
               type="email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="teammate@example.com"
+              placeholder={t('team.emailPlaceholder')}
               onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
             />
           </div>
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>{t('team.roleLabel')}</Label>
             <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as any)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
@@ -183,17 +187,17 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
               <SelectContent>
                 <SelectItem value="viewer">
                   <span className="flex items-center gap-2">
-                    <Eye className="w-4 h-4" /> Viewer
+                    <Eye className="w-4 h-4" /> {t('team.viewer')}
                   </span>
                 </SelectItem>
                 <SelectItem value="editor">
                   <span className="flex items-center gap-2">
-                    <Edit className="w-4 h-4" /> Editor / Manager
+                    <Edit className="w-4 h-4" /> {t('team.editor')}
                   </span>
                 </SelectItem>
                 <SelectItem value="admin">
                   <span className="flex items-center gap-2">
-                    <Crown className="w-4 h-4" /> Administrator
+                    <Crown className="w-4 h-4" /> {t('team.admin')}
                   </span>
                 </SelectItem>
               </SelectContent>
@@ -201,7 +205,7 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
           </div>
           <Button onClick={handleInvite} disabled={isSending || !inviteEmail.trim()} className="gap-2">
             {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-            Send Invite
+            {t('team.sendInvite')}
           </Button>
         </div>
       </div>
@@ -210,18 +214,22 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
       <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-lg">Role Permissions</h3>
+          <h3 className="font-semibold text-lg">{t('team.rolePermissions')}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {(Object.entries(roleConfig) as [string, typeof roleConfig.viewer][]).map(([key, config]) => {
-            const Icon = config.icon;
+          {([
+            { key: 'viewer', icon: Eye, color: 'text-blue-400', label: t('team.viewer'), desc: t('team.viewerDesc') },
+            { key: 'editor', icon: Edit, color: 'text-amber-400', label: t('team.editor'), desc: t('team.editorDesc') },
+            { key: 'admin', icon: Crown, color: 'text-red-400', label: t('team.admin'), desc: t('team.adminDesc') },
+          ] as const).map((item) => {
+            const Icon = item.icon;
             return (
-              <div key={key} className="bg-background/50 border border-border/30 rounded-lg p-4 space-y-2">
+              <div key={item.key} className="bg-background/50 border border-border/30 rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Icon className={`w-5 h-5 ${config.color}`} />
-                  <span className="font-medium">{config.label}</span>
+                  <Icon className={`w-5 h-5 ${item.color}`} />
+                  <span className="font-medium">{item.label}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{config.description}</p>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
               </div>
             );
           })}
@@ -232,8 +240,10 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
       <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-lg">Team Members</h3>
-          <Badge variant="outline" className="ml-auto">{members.length} member{members.length !== 1 ? 's' : ''}</Badge>
+          <h3 className="font-semibold text-lg">{t('team.membersTitle')}</h3>
+          <Badge variant="outline" className="ml-auto">
+            {members.length} {members.length !== 1 ? t('team.members') : t('team.member')}
+          </Badge>
         </div>
 
         {isLoading ? (
@@ -243,23 +253,37 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
         ) : members.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Users className="w-10 h-10 mx-auto mb-2 opacity-40" />
-            <p>No team members yet. Invite someone to get started!</p>
+            <p>{t('team.noMembers')}</p>
           </div>
         ) : (
           <div className="space-y-3">
             {members.map((member) => {
-              const config = roleConfig[member.role];
-              const Icon = config.icon;
+              const roleLabels: Record<string, string> = {
+                viewer: t('team.viewer'),
+                editor: t('team.editor'),
+                admin: t('team.admin'),
+              };
+              const roleColors: Record<string, string> = {
+                viewer: 'text-blue-400',
+                editor: 'text-amber-400',
+                admin: 'text-red-400',
+              };
+              const roleIcons: Record<string, typeof Eye> = {
+                viewer: Eye,
+                editor: Edit,
+                admin: Crown,
+              };
+              const Icon = roleIcons[member.role] || Eye;
               return (
                 <div key={member.id} className="flex flex-col sm:flex-row sm:items-center gap-3 bg-background/50 border border-border/30 rounded-lg p-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`p-2 rounded-lg bg-background border border-border/50`}>
-                      <Icon className={`w-4 h-4 ${config.color}`} />
+                    <div className="p-2 rounded-lg bg-background border border-border/50">
+                      <Icon className={`w-4 h-4 ${roleColors[member.role] || ''}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium truncate">{member.email}</p>
                       <p className="text-xs text-muted-foreground">
-                        Invited {new Date(member.invited_at).toLocaleDateString()}
+                        {t('team.invited')} {new Date(member.invited_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -273,9 +297,9 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="viewer">Viewer</SelectItem>
-                        <SelectItem value="editor">Editor / Manager</SelectItem>
-                        <SelectItem value="admin">Administrator</SelectItem>
+                        <SelectItem value="viewer">{t('team.viewer')}</SelectItem>
+                        <SelectItem value="editor">{t('team.editor')}</SelectItem>
+                        <SelectItem value="admin">{t('team.admin')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
