@@ -27,7 +27,7 @@ import {
   PresetManager,
 } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
-import { ScreenStreamer } from '@/components/ScreenStreamer';
+
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
 
@@ -292,7 +292,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         <TabsContent value="stream" className="space-y-6">
           <SessionManager streamerId={initialStreamer.id} />
           <StreamEmbedConfig streamerId={initialStreamer.id} />
-          <ScreenStreamer />
         </TabsContent>
       </Tabs>
     </motion.div>
