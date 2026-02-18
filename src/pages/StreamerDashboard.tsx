@@ -54,15 +54,19 @@ interface Submission {
   audio_file_url: string | null;
 }
 
+// Team role type: null = owner/platform-admin (full access), 'admin' | 'editor' | 'viewer' = team member
+type TeamRole = 'admin' | 'editor' | 'viewer' | null;
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isAdmin: isGlobalAdmin, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
@@ -147,7 +151,7 @@ const StreamerDashboard = () => {
       if (!data && !slug) {
         const { data: team } = await supabase
           .from('streamer_team_members')
-          .select('streamer_id')
+          .select('streamer_id, role')
           .eq('user_id', user.id)
           .eq('invitation_status', 'accepted')
           .limit(1)
@@ -160,11 +164,35 @@ const StreamerDashboard = () => {
             .single();
           if (teamStreamer) {
             setStreamer(teamStreamer as Streamer);
-            return teamStreamer;
+            setTeamRole(team.role as TeamRole);
+            return { streamer: teamStreamer, role: team.role as TeamRole };
           }
         }
         setIsLoading(false);
         return null;
+      }
+
+      // Slug-based access: check if owner or team member
+      if (data) {
+        if (data.user_id === user.id || isGlobalAdmin) {
+          // Owner or global admin — full access
+          setStreamer(data as Streamer);
+          setTeamRole(null);
+          return { streamer: data, role: null as TeamRole };
+        }
+        // Check team membership for slug-based access
+        const { data: teamMembership } = await supabase
+          .from('streamer_team_members')
+          .select('role')
+          .eq('streamer_id', data.id)
+          .eq('user_id', user.id)
+          .eq('invitation_status', 'accepted')
+          .maybeSingle();
+        if (teamMembership) {
+          setStreamer(data as Streamer);
+          setTeamRole(teamMembership.role as TeamRole);
+          return { streamer: data, role: teamMembership.role as TeamRole };
+        }
       }
       
       if (error || !data) {
@@ -173,7 +201,7 @@ const StreamerDashboard = () => {
         return null;
       }
       setStreamer(data as Streamer);
-      return data;
+      return { streamer: data, role: null as TeamRole };
     };
 
     const fetchSubmissions = async (streamerId: string) => {
@@ -190,8 +218,9 @@ const StreamerDashboard = () => {
     };
 
     const init = async () => {
-      const streamerData = await fetchStreamer();
-      if (streamerData) {
+      const result = await fetchStreamer();
+      if (result) {
+        const streamerData = result.streamer;
         await fetchSubmissions(streamerData.id);
         const submissionsChannel = supabase
           .channel('streamer_submissions')
@@ -207,6 +236,13 @@ const StreamerDashboard = () => {
 
     init().then(() => setIsLoading(false));
   }, [user, authLoading, slug]);
+
+  // Permission flags based on team role
+  // null teamRole = owner or global admin = full access
+  const isOwnerOrAdmin = teamRole === null || isGlobalAdmin;
+  const canEdit = isOwnerOrAdmin || teamRole === 'editor' || teamRole === 'admin';
+  const canManageTeam = isOwnerOrAdmin || teamRole === 'admin';
+  const canViewPayments = isOwnerOrAdmin || teamRole === 'admin';
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     const { error } = await supabase.from('submissions').update({ status: newStatus }).eq('id', id);
@@ -510,11 +546,13 @@ const StreamerDashboard = () => {
             <SubmissionListItem
               key={submission.id} submission={submission}
               position={statusFilter === 'deleted' || queueConfig.showPosition === false ? undefined : index + 1}
-              isAdmin={true} isTrashView={statusFilter === 'deleted'}
-              isSelected={selectedIds.has(submission.id)} isSelectionMode={isSelectionMode}
-              onToggleSelect={handleToggleSelect} onStatusChange={handleStatusChange}
-              onDelete={handleDeleteSubmission} onRestore={handleRestoreSubmission}
-              onUpdate={handleUpdateSubmission}
+              isAdmin={canEdit} isTrashView={statusFilter === 'deleted'}
+              isSelected={selectedIds.has(submission.id)} isSelectionMode={isSelectionMode && canEdit}
+              onToggleSelect={canEdit ? handleToggleSelect : undefined}
+              onStatusChange={canEdit ? handleStatusChange : undefined}
+              onDelete={canEdit ? handleDeleteSubmission : undefined}
+              onRestore={canEdit ? handleRestoreSubmission : undefined}
+              onUpdate={canEdit ? handleUpdateSubmission : undefined}
               showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
             />
@@ -528,7 +566,7 @@ const StreamerDashboard = () => {
               </p>
             </div>
           )}
-          {queueConfig.showBulkActions !== false && (
+          {queueConfig.showBulkActions !== false && canEdit && (
             <BulkActionBar selectedCount={selectedIds.size} totalCount={filteredSubmissions.length}
               isTrashView={statusFilter === 'deleted'} onSelectAll={handleSelectAll}
               onDeselectAll={handleDeselectAll} onBulkStatusChange={handleBulkStatusChange}
@@ -537,8 +575,16 @@ const StreamerDashboard = () => {
           )}
         </div>
       ),
-      earnings: <EarningsWidget streamerId={streamer.id} config={earningsConfig} />,
-      quick_settings: <QuickSettingsWidget streamer={streamer} onUpdate={setStreamer} />,
+      earnings: canViewPayments ? <EarningsWidget streamerId={streamer.id} config={earningsConfig} /> : (
+        <div className="flex items-center justify-center h-full text-muted-foreground text-sm p-4">
+          <span>Earnings data is restricted to administrators.</span>
+        </div>
+      ),
+      quick_settings: canEdit ? <QuickSettingsWidget streamer={streamer} onUpdate={setStreamer} /> : (
+        <div className="flex items-center justify-center h-full text-muted-foreground text-sm p-4">
+          <span>Settings editing is restricted to editors and administrators.</span>
+        </div>
+      ),
       chat: (
         <div className="widget-chat h-full min-h-[200px] overflow-hidden">
           <AdminStreamerChat streamerId={streamer.id} role="streamer" />
@@ -696,7 +742,7 @@ const StreamerDashboard = () => {
         <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
           <div className="w-full">
             <div className="flex items-center justify-end gap-2 mb-4">
-              <DashboardBuilder {...builderProps} />
+              {canEdit && <DashboardBuilder {...builderProps} />}
               <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
                 <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-3 h-3" />
@@ -712,7 +758,7 @@ const StreamerDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-6"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <LayoutDashboard className="w-8 h-8 text-primary" />
                   <div>
                     <h1 className="text-3xl font-display font-bold">{t('dashboard.streamerDashboard')}</h1>
@@ -720,6 +766,15 @@ const StreamerDashboard = () => {
                       {t('dashboard.managePageAt')} <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
                     </p>
                   </div>
+                  {teamRole && (
+                    <span className={`ml-2 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                      teamRole === 'viewer' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                      teamRole === 'editor' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                      'bg-red-500/10 text-red-400 border-red-500/30'
+                    }`}>
+                      {teamRole === 'viewer' ? '👁 Viewer' : teamRole === 'editor' ? '✏️ Editor' : '👑 Admin'}
+                    </span>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -730,16 +785,18 @@ const StreamerDashboard = () => {
                   <Music className="w-4 h-4" />
                   {t('dashboard.submissions')}
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
-                  <Settings className="w-4 h-4" />
-                  {t('dashboard.myPageSettings')}
-                </TabsTrigger>
+                {canEdit && (
+                  <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
+                    <Settings className="w-4 h-4" />
+                    {t('dashboard.myPageSettings')}
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="submissions">
                 <DashboardGrid
                   layout={dashboardLayout}
-                  isEditing={isBuilderEditing}
+                  isEditing={isBuilderEditing && canEdit}
                   onLayoutChange={setDashboardLayout}
                   onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
                   widgetRenderers={widgetRenderers}
@@ -750,9 +807,11 @@ const StreamerDashboard = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="settings">
-                <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
-              </TabsContent>
+              {canEdit && (
+                <TabsContent value="settings">
+                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </main>

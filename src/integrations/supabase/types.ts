@@ -1323,6 +1323,10 @@ export type Database = {
       }
     }
     Functions: {
+      get_team_role: {
+        Args: { _streamer_id: string; _user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
