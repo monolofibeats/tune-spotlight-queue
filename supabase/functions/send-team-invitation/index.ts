@@ -100,6 +100,9 @@ serve(async (req) => {
       (u) => u.email?.toLowerCase() === email.toLowerCase()
     );
 
+    // If the invited user already has an account, auto-accept the invitation
+    const autoAccept = !!invitedUser?.id;
+
     // Create the team member record
     const { data: member, error: insertError } = await supabaseClient
       .from("streamer_team_members")
@@ -109,7 +112,8 @@ serve(async (req) => {
         role,
         invited_by: user.id,
         user_id: invitedUser?.id || null,
-        invitation_status: "pending",
+        invitation_status: autoAccept ? "accepted" : "pending",
+        accepted_at: autoAccept ? new Date().toISOString() : null,
       })
       .select()
       .single();
