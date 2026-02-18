@@ -53,15 +53,19 @@ serve(async (req) => {
     logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl });
 
     // Check if submission pricing is active
-    const { data: pricingConfig, error: configError } = await supabaseClient
+    // Prefer streamer-specific config, fall back to global (streamer_id IS NULL)
+    const { data: pricingConfigs, error: configError } = await supabaseClient
       .from('pricing_config')
       .select('*')
-      .eq('config_type', 'submission')
-      .single();
+      .eq('config_type', 'submission');
 
-    if (configError || !pricingConfig) {
+    if (configError || !pricingConfigs || pricingConfigs.length === 0) {
       throw new Error('Pricing configuration not found');
     }
+
+    const pricingConfig = pricingConfigs.find(r => streamerId && r.streamer_id === streamerId)
+      ?? pricingConfigs.find(r => r.streamer_id === null)
+      ?? pricingConfigs[0];
 
     if (!pricingConfig.is_active) {
       throw new Error('Paid submissions are not currently active');
