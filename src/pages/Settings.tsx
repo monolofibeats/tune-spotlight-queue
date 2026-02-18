@@ -50,7 +50,7 @@ interface Profile {
 }
 
 export default function Settings() {
-  const { user, isLoading: authLoading, isStreamer } = useAuth();
+  const { user, isLoading: authLoading, isStreamer, isAdmin } = useAuth();
   const { language: currentLanguage, setLanguage: setAppLanguage } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -103,9 +103,10 @@ export default function Settings() {
     }
     if (user) {
       fetchProfile();
-      if (isStreamer) fetchStreamerData();
+      // Load streamer data for streamers, team members, AND admins
+      if (isStreamer || isAdmin) fetchStreamerData();
     }
-  }, [user, authLoading, navigate, isStreamer]);
+  }, [user, authLoading, navigate, isStreamer, isAdmin]);
 
   const fetchStreamerData = async () => {
     if (!user) return;
@@ -312,12 +313,14 @@ export default function Settings() {
     );
   }
 
+  const hasStreamerAccess = (isStreamer || isAdmin) && !!streamerData;
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'devices', label: 'Voice & Video', icon: Mic },
-    ...(isStreamer && streamerData ? [
+    ...(hasStreamerAccess ? [
       { id: 'streamer-profile', label: 'Streamer Profile', icon: User },
       { id: 'social', label: 'Social', icon: LinkIcon },
       { id: 'page-language', label: 'Page Language', icon: Globe },
@@ -544,7 +547,7 @@ export default function Settings() {
             </TabsContent>
 
             {/* Streamer Profile Tab */}
-            {isStreamer && streamerData && (
+            {hasStreamerAccess && (
               <TabsContent value="streamer-profile" className="space-y-6">
                 <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                   <h3 className="font-semibold text-lg">Streamer Profile</h3>
@@ -606,7 +609,7 @@ export default function Settings() {
             )}
 
             {/* Social Tab */}
-            {isStreamer && streamerData && (
+            {hasStreamerAccess && (
               <TabsContent value="social" className="space-y-6">
                 <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                   <h3 className="font-semibold text-lg">Social Links</h3>
@@ -641,16 +644,16 @@ export default function Settings() {
             )}
 
             {/* Page Language Tab */}
-            {isStreamer && streamerData && (
+            {hasStreamerAccess && (
               <TabsContent value="page-language" className="space-y-6">
                 <LanguageSettings language={pageLanguage} onChange={setPageLanguage} />
               </TabsContent>
             )}
 
             {/* Team Tab */}
-            {isStreamer && streamerData && (
+            {hasStreamerAccess && (
               <TabsContent value="team" className="space-y-6">
-                <TeamManager streamerId={streamerData.id} />
+                <TeamManager streamerId={streamerData!.id} />
               </TabsContent>
             )}
           </Tabs>
