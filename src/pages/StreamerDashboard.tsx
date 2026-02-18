@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { StreamSessionProvider } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -673,149 +674,149 @@ const StreamerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
-      {/* Collapsible Header */}
-      {viewOptions.showHeader ? (
-        <Header />
-      ) : (
-        <div className="fixed top-2 left-2 z-50">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 bg-card/80 backdrop-blur-sm"
-            onClick={() => setViewOptions(prev => ({ ...prev, showHeader: true }))}
-            title="Show header"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
-      
-      <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
-        <div className="w-full">
-          {/* Single DashboardBuilder instance — never remounts on title toggle */}
-          <div className="flex items-center justify-end gap-2 mb-4">
-            <DashboardBuilder {...builderProps} />
-            <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
-              <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-3 h-3" />
-                View Page
-              </a>
+    <StreamSessionProvider streamerId={streamer.id}>
+      <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
+        {/* Collapsible Header */}
+        {viewOptions.showHeader ? (
+          <Header />
+        ) : (
+          <div className="fixed top-2 left-2 z-50">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+              onClick={() => setViewOptions(prev => ({ ...prev, showHeader: true }))}
+              title="Show header"
+            >
+              <ChevronDown className="w-4 h-4" />
             </Button>
           </div>
-
-          {/* Collapsible Dashboard Header */}
-          {viewOptions.showDashboardTitle && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6"
-            >
-              <div className="flex items-center gap-3">
-                <LayoutDashboard className="w-8 h-8 text-primary" />
-                <div>
-                  <h1 className="text-3xl font-display font-bold">Streamer Dashboard</h1>
-                  <p className="text-muted-foreground">
-                    Manage your page at <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Tabs */}
-          <Tabs defaultValue="submissions" className="space-y-6">
-            <TabsList className="glass p-1 rounded-xl">
-              <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
-                <Music className="w-4 h-4" />
-                Submissions
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
-                <Settings className="w-4 h-4" />
-                My Page Settings
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="submissions">
-              <DashboardGrid
-                layout={dashboardLayout}
-                isEditing={isBuilderEditing}
-                onLayoutChange={setDashboardLayout}
-                onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
-                widgetRenderers={widgetRenderers}
-                poppedOutWidgets={poppedOutWidgets}
-                showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
-                onPopOut={handlePopOut}
-                widgetConfigs={widgetConfigs}
-              />
-            </TabsContent>
-
-            <TabsContent value="settings">
-              <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-
-      {/* Floating chat — only show if chat widget is NOT in the grid at all (never added) */}
-
-      {/* Pending pop-out placeholders — one button per widget, each click = one user gesture = one popup */}
-      {pendingPopOuts.length > 0 && (
-        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-          {pendingPopOuts.map((widgetId) => {
-            const def = getWidgetDef(widgetId);
-            if (!def) return null;
-            const IconComp = def.icon;
-            return (
-              <button
-                key={widgetId}
-                onClick={() => {
-                  // Single window.open in direct click handler — bypasses popup blocker
-                  const popup = window.open('', `widget_${widgetId}`, 'width=600,height=500,menubar=no,toolbar=no,location=no,status=no');
-                  if (popup) {
-                    preOpenedWindowsRef.current.set(widgetId, popup);
-                  }
-                  setPendingPopOuts(prev => prev.filter(id => id !== widgetId));
-                  setPoppedOutWidgets(prev => {
-                    const next = new Set(prev);
-                    next.add(widgetId);
-                    return next;
-                  });
-                }}
-                className="bg-card border border-border text-foreground px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium hover:bg-accent transition-colors min-w-[220px]"
-              >
-                <IconComp className="w-4 h-4 text-primary" />
-                <span>Open {def.label}</span>
-                <ExternalLink className="w-3.5 h-3.5 ml-auto text-muted-foreground" />
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pop-out portals */}
-      {Array.from(poppedOutWidgets).map((widgetId) => {
-        const def = getWidgetDef(widgetId);
-        const content = widgetRenderers[widgetId];
-        if (!def || !content) return null;
-        return (
-          <PopOutPortal
-            key={widgetId}
-            widgetId={widgetId}
-            title={def.label}
-            onClose={() => {
-              preOpenedWindowsRef.current.delete(widgetId);
-              handlePopOutClose(widgetId);
-            }}
-            preOpenedWindow={preOpenedWindowsRef.current.get(widgetId)}
-          >
-            <div className="min-h-[200px]">
-              {content}
+        )}
+        
+        <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
+          <div className="w-full">
+            {/* Single DashboardBuilder instance — never remounts on title toggle */}
+            <div className="flex items-center justify-end gap-2 mb-4">
+              <DashboardBuilder {...builderProps} />
+              <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
+                <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-3 h-3" />
+                  View Page
+                </a>
+              </Button>
             </div>
-          </PopOutPortal>
-        );
-      })}
-    </div>
+
+            {/* Collapsible Dashboard Header */}
+            {viewOptions.showDashboardTitle && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutDashboard className="w-8 h-8 text-primary" />
+                  <div>
+                    <h1 className="text-3xl font-display font-bold">Streamer Dashboard</h1>
+                    <p className="text-muted-foreground">
+                      Manage your page at <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Tabs */}
+            <Tabs defaultValue="submissions" className="space-y-6">
+              <TabsList className="glass p-1 rounded-xl">
+                <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
+                  <Music className="w-4 h-4" />
+                  Submissions
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
+                  <Settings className="w-4 h-4" />
+                  My Page Settings
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="submissions">
+                <DashboardGrid
+                  layout={dashboardLayout}
+                  isEditing={isBuilderEditing}
+                  onLayoutChange={setDashboardLayout}
+                  onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
+                  widgetRenderers={widgetRenderers}
+                  poppedOutWidgets={poppedOutWidgets}
+                  showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
+                  onPopOut={handlePopOut}
+                  widgetConfigs={widgetConfigs}
+                />
+              </TabsContent>
+
+              <TabsContent value="settings">
+                <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </main>
+
+        {/* Pending pop-out placeholders — one button per widget, each click = one user gesture = one popup */}
+        {pendingPopOuts.length > 0 && (
+          <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+            {pendingPopOuts.map((widgetId) => {
+              const def = getWidgetDef(widgetId);
+              if (!def) return null;
+              const IconComp = def.icon;
+              return (
+                <button
+                  key={widgetId}
+                  onClick={() => {
+                    // Single window.open in direct click handler — bypasses popup blocker
+                    const popup = window.open('', `widget_${widgetId}`, 'width=600,height=500,menubar=no,toolbar=no,location=no,status=no');
+                    if (popup) {
+                      preOpenedWindowsRef.current.set(widgetId, popup);
+                    }
+                    setPendingPopOuts(prev => prev.filter(id => id !== widgetId));
+                    setPoppedOutWidgets(prev => {
+                      const next = new Set(prev);
+                      next.add(widgetId);
+                      return next;
+                    });
+                  }}
+                  className="bg-card border border-border text-foreground px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-sm font-medium hover:bg-accent transition-colors min-w-[220px]"
+                >
+                  <IconComp className="w-4 h-4 text-primary" />
+                  <span>Open {def.label}</span>
+                  <ExternalLink className="w-3.5 h-3.5 ml-auto text-muted-foreground" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pop-out portals */}
+        {Array.from(poppedOutWidgets).map((widgetId) => {
+          const def = getWidgetDef(widgetId);
+          const content = widgetRenderers[widgetId];
+          if (!def || !content) return null;
+          return (
+            <PopOutPortal
+              key={widgetId}
+              widgetId={widgetId}
+              title={def.label}
+              onClose={() => {
+                preOpenedWindowsRef.current.delete(widgetId);
+                handlePopOutClose(widgetId);
+              }}
+              preOpenedWindow={preOpenedWindowsRef.current.get(widgetId)}
+            >
+              <div className="min-h-[200px]">
+                {content}
+              </div>
+            </PopOutPortal>
+          );
+        })}
+      </div>
+    </StreamSessionProvider>
   );
 };
 
