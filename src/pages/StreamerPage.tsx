@@ -164,14 +164,12 @@ function StreamerPageContent() {
         </div>
       </section>
 
-      {/* Stream Embed (looping video, Twitch, YouTube etc.) */}
-      {streamer.show_stream_embed !== false && (
-        <section className="pb-4 px-4">
-          <div className="container mx-auto max-w-3xl">
-            <StreamEmbed streamerId={streamer.id} />
-          </div>
-        </section>
-      )}
+      {/* Stream Embed (looping video, Twitch, YouTube etc.) - always shown if configured */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <StreamEmbed streamerId={streamer.id} />
+        </div>
+      </section>
 
       {/* Tracked Submissions - below the form */}
       {currentSubmissions.length > 0 && (

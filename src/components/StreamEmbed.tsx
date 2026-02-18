@@ -47,12 +47,12 @@ export function StreamEmbed({ streamerId }: StreamEmbedProps) {
 
   const fetchConfig = async () => {
     try {
-      const { data, error } = await (supabase
-        .from('stream_config' as any)
+      const { data, error } = await supabase
+        .from('stream_config')
         .select('*')
         .eq('streamer_id', streamerId)
         .limit(1)
-        .maybeSingle()) as any;
+        .maybeSingle();
 
       if (error) throw error;
       setConfig(data as StreamConfig | null);
