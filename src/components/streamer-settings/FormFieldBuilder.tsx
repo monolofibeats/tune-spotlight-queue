@@ -211,9 +211,10 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
 
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-3">
                       {/* Label */}
-                      <div className="space-y-1.5">
+                    <div className="space-y-1.5">
                         <Label className="text-xs">Label</Label>
                         <Input
+                          key={`label-${field.id}-${field.field_label}`}
                           defaultValue={field.field_label}
                           onBlur={(e) => {
                             const val = e.target.value;
