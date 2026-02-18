@@ -73,23 +73,29 @@ export function SpotBiddingDialog({
     setIsLoading(true);
     
     try {
-      // Get bid increment configuration
-      const { data: bidConfig } = await supabase
+      // Get bid increment configuration (prefer streamer-specific, fall back to global)
+      const { data: bidConfigs } = await supabase
         .from('pricing_config')
         .select('*')
-        .eq('config_type', 'bid_increment')
-        .single();
+        .eq('config_type', 'bid_increment');
+
+      const bidConfig = bidConfigs?.find(r => streamerId && r.streamer_id === streamerId)
+        ?? bidConfigs?.find(r => r.streamer_id === null)
+        ?? bidConfigs?.[0];
 
       if (bidConfig) {
         setIncrementPercent(bidConfig.min_amount_cents); // Stored as %
       }
 
-      // Get skip_line minimum price - REQUIRED for proper validation
-      const { data: skipConfig, error: skipError } = await supabase
+      // Get skip_line minimum price - REQUIRED for proper validation (prefer streamer-specific, fall back to global)
+      const { data: skipConfigs, error: skipError } = await supabase
         .from('pricing_config')
         .select('*')
-        .eq('config_type', 'skip_line')
-        .single();
+        .eq('config_type', 'skip_line');
+
+      const skipConfig = skipConfigs?.find(r => streamerId && r.streamer_id === streamerId)
+        ?? skipConfigs?.find(r => r.streamer_id === null)
+        ?? skipConfigs?.[0];
 
       if (skipError || !skipConfig) {
         console.error('Failed to load skip_line config:', skipError);
@@ -101,6 +107,7 @@ export function SpotBiddingDialog({
         setIsLoading(false);
         return;
       }
+
 
       const loadedMinBid = skipConfig.min_amount_cents / 100;
       setMinBidAmount(loadedMinBid);
