@@ -7,7 +7,6 @@ import {
   Layout, 
   FileText,
   DollarSign,
-  Flag,
   Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,6 @@ import { toast } from '@/hooks/use-toast';
 import { 
   FormFieldBuilder, 
   DesignCustomizer, 
-  BannerEditor, 
   PricingSettings,
   PresetManager,
 } from '@/components/streamer-settings';
@@ -221,7 +219,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'form', label: 'Form', icon: Layout },
     { id: 'design', label: 'Design', icon: Palette },
-    { id: 'banner', label: 'Banner', icon: Flag },
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
   ];
 
@@ -374,24 +371,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
               if (newSettings.backgroundGradient !== undefined) setBackgroundGradient(newSettings.backgroundGradient);
               if (newSettings.animationStyle !== undefined) setAnimationStyle(newSettings.animationStyle);
               if (newSettings.cardStyle !== undefined) setCardStyle(newSettings.cardStyle);
-            }}
-          />
-        </TabsContent>
-
-        {/* Banner Tab */}
-        <TabsContent value="banner" className="space-y-6">
-          <BannerEditor
-            settings={{
-              bannerEnabled,
-              bannerText,
-              bannerLink,
-              bannerColor,
-            }}
-            onChange={(newSettings) => {
-              if (newSettings.bannerEnabled !== undefined) setBannerEnabled(newSettings.bannerEnabled);
-              if (newSettings.bannerText !== undefined) setBannerText(newSettings.bannerText);
-              if (newSettings.bannerLink !== undefined) setBannerLink(newSettings.bannerLink);
-              if (newSettings.bannerColor !== undefined) setBannerColor(newSettings.bannerColor);
             }}
           />
         </TabsContent>
