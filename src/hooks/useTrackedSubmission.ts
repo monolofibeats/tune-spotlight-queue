@@ -13,6 +13,7 @@ export interface TrackedSubmission {
   streamerId: string | null;
   streamerSlug: string | null;
   trackedAt: number; // timestamp
+  doneStatus?: 'reviewed' | 'skipped' | 'deleted'; // set when streamer processes it
 }
 
 function getTrackedSubmissions(): TrackedSubmission[] {
