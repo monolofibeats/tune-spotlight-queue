@@ -337,7 +337,7 @@ export default function Settings() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-5xl mx-auto"
         >
-          <Button variant="ghost" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')} className="mb-6 gap-2">
+          <Button variant="ghost" onClick={() => window.history.back()} className="mb-6 gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
