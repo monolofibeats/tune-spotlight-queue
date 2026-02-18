@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MusicEmbed } from './MusicEmbed';
 import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { toast } from '@/hooks/use-toast';
@@ -58,10 +60,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
   const { fields: streamerFormFields } = useStreamerFormFields(streamerId);
 
+  // Build a map of field configs keyed by field_name, preserving field_type and options
   const fieldConfig = useMemo(() => {
     const map = new Map<
       string,
-      { label?: string; placeholder?: string; enabled: boolean; required: boolean }
+      { label?: string; placeholder?: string; enabled: boolean; required: boolean; field_type: string; options?: { values: string[] } }
     >();
 
     for (const f of streamerFormFields) {
@@ -70,6 +73,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
         placeholder: f.placeholder || undefined,
         enabled: f.is_enabled ?? true,
         required: f.is_required ?? false,
+        field_type: f.field_type || 'text',
+        options: (f.options as { values: string[] } | null) ?? undefined,
       });
     }
 
@@ -80,6 +85,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const getRequired = (name: string, fallback: boolean) => fieldConfig.get(name)?.required ?? fallback;
   const getLabel = (name: string, fallback: string) => fieldConfig.get(name)?.label || fallback;
   const getPlaceholder = (name: string, fallback: string) => fieldConfig.get(name)?.placeholder || fallback;
+  const getFieldType = (name: string) => fieldConfig.get(name)?.field_type ?? 'text';
+  const getFieldOptions = (name: string) => fieldConfig.get(name)?.options?.values ?? [];
 
   const showSongUrl = getEnabled('song_url', true);
   const showArtist = getEnabled('artist_name', true);
@@ -108,6 +115,18 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const emailPlaceholder = getPlaceholder('email', t('submission.emailPlaceholder'));
   const messageLabel = getLabel('message', t('submission.messageLabel'));
   const messagePlaceholder = getPlaceholder('message', t('submission.messagePlaceholder'));
+
+  // Extra dynamic fields: any field_name NOT in the 5 hardcoded ones
+  const HARDCODED_FIELD_NAMES = new Set(['song_url', 'artist_name', 'song_title', 'email', 'message']);
+  const dynamicFields = useMemo(
+    () => streamerFormFields.filter(f => !HARDCODED_FIELD_NAMES.has(f.field_name) && (f.is_enabled ?? true)),
+    [streamerFormFields]
+  );
+
+  // State for dynamic extra fields
+  const [dynamicValues, setDynamicValues] = useState<Record<string, string | boolean>>({});
+  const setDynamicValue = (name: string, value: string | boolean) =>
+    setDynamicValues(prev => ({ ...prev, [name]: value }));
 
   const [songUrl, setSongUrl] = useState('');
   const [artistName, setArtistName] = useState('');
@@ -649,6 +668,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     setMessage('');
     setAudioFile(null);
     setUploadedAudioUrl(null);
+    setDynamicValues({});
     uploadedAudioUrlRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -1061,6 +1081,88 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                   />
                 </div>
               )}
+
+              {/* Dynamic extra fields (e.g. platform, custom fields) */}
+              {dynamicFields.map((field) => {
+                const isRequired = field.is_required ?? false;
+                const label = field.field_label;
+                const placeholder = field.placeholder ?? '';
+                const fieldType = field.field_type;
+                const options = (field.options as { values: string[] } | null)?.values ?? [];
+                const value = dynamicValues[field.field_name];
+
+                if (fieldType === 'toggle') {
+                  return (
+                    <div key={field.id} className="flex items-center justify-between py-2">
+                      <label className="text-xs text-muted-foreground">
+                        {label} {isRequired && <span className="text-destructive">*</span>}
+                      </label>
+                      <Switch
+                        checked={!!value}
+                        onCheckedChange={(checked) => setDynamicValue(field.field_name, checked)}
+                      />
+                    </div>
+                  );
+                }
+
+                if (fieldType === 'select' && options.length > 0) {
+                  return (
+                    <div key={field.id}>
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {label} {isRequired && <span className="text-destructive">*</span>}
+                      </label>
+                      <Select
+                        value={(value as string) ?? ''}
+                        onValueChange={(v) => setDynamicValue(field.field_name, v)}
+                      >
+                        <SelectTrigger className="h-10 text-sm bg-background/50">
+                          <SelectValue placeholder={placeholder || `Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {options.map((opt) => (
+                            <SelectItem key={opt} value={opt}>
+                              {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                }
+
+                if (fieldType === 'textarea') {
+                  return (
+                    <div key={field.id}>
+                      <label className="text-xs text-muted-foreground mb-1.5 block">
+                        {label} {isRequired && <span className="text-destructive">*</span>}
+                      </label>
+                      <Textarea
+                        placeholder={placeholder}
+                        value={(value as string) ?? ''}
+                        onChange={(e) => setDynamicValue(field.field_name, e.target.value)}
+                        className="min-h-[80px] text-sm resize-none bg-background/50"
+                        required={isRequired}
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={field.id}>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">
+                      {label} {isRequired && <span className="text-destructive">*</span>}
+                    </label>
+                    <Input
+                      type={fieldType === 'email' ? 'email' : fieldType === 'number' ? 'number' : fieldType === 'url' ? 'url' : 'text'}
+                      placeholder={placeholder}
+                      value={(value as string) ?? ''}
+                      onChange={(e) => setDynamicValue(field.field_name, e.target.value)}
+                      className="h-10 text-sm bg-background/50"
+                      required={isRequired}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
