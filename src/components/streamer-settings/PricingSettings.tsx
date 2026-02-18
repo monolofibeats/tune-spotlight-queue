@@ -164,51 +164,30 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
     setIsSaving(true);
 
     try {
-      // Upsert all config types for this streamer (creates rows if they don't exist yet)
-      const upsertRows = [
-        {
-          ...(configs['submissions_open'] ? { id: configs['submissions_open'].id } : {}),
-          config_type: 'submissions_open',
-          streamer_id: streamerId,
-          is_active: submissionsOpen,
-          min_amount_cents: 0,
-          max_amount_cents: 0,
-          step_cents: 0,
-        },
-        {
-          ...(configs['skip_line'] ? { id: configs['skip_line'].id } : {}),
-          config_type: 'skip_line',
-          streamer_id: streamerId,
-          is_active: skipLine.isActive,
-          min_amount_cents: Math.round(skipLine.min * 100),
-          max_amount_cents: Math.round(skipLine.max * 100),
-          step_cents: Math.round(skipLine.step * 100),
-        },
-        {
-          ...(configs['submission'] ? { id: configs['submission'].id } : {}),
-          config_type: 'submission',
-          streamer_id: streamerId,
-          is_active: submission.isActive,
-          min_amount_cents: Math.round(submission.min * 100),
-          max_amount_cents: Math.round(submission.max * 100),
-          step_cents: Math.round(submission.step * 100),
-        },
-        {
-          ...(configs['bid_increment'] ? { id: configs['bid_increment'].id } : {}),
-          config_type: 'bid_increment',
-          streamer_id: streamerId,
-          is_active: bidIncrementActive,
-          min_amount_cents: bidIncrementPercent,
-          max_amount_cents: 100,
-          step_cents: 5,
-        },
-      ];
+      // Helper: update existing row or insert new streamer-specific row
+      const saveConfig = async (
+        configType: string,
+        values: { is_active: boolean; min_amount_cents: number; max_amount_cents: number; step_cents: number }
+      ) => {
+        const existing = configs[configType];
+        if (existing) {
+          const { error } = await supabase
+            .from('pricing_config')
+            .update(values)
+            .eq('id', existing.id);
+          if (error) throw new Error(`${configType}: ${error.message}`);
+        } else {
+          const { error } = await supabase
+            .from('pricing_config')
+            .insert({ config_type: configType, streamer_id: streamerId, ...values });
+          if (error) throw new Error(`${configType}: ${error.message}`);
+        }
+      };
 
-      const { error } = await supabase
-        .from('pricing_config')
-        .upsert(upsertRows, { onConflict: 'streamer_id,config_type' });
-
-      if (error) throw error;
+      await saveConfig('submissions_open', { is_active: submissionsOpen, min_amount_cents: 0, max_amount_cents: 0, step_cents: 0 });
+      await saveConfig('skip_line', { is_active: skipLine.isActive, min_amount_cents: Math.round(skipLine.min * 100), max_amount_cents: Math.round(skipLine.max * 100), step_cents: Math.round(skipLine.step * 100) });
+      await saveConfig('submission', { is_active: submission.isActive, min_amount_cents: Math.round(submission.min * 100), max_amount_cents: Math.round(submission.max * 100), step_cents: Math.round(submission.step * 100) });
+      await saveConfig('bid_increment', { is_active: bidIncrementActive, min_amount_cents: bidIncrementPercent, max_amount_cents: 100, step_cents: 5 });
 
       toast({
         title: 'Pricing updated! 💰',
