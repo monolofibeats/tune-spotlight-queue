@@ -27,6 +27,7 @@ import {
 } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 import { ScreenStreamer } from '@/components/ScreenStreamer';
+import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
@@ -352,6 +353,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         {/* Stream Tab */}
         <TabsContent value="stream" className="space-y-6">
           <SessionManager />
+          <StreamEmbedConfig />
           <ScreenStreamer />
         </TabsContent>
 
