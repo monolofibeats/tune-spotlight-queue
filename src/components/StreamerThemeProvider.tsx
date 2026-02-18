@@ -105,24 +105,8 @@ export function StreamerThemeProvider({ streamer, children }: StreamerThemeProvi
       body.style.fontFamily = "";
     });
 
-    // Apply background style - use cssText to override Tailwind's bg-background
-    if (streamer.background_type === "gradient" && streamer.background_gradient) {
-      body.style.setProperty("background", streamer.background_gradient, "important");
-      cleanup.push(() => {
-        body.style.removeProperty("background");
-      });
-    } else if (streamer.background_type === "image" && streamer.background_image_url) {
-      body.style.setProperty("background-image", `url(${streamer.background_image_url})`, "important");
-      body.style.setProperty("background-size", "cover", "important");
-      body.style.setProperty("background-position", "center", "important");
-      body.style.setProperty("background-attachment", "fixed", "important");
-      cleanup.push(() => {
-        body.style.removeProperty("background-image");
-        body.style.removeProperty("background-size");
-        body.style.removeProperty("background-position");
-        body.style.removeProperty("background-attachment");
-      });
-    }
+    // Background is now rendered as a dedicated overlay div in StreamerPage
+    // (no body-level background manipulation needed)
 
     // Apply animation style class
     if (streamer.animation_style && streamer.animation_style !== "none") {
