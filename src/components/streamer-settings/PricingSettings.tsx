@@ -118,18 +118,14 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
       toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeDesc'), variant: 'destructive' });
       return;
     }
-    if (submission.isActive && submission.min >= submission.max) {
-      toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeSubmission'), variant: 'destructive' });
-      return;
-    }
-
     setIsSaving(true);
 
     try {
+      const isPaid = submission.min > 0;
       const rows = [
         { config_type: 'submissions_open', streamer_id: streamerId, is_active: submissionsOpen, min_amount_cents: 0, max_amount_cents: 0, step_cents: 0 },
         { config_type: 'skip_line', streamer_id: streamerId, is_active: skipLine.isActive, min_amount_cents: Math.round(skipLine.min * 100), max_amount_cents: Math.round(skipLine.max * 100), step_cents: Math.round(skipLine.step * 100) },
-        { config_type: 'submission', streamer_id: streamerId, is_active: submission.isActive, min_amount_cents: Math.round(submission.min * 100), max_amount_cents: Math.round(submission.max * 100), step_cents: Math.round(submission.step * 100) },
+        { config_type: 'submission', streamer_id: streamerId, is_active: isPaid, min_amount_cents: Math.round(submission.min * 100), max_amount_cents: Math.round(submission.max * 100), step_cents: Math.round(submission.step * 100) },
         { config_type: 'bid_increment', streamer_id: streamerId, is_active: bidIncrementActive, min_amount_cents: bidIncrementPercent, max_amount_cents: 100, step_cents: 5 },
       ];
 
@@ -143,9 +139,9 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         title: t('pricing.updated'),
         description: !submissionsOpen
           ? t('pricing.closedDesc')
-          : submission.isActive
-            ? `Submissions: €${submission.min.toFixed(2)}, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`
-            : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}-€${skipLine.max.toFixed(2)}`,
+          : isPaid
+            ? `Submissions: €${submission.min.toFixed(2)}, Bids: €${skipLine.min.toFixed(2)}`
+            : `Submissions: Free, Bids: €${skipLine.min.toFixed(2)}`,
       });
 
       await fetchConfigs();
