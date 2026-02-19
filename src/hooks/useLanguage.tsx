@@ -1453,6 +1453,16 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.updated': 'Preise aktualisiert! 💰',
     'pricing.closedDesc': 'Einreichungen sind derzeit GESCHLOSSEN',
 
+    // Dashboard Editor
+    'dashboardEditor.title': 'Dashboard-Editor',
+    'dashboardEditor.desc': 'Widgets ein-/ausblenden auf deinem Dashboard.',
+    'dashboardEditor.descNoPreset': ' Ein Standard-Preset wird beim Speichern erstellt.',
+    'dashboardEditor.saveLayout': 'Layout speichern',
+    'dashboardEditor.savedTitle': 'Dashboard-Layout gespeichert!',
+    'dashboardEditor.widget.stats': 'Statistikübersicht',
+    'dashboardEditor.widget.queue': 'Einreichungswarteschlange',
+    'dashboardEditor.widget.now_playing': 'Gerade gespielt',
+
     // Form Field Builder
     'formBuilder.title': 'Formularfelder',
     'formBuilder.desc': 'Konfiguriere was Einsender ausfüllen',
