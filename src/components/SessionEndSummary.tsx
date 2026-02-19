@@ -65,8 +65,10 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
 
   const fetchStats = async () => {
     const [subRes, earningsRes] = await Promise.all([
-      supabase.from('submissions').select('id, is_priority').eq('streamer_id', streamerId),
-      supabase.from('streamer_earnings').select('streamer_share_cents').eq('streamer_id', streamerId),
+      supabase.from('submissions').select('id, is_priority').eq('streamer_id', streamerId)
+        .gte('created_at', startedAt).lte('created_at', endedAt),
+      supabase.from('streamer_earnings').select('streamer_share_cents').eq('streamer_id', streamerId)
+        .gte('created_at', startedAt).lte('created_at', endedAt),
     ]);
     const subs = subRes.data || [];
     const earnings = earningsRes.data || [];
