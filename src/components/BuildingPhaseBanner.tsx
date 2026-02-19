@@ -53,13 +53,12 @@ export function BuildingPhaseBanner() {
               <Construction className="w-6 h-6 text-primary" />
             </motion.div>
             <h2 className="text-lg md:text-xl font-bold text-foreground">
-              🚧 We're still building!
+              {t('building.title')}
             </h2>
           </div>
 
           <p className="text-sm md:text-base text-muted-foreground mb-6">
-            This platform is currently in its building phase. Got ideas, suggestions, or feedback? 
-            We'd love to hear from you — drop us a message below!
+            {t('building.description')}
           </p>
 
           {submitted ? (
@@ -69,12 +68,12 @@ export function BuildingPhaseBanner() {
               className="flex items-center gap-3 p-4 rounded-lg bg-primary/10 border border-primary/20"
             >
               <CheckCircle className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">Thanks for your feedback! We'll review it soon.</span>
+              <span className="text-sm font-medium text-foreground">{t('building.thanks')}</span>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3">
               <Textarea
-                placeholder="Your suggestion or feedback..."
+                placeholder={t('building.placeholder')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
@@ -82,14 +81,14 @@ export function BuildingPhaseBanner() {
                 className="min-h-[80px] resize-none"
               />
               <Input
-                placeholder="Your email or contact info (optional)"
+                placeholder={t('building.contactPlaceholder')}
                 value={contactInfo}
                 onChange={(e) => setContactInfo(e.target.value)}
                 maxLength={255}
               />
               <Button type="submit" disabled={isSubmitting || !message.trim()} className="w-full sm:w-auto">
                 <Send className="w-4 h-4 mr-2" />
-                {isSubmitting ? 'Sending...' : 'Send Feedback'}
+                {isSubmitting ? t('building.submitting') : t('building.submit')}
               </Button>
             </form>
           )}
