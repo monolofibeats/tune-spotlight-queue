@@ -132,6 +132,18 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ backdropFilter: 'blur(18px)', backgroundColor: 'hsl(var(--background) / 0.82)' }}
         >
+          {/* Shooting star animation */}
+          <motion.img
+            src={shootingStar}
+            alt=""
+            aria-hidden
+            initial={{ x: '-30vw', y: '30vh', rotate: -30, opacity: 0, scale: 0.5 }}
+            animate={{ x: '60vw', y: '-40vh', rotate: -30, opacity: [0, 1, 1, 0], scale: [0.5, 1.1, 1, 0.7] }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1, times: [0, 0.2, 0.7, 1] }}
+            className="absolute pointer-events-none z-10"
+            style={{ width: 110, left: '50%', top: '50%', filter: 'drop-shadow(0 0 18px hsl(45 90% 60%))' }}
+          />
+
           {/* Ambient glow blob */}
           <motion.div
             initial={{ scale: 0.4, opacity: 0 }}
