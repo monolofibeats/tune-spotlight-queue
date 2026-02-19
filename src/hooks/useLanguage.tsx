@@ -1330,6 +1330,15 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq5a': 'Für Streamer unterstützen wir TikTok Live, Instagram, YouTube, Twitch, Kick - Nutzer können einen Link zu ihrem Zeug von jeder belieben DSP schicken oder Dateien direkt hochladen (bis zu 100 MB).',
     'discovery.contentReviewer': 'Content Reviewer',
 
+    // Building Phase Banner
+    'building.title': '🚧 Wir bauen noch!',
+    'building.description': 'Diese Plattform befindet sich derzeit in der Aufbauphase. Hast du Ideen, Vorschläge oder Feedback? Wir würden uns freuen von dir zu hören — schreib uns einfach eine Nachricht!',
+    'building.placeholder': 'Dein Vorschlag oder Feedback...',
+    'building.contactPlaceholder': 'Deine E-Mail oder Kontaktinfo (optional)',
+    'building.submit': 'Feedback senden',
+    'building.submitting': 'Wird gesendet...',
+    'building.thanks': 'Danke für dein Feedback! Wir werden es bald prüfen.',
+
     // Page Settings (StreamerSettingsPanel)
     'pageSettings.customizePage': 'Seite anpassen',
     'pageSettings.preview': 'Vorschau',
