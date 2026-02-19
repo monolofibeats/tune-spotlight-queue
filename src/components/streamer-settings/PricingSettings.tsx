@@ -350,7 +350,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         </TabsContent>
       </Tabs>
 
-      {((skipLine.min >= skipLine.max) || (submission.isActive && submission.min >= submission.max)) && (
+      {(submission.isActive && submission.min >= submission.max) && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm">{t('pricing.minLessThanMax')}</span>
@@ -359,7 +359,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
 
       <Button
         onClick={handleSave}
-        disabled={isSaving || skipLine.min >= skipLine.max}
+        disabled={isSaving || skipLine.min <= 0}
         className="w-full"
         size="lg"
       >
