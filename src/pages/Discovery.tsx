@@ -122,7 +122,7 @@ const Discovery = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight flex flex-col items-center gap-1"
+              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -137,8 +137,9 @@ const Discovery = () => {
                   <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                 </motion.span>
               </span>
+              <br />
               <motion.span 
-                className="text-primary whitespace-normal sm:whitespace-nowrap text-center w-full"
+                className="text-primary whitespace-normal sm:whitespace-nowrap"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
