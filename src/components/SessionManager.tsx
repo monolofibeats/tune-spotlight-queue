@@ -8,9 +8,10 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
+import { SessionEndSummary } from '@/components/SessionEndSummary';
 
 interface SessionManagerProps {
-  streamerId?: string; // kept for backwards compat but context is used
+  streamerId?: string;
 }
 
 export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
@@ -19,6 +20,10 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
   const { t } = useLanguage();
   const [sessionTitle, setSessionTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [endedSessionSnap, setEndedSessionSnap] = useState<{
+    streamerId: string; startedAt: string; endedAt: string;
+  } | null>(null);
 
   const handleStartSession = async () => {
     setIsLoading(true);
@@ -43,25 +48,41 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
 
   const handleEndSession = async () => {
     setIsLoading(true);
+    // Capture snapshot before ending
+    const snap = currentSession
+      ? {
+          streamerId: currentSession.streamer_id || '',
+          startedAt: currentSession.started_at,
+          endedAt: new Date().toISOString(),
+        }
+      : null;
     try {
       await endSession();
       play('notification');
-      toast({
-        title: t('session.endStream'),
-        description: t('session.noActiveSession'),
-      });
+      if (snap && snap.streamerId) {
+        setEndedSessionSnap(snap);
+        setSummaryOpen(true);
+      } else {
+        toast({ title: t('session.endStream'), description: t('session.noActiveSession') });
+      }
     } catch (error) {
-      toast({
-        title: t('common.error'),
-        description: t('session.endStream'),
-        variant: "destructive",
-      });
+      toast({ title: t('common.error'), description: t('session.endStream'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
+    <>
+      {endedSessionSnap && (
+        <SessionEndSummary
+          open={summaryOpen}
+          onClose={() => setSummaryOpen(false)}
+          streamerId={endedSessionSnap.streamerId}
+          startedAt={endedSessionSnap.startedAt}
+          endedAt={endedSessionSnap.endedAt}
+        />
+      )}
     <div className="rounded-xl border border-border/50 bg-card/50 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -136,5 +157,6 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
         {isLive ? t('session.endStream') : t('session.startStream')}
       </Button>
     </div>
+    </>
   );
 }
