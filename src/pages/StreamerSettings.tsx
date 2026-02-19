@@ -34,7 +34,6 @@ import {
   BannerEditor, 
   PricingSettings,
   LanguageSettings,
-  PresetManager,
 } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
@@ -310,7 +309,6 @@ const StreamerSettings = () => {
   }
 
   const tabs = [
-    { id: 'presets', label: 'Presets', icon: Palette },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'form', label: 'Form', icon: Layout },
@@ -377,10 +375,6 @@ const StreamerSettings = () => {
               </TabsList>
             </ScrollArea>
 
-            {/* Presets Tab */}
-            <TabsContent value="presets" className="space-y-6">
-              {streamer && <PresetManager streamerId={streamer.id} />}
-            </TabsContent>
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">

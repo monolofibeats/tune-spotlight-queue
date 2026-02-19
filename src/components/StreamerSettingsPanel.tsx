@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Save, 
@@ -9,6 +9,7 @@ import {
   DollarSign,
   Eye,
   Radio,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,6 @@ import {
   FormFieldBuilder, 
   DesignCustomizer, 
   PricingSettings,
-  PresetManager,
 } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 
@@ -184,14 +184,27 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     }
   };
 
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [previewKey, setPreviewKey] = useState(0);
+
+  const refreshPreview = () => {
+    setPreviewKey((k) => k + 1);
+  };
+
   const tabs = [
     { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
     { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
     { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
-    { id: 'presets', label: t('pageSettings.tab.presets'), icon: Palette },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
+
+  // After saving, refresh the preview
+  const originalHandleSave = handleSave;
+  const handleSaveAndRefresh = async () => {
+    await originalHandleSave();
+    refreshPreview();
+  };
 
   return (
     <motion.div
@@ -213,7 +226,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
               {t('pageSettings.preview')}
             </a>
           </Button>
-          <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+          <Button onClick={handleSaveAndRefresh} disabled={isSaving} className="gap-2">
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
@@ -224,76 +237,102 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <ScrollArea className="w-full">
-          <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
-            {tabs.map((tab) => (
-              <TabsTrigger 
-                key={tab.id}
-                value={tab.id} 
-                className="rounded-lg px-4 gap-2 whitespace-nowrap"
-              >
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </ScrollArea>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left side: Settings */}
+        <div className="w-full lg:w-1/2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <ScrollArea className="w-full">
+              <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
+                {tabs.map((tab) => (
+                  <TabsTrigger 
+                    key={tab.id}
+                    value={tab.id} 
+                    className="rounded-lg px-4 gap-2 whitespace-nowrap"
+                  >
+                    <tab.icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollArea>
 
-        <TabsContent value="form" className="space-y-6">
-          <FormFieldBuilder streamerId={streamer.id} />
-        </TabsContent>
+            <TabsContent value="form" className="space-y-6">
+              <FormFieldBuilder streamerId={streamer.id} />
+            </TabsContent>
 
-        <TabsContent value="content" className="space-y-6">
-          <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
-            <p className="text-sm text-muted-foreground">{t('pageSettings.hero.desc')}</p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="heroTitle">{t('pageSettings.hero.titleLabel')}</Label>
-                <Input id="heroTitle" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder={t('pageSettings.hero.titlePlaceholder')} />
+            <TabsContent value="content" className="space-y-6">
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('pageSettings.hero.desc')}</p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="heroTitle">{t('pageSettings.hero.titleLabel')}</Label>
+                    <Input id="heroTitle" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder={t('pageSettings.hero.titlePlaceholder')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="heroSubtitle">{t('pageSettings.hero.subtitleLabel')}</Label>
+                    <Input id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder={t('pageSettings.hero.subtitlePlaceholder')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="welcomeMessage">{t('pageSettings.hero.welcomeLabel')}</Label>
+                    <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder={t('pageSettings.hero.welcomePlaceholder')} rows={2} />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="heroSubtitle">{t('pageSettings.hero.subtitleLabel')}</Label>
-                <Input id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} placeholder={t('pageSettings.hero.subtitlePlaceholder')} />
+            </TabsContent>
+
+            <TabsContent value="pricing" className="space-y-6">
+              <PricingSettings streamerId={streamer.id} />
+            </TabsContent>
+
+            <TabsContent value="design" className="space-y-6">
+              <DesignCustomizer
+                settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
+                onChange={(newSettings) => {
+                  if (newSettings.primaryColor !== undefined) setPrimaryColor(newSettings.primaryColor);
+                  if (newSettings.fontFamily !== undefined) setFontFamily(newSettings.fontFamily);
+                  if (newSettings.buttonStyle !== undefined) setButtonStyle(newSettings.buttonStyle);
+                  if (newSettings.backgroundType !== undefined) setBackgroundType(newSettings.backgroundType);
+                  if (newSettings.backgroundImageUrl !== undefined) setBackgroundImageUrl(newSettings.backgroundImageUrl);
+                  if (newSettings.backgroundGradient !== undefined) setBackgroundGradient(newSettings.backgroundGradient);
+                  if (newSettings.animationStyle !== undefined) setAnimationStyle(newSettings.animationStyle);
+                  if (newSettings.cardStyle !== undefined) setCardStyle(newSettings.cardStyle);
+                }}
+              />
+            </TabsContent>
+
+            <TabsContent value="stream" className="space-y-6">
+              <SessionManager streamerId={initialStreamer.id} />
+              <StreamEmbedConfig streamerId={initialStreamer.id} />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Right side: Live Preview */}
+        <div className="hidden lg:block w-1/2 sticky top-24 self-start">
+          <div className="bg-card/50 border border-border/50 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border/50 bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">Live Preview</span>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="welcomeMessage">{t('pageSettings.hero.welcomeLabel')}</Label>
-                <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder={t('pageSettings.hero.welcomePlaceholder')} rows={2} />
-              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={refreshPreview}>
+                <RefreshCw className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            <div className="relative" style={{ height: 'calc(100vh - 200px)' }}>
+              <iframe
+                ref={previewIframeRef}
+                key={previewKey}
+                src={`/${streamer.slug}/submit`}
+                className="w-full h-full border-0"
+                title="Live Preview"
+                style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%', height: '133.33%' }}
+              />
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="pricing" className="space-y-6">
-          <PricingSettings streamerId={streamer.id} />
-        </TabsContent>
-
-        <TabsContent value="design" className="space-y-6">
-          <DesignCustomizer
-            settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
-            onChange={(newSettings) => {
-              if (newSettings.primaryColor !== undefined) setPrimaryColor(newSettings.primaryColor);
-              if (newSettings.fontFamily !== undefined) setFontFamily(newSettings.fontFamily);
-              if (newSettings.buttonStyle !== undefined) setButtonStyle(newSettings.buttonStyle);
-              if (newSettings.backgroundType !== undefined) setBackgroundType(newSettings.backgroundType);
-              if (newSettings.backgroundImageUrl !== undefined) setBackgroundImageUrl(newSettings.backgroundImageUrl);
-              if (newSettings.backgroundGradient !== undefined) setBackgroundGradient(newSettings.backgroundGradient);
-              if (newSettings.animationStyle !== undefined) setAnimationStyle(newSettings.animationStyle);
-              if (newSettings.cardStyle !== undefined) setCardStyle(newSettings.cardStyle);
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="presets" className="space-y-6">
-          <PresetManager streamerId={streamer.id} />
-        </TabsContent>
-
-        <TabsContent value="stream" className="space-y-6">
-          <SessionManager streamerId={initialStreamer.id} />
-          <StreamEmbedConfig streamerId={initialStreamer.id} />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </motion.div>
   );
 }
