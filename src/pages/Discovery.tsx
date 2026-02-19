@@ -127,20 +127,20 @@ const Discovery = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              {/* Title line — star is absolute so it doesn't affect the flex item's own width */}
-              <span className="relative inline-flex items-center justify-center pr-8 sm:pr-10 md:pr-12">
+              {/* Title line — star is truly absolute (no effect on span width) */}
+              <span className="relative inline-flex justify-center">
                 {t('discovery.heroTitle')}
                 <motion.span
-                  className="absolute -right-0 -top-3 sm:-top-4 md:-top-5 pointer-events-none"
+                  className="absolute -right-8 -top-3 sm:-right-10 sm:-top-4 md:-right-12 md:-top-5 pointer-events-none"
                   animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
                   <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                 </motion.span>
               </span>
-              {/* Highlight line — centers independently of the title line */}
+              {/* Highlight centers to the same midpoint as the title text */}
               <motion.span 
-                className="text-primary text-center max-w-full whitespace-normal sm:whitespace-nowrap"
+                className="text-primary whitespace-normal sm:whitespace-nowrap"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
