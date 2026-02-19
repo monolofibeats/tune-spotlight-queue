@@ -114,7 +114,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
 
   const handleSave = async () => {
-    if (skipLine.min >= skipLine.max) {
+    if (skipLine.min <= 0) {
       toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeDesc'), variant: 'destructive' });
       return;
     }
