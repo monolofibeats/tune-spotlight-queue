@@ -154,8 +154,8 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                 transition={{ delay: STATS_DELAY + 0.05 }}
                 className="flex items-center gap-1.5 mb-1"
               >
-                <Mic2 className="w-3 h-3 text-black/70" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/70">
+                <Mic2 className="w-3 h-3 text-white/80" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
                   Session Complete
                 </span>
               </motion.div>
@@ -164,20 +164,21 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: STATS_DELAY + 0.1, type: 'spring', stiffness: 300, damping: 22 }}
-                className="text-2xl font-black tracking-tight text-black/85 mb-3"
+                className="text-2xl font-black tracking-tight text-white mb-3 drop-shadow-lg"
+                style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
               >
                 Stream Recap
               </motion.h2>
 
               {/* Stats 2×2 grid */}
               {!stats ? (
-                <div className="grid grid-cols-2 gap-2 w-full max-w-[260px]">
+                <div className="grid grid-cols-2 gap-2.5 w-full max-w-[280px]">
                   {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="h-14 rounded-xl bg-black/15 animate-pulse" />
+                    <div key={i} className="h-16 rounded-xl bg-black/30 animate-pulse" />
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 w-full max-w-[270px]">
+                <div className="grid grid-cols-2 gap-2.5 w-full max-w-[280px]">
                   {[
                     { icon: Clock, label: 'Duration', value: <CountUp to={Math.floor(stats.durationSeconds / 60)} suffix="m" delay={(STATS_DELAY + 0.2) * 1000} /> },
                     { icon: Music2, label: 'Submissions', value: <CountUp to={stats.totalSubmissions} delay={(STATS_DELAY + 0.3) * 1000} /> },
@@ -191,12 +192,17 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                         initial={{ opacity: 0, scale: 0.75, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ delay: STATS_DELAY + 0.18 + i * 0.07, type: 'spring', stiffness: 360, damping: 24 }}
-                        className="flex flex-col items-center justify-center py-2.5 px-2 rounded-xl"
-                        style={{ background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(4px)' }}
+                        className="flex flex-col items-center justify-center py-3 px-2 rounded-xl"
+                        style={{
+                          background: 'rgba(0,0,0,0.55)',
+                          backdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        }}
                       >
-                        <Icon className="w-3 h-3 text-black/60 mb-0.5" />
-                        <span className="text-[9px] text-black/60 uppercase tracking-wider font-semibold">{item.label}</span>
-                        <span className="text-lg font-black text-black/85 leading-tight">{item.value}</span>
+                        <Icon className="w-3.5 h-3.5 text-yellow-300 mb-1" />
+                        <span className="text-[9px] text-white/55 uppercase tracking-wider font-semibold mb-0.5">{item.label}</span>
+                        <span className="text-xl font-black text-white leading-tight">{item.value}</span>
                       </motion.div>
                     );
                   })}
@@ -213,10 +219,14 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                 >
                   <button
                     onClick={onClose}
-                    className="px-6 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all"
-                    style={{ background: 'rgba(0,0,0,0.25)', color: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.38)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.25)')}
+                    className="px-7 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all text-white"
+                    style={{
+                      background: 'rgba(0,0,0,0.5)',
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.7)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.5)')}
                   >
                     Done
                   </button>
