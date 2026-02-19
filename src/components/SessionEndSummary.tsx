@@ -27,7 +27,6 @@ function CountUp({ to, decimals = 0, prefix = '', suffix = '', delay = 0 }: {
       const timer = setInterval(() => {
         step++;
         const progress = step / steps;
-        // ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
         setValue(to * eased);
         if (step >= steps) { setValue(to); clearInterval(timer); }
@@ -48,6 +47,10 @@ function formatDuration(seconds: number) {
   if (m > 0) return `${m}m ${s}s`;
   return `${s}s`;
 }
+
+// Phase 1: star shoots in. Phase 2 (delay 0.75s): card bursts from where star landed.
+const STAR_LAND_DELAY = 0.65;
+const CARD_APPEAR_DELAY = STAR_LAND_DELAY + 0.12;
 
 export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedAt }: SessionEndSummaryProps) {
   const [stats, setStats] = useState<{
@@ -86,8 +89,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     {
       icon: Clock,
       label: 'Stream Duration',
-      value: formatDuration(stats.durationSeconds),
-      animatedValue: <CountUp to={Math.floor(stats.durationSeconds / 60)} suffix="m" delay={400} />,
+      animatedValue: <CountUp to={Math.floor(stats.durationSeconds / 60)} suffix="m" delay={CARD_APPEAR_DELAY * 1000 + 300} />,
       gradient: 'from-blue-500/20 to-blue-700/5',
       border: 'border-blue-500/25',
       iconColor: 'text-blue-400',
@@ -95,8 +97,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     {
       icon: Music2,
       label: 'Submissions',
-      value: stats.totalSubmissions,
-      animatedValue: <CountUp to={stats.totalSubmissions} delay={550} />,
+      animatedValue: <CountUp to={stats.totalSubmissions} delay={CARD_APPEAR_DELAY * 1000 + 450} />,
       gradient: 'from-violet-500/20 to-violet-700/5',
       border: 'border-violet-500/25',
       iconColor: 'text-violet-400',
@@ -104,8 +105,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     {
       icon: Star,
       label: 'Priority Spots',
-      value: stats.prioritySubmissions,
-      animatedValue: <CountUp to={stats.prioritySubmissions} delay={700} />,
+      animatedValue: <CountUp to={stats.prioritySubmissions} delay={CARD_APPEAR_DELAY * 1000 + 600} />,
       gradient: 'from-amber-500/20 to-amber-700/5',
       border: 'border-amber-500/25',
       iconColor: 'text-amber-400',
@@ -113,8 +113,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     {
       icon: Euro,
       label: 'Your Earnings',
-      value: stats.totalEarnings,
-      animatedValue: <CountUp to={stats.totalEarnings} decimals={2} prefix="€" delay={850} />,
+      animatedValue: <CountUp to={stats.totalEarnings} decimals={2} prefix="€" delay={CARD_APPEAR_DELAY * 1000 + 750} />,
       gradient: 'from-emerald-500/20 to-emerald-700/5',
       border: 'border-emerald-500/25',
       iconColor: 'text-emerald-400',
@@ -128,52 +127,95 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          style={{ backdropFilter: 'blur(18px)', backgroundColor: 'hsl(var(--background) / 0.82)' }}
+          style={{ backdropFilter: 'blur(20px)', backgroundColor: 'hsl(var(--background) / 0.75)' }}
         >
-          {/* Shooting star animation */}
+          {/* ── Phase 1: Star shoots in from left, rotates, slams to center ── */}
           <motion.img
             src={shootingStar}
             alt=""
             aria-hidden
-            initial={{ x: '-30vw', y: '30vh', rotate: -30, opacity: 0, scale: 0.5 }}
-            animate={{ x: '60vw', y: '-40vh', rotate: -30, opacity: [0, 1, 1, 0], scale: [0.5, 1.1, 1, 0.7] }}
-            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1, times: [0, 0.2, 0.7, 1] }}
-            className="absolute pointer-events-none z-10"
-            style={{ width: 110, left: '50%', top: '50%', filter: 'drop-shadow(0 0 18px hsl(45 90% 60%))' }}
+            initial={{
+              x: '-100vw',
+              y: '20vh',
+              rotate: -20,
+              scale: 1.6,
+              opacity: 1,
+            }}
+            animate={{
+              x: 0,
+              y: 0,
+              rotate: 0,
+              scale: [1.6, 2.2, 0.1],
+              opacity: [1, 1, 0],
+            }}
+            transition={{
+              duration: STAR_LAND_DELAY,
+              ease: [0.16, 1, 0.3, 1],
+              times: [0, 0.72, 1],
+            }}
+            className="absolute pointer-events-none z-20"
+            style={{
+              width: 160,
+              filter: 'drop-shadow(0 0 32px hsl(45 95% 55%)) drop-shadow(0 0 60px hsl(45 90% 50% / 0.8))',
+            }}
           />
 
-          {/* Ambient glow blob */}
+          {/* ── Shockwave burst when star lands ── */}
           <motion.div
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1.6, opacity: 0.12 }}
-            transition={{ duration: 1.4, ease: 'easeOut' }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary pointer-events-none"
-            style={{ filter: 'blur(90px)' }}
+            initial={{ scale: 0, opacity: 0.9 }}
+            animate={{ scale: 4, opacity: 0 }}
+            transition={{ delay: STAR_LAND_DELAY - 0.05, duration: 0.55, ease: 'easeOut' }}
+            className="absolute pointer-events-none z-10 w-32 h-32 rounded-full"
+            style={{ background: 'radial-gradient(circle, hsl(45 95% 65% / 0.7) 0%, transparent 70%)' }}
           />
 
+          {/* ── Ambient glow that pulses in on impact ── */}
           <motion.div
-            initial={{ scale: 0.86, opacity: 0, y: 30 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1.8, opacity: 0.18 }}
+            transition={{ delay: STAR_LAND_DELAY, duration: 0.8, ease: 'easeOut' }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary pointer-events-none"
+            style={{ filter: 'blur(100px)' }}
+          />
+
+          {/* ── Phase 2: Card bursts out from where star landed ── */}
+          <motion.div
+            initial={{ scale: 0.08, opacity: 0, rotate: -8 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
             exit={{ scale: 0.92, opacity: 0, y: 16 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 24, delay: 0.06 }}
+            transition={{
+              delay: CARD_APPEAR_DELAY,
+              type: 'spring',
+              stiffness: 340,
+              damping: 22,
+            }}
             className="relative w-full max-w-md bg-card border border-border/60 rounded-2xl shadow-2xl overflow-hidden"
           >
+            {/* Glowing border pulse on appear */}
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ delay: CARD_APPEAR_DELAY + 0.4, duration: 0.6 }}
+              className="absolute inset-0 rounded-2xl pointer-events-none z-10"
+              style={{ boxShadow: '0 0 0 2px hsl(45 90% 55%), 0 0 40px 8px hsl(45 90% 55% / 0.4)' }}
+            />
+
             {/* Top accent bar */}
             <motion.div
               initial={{ scaleX: 0, originX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 0.65, delay: 0.2, ease: 'easeOut' }}
-              className="h-[3px] bg-gradient-to-r from-primary via-primary/50 to-transparent"
+              transition={{ duration: 0.55, delay: CARD_APPEAR_DELAY + 0.1, ease: 'easeOut' }}
+              className="h-[3px] bg-gradient-to-r from-primary via-primary/60 to-transparent"
             />
 
             <div className="p-6 space-y-5">
               {/* Header */}
               <motion.div
-                initial={{ opacity: 0, x: -14 }}
+                initial={{ opacity: 0, x: -18 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.28 }}
+                transition={{ delay: CARD_APPEAR_DELAY + 0.18, type: 'spring', stiffness: 300, damping: 28 }}
                 className="flex items-start justify-between"
               >
                 <div>
@@ -207,9 +249,14 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                     return (
                       <motion.div
                         key={card.label}
-                        initial={{ opacity: 0, y: 18, scale: 0.93 }}
+                        initial={{ opacity: 0, y: 20, scale: 0.88 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ type: 'spring', stiffness: 320, damping: 26, delay: 0.32 + i * 0.07 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 340,
+                          damping: 26,
+                          delay: CARD_APPEAR_DELAY + 0.22 + i * 0.07,
+                        }}
                         className={`relative rounded-xl border bg-gradient-to-br p-4 overflow-hidden ${card.gradient} ${card.border}`}
                       >
                         <div className="flex items-center gap-1.5 mb-2">
@@ -219,12 +266,12 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                         <div className="text-2xl font-bold tracking-tight">
                           {card.animatedValue}
                         </div>
-                        {/* Shimmer */}
+                        {/* Shimmer sweep */}
                         <motion.div
                           initial={{ x: '-110%' }}
                           animate={{ x: '210%' }}
-                          transition={{ delay: 0.9 + i * 0.1, duration: 0.75, ease: 'easeInOut' }}
-                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -skew-x-12 pointer-events-none"
+                          transition={{ delay: CARD_APPEAR_DELAY + 0.7 + i * 0.08, duration: 0.65, ease: 'easeInOut' }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 pointer-events-none"
                         />
                       </motion.div>
                     );
@@ -235,9 +282,9 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
               {/* Footer tip */}
               {stats && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.9 }}
+                  transition={{ delay: CARD_APPEAR_DELAY + 0.6 }}
                   className="flex items-start gap-2.5 p-3 rounded-xl bg-primary/8 border border-primary/15"
                 >
                   <TrendingUp className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -252,7 +299,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.05 }}
+                transition={{ delay: CARD_APPEAR_DELAY + 0.75 }}
               >
                 <Button onClick={onClose} className="w-full">Done</Button>
               </motion.div>
