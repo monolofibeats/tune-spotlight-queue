@@ -656,6 +656,16 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.updated': 'Pricing updated! 💰',
     'pricing.closedDesc': 'Submissions are currently CLOSED',
 
+    // Dashboard Editor
+    'dashboardEditor.title': 'Dashboard Editor',
+    'dashboardEditor.desc': 'Toggle widgets to show/hide them on your dashboard.',
+    'dashboardEditor.descNoPreset': ' A default preset will be created when you save.',
+    'dashboardEditor.saveLayout': 'Save Layout',
+    'dashboardEditor.savedTitle': 'Dashboard layout saved!',
+    'dashboardEditor.widget.stats': 'Statistics Overview',
+    'dashboardEditor.widget.queue': 'Submission Queue',
+    'dashboardEditor.widget.now_playing': 'Now Playing Panel',
+
     // Form Field Builder
     'formBuilder.title': 'Form Fields',
     'formBuilder.desc': 'Configure what submitters fill in',
