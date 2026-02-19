@@ -143,7 +143,7 @@ export function SpotBiddingDialog({
       const calculatedSpots: SpotPrice[] = [];
       const percent = bidConfig?.min_amount_cents || 10;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         const submission = pendingSubmissions?.[i];
         if (submission) {
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;

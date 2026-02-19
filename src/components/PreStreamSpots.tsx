@@ -31,8 +31,6 @@ const SPOT_COLORS = [
   { number: 1, label: 'First', color: 'from-yellow-400 to-amber-500' },
   { number: 2, label: 'Second', color: 'from-gray-300 to-gray-400' },
   { number: 3, label: 'Third', color: 'from-amber-600 to-amber-700' },
-  { number: 4, label: 'Fourth', color: 'from-zinc-400 to-zinc-500' },
-  { number: 5, label: 'Fifth', color: 'from-zinc-500 to-zinc-600' },
 ];
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -356,7 +354,7 @@ export function PreStreamSpots() {
           </div>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 md:gap-3">
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
           {SPOT_COLORS.map((config) => {
             const spot = spots.find(s => s.spot_number === config.number);
             const isAvailable = spot?.is_available ?? false;
