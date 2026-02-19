@@ -184,12 +184,18 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
     }
   };
 
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [previewKey, setPreviewKey] = useState(0);
+
+  const refreshPreview = () => {
+    setPreviewKey((k) => k + 1);
+  };
+
   const tabs = [
     { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
     { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
     { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
-    { id: 'presets', label: t('pageSettings.tab.presets'), icon: Palette },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
