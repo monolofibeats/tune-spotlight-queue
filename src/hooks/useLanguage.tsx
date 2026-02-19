@@ -543,6 +543,15 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq5a': 'For streamers we support TikTok Live, Instagram, YouTube, Twitch, Kick — Users can send a link to their work on any of the usual DSPs and upload files directly (up to 100MB).',
     'discovery.contentReviewer': 'Content reviewer',
 
+    // Building Phase Banner
+    'building.title': "🚧 We're still building!",
+    'building.description': "This platform is currently in its building phase. Got ideas, suggestions, or feedback? We'd love to hear from you — drop us a message below!",
+    'building.placeholder': 'Your suggestion or feedback...',
+    'building.contactPlaceholder': 'Your email or contact info (optional)',
+    'building.submit': 'Send Feedback',
+    'building.submitting': 'Sending...',
+    'building.thanks': "Thanks for your feedback! We'll review it soon.",
+
     // Page Settings (StreamerSettingsPanel)
     'pageSettings.customizePage': 'Customize Your Page',
     'pageSettings.preview': 'Preview',
@@ -1320,6 +1329,15 @@ const translations: Record<Language, Record<string, string>> = {
     'discovery.faq5q': 'Welche Platformen unterstützt ihr?',
     'discovery.faq5a': 'Für Streamer unterstützen wir TikTok Live, Instagram, YouTube, Twitch, Kick - Nutzer können einen Link zu ihrem Zeug von jeder belieben DSP schicken oder Dateien direkt hochladen (bis zu 100 MB).',
     'discovery.contentReviewer': 'Content Reviewer',
+
+    // Building Phase Banner
+    'building.title': '🚧 Wir bauen noch!',
+    'building.description': 'Diese Plattform befindet sich derzeit in der Aufbauphase. Hast du Ideen, Vorschläge oder Feedback? Wir würden uns freuen von dir zu hören — schreib uns einfach eine Nachricht!',
+    'building.placeholder': 'Dein Vorschlag oder Feedback...',
+    'building.contactPlaceholder': 'Deine E-Mail oder Kontaktinfo (optional)',
+    'building.submit': 'Feedback senden',
+    'building.submitting': 'Wird gesendet...',
+    'building.thanks': 'Danke für dein Feedback! Wir werden es bald prüfen.',
 
     // Page Settings (StreamerSettingsPanel)
     'pageSettings.customizePage': 'Seite anpassen',
