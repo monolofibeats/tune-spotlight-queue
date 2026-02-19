@@ -114,7 +114,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
 
   const handleSave = async () => {
-    if (skipLine.min >= skipLine.max) {
+    if (skipLine.min <= 0) {
       toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeDesc'), variant: 'destructive' });
       return;
     }
@@ -243,7 +243,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                   <Label className="text-sm">{t('pricing.skipLine.minPrice')}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={0.5} max={skipLine.max - 0.5} step={0.5} value={skipLine.min}
+                    <Input type="number" min={0.5} max={500} step={0.5} value={skipLine.min}
                       onChange={(e) => setSkipLine(s => ({ ...s, min: parseFloat(e.target.value) || 0.5 }))}
                       className="w-24 h-9 text-right" />
                   </div>
@@ -251,36 +251,10 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                 <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={0.5} max={50} step={0.5} />
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">{t('pricing.skipLine.maxPrice')}</Label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={skipLine.min + 0.5} max={100} step={0.5} value={skipLine.max}
-                      onChange={(e) => setSkipLine(s => ({ ...s, max: parseFloat(e.target.value) || 100 }))}
-                      className="w-24 h-9 text-right" />
-                  </div>
-                </div>
-                <Slider value={[skipLine.max]} onValueChange={([val]) => setSkipLine(s => ({ ...s, max: val }))} min={5} max={100} step={0.5} />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">{t('pricing.skipLine.bidStep')}</Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">€</span>
-                  <Input type="number" min={0.5} max={10} step={0.5} value={skipLine.step}
-                    onChange={(e) => setSkipLine(s => ({ ...s, step: parseFloat(e.target.value) || 0.5 }))}
-                    className="w-24 h-9 text-right" />
-                </div>
-              </div>
-
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <p className="text-sm font-medium text-amber-400 mb-2">{t('pricing.skipLine.preview')}</p>
                 <p className="text-xs text-muted-foreground">
-                  {t('pricing.skipLine.previewDesc')
-                    .replace('{min}', skipLine.min.toFixed(2))
-                    .replace('{max}', skipLine.max.toFixed(2))
-                    .replace('{step}', skipLine.step.toFixed(2))}
+                  {t('pricing.skipLine.minPrice')}: €{skipLine.min.toFixed(2)}
                 </p>
               </div>
             </>
@@ -376,7 +350,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         </TabsContent>
       </Tabs>
 
-      {((skipLine.min >= skipLine.max) || (submission.isActive && submission.min >= submission.max)) && (
+      {(submission.isActive && submission.min >= submission.max) && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
           <AlertCircle className="w-4 h-4" />
           <span className="text-sm">{t('pricing.minLessThanMax')}</span>
@@ -385,7 +359,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
 
       <Button
         onClick={handleSave}
-        disabled={isSaving || skipLine.min >= skipLine.max}
+        disabled={isSaving || skipLine.min <= 0}
         className="w-full"
         size="lg"
       >

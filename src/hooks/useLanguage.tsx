@@ -656,6 +656,16 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.updated': 'Pricing updated! 💰',
     'pricing.closedDesc': 'Submissions are currently CLOSED',
 
+    // Dashboard Editor
+    'dashboardEditor.title': 'Dashboard Editor',
+    'dashboardEditor.desc': 'Toggle widgets to show/hide them on your dashboard.',
+    'dashboardEditor.descNoPreset': ' A default preset will be created when you save.',
+    'dashboardEditor.saveLayout': 'Save Layout',
+    'dashboardEditor.savedTitle': 'Dashboard layout saved!',
+    'dashboardEditor.widget.stats': 'Statistics Overview',
+    'dashboardEditor.widget.queue': 'Submission Queue',
+    'dashboardEditor.widget.now_playing': 'Now Playing Panel',
+
     // Form Field Builder
     'formBuilder.title': 'Form Fields',
     'formBuilder.desc': 'Configure what submitters fill in',
@@ -1442,6 +1452,16 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.proTipDesc': 'Niedrigere Mindestgebote können das Engagement steigern, während höhere Maximalgebote enthusiastische Unterstützer hervorheben. Probiere aus, was für deine Community funktioniert!',
     'pricing.updated': 'Preise aktualisiert! 💰',
     'pricing.closedDesc': 'Einreichungen sind derzeit GESCHLOSSEN',
+
+    // Dashboard Editor
+    'dashboardEditor.title': 'Dashboard-Editor',
+    'dashboardEditor.desc': 'Widgets ein-/ausblenden auf deinem Dashboard.',
+    'dashboardEditor.descNoPreset': ' Ein Standard-Preset wird beim Speichern erstellt.',
+    'dashboardEditor.saveLayout': 'Layout speichern',
+    'dashboardEditor.savedTitle': 'Dashboard-Layout gespeichert!',
+    'dashboardEditor.widget.stats': 'Statistikübersicht',
+    'dashboardEditor.widget.queue': 'Einreichungswarteschlange',
+    'dashboardEditor.widget.now_playing': 'Gerade gespielt',
 
     // Form Field Builder
     'formBuilder.title': 'Formularfelder',
