@@ -157,5 +157,6 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
         {isLive ? t('session.endStream') : t('session.startStream')}
       </Button>
     </div>
+    </>
   );
 }
