@@ -73,6 +73,16 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
   };
 
   return (
+    <>
+      {endedSessionSnap && (
+        <SessionEndSummary
+          open={summaryOpen}
+          onClose={() => setSummaryOpen(false)}
+          streamerId={endedSessionSnap.streamerId}
+          startedAt={endedSessionSnap.startedAt}
+          endedAt={endedSessionSnap.endedAt}
+        />
+      )}
     <div className="rounded-xl border border-border/50 bg-card/50 p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
