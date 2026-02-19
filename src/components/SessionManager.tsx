@@ -48,19 +48,25 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
 
   const handleEndSession = async () => {
     setIsLoading(true);
+    // Capture snapshot before ending
+    const snap = currentSession
+      ? {
+          streamerId: currentSession.streamer_id || '',
+          startedAt: currentSession.started_at,
+          endedAt: new Date().toISOString(),
+        }
+      : null;
     try {
       await endSession();
       play('notification');
-      toast({
-        title: t('session.endStream'),
-        description: t('session.noActiveSession'),
-      });
+      if (snap && snap.streamerId) {
+        setEndedSessionSnap(snap);
+        setSummaryOpen(true);
+      } else {
+        toast({ title: t('session.endStream'), description: t('session.noActiveSession') });
+      }
     } catch (error) {
-      toast({
-        title: t('common.error'),
-        description: t('session.endStream'),
-        variant: "destructive",
-      });
+      toast({ title: t('common.error'), description: t('session.endStream'), variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
