@@ -122,24 +122,25 @@ const Discovery = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight text-center"
+              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight flex flex-col items-center gap-1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <span className="relative inline-flex justify-center">
+              {/* Title line — star is absolute so it doesn't affect the flex item's own width */}
+              <span className="relative inline-flex items-center justify-center pr-8 sm:pr-10 md:pr-12">
                 {t('discovery.heroTitle')}
                 <motion.span
-                  className="absolute -right-7 -top-3 sm:-right-9 sm:-top-4 md:-right-11 md:-top-5 pointer-events-none"
+                  className="absolute -right-0 -top-3 sm:-top-4 md:-top-5 pointer-events-none"
                   animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 >
                   <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                 </motion.span>
               </span>
-              <br />
+              {/* Highlight line — centers independently of the title line */}
               <motion.span 
-                className="text-primary whitespace-normal sm:whitespace-nowrap"
+                className="text-primary text-center max-w-full whitespace-normal sm:whitespace-nowrap"
                 animate={{ 
                   textShadow: [
                     '0 0 20px hsl(var(--primary) / 0.5)',
