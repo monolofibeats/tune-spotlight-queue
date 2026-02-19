@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Music2, Clock, Euro, Star, TrendingUp, Mic2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import shootingStar from '@/assets/upstar-shooting-star.png';
 
 interface SessionEndSummaryProps {
   open: boolean;
