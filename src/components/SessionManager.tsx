@@ -8,9 +8,10 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
+import { SessionEndSummary } from '@/components/SessionEndSummary';
 
 interface SessionManagerProps {
-  streamerId?: string; // kept for backwards compat but context is used
+  streamerId?: string;
 }
 
 export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
@@ -19,6 +20,10 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
   const { t } = useLanguage();
   const [sessionTitle, setSessionTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [endedSessionSnap, setEndedSessionSnap] = useState<{
+    streamerId: string; startedAt: string; endedAt: string;
+  } | null>(null);
 
   const handleStartSession = async () => {
     setIsLoading(true);
