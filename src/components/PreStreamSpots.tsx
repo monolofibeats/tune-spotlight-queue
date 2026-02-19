@@ -354,7 +354,7 @@ export function PreStreamSpots() {
           </div>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 md:gap-3">
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
           {SPOT_COLORS.map((config) => {
             const spot = spots.find(s => s.spot_number === config.number);
             const isAvailable = spot?.is_available ?? false;
