@@ -262,59 +262,56 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         </TabsContent>
 
         <TabsContent value="submission" className="space-y-4 mt-4">
-          <div className={`flex items-center justify-between p-3 rounded-lg ${
-            submission.isActive ? 'bg-primary/20 border border-primary/30' : 'bg-secondary/30'
-          }`}>
-            <div>
-              <p className="text-sm font-medium">
-                {submission.isActive ? t('pricing.submission.paid') : t('pricing.submission.free')}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {submission.isActive ? t('pricing.submission.paidDesc') : t('pricing.submission.freeDesc')}
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">{t('pricing.submission.price')}</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min={0}
+                  max={20}
+                  step={0.5}
+                  value={submission.min}
+                  onChange={(e) => {
+                    const val = Math.max(0, parseFloat(e.target.value) || 0);
+                    setSubmission(s => ({ ...s, min: val, isActive: val > 0 }));
+                  }}
+                  className="w-24 h-9 text-right"
+                />
+              </div>
             </div>
-            <Switch
-              checked={submission.isActive}
-              onCheckedChange={(checked) => setSubmission(s => ({ ...s, isActive: checked }))}
+            <Slider
+              value={[submission.min]}
+              onValueChange={([val]) => setSubmission(s => ({ ...s, min: val, isActive: val > 0 }))}
+              min={0}
+              max={20}
+              step={0.5}
             />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Free (€0.00)</span>
+              <span>€20.00</span>
+            </div>
           </div>
 
-          {submission.isActive && (
-            <>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">{t('pricing.submission.price')}</Label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={0.5} max={100} step={0.5} value={submission.min}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value) || 1;
-                        setSubmission(s => ({ ...s, min: val, max: Math.max(val, s.max) }));
-                      }}
-                      className="w-24 h-9 text-right" />
-                  </div>
-                </div>
-                <Slider value={[submission.min]} onValueChange={([val]) => setSubmission(s => ({ ...s, min: val, max: Math.max(val, s.max) }))} min={0.5} max={20} step={0.5} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>€0.50</span>
-                  <span>€20.00</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                <p className="text-sm font-medium text-primary mb-2">{t('pricing.submission.currentPrice')}</p>
+          <div className={`p-4 rounded-lg border transition-colors ${
+            submission.min > 0
+              ? 'bg-primary/10 border-primary/20'
+              : 'bg-emerald-500/10 border-emerald-500/20'
+          }`}>
+            {submission.min > 0 ? (
+              <>
+                <p className="text-sm font-medium text-primary mb-1">{t('pricing.submission.currentPrice')}</p>
                 <p className="text-2xl font-bold">€{submission.min.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{t('pricing.submission.perSubmission')}</p>
-              </div>
-            </>
-          )}
-
-          {!submission.isActive && (
-            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <p className="text-sm font-medium text-emerald-400 mb-2">{t('pricing.submission.freeActive')}</p>
-              <p className="text-xs text-muted-foreground">{t('pricing.submission.freeActiveDesc')}</p>
-            </div>
-          )}
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-emerald-400 mb-1">{t('pricing.submission.freeActive')}</p>
+                <p className="text-xs text-muted-foreground">{t('pricing.submission.freeActiveDesc')}</p>
+              </>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="bidding" className="space-y-4 mt-4">
