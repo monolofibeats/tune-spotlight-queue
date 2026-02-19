@@ -9,6 +9,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 import { SessionEndSummary } from '@/components/SessionEndSummary';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SessionManagerProps {
   streamerId?: string;
@@ -48,14 +49,29 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
 
   const handleEndSession = async () => {
     setIsLoading(true);
-    // Capture snapshot before ending
-    const snap = currentSession
+
+    // Capture snapshot before ending — use currentSession from context,
+    // or fall back to a direct DB fetch if realtime hasn't synced yet.
+    let sessionData = currentSession;
+    if (!sessionData) {
+      const { data } = await supabase
+        .from('stream_sessions')
+        .select('*')
+        .eq('is_active', true)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      sessionData = data as typeof currentSession;
+    }
+
+    const snap = sessionData
       ? {
-          streamerId: currentSession.streamer_id || '',
-          startedAt: currentSession.started_at,
+          streamerId: sessionData.streamer_id || '',
+          startedAt: sessionData.started_at,
           endedAt: new Date().toISOString(),
         }
       : null;
+
     try {
       await endSession();
       play('notification');
