@@ -9,6 +9,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 import { SessionEndSummary } from '@/components/SessionEndSummary';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SessionManagerProps {
   streamerId?: string;
