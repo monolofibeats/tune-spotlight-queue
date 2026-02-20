@@ -627,7 +627,7 @@ function WidgetsTab({
                         <div className="flex items-center justify-between p-2 rounded-lg bg-accent/10 border border-accent/20">
                           <div className="flex items-center gap-1.5">
                             {popOutOptions.showWhenPoppedOut.has(widget.id) ? <Eye className="w-3 h-3 text-accent-foreground" /> : <EyeOff className="w-3 h-3 text-muted-foreground" />}
-                            <span className="text-[10px] font-medium">Show on dashboard too</span>
+                            <span className="text-[10px] font-medium">{t('builder.showOnDashboardToo')}</span>
                           </div>
                           <Switch checked={popOutOptions.showWhenPoppedOut.has(widget.id)} onCheckedChange={(v) => toggleShowWhenPoppedOut(widget.id, v)} />
                         </div>
