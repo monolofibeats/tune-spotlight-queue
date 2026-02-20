@@ -393,7 +393,7 @@ export function DashboardBuilder({
                                 setIsSavingPreset(true);
                                 onSaveAsPreset(newPresetName.trim()).then(() => {
                                   setNewPresetName('');
-                                  toast({ title: `Preset "${newPresetName.trim()}" saved!` });
+                                  toast({ title: t('builder.presetSaved').replace('{name}', newPresetName.trim()) });
                                 }).finally(() => setIsSavingPreset(false));
                               }}
                             >
