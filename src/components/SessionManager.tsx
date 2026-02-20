@@ -159,6 +159,19 @@ export function SessionManager({ streamerId: _streamerId, phoneOptimized = false
               onChange={(e) => setSessionTitle(e.target.value)}
             />
           </div>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20">
+            <div className="flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">{t('session.phoneOptimized') || 'Optimize for phone'}</p>
+                <p className="text-[10px] text-muted-foreground">{t('session.phoneOptimizedDesc') || 'Single-column layout for 9:16 streaming'}</p>
+              </div>
+            </div>
+            <Switch
+              checked={phoneOptimized}
+              onCheckedChange={(checked) => onPhoneOptimizedChange?.(checked)}
+            />
+          </div>
         </div>
       )}
 
