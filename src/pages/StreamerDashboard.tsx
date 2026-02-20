@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { StreamSessionProvider } from '@/hooks/useStreamSession';
+import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -56,6 +56,60 @@ interface Submission {
 
 // Team role type: null = owner/platform-admin (full access), 'admin' | 'editor' | 'viewer' = team member
 type TeamRole = 'admin' | 'editor' | 'viewer' | null;
+
+// Inner component that can access StreamSession context
+function LiveAwareDashboardGrid({
+  dashboardLayout,
+  isBuilderEditing,
+  canEdit,
+  setDashboardLayout,
+  widgetRenderers,
+  poppedOutWidgets,
+  popOutOptions,
+  handlePopOut,
+  widgetConfigs,
+}: {
+  dashboardLayout: Layout[];
+  isBuilderEditing: boolean;
+  canEdit: boolean;
+  setDashboardLayout: (layout: Layout[] | ((prev: Layout[]) => Layout[])) => void;
+  widgetRenderers: Record<string, React.ReactNode>;
+  poppedOutWidgets: Set<string>;
+  popOutOptions: { showWhenPoppedOut: Set<string> };
+  handlePopOut: (widgetId: string) => void;
+  widgetConfigs: WidgetConfigs;
+}) {
+  const { isLive } = useStreamSession();
+
+  // When live, force a single-column phone-optimized layout
+  const effectiveLayout = useMemo(() => {
+    if (!isLive) return dashboardLayout;
+    // Stack all widgets in a single column, full width
+    let yOffset = 0;
+    return dashboardLayout.map(item => {
+      const newItem = { ...item, x: 0, w: 12, minW: 4 };
+      newItem.y = yOffset;
+      yOffset += item.h;
+      return newItem;
+    });
+  }, [isLive, dashboardLayout]);
+
+  return (
+    <div className={`transition-all duration-500 ${isLive ? 'max-w-[480px] mx-auto' : ''}`}>
+      <DashboardGrid
+        layout={effectiveLayout}
+        isEditing={isBuilderEditing && canEdit}
+        onLayoutChange={setDashboardLayout}
+        onRemoveWidget={(id) => setDashboardLayout((prev: Layout[]) => prev.filter(l => l.i !== id))}
+        widgetRenderers={widgetRenderers}
+        poppedOutWidgets={poppedOutWidgets}
+        showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
+        onPopOut={handlePopOut}
+        widgetConfigs={widgetConfigs}
+      />
+    </div>
+  );
+}
 
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -794,15 +848,15 @@ const StreamerDashboard = () => {
               </TabsList>
 
               <TabsContent value="submissions">
-                <DashboardGrid
-                  layout={dashboardLayout}
-                  isEditing={isBuilderEditing && canEdit}
-                  onLayoutChange={setDashboardLayout}
-                  onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
+                <LiveAwareDashboardGrid
+                  dashboardLayout={dashboardLayout}
+                  isBuilderEditing={isBuilderEditing}
+                  canEdit={canEdit}
+                  setDashboardLayout={setDashboardLayout}
                   widgetRenderers={widgetRenderers}
                   poppedOutWidgets={poppedOutWidgets}
-                  showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
-                  onPopOut={handlePopOut}
+                  popOutOptions={popOutOptions}
+                  handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
                 />
               </TabsContent>
