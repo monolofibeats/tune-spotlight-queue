@@ -211,7 +211,7 @@ export function DashboardBuilder({
     } else if (onPoppedOutWidgetsChange) {
       onPoppedOutWidgetsChange(new Set());
     }
-    toast({ title: `"${template.name}" applied — drag to customize` });
+    toast({ title: t('builder.applied').replace('{name}', template.name) });
   }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
