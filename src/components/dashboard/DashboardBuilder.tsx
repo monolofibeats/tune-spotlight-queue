@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   Pencil,
   X,
@@ -29,11 +29,11 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 import { WIDGET_REGISTRY, type WidgetDefinition, type WidgetConfigs, getDefaultWidgetConfig } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
 import type { Layout } from 'react-grid-layout';
 import type { StreamerPreset } from '@/hooks/useStreamerPresets';
-
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
@@ -89,6 +89,7 @@ export function DashboardBuilder({
   onDeletePreset,
   onRenamePreset,
 }: DashboardBuilderProps) {
+  const { t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
   const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
@@ -210,18 +211,18 @@ export function DashboardBuilder({
     } else if (onPoppedOutWidgetsChange) {
       onPoppedOutWidgetsChange(new Set());
     }
-    toast({ title: `"${template.name}" applied — drag to customize` });
+    toast({ title: t('builder.applied').replace('{name}', t(`template.${template.id}`)) });
   }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await onSave(currentLayout);
-      toast({ title: 'Layout saved!' });
+      toast({ title: t('builder.layoutSaved') });
       onToggleEditing(false);
       setExpandedWidget(null);
     } catch {
-      toast({ title: 'Failed to save', variant: 'destructive' });
+      toast({ title: t('builder.layoutSaveFailed'), variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
@@ -229,16 +230,16 @@ export function DashboardBuilder({
 
   if (!isEditing) {
     return (
-      <Button variant="ghost" size="icon" onClick={handleStartEditing} className="h-8 w-8" title="Edit dashboard layout">
+      <Button variant="ghost" size="icon" onClick={handleStartEditing} className="h-8 w-8" title={t('builder.editLayout')}>
         <Pencil className="w-4 h-4" />
       </Button>
     );
   }
 
   const tabs: { id: BuilderTab; label: string }[] = [
-    { id: 'widgets', label: 'Widgets' },
-    { id: 'layout', label: 'Layout' },
-    { id: 'templates', label: 'Templates' },
+    { id: 'widgets', label: t('builder.tab.widgets') },
+    { id: 'layout', label: t('builder.tab.layout') },
+    { id: 'templates', label: t('builder.tab.templates') },
   ];
 
   return (
@@ -246,14 +247,14 @@ export function DashboardBuilder({
       {/* Top bar buttons */}
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={handleCancel} className="gap-1.5 text-xs">
-          <X className="w-3.5 h-3.5" /> Cancel
+          <X className="w-3.5 h-3.5" /> {t('builder.cancel')}
         </Button>
         <Button variant="outline" size="sm" onClick={() => onLayoutChange(getDefaultLayout())} className="gap-1.5 text-xs">
-          <RotateCcw className="w-3.5 h-3.5" /> Reset
+          <RotateCcw className="w-3.5 h-3.5" /> {t('builder.reset')}
         </Button>
         <Button size="sm" onClick={handleSave} disabled={isSaving} className="gap-1.5 text-xs">
           {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-          Save
+          {t('builder.save')}
         </Button>
       </div>
 
@@ -278,7 +279,7 @@ export function DashboardBuilder({
           >
             <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <LayoutTemplate className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-xs font-semibold flex-1">Dashboard Builder</span>
+            <span className="text-xs font-semibold flex-1">{t('builder.title')}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsMinimized(!isMinimized)}>
               {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
             </Button>
@@ -324,18 +325,19 @@ export function DashboardBuilder({
                       updateWidgetConfigValue={updateWidgetConfigValue}
                       toggleShowWhenPoppedOut={toggleShowWhenPoppedOut}
                       onPopOut={onPopOut}
+                      t={t}
                     />
                   )}
 
                   {activeTab === 'layout' && (
                     <div className="space-y-3">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Visibility</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t('builder.visibility')}</p>
                       <div className="flex items-center justify-between p-2 rounded-lg border border-border/50">
                         <div className="flex items-center gap-2">
                           <PanelTopClose className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-xs font-medium">Site Header</p>
-                            <p className="text-[10px] text-muted-foreground">Navigation bar</p>
+                            <p className="text-xs font-medium">{t('builder.siteHeader')}</p>
+                            <p className="text-[10px] text-muted-foreground">{t('builder.navBar')}</p>
                           </div>
                         </div>
                         <Switch
@@ -348,8 +350,8 @@ export function DashboardBuilder({
                         <div className="flex items-center gap-2">
                           <Type className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-xs font-medium">Dashboard Title</p>
-                            <p className="text-[10px] text-muted-foreground">Title bar & buttons</p>
+                            <p className="text-xs font-medium">{t('builder.dashboardTitle')}</p>
+                            <p className="text-[10px] text-muted-foreground">{t('builder.titleBarButtons')}</p>
                           </div>
                         </div>
                         <Switch
@@ -367,10 +369,10 @@ export function DashboardBuilder({
                       {/* Save current as preset */}
                       {onSaveAsPreset && (
                         <div className="space-y-1.5">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Save Current Layout</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.saveCurrentLayout')}</p>
                           <div className="flex gap-1.5">
                             <Input
-                              placeholder="Preset name…"
+                              placeholder={t('builder.presetName')}
                               value={newPresetName}
                               onChange={(e) => setNewPresetName(e.target.value)}
                               className="h-7 text-xs"
@@ -379,7 +381,7 @@ export function DashboardBuilder({
                                   setIsSavingPreset(true);
                                   onSaveAsPreset(newPresetName.trim()).then(() => {
                                     setNewPresetName('');
-                                    toast({ title: `Preset "${newPresetName.trim()}" saved!` });
+                                    toast({ title: t('builder.presetSaved').replace('{name}', newPresetName.trim()) });
                                   }).finally(() => setIsSavingPreset(false));
                                 }
                               }}
@@ -392,12 +394,12 @@ export function DashboardBuilder({
                                 setIsSavingPreset(true);
                                 onSaveAsPreset(newPresetName.trim()).then(() => {
                                   setNewPresetName('');
-                                  toast({ title: `Preset "${newPresetName.trim()}" saved!` });
+                                  toast({ title: t('builder.presetSaved').replace('{name}', newPresetName.trim()) });
                                 }).finally(() => setIsSavingPreset(false));
                               }}
                             >
                               {isSavingPreset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                              Save
+                              {t('builder.save')}
                             </Button>
                           </div>
                         </div>
@@ -406,7 +408,7 @@ export function DashboardBuilder({
                       {/* User presets */}
                       {userPresets.length > 0 && (
                         <div className="space-y-1.5">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">My Presets</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.myPresets')}</p>
                           {userPresets.map(preset => (
                             <div
                               key={preset.id}
@@ -468,21 +470,20 @@ export function DashboardBuilder({
 
                       {/* Built-in templates */}
                       <div className="space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Built-in Templates</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.builtInTemplates')}</p>
                         {DASHBOARD_TEMPLATES.map(template => (
                           <button
                             key={template.id}
                             onClick={() => applyTemplate(template)}
                             className="w-full text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
                           >
-                            <p className="text-xs font-medium">{template.name}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{template.description}</p>
+                            <p className="text-xs font-medium">{t(`template.${template.id}`)}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{t(`template.${template.id}.desc`)}</p>
                             <div className="flex gap-1 mt-1.5 flex-wrap">
                               {template.layout.map(l => {
-                                const def = WIDGET_REGISTRY.find(w => w.id === l.i);
-                                return def ? (
+                                return WIDGET_REGISTRY.find(w => w.id === l.i) ? (
                                   <span key={l.i} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                    {def.label}
+                                    {t(`widget.${l.i}.label`)}
                                   </span>
                                 ) : null;
                               })}
@@ -519,18 +520,19 @@ interface WidgetsTabProps {
   updateWidgetConfigValue: (widgetId: string, key: string, value: number) => void;
   toggleShowWhenPoppedOut: (widgetId: string, value: boolean) => void;
   onPopOut?: (widgetId: string) => void;
+  t: (key: string) => string;
 }
 
 function WidgetsTab({
   activeWidgetIds, currentLayout, expandedWidget, setExpandedWidget,
   poppedOutWidgets, widgetConfigs, popOutOptions,
-  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, updateWidgetConfigValue, toggleShowWhenPoppedOut, onPopOut,
+  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, updateWidgetConfigValue, toggleShowWhenPoppedOut, onPopOut, t,
 }: WidgetsTabProps) {
   return (
     <>
       {['core', 'analytics', 'tools'].map(category => (
         <div key={category} className="mb-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{category}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t(`builder.category.${category}`)}</p>
           {WIDGET_REGISTRY.filter(w => w.category === category).map(widget => {
             const isActive = activeWidgetIds.includes(widget.id);
             const isExpanded = expandedWidget === widget.id && isActive;
@@ -552,10 +554,10 @@ function WidgetsTab({
                   <widget.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-medium truncate">{widget.label}</p>
+                      <p className="text-xs font-medium truncate">{t(`widget.${widget.id}.label`)}</p>
                       {isPoppedOut && <span className="text-[9px] px-1 py-0.5 rounded bg-accent text-accent-foreground">popped</span>}
                     </div>
-                    {!isActive && <p className="text-[10px] text-muted-foreground truncate">{widget.description}</p>}
+                    {!isActive && <p className="text-[10px] text-muted-foreground truncate">{t(`widget.${widget.id}.desc`)}</p>}
                   </div>
                   {isActive ? (
                     isExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />
@@ -570,7 +572,7 @@ function WidgetsTab({
                       {/* Width */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">Width</label>
+                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.width')}</label>
                           <div className="flex items-center gap-1">
                             <Input type="number" value={layoutItem.w} min={widget.minSize.w} step="0.1"
                               onChange={(e) => updateWidgetSize(widget.id, 'w', parseFloat(e.target.value) || widget.minSize.w)}
@@ -582,7 +584,7 @@ function WidgetsTab({
                       {/* Height */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">Height</label>
+                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.height')}</label>
                           <div className="flex items-center gap-1">
                             <Input type="number" value={layoutItem.h} min={widget.minSize.h} step="0.1"
                               onChange={(e) => updateWidgetSize(widget.id, 'h', parseFloat(e.target.value) || widget.minSize.h)}
@@ -595,7 +597,7 @@ function WidgetsTab({
                       {/* Text Size */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">Text Size</label>
+                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.textSize')}</label>
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] font-mono text-muted-foreground">{(widgetConfig.textScale as number) ?? 100}%</span>
                           </div>
@@ -615,7 +617,7 @@ function WidgetsTab({
                             className="text-primary hover:underline"
                             onClick={() => updateWidgetConfigValue(widget.id, 'textScale', 100)}
                           >
-                            Reset
+                            {t('builder.resetSize')}
                           </button>
                           <span>150%</span>
                         </div>
@@ -624,7 +626,7 @@ function WidgetsTab({
                         <div className="flex items-center justify-between p-2 rounded-lg bg-accent/10 border border-accent/20">
                           <div className="flex items-center gap-1.5">
                             {popOutOptions.showWhenPoppedOut.has(widget.id) ? <Eye className="w-3 h-3 text-accent-foreground" /> : <EyeOff className="w-3 h-3 text-muted-foreground" />}
-                            <span className="text-[10px] font-medium">Show on dashboard too</span>
+                            <span className="text-[10px] font-medium">{t('builder.showOnDashboardToo')}</span>
                           </div>
                           <Switch checked={popOutOptions.showWhenPoppedOut.has(widget.id)} onCheckedChange={(v) => toggleShowWhenPoppedOut(widget.id, v)} />
                         </div>
@@ -633,7 +635,7 @@ function WidgetsTab({
                       {/* Config toggles */}
                       {widget.configOptions && widget.configOptions.length > 0 && (
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Display Elements</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t('builder.displayElements')}</p>
                           <div className="space-y-1.5">
                             {widget.configOptions.map(opt => (
                               <div key={opt.key} className="flex items-center gap-2">
@@ -651,11 +653,11 @@ function WidgetsTab({
                       <div className="flex gap-1.5">
                         {onPopOut && (
                           <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={() => onPopOut(widget.id)}>
-                            <ExternalLink className="w-3 h-3" /> Pop Out
+                            <ExternalLink className="w-3 h-3" /> {t('builder.popOut')}
                           </Button>
                         )}
                         <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1 text-destructive hover:text-destructive" onClick={() => removeWidget(widget.id)}>
-                          <X className="w-3 h-3" /> Remove
+                          <X className="w-3 h-3" /> {t('builder.remove')}
                         </Button>
                       </div>
                     </div>

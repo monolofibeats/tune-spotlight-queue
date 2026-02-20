@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { GripVertical, X, ExternalLink } from 'lucide-react';
 import { getWidgetDef } from './WidgetRegistry';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface WidgetWrapperProps {
   widgetId: string;
@@ -12,7 +13,9 @@ interface WidgetWrapperProps {
 }
 
 export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppedOut, textScale = 100 }: WidgetWrapperProps) {
+  const { t } = useLanguage();
   const def = getWidgetDef(widgetId);
+  const translatedLabel = t(`widget.${widgetId}.label`);
   const zoomStyle = textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined;
 
   return (
@@ -25,7 +28,7 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
       {isEditing && (
         <div className="flex items-center gap-1.5 px-2 py-1 shrink-0 bg-primary/10 border-b border-primary/20">
           <GripVertical className="w-3.5 h-3.5 text-primary/60 cursor-grab drag-handle" />
-          <span className="text-[10px] font-medium text-primary/80 flex-1 truncate">{def?.label || widgetId}</span>
+          <span className="text-[10px] font-medium text-primary/80 flex-1 truncate">{translatedLabel !== `widget.${widgetId}.label` ? translatedLabel : (def?.label || widgetId)}</span>
           {isPoppedOut && (
             <ExternalLink className="w-3 h-3 text-accent-foreground" />
           )}
