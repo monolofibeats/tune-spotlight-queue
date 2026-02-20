@@ -211,7 +211,7 @@ export function DashboardBuilder({
     } else if (onPoppedOutWidgetsChange) {
       onPoppedOutWidgetsChange(new Set());
     }
-    toast({ title: t('builder.applied').replace('{name}', template.name) });
+    toast({ title: t('builder.applied').replace('{name}', t(`template.${template.id}`)) });
   }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
