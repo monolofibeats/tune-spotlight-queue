@@ -18,7 +18,7 @@ interface SessionManagerProps {
   onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
-export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
+export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
   const { t } = useLanguage();
