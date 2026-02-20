@@ -521,6 +521,7 @@ interface WidgetsTabProps {
   updateWidgetConfigValue: (widgetId: string, key: string, value: number) => void;
   toggleShowWhenPoppedOut: (widgetId: string, value: boolean) => void;
   onPopOut?: (widgetId: string) => void;
+  t: (key: string) => string;
 }
 
 function WidgetsTab({
