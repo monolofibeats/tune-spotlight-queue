@@ -57,6 +57,60 @@ interface Submission {
 // Team role type: null = owner/platform-admin (full access), 'admin' | 'editor' | 'viewer' = team member
 type TeamRole = 'admin' | 'editor' | 'viewer' | null;
 
+// Inner component that can access StreamSession context
+function LiveAwareDashboardGrid({
+  dashboardLayout,
+  isBuilderEditing,
+  canEdit,
+  setDashboardLayout,
+  widgetRenderers,
+  poppedOutWidgets,
+  popOutOptions,
+  handlePopOut,
+  widgetConfigs,
+}: {
+  dashboardLayout: Layout[];
+  isBuilderEditing: boolean;
+  canEdit: boolean;
+  setDashboardLayout: (layout: Layout[] | ((prev: Layout[]) => Layout[])) => void;
+  widgetRenderers: Record<string, React.ReactNode>;
+  poppedOutWidgets: Set<string>;
+  popOutOptions: { showWhenPoppedOut: Set<string> };
+  handlePopOut: (widgetId: string) => void;
+  widgetConfigs: WidgetConfigs;
+}) {
+  const { isLive } = useStreamSession();
+
+  // When live, force a single-column phone-optimized layout
+  const effectiveLayout = useMemo(() => {
+    if (!isLive) return dashboardLayout;
+    // Stack all widgets in a single column, full width
+    let yOffset = 0;
+    return dashboardLayout.map(item => {
+      const newItem = { ...item, x: 0, w: 12, minW: 4 };
+      newItem.y = yOffset;
+      yOffset += item.h;
+      return newItem;
+    });
+  }, [isLive, dashboardLayout]);
+
+  return (
+    <div className={`transition-all duration-500 ${isLive ? 'max-w-[480px] mx-auto' : ''}`}>
+      <DashboardGrid
+        layout={effectiveLayout}
+        isEditing={isBuilderEditing && canEdit}
+        onLayoutChange={setDashboardLayout}
+        onRemoveWidget={(id) => setDashboardLayout((prev: Layout[]) => prev.filter(l => l.i !== id))}
+        widgetRenderers={widgetRenderers}
+        poppedOutWidgets={poppedOutWidgets}
+        showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
+        onPopOut={handlePopOut}
+        widgetConfigs={widgetConfigs}
+      />
+    </div>
+  );
+}
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user, isAdmin: isGlobalAdmin, isLoading: authLoading } = useAuth();
