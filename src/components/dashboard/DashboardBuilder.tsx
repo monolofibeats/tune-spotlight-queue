@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   Pencil,
   X,
@@ -29,11 +29,11 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 import { WIDGET_REGISTRY, type WidgetDefinition, type WidgetConfigs, getDefaultWidgetConfig } from './WidgetRegistry';
 import { DASHBOARD_TEMPLATES, getDefaultLayout, type DashboardTemplate } from './LayoutTemplates';
 import type { Layout } from 'react-grid-layout';
 import type { StreamerPreset } from '@/hooks/useStreamerPresets';
-
 export interface DashboardViewOptions {
   showHeader: boolean;
   showDashboardTitle: boolean;
