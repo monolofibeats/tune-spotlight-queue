@@ -95,7 +95,7 @@ function LiveAwareDashboardGrid({
   }, [isLive, phoneOptimized, dashboardLayout]);
 
   return (
-    <div className={`transition-all duration-500 ${isLive ? 'max-w-[480px] mx-auto' : ''}`}>
+    <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
       <DashboardGrid
         layout={effectiveLayout}
         isEditing={isBuilderEditing && canEdit}
