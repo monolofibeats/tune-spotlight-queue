@@ -527,7 +527,7 @@ interface WidgetsTabProps {
 function WidgetsTab({
   activeWidgetIds, currentLayout, expandedWidget, setExpandedWidget,
   poppedOutWidgets, widgetConfigs, popOutOptions,
-  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, updateWidgetConfigValue, toggleShowWhenPoppedOut, onPopOut,
+  addWidget, removeWidget, updateWidgetSize, toggleWidgetConfig, updateWidgetConfigValue, toggleShowWhenPoppedOut, onPopOut, t,
 }: WidgetsTabProps) {
   return (
     <>
