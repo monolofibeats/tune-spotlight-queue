@@ -636,7 +636,7 @@ function WidgetsTab({
                       {/* Config toggles */}
                       {widget.configOptions && widget.configOptions.length > 0 && (
                         <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Display Elements</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t('builder.displayElements')}</p>
                           <div className="space-y-1.5">
                             {widget.configOptions.map(opt => (
                               <div key={opt.key} className="flex items-center gap-2">
