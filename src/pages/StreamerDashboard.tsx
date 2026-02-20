@@ -92,7 +92,7 @@ function LiveAwareDashboardGrid({
       yOffset += item.h;
       return newItem;
     });
-  }, [isLive, dashboardLayout]);
+  }, [isLive, phoneOptimized, dashboardLayout]);
 
   return (
     <div className={`transition-all duration-500 ${isLive ? 'max-w-[480px] mx-auto' : ''}`}>
