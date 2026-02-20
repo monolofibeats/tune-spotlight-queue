@@ -848,15 +848,15 @@ const StreamerDashboard = () => {
               </TabsList>
 
               <TabsContent value="submissions">
-                <DashboardGrid
-                  layout={dashboardLayout}
-                  isEditing={isBuilderEditing && canEdit}
-                  onLayoutChange={setDashboardLayout}
-                  onRemoveWidget={(id) => setDashboardLayout(prev => prev.filter(l => l.i !== id))}
+                <LiveAwareDashboardGrid
+                  dashboardLayout={dashboardLayout}
+                  isBuilderEditing={isBuilderEditing}
+                  canEdit={canEdit}
+                  setDashboardLayout={setDashboardLayout}
                   widgetRenderers={widgetRenderers}
                   poppedOutWidgets={poppedOutWidgets}
-                  showWhenPoppedOut={popOutOptions.showWhenPoppedOut}
-                  onPopOut={handlePopOut}
+                  popOutOptions={popOutOptions}
+                  handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
                 />
               </TabsContent>
