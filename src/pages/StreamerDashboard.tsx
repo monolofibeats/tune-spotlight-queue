@@ -68,6 +68,7 @@ function LiveAwareDashboardGrid({
   popOutOptions,
   handlePopOut,
   widgetConfigs,
+  phoneOptimized,
 }: {
   dashboardLayout: Layout[];
   isBuilderEditing: boolean;
@@ -78,6 +79,7 @@ function LiveAwareDashboardGrid({
   popOutOptions: { showWhenPoppedOut: Set<string> };
   handlePopOut: (widgetId: string) => void;
   widgetConfigs: WidgetConfigs;
+  phoneOptimized: boolean;
 }) {
   const { isLive } = useStreamSession();
 
