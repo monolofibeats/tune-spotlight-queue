@@ -477,14 +477,13 @@ export function DashboardBuilder({
                             onClick={() => applyTemplate(template)}
                             className="w-full text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all"
                           >
-                            <p className="text-xs font-medium">{template.name}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{template.description}</p>
+                            <p className="text-xs font-medium">{t(`template.${template.id}`)}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{t(`template.${template.id}.desc`)}</p>
                             <div className="flex gap-1 mt-1.5 flex-wrap">
                               {template.layout.map(l => {
-                                const def = WIDGET_REGISTRY.find(w => w.id === l.i);
-                                return def ? (
+                                return WIDGET_REGISTRY.find(w => w.id === l.i) ? (
                                   <span key={l.i} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                    {def.label}
+                                    {t(`widget.${l.i}.label`)}
                                   </span>
                                 ) : null;
                               })}
