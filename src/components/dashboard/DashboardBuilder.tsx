@@ -325,6 +325,7 @@ export function DashboardBuilder({
                       updateWidgetConfigValue={updateWidgetConfigValue}
                       toggleShowWhenPoppedOut={toggleShowWhenPoppedOut}
                       onPopOut={onPopOut}
+                      t={t}
                     />
                   )}
 
