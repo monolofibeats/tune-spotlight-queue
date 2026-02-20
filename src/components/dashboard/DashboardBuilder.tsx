@@ -368,7 +368,7 @@ export function DashboardBuilder({
                       {/* Save current as preset */}
                       {onSaveAsPreset && (
                         <div className="space-y-1.5">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Save Current Layout</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.saveCurrentLayout')}</p>
                           <div className="flex gap-1.5">
                             <Input
                               placeholder="Preset name…"
