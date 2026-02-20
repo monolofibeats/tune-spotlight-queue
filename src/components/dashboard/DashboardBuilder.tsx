@@ -330,13 +330,13 @@ export function DashboardBuilder({
 
                   {activeTab === 'layout' && (
                     <div className="space-y-3">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Visibility</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t('builder.visibility')}</p>
                       <div className="flex items-center justify-between p-2 rounded-lg border border-border/50">
                         <div className="flex items-center gap-2">
                           <PanelTopClose className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-xs font-medium">Site Header</p>
-                            <p className="text-[10px] text-muted-foreground">Navigation bar</p>
+                            <p className="text-xs font-medium">{t('builder.siteHeader')}</p>
+                            <p className="text-[10px] text-muted-foreground">{t('builder.navBar')}</p>
                           </div>
                         </div>
                         <Switch
@@ -349,8 +349,8 @@ export function DashboardBuilder({
                         <div className="flex items-center gap-2">
                           <Type className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-xs font-medium">Dashboard Title</p>
-                            <p className="text-[10px] text-muted-foreground">Title bar & buttons</p>
+                            <p className="text-xs font-medium">{t('builder.dashboardTitle')}</p>
+                            <p className="text-[10px] text-muted-foreground">{t('builder.titleBarButtons')}</p>
                           </div>
                         </div>
                         <Switch
