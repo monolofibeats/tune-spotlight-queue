@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Power, Loader2 } from 'lucide-react';
+import { Radio, Power, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
@@ -13,6 +14,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SessionManagerProps {
   streamerId?: string;
+  phoneOptimized?: boolean;
+  onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
 export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
