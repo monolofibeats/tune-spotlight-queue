@@ -218,11 +218,11 @@ export function DashboardBuilder({
     setIsSaving(true);
     try {
       await onSave(currentLayout);
-      toast({ title: 'Layout saved!' });
+      toast({ title: t('builder.layoutSaved') });
       onToggleEditing(false);
       setExpandedWidget(null);
     } catch {
-      toast({ title: 'Failed to save', variant: 'destructive' });
+      toast({ title: t('builder.layoutSaveFailed'), variant: 'destructive' });
     } finally {
       setIsSaving(false);
     }
