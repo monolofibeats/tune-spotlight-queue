@@ -598,7 +598,7 @@ function WidgetsTab({
                       {/* Text Size */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">Text Size</label>
+                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.textSize')}</label>
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] font-mono text-muted-foreground">{(widgetConfig.textScale as number) ?? 100}%</span>
                           </div>
