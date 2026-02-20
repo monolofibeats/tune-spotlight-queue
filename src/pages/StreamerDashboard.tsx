@@ -81,9 +81,9 @@ function LiveAwareDashboardGrid({
 }) {
   const { isLive } = useStreamSession();
 
-  // When live, force a single-column phone-optimized layout
+  // When live AND phone-optimized, force a single-column phone-optimized layout
   const effectiveLayout = useMemo(() => {
-    if (!isLive) return dashboardLayout;
+    if (!isLive || !phoneOptimized) return dashboardLayout;
     // Stack all widgets in a single column, full width
     let yOffset = 0;
     return dashboardLayout.map(item => {
