@@ -215,27 +215,29 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       className="space-y-6"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
+                <Eye className="w-4 h-4" />
+                {t('pageSettings.preview')}
+              </a>
+            </Button>
+            <Button onClick={handleSaveAndRefresh} disabled={isSaving} className="gap-2">
+              {isSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {t('pageSettings.saveChanges')}
+            </Button>
+          </div>
+        </div>
         <div>
-          <h2 className="text-xl font-semibold">{t('pageSettings.customizePage')}</h2>
-          <p className="text-muted-foreground text-sm">
+          <h2 className="text-xl font-semibold text-right">{t('pageSettings.customizePage')}</h2>
+          <p className="text-muted-foreground text-sm text-right">
             upstar.gg/{streamer.slug}
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
-              <Eye className="w-4 h-4" />
-              {t('pageSettings.preview')}
-            </a>
-          </Button>
-          <Button onClick={handleSaveAndRefresh} disabled={isSaving} className="gap-2">
-            {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {t('pageSettings.saveChanges')}
-          </Button>
         </div>
       </div>
 
