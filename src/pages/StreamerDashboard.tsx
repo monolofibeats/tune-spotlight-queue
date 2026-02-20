@@ -861,6 +861,7 @@ const StreamerDashboard = () => {
                   popOutOptions={popOutOptions}
                   handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
+                  phoneOptimized={phoneOptimized}
                 />
               </TabsContent>
 
