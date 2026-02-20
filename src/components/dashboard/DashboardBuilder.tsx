@@ -469,7 +469,7 @@ export function DashboardBuilder({
 
                       {/* Built-in templates */}
                       <div className="space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Built-in Templates</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.builtInTemplates')}</p>
                         {DASHBOARD_TEMPLATES.map(template => (
                           <button
                             key={template.id}
