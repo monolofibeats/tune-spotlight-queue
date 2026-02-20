@@ -371,7 +371,7 @@ export function DashboardBuilder({
                           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.saveCurrentLayout')}</p>
                           <div className="flex gap-1.5">
                             <Input
-                              placeholder="Preset name…"
+                              placeholder={t('builder.presetName')}
                               value={newPresetName}
                               onChange={(e) => setNewPresetName(e.target.value)}
                               className="h-7 text-xs"
