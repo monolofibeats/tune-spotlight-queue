@@ -398,7 +398,7 @@ export function DashboardBuilder({
                               }}
                             >
                               {isSavingPreset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                              Save
+                              {t('builder.save')}
                             </Button>
                           </div>
                         </div>
