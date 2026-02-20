@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { GripVertical, X, ExternalLink } from 'lucide-react';
 import { getWidgetDef } from './WidgetRegistry';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface WidgetWrapperProps {
   widgetId: string;
