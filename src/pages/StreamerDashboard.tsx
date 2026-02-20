@@ -125,6 +125,7 @@ const StreamerDashboard = () => {
   const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
+  const [phoneOptimized, setPhoneOptimized] = useState(true);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
