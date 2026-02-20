@@ -54,7 +54,7 @@ interface StreamerSettingsPanelProps {
   onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
-export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
+export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange }: StreamerSettingsPanelProps) {
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
