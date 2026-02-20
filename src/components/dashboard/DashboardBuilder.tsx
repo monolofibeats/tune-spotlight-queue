@@ -573,7 +573,7 @@ function WidgetsTab({
                       {/* Width */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">Width</label>
+                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.width')}</label>
                           <div className="flex items-center gap-1">
                             <Input type="number" value={layoutItem.w} min={widget.minSize.w} step="0.1"
                               onChange={(e) => updateWidgetSize(widget.id, 'w', parseFloat(e.target.value) || widget.minSize.w)}
