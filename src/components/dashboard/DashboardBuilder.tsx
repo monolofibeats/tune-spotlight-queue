@@ -237,9 +237,9 @@ export function DashboardBuilder({
   }
 
   const tabs: { id: BuilderTab; label: string }[] = [
-    { id: 'widgets', label: 'Widgets' },
-    { id: 'layout', label: 'Layout' },
-    { id: 'templates', label: 'Templates' },
+    { id: 'widgets', label: t('builder.tab.widgets') },
+    { id: 'layout', label: t('builder.tab.layout') },
+    { id: 'templates', label: t('builder.tab.templates') },
   ];
 
   return (
