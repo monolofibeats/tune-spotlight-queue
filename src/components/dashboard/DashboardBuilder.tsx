@@ -555,10 +555,10 @@ function WidgetsTab({
                   <widget.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-medium truncate">{widget.label}</p>
+                      <p className="text-xs font-medium truncate">{t(`widget.${widget.id}.label`)}</p>
                       {isPoppedOut && <span className="text-[9px] px-1 py-0.5 rounded bg-accent text-accent-foreground">popped</span>}
                     </div>
-                    {!isActive && <p className="text-[10px] text-muted-foreground truncate">{widget.description}</p>}
+                    {!isActive && <p className="text-[10px] text-muted-foreground truncate">{t(`widget.${widget.id}.desc`)}</p>}
                   </div>
                   {isActive ? (
                     isExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />
