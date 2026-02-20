@@ -618,7 +618,7 @@ function WidgetsTab({
                             className="text-primary hover:underline"
                             onClick={() => updateWidgetConfigValue(widget.id, 'textScale', 100)}
                           >
-                            Reset
+                            {t('builder.resetSize')}
                           </button>
                           <span>150%</span>
                         </div>
