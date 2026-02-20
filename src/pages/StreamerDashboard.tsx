@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { StreamSessionProvider } from '@/hooks/useStreamSession';
+import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
