@@ -407,7 +407,7 @@ export function DashboardBuilder({
                       {/* User presets */}
                       {userPresets.length > 0 && (
                         <div className="space-y-1.5">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">My Presets</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t('builder.myPresets')}</p>
                           {userPresets.map(preset => (
                             <div
                               key={preset.id}
