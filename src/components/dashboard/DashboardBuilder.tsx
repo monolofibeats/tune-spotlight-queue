@@ -279,7 +279,7 @@ export function DashboardBuilder({
           >
             <GripVertical className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <LayoutTemplate className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-xs font-semibold flex-1">Dashboard Builder</span>
+            <span className="text-xs font-semibold flex-1">{t('builder.title')}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsMinimized(!isMinimized)}>
               {isMinimized ? <Maximize2 className="w-3 h-3" /> : <Minimize2 className="w-3 h-3" />}
             </Button>
