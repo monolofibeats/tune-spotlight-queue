@@ -230,7 +230,7 @@ export function DashboardBuilder({
 
   if (!isEditing) {
     return (
-      <Button variant="ghost" size="icon" onClick={handleStartEditing} className="h-8 w-8" title="Edit dashboard layout">
+      <Button variant="ghost" size="icon" onClick={handleStartEditing} className="h-8 w-8" title={t('builder.editLayout')}>
         <Pencil className="w-4 h-4" />
       </Button>
     );
