@@ -867,7 +867,7 @@ const StreamerDashboard = () => {
 
               {canEdit && (
                 <TabsContent value="settings">
-                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
+                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} />
                 </TabsContent>
               )}
             </Tabs>
