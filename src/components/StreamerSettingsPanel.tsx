@@ -304,7 +304,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             </TabsContent>
 
             <TabsContent value="stream" className="space-y-6">
-              <SessionManager streamerId={initialStreamer.id} />
+              <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
               <StreamEmbedConfig streamerId={initialStreamer.id} />
             </TabsContent>
           </Tabs>
