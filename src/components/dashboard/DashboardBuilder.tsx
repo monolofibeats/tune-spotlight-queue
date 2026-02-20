@@ -533,7 +533,7 @@ function WidgetsTab({
     <>
       {['core', 'analytics', 'tools'].map(category => (
         <div key={category} className="mb-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{category}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{t(`builder.category.${category}`)}</p>
           {WIDGET_REGISTRY.filter(w => w.category === category).map(widget => {
             const isActive = activeWidgetIds.includes(widget.id);
             const isExpanded = expandedWidget === widget.id && isActive;
