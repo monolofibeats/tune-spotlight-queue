@@ -50,6 +50,8 @@ interface ExtendedStreamer extends Streamer {
 interface StreamerSettingsPanelProps {
   streamer: Streamer;
   onUpdate: (streamer: Streamer) => void;
+  phoneOptimized?: boolean;
+  onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
 export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
