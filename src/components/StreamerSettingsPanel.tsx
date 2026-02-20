@@ -50,9 +50,11 @@ interface ExtendedStreamer extends Streamer {
 interface StreamerSettingsPanelProps {
   streamer: Streamer;
   onUpdate: (streamer: Streamer) => void;
+  phoneOptimized?: boolean;
+  onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
-export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: StreamerSettingsPanelProps) {
+export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange }: StreamerSettingsPanelProps) {
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
@@ -302,7 +304,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate }: S
             </TabsContent>
 
             <TabsContent value="stream" className="space-y-6">
-              <SessionManager streamerId={initialStreamer.id} />
+              <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
               <StreamEmbedConfig streamerId={initialStreamer.id} />
             </TabsContent>
           </Tabs>

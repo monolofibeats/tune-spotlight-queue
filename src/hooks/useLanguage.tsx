@@ -353,6 +353,8 @@ const translations: Record<Language, Record<string, string>> = {
     'session.noActiveSession': 'No Active Session',
     'session.sessionTitle': 'Session Title (optional)',
     'session.sessionTitlePlaceholder': 'e.g., Saturday Night Reviews',
+    'session.phoneOptimized': 'Optimize for phone',
+    'session.phoneOptimizedDesc': 'Single-column layout for 9:16 streaming',
     // Stream Embed
     'streamEmbed.title': 'Stream Embed Widget',
     'streamEmbed.subtitle': 'Configure what appears in the live embed on your page',
@@ -1206,6 +1208,8 @@ const translations: Record<Language, Record<string, string>> = {
     'session.noActiveSession': 'Keine aktive Session',
     'session.sessionTitle': 'Session-Titel (optional)',
     'session.sessionTitlePlaceholder': 'z.B. Saturday Night Reviews',
+    'session.phoneOptimized': 'Für Handy optimieren',
+    'session.phoneOptimizedDesc': 'Einspalten-Layout für 9:16-Streaming',
     // Stream Embed
     'streamEmbed.title': 'Stream-Embed-Widget',
     'streamEmbed.subtitle': 'Konfiguriere was im Live-Embed auf deiner Seite angezeigt wird',

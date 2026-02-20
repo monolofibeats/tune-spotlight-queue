@@ -68,6 +68,7 @@ function LiveAwareDashboardGrid({
   popOutOptions,
   handlePopOut,
   widgetConfigs,
+  phoneOptimized,
 }: {
   dashboardLayout: Layout[];
   isBuilderEditing: boolean;
@@ -78,12 +79,13 @@ function LiveAwareDashboardGrid({
   popOutOptions: { showWhenPoppedOut: Set<string> };
   handlePopOut: (widgetId: string) => void;
   widgetConfigs: WidgetConfigs;
+  phoneOptimized: boolean;
 }) {
   const { isLive } = useStreamSession();
 
-  // When live, force a single-column phone-optimized layout
+  // When live AND phone-optimized, force a single-column phone-optimized layout
   const effectiveLayout = useMemo(() => {
-    if (!isLive) return dashboardLayout;
+    if (!isLive || !phoneOptimized) return dashboardLayout;
     // Stack all widgets in a single column, full width
     let yOffset = 0;
     return dashboardLayout.map(item => {
@@ -92,10 +94,10 @@ function LiveAwareDashboardGrid({
       yOffset += item.h;
       return newItem;
     });
-  }, [isLive, dashboardLayout]);
+  }, [isLive, phoneOptimized, dashboardLayout]);
 
   return (
-    <div className={`transition-all duration-500 ${isLive ? 'max-w-[480px] mx-auto' : ''}`}>
+    <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
       <DashboardGrid
         layout={effectiveLayout}
         isEditing={isBuilderEditing && canEdit}
@@ -123,6 +125,7 @@ const StreamerDashboard = () => {
   const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
+  const [phoneOptimized, setPhoneOptimized] = useState(true);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
@@ -858,12 +861,13 @@ const StreamerDashboard = () => {
                   popOutOptions={popOutOptions}
                   handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
+                  phoneOptimized={phoneOptimized}
                 />
               </TabsContent>
 
               {canEdit && (
                 <TabsContent value="settings">
-                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} />
+                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} />
                 </TabsContent>
               )}
             </Tabs>

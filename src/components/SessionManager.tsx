@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Power, Loader2 } from 'lucide-react';
+import { Radio, Power, Loader2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { toast } from '@/hooks/use-toast';
@@ -13,9 +14,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SessionManagerProps {
   streamerId?: string;
+  phoneOptimized?: boolean;
+  onPhoneOptimizedChange?: (value: boolean) => void;
 }
 
-export function SessionManager({ streamerId: _streamerId }: SessionManagerProps) {
+export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
   const { t } = useLanguage();
@@ -154,6 +157,19 @@ export function SessionManager({ streamerId: _streamerId }: SessionManagerProps)
               placeholder={t('session.sessionTitlePlaceholder')}
               value={sessionTitle}
               onChange={(e) => setSessionTitle(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20">
+            <div className="flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">{t('session.phoneOptimized')}</p>
+                <p className="text-[10px] text-muted-foreground">{t('session.phoneOptimizedDesc')}</p>
+              </div>
+            </div>
+            <Switch
+              checked={phoneOptimized}
+              onCheckedChange={(checked) => onPhoneOptimizedChange?.(checked)}
             />
           </div>
         </div>
