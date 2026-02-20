@@ -247,14 +247,14 @@ export function DashboardBuilder({
       {/* Top bar buttons */}
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={handleCancel} className="gap-1.5 text-xs">
-          <X className="w-3.5 h-3.5" /> Cancel
+          <X className="w-3.5 h-3.5" /> {t('builder.cancel')}
         </Button>
         <Button variant="outline" size="sm" onClick={() => onLayoutChange(getDefaultLayout())} className="gap-1.5 text-xs">
-          <RotateCcw className="w-3.5 h-3.5" /> Reset
+          <RotateCcw className="w-3.5 h-3.5" /> {t('builder.reset')}
         </Button>
         <Button size="sm" onClick={handleSave} disabled={isSaving} className="gap-1.5 text-xs">
           {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-          Save
+          {t('builder.save')}
         </Button>
       </div>
 
