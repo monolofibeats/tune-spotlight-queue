@@ -13,7 +13,9 @@ interface WidgetWrapperProps {
 }
 
 export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppedOut, textScale = 100 }: WidgetWrapperProps) {
+  const { t } = useLanguage();
   const def = getWidgetDef(widgetId);
+  const translatedLabel = t(`widget.${widgetId}.label`);
   const zoomStyle = textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined;
 
   return (
