@@ -89,6 +89,7 @@ export function DashboardBuilder({
   onDeletePreset,
   onRenamePreset,
 }: DashboardBuilderProps) {
+  const { t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   const [layoutBeforeEdit, setLayoutBeforeEdit] = useState<Layout[]>([]);
   const [viewOptionsBeforeEdit, setViewOptionsBeforeEdit] = useState<DashboardViewOptions>({ showHeader: true, showDashboardTitle: true });
