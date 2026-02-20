@@ -654,11 +654,11 @@ function WidgetsTab({
                       <div className="flex gap-1.5">
                         {onPopOut && (
                           <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={() => onPopOut(widget.id)}>
-                            <ExternalLink className="w-3 h-3" /> Pop Out
+                            <ExternalLink className="w-3 h-3" /> {t('builder.popOut')}
                           </Button>
                         )}
                         <Button variant="outline" size="sm" className="h-7 text-[10px] gap-1 text-destructive hover:text-destructive" onClick={() => removeWidget(widget.id)}>
-                          <X className="w-3 h-3" /> Remove
+                          <X className="w-3 h-3" /> {t('builder.remove')}
                         </Button>
                       </div>
                     </div>
