@@ -8,6 +8,7 @@ import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBan
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
 import { SubmissionTracker } from '@/components/SubmissionTracker';
+import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { StreamEmbed } from '@/components/StreamEmbed';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
@@ -161,6 +162,13 @@ function StreamerPageContent() {
             streamerSlug={streamer.slug}
             onSubmissionTracked={(sub) => trackSubmission(sub)}
           />
+        </div>
+      </section>
+
+      {/* Top Songs Pedestal - below form when public */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-xl">
+          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={!!streamer.show_top_songs} />
         </div>
       </section>
 

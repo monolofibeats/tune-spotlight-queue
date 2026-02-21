@@ -1000,6 +1000,58 @@ export type Database = {
           },
         ]
       }
+      streamer_top_songs: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          position: number
+          streamer_id: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position: number
+          streamer_id: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          streamer_id?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_top_songs_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "streamer_top_songs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "streamer_top_songs_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streamers: {
         Row: {
           accent_color: string | null
@@ -1034,6 +1086,7 @@ export type Database = {
           rejection_reason: string | null
           show_how_it_works: boolean | null
           show_stream_embed: boolean | null
+          show_top_songs: boolean | null
           slug: string
           status: Database["public"]["Enums"]["streamer_status"]
           submission_type: string | null
@@ -1078,6 +1131,7 @@ export type Database = {
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
           show_stream_embed?: boolean | null
+          show_top_songs?: boolean | null
           slug: string
           status?: Database["public"]["Enums"]["streamer_status"]
           submission_type?: string | null
@@ -1122,6 +1176,7 @@ export type Database = {
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
           show_stream_embed?: boolean | null
+          show_top_songs?: boolean | null
           slug?: string
           status?: Database["public"]["Enums"]["streamer_status"]
           submission_type?: string | null

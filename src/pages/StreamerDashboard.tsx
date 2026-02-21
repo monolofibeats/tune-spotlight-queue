@@ -11,7 +11,8 @@ import {
   CheckCircle,
   Settings,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  Trophy
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { BulkActionBar } from '@/components/submission/BulkActionBar';
+import { TopSongsPedestal } from '@/components/TopSongsPedestal';
 import { DashboardBuilder, type DashboardViewOptions, type PopOutOptions } from '@/components/dashboard/DashboardBuilder';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { EarningsWidget } from '@/components/dashboard/widgets/EarningsWidget';
@@ -843,6 +845,12 @@ const StreamerDashboard = () => {
                   {t('dashboard.submissions')}
                 </TabsTrigger>
                 {canEdit && (
+                  <TabsTrigger value="top-songs" className="rounded-lg px-6 gap-2">
+                    <Trophy className="w-4 h-4" />
+                    {t('topSongs.tab')}
+                  </TabsTrigger>
+                )}
+                {canEdit && (
                   <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
                     <Settings className="w-4 h-4" />
                     {t('dashboard.myPageSettings')}
@@ -864,6 +872,14 @@ const StreamerDashboard = () => {
                   phoneOptimized={phoneOptimized}
                 />
               </TabsContent>
+
+              {canEdit && (
+                <TabsContent value="top-songs">
+                  <div className="glass rounded-2xl p-6 border border-border/30">
+                    <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
+                  </div>
+                </TabsContent>
+              )}
 
               {canEdit && (
                 <TabsContent value="settings">
