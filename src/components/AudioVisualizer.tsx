@@ -348,6 +348,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     const OFF_KEY_HISTORY_MAX = 40;
     // Smoothed severity for color interpolation (0 = in-tune, 1 = off-key)
     let smoothSeverity = 0;
+    let targetSeverity = 0;
     // Require sustained drift before changing status
     let sustainedDriftCount = 0;
     const SUSTAINED_THRESHOLD = 4; // need N consecutive readings to trigger status change
