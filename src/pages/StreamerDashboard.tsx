@@ -11,7 +11,8 @@ import {
   CheckCircle,
   Settings,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  Trophy
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
