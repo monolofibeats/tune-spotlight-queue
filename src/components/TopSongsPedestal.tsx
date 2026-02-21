@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search } from 'lucide-react';
+import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
