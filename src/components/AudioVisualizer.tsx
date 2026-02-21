@@ -466,16 +466,16 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               const avgDrift = recentWindow.reduce((a, b) => a + b, 0) / recentWindow.length;
 
               // Target severity: 0 = in-tune, 0.33 = slight, 0.66 = off-key, 1 = key-change
-              let targetSeverity = 0;
+              let newTargetSeverity = 0;
               let newStatus = offKeyStatus;
 
               if (avgDrift < 0.5) {
-                targetSeverity = 0;
+                newTargetSeverity = 0;
                 sustainedDriftCount = 0;
                 newStatus = 'in-tune';
                 offKeyDetail = '';
               } else if (avgDrift < 2) {
-                targetSeverity = 0.33;
+                newTargetSeverity = 0.33;
                 if (offKeyStatus !== 'slight') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
@@ -487,7 +487,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
                   offKeyDetail = `Drift ${direction} ~${avgDrift.toFixed(1)} st`;
                 }
               } else if (avgDrift < 4.5) {
-                targetSeverity = 0.66;
+                newTargetSeverity = 0.66;
                 if (offKeyStatus !== 'off-key') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
@@ -499,7 +499,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
                   offKeyDetail = `Off ${direction} ~${avgDrift.toFixed(1)} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
                 }
               } else {
-                targetSeverity = 1;
+                newTargetSeverity = 1;
                 if (offKeyStatus !== 'key-change') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
@@ -509,6 +509,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               }
 
               offKeyStatus = newStatus;
+              targetSeverity = newTargetSeverity;
             } else {
               offKeyStatus = 'listening';
               offKeyDetail = 'Establishing reference…';
@@ -522,7 +523,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       if (hasAudio && detectedKey) keyDisplayAlpha = Math.min(1, keyDisplayAlpha + 0.05);
 
       // Lerp severity every frame for smooth color transitions
-      smoothSeverity += (targetSeverity - smoothSeverity) * 0.04;
+      smoothSeverity += (targetSeverity - smoothSeverity) * 0.12;
 
       // ── Map frequency spectrum (capped at 20kHz) ──
       const sampleRate = analyser?.context?.sampleRate || 44100;
