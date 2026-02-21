@@ -716,6 +716,24 @@ export function NowPlayingPanel({
                       <SkipForward className="w-3.5 h-3.5" />
                       {t('nowPlaying.skip')}
                     </Button>
+                    {onAddToPedestal && (
+                      <div className="flex items-center gap-1 ml-2">
+                        <Trophy className="w-3.5 h-3.5 text-muted-foreground" />
+                        {[1, 2, 3].map(pos => (
+                          <Button
+                            key={pos}
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs gap-1 px-2"
+                            onClick={() => onAddToPedestal(submission.id, pos)}
+                            title={`Add to Spot #${pos}`}
+                          >
+                            {pos === 1 ? <Crown className="w-3 h-3 text-yellow-400" /> : pos === 2 ? <Medal className="w-3 h-3 text-slate-300" /> : <Award className="w-3 h-3 text-amber-600" />}
+                            #{pos}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                     {onDelete && (
                       <Button
                         variant="ghost"
@@ -727,7 +745,7 @@ export function NowPlayingPanel({
                         {t('nowPlaying.trash')}
                       </Button>
                     )}
-                  </div>
+                   </div>
                 </div>
               )}
 
