@@ -460,27 +460,57 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               offKeyHistory.push(dist);
               if (offKeyHistory.length > OFF_KEY_HISTORY_MAX) offKeyHistory.shift();
 
-              if (dist === 0) {
-                offKeyStatus = 'in-tune';
+              // Use rolling average of recent history for status decisions
+              const recentWindow = offKeyHistory.slice(-8);
+              const avgDrift = recentWindow.reduce((a, b) => a + b, 0) / recentWindow.length;
+
+              // Target severity: 0 = in-tune, 0.33 = slight, 0.66 = off-key, 1 = key-change
+              let targetSeverity = 0;
+              let newStatus = offKeyStatus;
+
+              if (avgDrift < 0.5) {
+                targetSeverity = 0;
+                sustainedDriftCount = 0;
+                newStatus = 'in-tune';
                 offKeyDetail = '';
-              } else if (dist <= 2) {
-                offKeyStatus = 'slight';
-                const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
-                const direction = semiDiff <= 6
-                  ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
-                  : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
-                offKeyDetail = `Drift ${direction} ${dist} st`;
-              } else if (dist <= 4) {
-                offKeyStatus = 'off-key';
-                const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
-                const direction = semiDiff <= 6
-                  ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
-                  : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
-                offKeyDetail = `Off ${direction} ${dist} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
+              } else if (avgDrift < 2) {
+                targetSeverity = 0.33;
+                if (offKeyStatus !== 'slight') sustainedDriftCount++;
+                else sustainedDriftCount = SUSTAINED_THRESHOLD;
+                if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
+                  newStatus = 'slight';
+                  const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
+                  const direction = semiDiff <= 6
+                    ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
+                    : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
+                  offKeyDetail = `Drift ${direction} ~${avgDrift.toFixed(1)} st`;
+                }
+              } else if (avgDrift < 4.5) {
+                targetSeverity = 0.66;
+                if (offKeyStatus !== 'off-key') sustainedDriftCount++;
+                else sustainedDriftCount = SUSTAINED_THRESHOLD;
+                if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
+                  newStatus = 'off-key';
+                  const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
+                  const direction = semiDiff <= 6
+                    ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
+                    : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
+                  offKeyDetail = `Off ${direction} ~${avgDrift.toFixed(1)} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
+                }
               } else {
-                offKeyStatus = 'key-change';
-                offKeyDetail = `→ ${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`;
+                targetSeverity = 1;
+                if (offKeyStatus !== 'key-change') sustainedDriftCount++;
+                else sustainedDriftCount = SUSTAINED_THRESHOLD;
+                if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
+                  newStatus = 'key-change';
+                  offKeyDetail = `→ ${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`;
+                }
               }
+
+              offKeyStatus = newStatus;
+              // Smooth severity lerp (slow transitions)
+              const sevLerp = 0.08;
+              smoothSeverity += (targetSeverity - smoothSeverity) * sevLerp;
             } else {
               offKeyStatus = 'listening';
               offKeyDetail = 'Establishing reference…';
