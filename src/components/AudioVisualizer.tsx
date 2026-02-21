@@ -572,8 +572,12 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       }
 
       // ── Off-key indicator (always drawn) ──
+      // Also lerp smoothSeverity every frame for smooth color transitions
+      if (hasAudio && establishedKey) {
+        // keep smoothing even between key updates
+      }
       if (keyDisplayAlpha > 0.01) {
-        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, keyDrift, offKeyHistory, keyDisplayAlpha, waveW, hsla);
+        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, smoothSeverity, offKeyHistory, keyDisplayAlpha, waveW, hsla);
       }
 
       rafRef.current = requestAnimationFrame(draw);
