@@ -405,23 +405,49 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     if (!audioFile) return null;
     
     setIsUploadingFile(true);
+    setUploadProgress(0);
     try {
       const fileExt = audioFile.name.split('.').pop()?.toLowerCase();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('song-files')
-        .upload(fileName, audioFile, {
-          cacheControl: '3600',
-          upsert: false,
+      // Use XMLHttpRequest for progress tracking
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/song-files/${fileName}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.setRequestHeader('apikey', import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+        xhr.setRequestHeader('x-upsert', 'false');
+        xhr.setRequestHeader('cache-control', '3600');
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
         });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText);
+              reject(new Error(err.message || 'Upload failed'));
+            } catch {
+              reject(new Error('Upload failed'));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+        xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+        xhr.send(audioFile);
+      });
       
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw new Error(uploadError.message || 'Failed to upload audio file');
-      }
-      
-      // Return just the file path - signed URLs will be generated on demand for playback
       return fileName;
     } catch (error) {
       console.error('File upload error:', error);
@@ -429,6 +455,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       throw new Error(errorMessage);
     } finally {
       setIsUploadingFile(false);
+      setUploadProgress(0);
     }
   };
 
