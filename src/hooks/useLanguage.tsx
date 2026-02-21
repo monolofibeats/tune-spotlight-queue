@@ -373,6 +373,7 @@ const translations: Record<Language, Record<string, string>> = {
     'topSongs.searchPlaceholder': 'Search songs...',
     'topSongs.messagePlaceholder': 'e.g. "#1 will get a playlist add!"',
     'topSongs.messageLabel': 'Public message',
+    'topSongs.saveMessage': 'Save',
     'topSongs.tab': 'Top Songs',
     // Stream Embed
     'streamEmbed.title': 'Stream Embed Widget',
