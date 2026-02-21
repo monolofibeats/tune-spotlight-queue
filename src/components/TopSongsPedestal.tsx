@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award } from 'lucide-react';
+import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +47,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
   const [draggingSubmission, setDraggingSubmission] = useState<Submission | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchTopSongs = useCallback(async () => {
     const { data } = await supabase
@@ -257,11 +258,14 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
     return 'min-h-[85px]';
   };
 
-  // Available songs = reviewed/pending, not already on pedestal
+  // Available songs = reviewed/pending, not already on pedestal, filtered by search
   const pedestalSubmissionIds = topSongs.map(ts => ts.submission_id);
-  const availableSongs = submissions.filter(
-    s => !pedestalSubmissionIds.includes(s.id) && s.status !== 'deleted'
-  );
+  const availableSongs = submissions.filter(s => {
+    if (pedestalSubmissionIds.includes(s.id) || s.status === 'deleted') return false;
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.song_title.toLowerCase().includes(q) || s.artist_name.toLowerCase().includes(q);
+  });
 
   return (
     <div className="space-y-6">
@@ -368,6 +372,16 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       {/* Draggable song list */}
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('topSongs.availableSongs')}</h3>
+        <div className="relative mb-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('topSongs.searchPlaceholder')}
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
         <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
           {availableSongs.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">{t('topSongs.noSongsAvailable')}</p>

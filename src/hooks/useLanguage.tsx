@@ -370,6 +370,7 @@ const translations: Record<Language, Record<string, string>> = {
     'topSongs.dragHere': 'Drag a song here',
     'topSongs.availableSongs': 'Available Songs — drag to a spot above',
     'topSongs.noSongsAvailable': 'No submissions available yet',
+    'topSongs.searchPlaceholder': 'Search songs...',
     'topSongs.tab': 'Top Songs',
     // Stream Embed
     'streamEmbed.title': 'Stream Embed Widget',
@@ -1241,6 +1242,7 @@ const translations: Record<Language, Record<string, string>> = {
     'topSongs.dragHere': 'Song hierher ziehen',
     'topSongs.availableSongs': 'Verfügbare Songs — auf einen Platz oben ziehen',
     'topSongs.noSongsAvailable': 'Noch keine Submissions verfügbar',
+    'topSongs.searchPlaceholder': 'Songs suchen...',
     'topSongs.tab': 'Top Songs',
     // Stream Embed
     'streamEmbed.title': 'Stream-Embed-Widget',
