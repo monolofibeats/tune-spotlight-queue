@@ -874,6 +874,14 @@ const StreamerDashboard = () => {
               </TabsContent>
 
               {canEdit && (
+                <TabsContent value="top-songs">
+                  <div className="glass rounded-2xl p-6 border border-border/30">
+                    <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
+                  </div>
+                </TabsContent>
+              )}
+
+              {canEdit && (
                 <TabsContent value="settings">
                   <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} />
                 </TabsContent>
