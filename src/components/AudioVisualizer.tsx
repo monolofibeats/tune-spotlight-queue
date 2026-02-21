@@ -499,7 +499,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
                   offKeyDetail = `Off ${direction} ~${avgDrift.toFixed(1)} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
                 }
               } else {
-                targetSeverity = 1;
+                newTargetSeverity = 1;
                 if (offKeyStatus !== 'key-change') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
