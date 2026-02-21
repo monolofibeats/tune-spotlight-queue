@@ -369,6 +369,16 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       {/* Draggable song list */}
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-3">{t('topSongs.availableSongs')}</h3>
+        <div className="relative mb-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('topSongs.searchPlaceholder')}
+            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
         <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
           {availableSongs.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">{t('topSongs.noSongsAvailable')}</p>
