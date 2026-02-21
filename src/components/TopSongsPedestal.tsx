@@ -258,11 +258,14 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
     return 'min-h-[85px]';
   };
 
-  // Available songs = reviewed/pending, not already on pedestal
+  // Available songs = reviewed/pending, not already on pedestal, filtered by search
   const pedestalSubmissionIds = topSongs.map(ts => ts.submission_id);
-  const availableSongs = submissions.filter(
-    s => !pedestalSubmissionIds.includes(s.id) && s.status !== 'deleted'
-  );
+  const availableSongs = submissions.filter(s => {
+    if (pedestalSubmissionIds.includes(s.id) || s.status === 'deleted') return false;
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.song_title.toLowerCase().includes(q) || s.artist_name.toLowerCase().includes(q);
+  });
 
   return (
     <div className="space-y-6">
