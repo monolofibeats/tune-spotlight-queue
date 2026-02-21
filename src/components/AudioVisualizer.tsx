@@ -509,6 +509,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               }
 
               offKeyStatus = newStatus;
+              targetSeverity = newTargetSeverity;
             } else {
               offKeyStatus = 'listening';
               offKeyDetail = 'Establishing reference…';
