@@ -8,7 +8,7 @@ import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBan
 import { Header } from '@/components/Header';
 import { SubmissionForm } from '@/components/SubmissionForm';
 import { SubmissionTracker } from '@/components/SubmissionTracker';
-import { StreamEmbed } from '@/components/StreamEmbed';
+import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
