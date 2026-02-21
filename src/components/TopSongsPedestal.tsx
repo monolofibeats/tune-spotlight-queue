@@ -47,6 +47,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
   const [draggingSubmission, setDraggingSubmission] = useState<Submission | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchTopSongs = useCallback(async () => {
     const { data } = await supabase
