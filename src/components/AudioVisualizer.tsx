@@ -536,9 +536,9 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
         drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSRef.current !== false, showDBFSRef.current !== false);
       }
 
-      // ── Key indicator (always drawn) ──
-      if (detectedKey && keyDisplayAlpha > 0.01) {
-        drawKeyIndicator(ctx, detectedKey, detectedMode, detectedConf, detectedCamelot, keyDrift, driftMessage, keyDisplayAlpha, waveW, hsla);
+      // ── Off-key indicator (always drawn) ──
+      if (keyDisplayAlpha > 0.01) {
+        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, keyDrift, offKeyHistory, keyDisplayAlpha, waveW, hsla);
       }
 
       rafRef.current = requestAnimationFrame(draw);
