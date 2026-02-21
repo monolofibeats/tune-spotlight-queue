@@ -107,6 +107,12 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
           );
         })}
       </div>
+
+      {topSongsMessage && (
+        <p className="text-center text-xs text-muted-foreground italic mt-1">
+          {topSongsMessage}
+        </p>
+      )}
     </motion.div>
   );
 }
