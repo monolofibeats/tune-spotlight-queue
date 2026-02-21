@@ -168,7 +168,7 @@ function StreamerPageContent() {
       {/* Top Songs Pedestal - below form when public */}
       <section className="pb-4 px-4">
         <div className="container mx-auto max-w-xl">
-          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={!!streamer.show_top_songs} />
+          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={!!streamer.show_top_songs} topSongsMessage={streamer.top_songs_message} />
         </div>
       </section>
 
