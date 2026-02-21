@@ -845,6 +845,12 @@ const StreamerDashboard = () => {
                   {t('dashboard.submissions')}
                 </TabsTrigger>
                 {canEdit && (
+                  <TabsTrigger value="top-songs" className="rounded-lg px-6 gap-2">
+                    <Trophy className="w-4 h-4" />
+                    {t('topSongs.tab')}
+                  </TabsTrigger>
+                )}
+                {canEdit && (
                   <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
                     <Settings className="w-4 h-4" />
                     {t('dashboard.myPageSettings')}
