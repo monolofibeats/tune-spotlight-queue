@@ -475,7 +475,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
                 newStatus = 'in-tune';
                 offKeyDetail = '';
               } else if (avgDrift < 2) {
-                targetSeverity = 0.33;
+                newTargetSeverity = 0.33;
                 if (offKeyStatus !== 'slight') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
