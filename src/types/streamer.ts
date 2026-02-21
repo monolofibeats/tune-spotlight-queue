@@ -50,6 +50,7 @@ export interface Streamer {
   show_how_it_works: boolean;
   show_stream_embed: boolean;
   show_top_songs?: boolean;
+  top_songs_message?: string;
   custom_css?: string;
   
   // Status & timestamps

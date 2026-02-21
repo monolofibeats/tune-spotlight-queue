@@ -14,9 +14,10 @@ interface TopSongDisplay {
 interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
+  topSongsMessage?: string;
 }
 
-export function TopSongsPublicDisplay({ streamerId, showTopSongs }: TopSongsPublicDisplayProps) {
+export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage }: TopSongsPublicDisplayProps) {
   const { t } = useLanguage();
   const [songs, setSongs] = useState<TopSongDisplay[]>([]);
 
@@ -106,6 +107,12 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs }: TopSongsPubl
           );
         })}
       </div>
+
+      {topSongsMessage && (
+        <p className="text-center text-xs text-muted-foreground italic mt-1">
+          {topSongsMessage}
+        </p>
+      )}
     </motion.div>
   );
 }

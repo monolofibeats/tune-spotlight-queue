@@ -45,6 +45,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   const { t } = useLanguage();
   const [topSongs, setTopSongs] = useState<TopSong[]>([]);
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
+  const [topSongsMessage, setTopSongsMessage] = useState(streamer.top_songs_message || '');
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
   const [draggingSubmission, setDraggingSubmission] = useState<Submission | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +81,18 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       setShowPublicly(!checked);
     } else {
       onStreamerUpdate?.({ ...streamer, show_top_songs: checked } as Streamer);
+    }
+  };
+
+  const handleMessageSave = async () => {
+    const { error } = await supabase
+      .from('streamers')
+      .update({ top_songs_message: topSongsMessage || null })
+      .eq('id', streamer.id);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save message', variant: 'destructive' });
+    } else {
+      onStreamerUpdate?.({ ...streamer, top_songs_message: topSongsMessage || null } as Streamer);
     }
   };
 
@@ -284,6 +297,20 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
             </AlertDialogContent>
           </AlertDialog>
         </div>
+      </div>
+
+      {/* Public message */}
+      <div className="flex items-center gap-2">
+        <label className="text-sm text-muted-foreground whitespace-nowrap">{t('topSongs.messageLabel')}</label>
+        <input
+          type="text"
+          value={topSongsMessage}
+          onChange={(e) => setTopSongsMessage(e.target.value)}
+          onBlur={handleMessageSave}
+          placeholder={t('topSongs.messagePlaceholder')}
+          maxLength={120}
+          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
       </div>
 
       {/* Pedestal - 3 spots */}
