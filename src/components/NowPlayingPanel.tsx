@@ -102,6 +102,7 @@ interface NowPlayingPanelProps {
   onDownload: () => void;
   onStatusChange?: (id: string, status: string) => void;
   onDelete?: (id: string) => void;
+  onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
 }
 
