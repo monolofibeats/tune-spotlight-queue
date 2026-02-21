@@ -447,22 +447,39 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
             if (!establishedKey && detectedConf > 60) {
               establishedKey = detectedKey;
               establishedMode = detectedMode;
+              establishedConf = detectedConf;
             }
 
             if (establishedKey) {
               const dist = keyDistance(detectedKey, detectedMode, establishedKey, establishedMode);
               keyDrift = dist;
-              if (dist === 0) driftMessage = '';
-              else if (dist <= 2) driftMessage = 'Slight pitch drift';
-              else if (dist <= 4) {
+              offKeyHistory.push(dist);
+              if (offKeyHistory.length > OFF_KEY_HISTORY_MAX) offKeyHistory.shift();
+
+              if (dist === 0) {
+                offKeyStatus = 'in-tune';
+                offKeyDetail = '';
+              } else if (dist <= 2) {
+                offKeyStatus = 'slight';
                 const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
                 const direction = semiDiff <= 6
                   ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
                   : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
-                driftMessage = `Off-key ${direction} · Tune to ${establishedKey}`;
+                offKeyDetail = `Drift ${direction} ${dist} st`;
+              } else if (dist <= 4) {
+                offKeyStatus = 'off-key';
+                const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
+                const direction = semiDiff <= 6
+                  ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
+                  : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
+                offKeyDetail = `Off ${direction} ${dist} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
               } else {
-                driftMessage = `Key change → ${detectedKey} ${detectedMode}`;
+                offKeyStatus = 'key-change';
+                offKeyDetail = `→ ${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`;
               }
+            } else {
+              offKeyStatus = 'listening';
+              offKeyDetail = 'Establishing reference…';
             }
           }
         }
