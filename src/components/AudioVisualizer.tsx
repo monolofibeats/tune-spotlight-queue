@@ -523,7 +523,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       if (hasAudio && detectedKey) keyDisplayAlpha = Math.min(1, keyDisplayAlpha + 0.05);
 
       // Lerp severity every frame for smooth color transitions
-      smoothSeverity += (targetSeverity - smoothSeverity) * 0.04;
+      smoothSeverity += (targetSeverity - smoothSeverity) * 0.12;
 
       // ── Map frequency spectrum (capped at 20kHz) ──
       const sampleRate = analyser?.context?.sampleRate || 44100;
