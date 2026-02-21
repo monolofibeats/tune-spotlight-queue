@@ -14,6 +14,7 @@ interface TopSongDisplay {
 interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
+  topSongsMessage?: string;
 }
 
 export function TopSongsPublicDisplay({ streamerId, showTopSongs }: TopSongsPublicDisplayProps) {
