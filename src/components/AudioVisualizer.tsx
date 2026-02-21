@@ -466,7 +466,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               const avgDrift = recentWindow.reduce((a, b) => a + b, 0) / recentWindow.length;
 
               // Target severity: 0 = in-tune, 0.33 = slight, 0.66 = off-key, 1 = key-change
-              let targetSeverity = 0;
+              let newTargetSeverity = 0;
               let newStatus = offKeyStatus;
 
               if (avgDrift < 0.5) {
