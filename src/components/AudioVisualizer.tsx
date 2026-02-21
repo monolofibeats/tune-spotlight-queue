@@ -343,9 +343,14 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     let offKeyStatus: 'listening' | 'in-tune' | 'slight' | 'off-key' | 'key-change' = 'listening';
     let offKeyDetail = '';
     let keyDisplayAlpha = 0;
-    const KEY_UPDATE_INTERVAL = 0.35;
+    const KEY_UPDATE_INTERVAL = 0.5; // slower updates
     let offKeyHistory: number[] = [];
-    const OFF_KEY_HISTORY_MAX = 30;
+    const OFF_KEY_HISTORY_MAX = 40;
+    // Smoothed severity for color interpolation (0 = in-tune, 1 = off-key)
+    let smoothSeverity = 0;
+    // Require sustained drift before changing status
+    let sustainedDriftCount = 0;
+    const SUSTAINED_THRESHOLD = 4; // need N consecutive readings to trigger status change
 
     // Lissajous history
     const lissajousHistory: { x: number; y: number }[] = [];
