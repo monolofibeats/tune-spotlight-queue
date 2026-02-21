@@ -306,11 +306,13 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
           type="text"
           value={topSongsMessage}
           onChange={(e) => setTopSongsMessage(e.target.value)}
-          onBlur={handleMessageSave}
           placeholder={t('topSongs.messagePlaceholder')}
           maxLength={120}
           className="flex-1 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
+        <Button variant="outline" size="sm" onClick={handleMessageSave}>
+          {t('topSongs.saveMessage')}
+        </Button>
       </div>
 
       {/* Pedestal - 3 spots */}
