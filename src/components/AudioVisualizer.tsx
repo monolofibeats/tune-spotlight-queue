@@ -329,20 +329,23 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     let integratedSampleCount = 0;
     let integratedLufs = -60;
 
-    // Key detection state
+    // Off-key detection state
     const chroma = new Float64Array(12);
     let chromaFrameCount = 0;
     let lastKeyUpdate = 0;
     let detectedKey = '';
     let detectedMode = '';
     let detectedConf = 0;
-    let detectedCamelot = '';
     let establishedKey = '';
     let establishedMode = '';
+    let establishedConf = 0;
     let keyDrift = 0;
-    let driftMessage = '';
+    let offKeyStatus: 'listening' | 'in-tune' | 'slight' | 'off-key' | 'key-change' = 'listening';
+    let offKeyDetail = '';
     let keyDisplayAlpha = 0;
-    const KEY_UPDATE_INTERVAL = 0.4;
+    const KEY_UPDATE_INTERVAL = 0.35;
+    let offKeyHistory: number[] = [];
+    const OFF_KEY_HISTORY_MAX = 30;
 
     // Lissajous history
     const lissajousHistory: { x: number; y: number }[] = [];
