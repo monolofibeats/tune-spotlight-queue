@@ -49,6 +49,7 @@ export interface Streamer {
   // Customization - Layout
   show_how_it_works: boolean;
   show_stream_embed: boolean;
+  show_top_songs?: boolean;
   custom_css?: string;
   
   // Status & timestamps
