@@ -45,6 +45,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   const { t } = useLanguage();
   const [topSongs, setTopSongs] = useState<TopSong[]>([]);
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
+  const [topSongsMessage, setTopSongsMessage] = useState(streamer.top_songs_message || '');
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
   const [draggingSubmission, setDraggingSubmission] = useState<Submission | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

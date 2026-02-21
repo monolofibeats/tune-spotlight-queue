@@ -1245,6 +1245,8 @@ const translations: Record<Language, Record<string, string>> = {
     'topSongs.availableSongs': 'Verfügbare Songs — auf einen Platz oben ziehen',
     'topSongs.noSongsAvailable': 'Noch keine Submissions verfügbar',
     'topSongs.searchPlaceholder': 'Songs suchen...',
+    'topSongs.messagePlaceholder': 'z.B. "#1 bekommt einen Playlist-Add!"',
+    'topSongs.messageLabel': 'Öffentliche Nachricht',
     'topSongs.tab': 'Top Songs',
     // Stream Embed
     'streamEmbed.title': 'Stream-Embed-Widget',
