@@ -442,7 +442,6 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
             detectedKey = result.key;
             detectedMode = result.mode;
             detectedConf = result.confidence;
-            detectedCamelot = CAMELOT_MAP[`${result.key} ${result.mode}`] || '?';
 
             if (!establishedKey && detectedConf > 60) {
               establishedKey = detectedKey;
