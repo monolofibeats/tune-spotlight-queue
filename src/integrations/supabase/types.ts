@@ -1091,6 +1091,7 @@ export type Database = {
           status: Database["public"]["Enums"]["streamer_status"]
           submission_type: string | null
           tiktok_url: string | null
+          top_songs_message: string | null
           twitch_url: string | null
           twitter_url: string | null
           updated_at: string
@@ -1136,6 +1137,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["streamer_status"]
           submission_type?: string | null
           tiktok_url?: string | null
+          top_songs_message?: string | null
           twitch_url?: string | null
           twitter_url?: string | null
           updated_at?: string
@@ -1181,6 +1183,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["streamer_status"]
           submission_type?: string | null
           tiktok_url?: string | null
+          top_songs_message?: string | null
           twitch_url?: string | null
           twitter_url?: string | null
           updated_at?: string

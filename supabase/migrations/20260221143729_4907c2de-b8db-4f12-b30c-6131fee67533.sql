@@ -1,0 +1,1 @@
+ALTER TABLE public.streamers ADD COLUMN top_songs_message text DEFAULT NULL;
