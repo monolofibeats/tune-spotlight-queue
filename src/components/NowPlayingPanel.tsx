@@ -128,6 +128,7 @@ export function NowPlayingPanel({
   onDownload,
   onStatusChange,
   onDelete,
+  onAddToPedestal,
   config,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
