@@ -94,6 +94,8 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       toast({ title: 'Error', description: 'Failed to save message', variant: 'destructive' });
     } else {
       onStreamerUpdate?.({ ...streamer, top_songs_message: topSongsMessage || null } as Streamer);
+      setMessageSaved(true);
+      setTimeout(() => setMessageSaved(false), 2000);
     }
   };
 
