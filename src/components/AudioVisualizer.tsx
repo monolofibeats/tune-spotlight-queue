@@ -487,7 +487,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
                   offKeyDetail = `Drift ${direction} ~${avgDrift.toFixed(1)} st`;
                 }
               } else if (avgDrift < 4.5) {
-                targetSeverity = 0.66;
+                newTargetSeverity = 0.66;
                 if (offKeyStatus !== 'off-key') sustainedDriftCount++;
                 else sustainedDriftCount = SUSTAINED_THRESHOLD;
                 if (sustainedDriftCount >= SUSTAINED_THRESHOLD) {
