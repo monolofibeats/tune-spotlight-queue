@@ -95,8 +95,6 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       onStreamerUpdate?.({ ...streamer, top_songs_message: topSongsMessage || null } as Streamer);
     }
   };
-    }
-  };
 
   const handleReset = async () => {
     // Deactivate all active top songs
