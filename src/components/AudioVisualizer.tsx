@@ -1063,7 +1063,7 @@ function drawOffKeyIndicator(
   establishedMode: string,
   status: 'listening' | 'in-tune' | 'slight' | 'off-key' | 'key-change',
   detail: string,
-  keyDrift: number,
+  severity: number, // 0..1 smoothed
   history: number[],
   alpha: number,
   waveW: number,
@@ -1073,35 +1073,36 @@ function drawOffKeyIndicator(
   ctx.globalAlpha = alpha;
 
   const boxW = 140;
-  const boxH = status === 'in-tune' || status === 'listening' ? 40 : 52;
+  const hasDetail = severity > 0.15 && status !== 'in-tune' && status !== 'listening';
+  const boxH = hasDetail ? 52 : 40;
   const kx = waveW - boxW - 8;
   const ky = 8;
 
-  // Background color based on status
-  const bgColor = status === 'off-key'
-    ? 'hsla(0, 70%, 12%, 0.9)'
-    : status === 'key-change'
-      ? 'hsla(280, 60%, 15%, 0.9)'
-      : status === 'slight'
-        ? 'hsla(40, 60%, 12%, 0.9)'
-        : 'hsla(0, 0%, 8%, 0.88)';
+  // Interpolate colors smoothly based on severity
+  // 0 = neutral/green, 0.33 = yellow, 0.66 = red, 1 = purple
+  const lerpColor = (s: number): { h: number; sat: number; light: number } => {
+    if (s < 0.05) return { h: 140, sat: 50, light: 12 }; // green-ish neutral
+    if (s < 0.33) {
+      const t = s / 0.33;
+      return { h: 140 - t * 100, sat: 50 + t * 20, light: 10 + t * 3 };
+    }
+    if (s < 0.66) {
+      const t = (s - 0.33) / 0.33;
+      return { h: 40 - t * 40, sat: 70 + t * 10, light: 13 - t * 1 };
+    }
+    const t = (s - 0.66) / 0.34;
+    return { h: t * 280, sat: 70 - t * 10, light: 12 + t * 3 };
+  };
 
-  ctx.fillStyle = bgColor;
+  const bg = lerpColor(severity);
+  ctx.fillStyle = `hsla(${bg.h}, ${bg.sat}%, ${bg.light}%, 0.9)`;
   ctx.beginPath();
   ctx.roundRect(kx, ky, boxW, boxH, 6);
   ctx.fill();
 
-  // Border
-  const borderColor = status === 'off-key'
-    ? 'hsla(0, 80%, 50%, 0.6)'
-    : status === 'key-change'
-      ? 'hsla(280, 70%, 55%, 0.5)'
-      : status === 'slight'
-        ? 'hsla(40, 80%, 50%, 0.4)'
-        : status === 'in-tune'
-          ? 'hsla(140, 60%, 40%, 0.4)'
-          : hsla(0.15);
-  ctx.strokeStyle = borderColor;
+  // Border - same hue but brighter
+  const borderAlpha = 0.2 + severity * 0.4;
+  ctx.strokeStyle = `hsla(${bg.h}, ${Math.min(90, bg.sat + 15)}%, ${Math.min(60, bg.light + 35)}%, ${borderAlpha})`;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.roundRect(kx, ky, boxW, boxH, 6);
@@ -1121,43 +1122,42 @@ function drawOffKeyIndicator(
     ctx.fillText(`ref: ${establishedKey}${establishedMode === 'Minor' ? 'm' : 'M'}`, kx + boxW - 6, ky + 11);
   }
 
+  // Status text color interpolated
+  const textColor = severity < 0.05
+    ? 'hsla(140, 70%, 55%, 0.9)'
+    : severity < 0.33
+      ? `hsla(${140 - (severity / 0.33) * 100}, 75%, 58%, 0.9)`
+      : severity < 0.66
+        ? `hsla(${40 - ((severity - 0.33) / 0.33) * 40}, 80%, 60%, 0.95)`
+        : `hsla(${((severity - 0.66) / 0.34) * 280}, 75%, 62%, 1)`;
+
   // Status indicator
   ctx.textAlign = 'left';
+  ctx.font = 'bold 13px monospace';
+  ctx.fillStyle = textColor;
   if (status === 'in-tune') {
-    ctx.font = 'bold 13px monospace';
-    ctx.fillStyle = 'hsla(140, 70%, 55%, 0.9)';
     ctx.fillText('✓ In Tune', kx + 6, ky + 30);
   } else if (status === 'listening') {
     ctx.font = '11px monospace';
     ctx.fillStyle = hsla(0.4);
     ctx.fillText('◎ Listening…', kx + 6, ky + 30);
   } else if (status === 'slight') {
-    ctx.font = 'bold 13px monospace';
-    ctx.fillStyle = 'hsla(40, 80%, 60%, 0.9)';
     ctx.fillText('⚠ Slight Drift', kx + 6, ky + 30);
   } else if (status === 'off-key') {
-    ctx.font = 'bold 13px monospace';
-    ctx.fillStyle = 'hsla(0, 80%, 60%, 1)';
     ctx.fillText('✗ Off-Key', kx + 6, ky + 30);
   } else if (status === 'key-change') {
-    ctx.font = 'bold 13px monospace';
-    ctx.fillStyle = 'hsla(280, 70%, 65%, 0.9)';
     ctx.fillText('◆ Key Change', kx + 6, ky + 30);
   }
 
-  // Drift history sparkline (when not in-tune/listening)
-  if (history.length > 1 && (status !== 'in-tune' && status !== 'listening')) {
+  // Drift history sparkline
+  if (history.length > 1 && hasDetail) {
     const sparkX = kx + 6;
     const sparkY = ky + 36;
     const sparkW = boxW - 12;
     const sparkH = 10;
 
     ctx.beginPath();
-    ctx.strokeStyle = status === 'off-key'
-      ? 'hsla(0, 70%, 55%, 0.5)'
-      : status === 'key-change'
-        ? 'hsla(280, 60%, 55%, 0.4)'
-        : 'hsla(40, 70%, 55%, 0.4)';
+    ctx.strokeStyle = `hsla(${bg.h}, ${bg.sat}%, ${Math.min(65, bg.light + 40)}%, 0.45)`;
     ctx.lineWidth = 1;
     for (let i = 0; i < history.length; i++) {
       const x = sparkX + (i / (history.length - 1)) * sparkW;
@@ -1169,7 +1169,7 @@ function drawOffKeyIndicator(
   }
 
   // Detail text
-  if (detail && status !== 'in-tune' && status !== 'listening') {
+  if (detail && hasDetail) {
     ctx.font = '8px monospace';
     ctx.textAlign = 'right';
     ctx.fillStyle = hsla(0.4);
