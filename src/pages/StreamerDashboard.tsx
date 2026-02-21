@@ -621,6 +621,7 @@ const StreamerDashboard = () => {
             onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
             onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
             onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
+            onAddToPedestal={handleAddToPedestal}
             config={npConfig}
           />
         </div>
