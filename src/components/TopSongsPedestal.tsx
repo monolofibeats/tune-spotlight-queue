@@ -84,6 +84,20 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
     }
   };
 
+  const handleMessageSave = async () => {
+    const { error } = await supabase
+      .from('streamers')
+      .update({ top_songs_message: topSongsMessage || null })
+      .eq('id', streamer.id);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save message', variant: 'destructive' });
+    } else {
+      onStreamerUpdate?.({ ...streamer, top_songs_message: topSongsMessage || null } as Streamer);
+    }
+  };
+    }
+  };
+
   const handleReset = async () => {
     // Deactivate all active top songs
     const { error } = await supabase
