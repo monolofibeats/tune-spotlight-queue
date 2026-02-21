@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search } from 'lucide-react';
+import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,6 +49,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
   const [draggingSubmission, setDraggingSubmission] = useState<Submission | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [messageSaved, setMessageSaved] = useState(false);
 
   const fetchTopSongs = useCallback(async () => {
     const { data } = await supabase
@@ -93,6 +94,8 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       toast({ title: 'Error', description: 'Failed to save message', variant: 'destructive' });
     } else {
       onStreamerUpdate?.({ ...streamer, top_songs_message: topSongsMessage || null } as Streamer);
+      setMessageSaved(true);
+      setTimeout(() => setMessageSaved(false), 2000);
     }
   };
 
@@ -310,8 +313,18 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
           maxLength={120}
           className="flex-1 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
-        <Button variant="outline" size="sm" onClick={handleMessageSave}>
-          {t('topSongs.saveMessage')}
+        <Button variant="outline" size="sm" onClick={handleMessageSave} className="gap-1.5">
+          <AnimatePresence mode="wait">
+            {messageSaved ? (
+              <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                <Check className="w-3.5 h-3.5 text-green-500" />
+              </motion.span>
+            ) : (
+              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                {t('topSongs.saveMessage')}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Button>
       </div>
 
