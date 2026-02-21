@@ -164,28 +164,8 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   };
 
   const removeFromPedestal = async (position: number) => {
-    // Remove song at position, pull up songs below it
     const currentActive = [...topSongs].sort((a, b) => a.position - b.position);
     const remaining = currentActive.filter(s => s.position !== position);
-
-    // Check history for a song to fill the gap from position 3
-    let historyFill: string | null = null;
-    if (remaining.length < 3) {
-      // Look for the most recent deactivated song that's not currently active
-      const activeIds = remaining.map(r => r.submission_id);
-      const { data: history } = await supabase
-        .from('streamer_top_songs')
-        .select('submission_id')
-        .eq('streamer_id', streamer.id)
-        .eq('is_active', false)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-      
-      if (history) {
-        const candidate = history.find(h => !activeIds.includes(h.submission_id));
-        if (candidate) historyFill = candidate.submission_id;
-      }
-    }
 
     // Deactivate all
     await supabase
@@ -201,10 +181,6 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       newArrangement.push({ submission_id: song.submission_id, position: pos });
       pos++;
     }
-    // Add history fill at the end if available
-    if (historyFill && pos <= 3) {
-      newArrangement.push({ submission_id: historyFill, position: pos });
-    }
 
     if (newArrangement.length > 0) {
       const inserts = newArrangement.map(a => ({
@@ -217,6 +193,7 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
     }
 
     await fetchTopSongs();
+    toast({ title: t('topSongs.resetSuccess') });
   };
 
   const handleDragStart = (e: React.DragEvent, submission: Submission) => {
