@@ -509,9 +509,6 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
               }
 
               offKeyStatus = newStatus;
-              // Smooth severity lerp (slow transitions)
-              const sevLerp = 0.08;
-              smoothSeverity += (targetSeverity - smoothSeverity) * sevLerp;
             } else {
               offKeyStatus = 'listening';
               offKeyDetail = 'Establishing reference…';
