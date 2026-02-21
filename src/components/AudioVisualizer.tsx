@@ -434,7 +434,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
             const binIdx = Math.round(freq / nyquist * binCount);
             if (binIdx >= 0 && binIdx < binCount) energy += data[binIdx] / 255;
           }
-          chroma[pitchClass] = chroma[pitchClass] * 0.92 + energy * 0.08;
+          chroma[pitchClass] = chroma[pitchClass] * 0.95 + energy * 0.05;
         }
         chromaFrameCount++;
 
