@@ -299,6 +299,20 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
         </div>
       </div>
 
+      {/* Public message */}
+      <div className="flex items-center gap-2">
+        <label className="text-sm text-muted-foreground whitespace-nowrap">{t('topSongs.messageLabel')}</label>
+        <input
+          type="text"
+          value={topSongsMessage}
+          onChange={(e) => setTopSongsMessage(e.target.value)}
+          onBlur={handleMessageSave}
+          placeholder={t('topSongs.messagePlaceholder')}
+          maxLength={120}
+          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+
       {/* Pedestal - 3 spots */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[1, 2, 3].map(pos => {
