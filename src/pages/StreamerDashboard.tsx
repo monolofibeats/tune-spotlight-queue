@@ -28,6 +28,7 @@ import { StreamerSettingsPanel } from '@/components/StreamerSettingsPanel';
 import { getSignedAudioUrl } from '@/lib/storage';
 import { AdminStreamerChat } from '@/components/AdminStreamerChat';
 import { BulkActionBar } from '@/components/submission/BulkActionBar';
+import { TopSongsPedestal } from '@/components/TopSongsPedestal';
 import { DashboardBuilder, type DashboardViewOptions, type PopOutOptions } from '@/components/dashboard/DashboardBuilder';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { EarningsWidget } from '@/components/dashboard/widgets/EarningsWidget';
