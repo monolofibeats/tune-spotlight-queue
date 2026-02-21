@@ -338,6 +338,59 @@ const StreamerDashboard = () => {
     }
   };
 
+  const handleAddToPedestal = async (submissionId: string, position: number) => {
+    if (!streamer) return;
+    const sub = submissions.find(s => s.id === submissionId);
+    if (!sub) return;
+
+    const { data: currentActiveSongs } = await supabase
+      .from('streamer_top_songs')
+      .select('submission_id, position')
+      .eq('streamer_id', streamer.id)
+      .eq('is_active', true)
+      .order('position');
+
+    const oldActive = (currentActiveSongs || []).filter(s => s.submission_id !== submissionId);
+
+    await supabase
+      .from('streamer_top_songs')
+      .update({ is_active: false })
+      .eq('streamer_id', streamer.id)
+      .eq('is_active', true);
+
+    const newArrangement: { submission_id: string; position: number }[] = [];
+    newArrangement.push({ submission_id: submissionId, position });
+
+    let nextPos = position + 1;
+    for (const song of oldActive) {
+      if (song.position >= position) {
+        if (nextPos <= 3) {
+          newArrangement.push({ submission_id: song.submission_id, position: nextPos });
+          nextPos++;
+        }
+      } else {
+        newArrangement.push({ submission_id: song.submission_id, position: song.position });
+      }
+    }
+
+    const inserts = newArrangement.map(a => ({
+      streamer_id: streamer.id,
+      submission_id: a.submission_id,
+      position: a.position,
+      is_active: true,
+    }));
+
+    if (inserts.length > 0) {
+      const { error } = await supabase.from('streamer_top_songs').insert(inserts);
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        return;
+      }
+    }
+
+    toast({ title: `Added to Spot #${position}`, description: `${sub.song_title} by ${sub.artist_name}` });
+  };
+
   const handleRestoreSubmission = async (id: string) => {
     const { error } = await supabase.from('submissions').update({ status: 'pending' }).eq('id', id);
     if (error) {
@@ -568,6 +621,7 @@ const StreamerDashboard = () => {
             onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
             onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
             onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
+            onAddToPedestal={handleAddToPedestal}
             config={npConfig}
           />
         </div>
