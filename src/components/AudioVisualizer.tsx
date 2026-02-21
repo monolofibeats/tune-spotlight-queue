@@ -329,20 +329,23 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     let integratedSampleCount = 0;
     let integratedLufs = -60;
 
-    // Key detection state
+    // Off-key detection state
     const chroma = new Float64Array(12);
     let chromaFrameCount = 0;
     let lastKeyUpdate = 0;
     let detectedKey = '';
     let detectedMode = '';
     let detectedConf = 0;
-    let detectedCamelot = '';
     let establishedKey = '';
     let establishedMode = '';
+    let establishedConf = 0;
     let keyDrift = 0;
-    let driftMessage = '';
+    let offKeyStatus: 'listening' | 'in-tune' | 'slight' | 'off-key' | 'key-change' = 'listening';
+    let offKeyDetail = '';
     let keyDisplayAlpha = 0;
-    const KEY_UPDATE_INTERVAL = 0.4;
+    const KEY_UPDATE_INTERVAL = 0.35;
+    let offKeyHistory: number[] = [];
+    const OFF_KEY_HISTORY_MAX = 30;
 
     // Lissajous history
     const lissajousHistory: { x: number; y: number }[] = [];
@@ -439,27 +442,43 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
             detectedKey = result.key;
             detectedMode = result.mode;
             detectedConf = result.confidence;
-            detectedCamelot = CAMELOT_MAP[`${result.key} ${result.mode}`] || '?';
 
             if (!establishedKey && detectedConf > 60) {
               establishedKey = detectedKey;
               establishedMode = detectedMode;
+              establishedConf = detectedConf;
             }
 
             if (establishedKey) {
               const dist = keyDistance(detectedKey, detectedMode, establishedKey, establishedMode);
               keyDrift = dist;
-              if (dist === 0) driftMessage = '';
-              else if (dist <= 2) driftMessage = 'Slight pitch drift';
-              else if (dist <= 4) {
+              offKeyHistory.push(dist);
+              if (offKeyHistory.length > OFF_KEY_HISTORY_MAX) offKeyHistory.shift();
+
+              if (dist === 0) {
+                offKeyStatus = 'in-tune';
+                offKeyDetail = '';
+              } else if (dist <= 2) {
+                offKeyStatus = 'slight';
                 const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
                 const direction = semiDiff <= 6
                   ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
                   : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
-                driftMessage = `Off-key ${direction} · Tune to ${establishedKey}`;
+                offKeyDetail = `Drift ${direction} ${dist} st`;
+              } else if (dist <= 4) {
+                offKeyStatus = 'off-key';
+                const semiDiff = Math.abs(NOTE_NAMES.indexOf(detectedKey) - NOTE_NAMES.indexOf(establishedKey));
+                const direction = semiDiff <= 6
+                  ? (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↑' : '↓')
+                  : (NOTE_NAMES.indexOf(detectedKey) > NOTE_NAMES.indexOf(establishedKey) ? '↓' : '↑');
+                offKeyDetail = `Off ${direction} ${dist} st · ${detectedKey}${detectedMode === 'Minor' ? 'm' : ''}`;
               } else {
-                driftMessage = `Key change → ${detectedKey} ${detectedMode}`;
+                offKeyStatus = 'key-change';
+                offKeyDetail = `→ ${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`;
               }
+            } else {
+              offKeyStatus = 'listening';
+              offKeyDetail = 'Establishing reference…';
             }
           }
         }
@@ -517,9 +536,9 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
         drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSRef.current !== false, showDBFSRef.current !== false);
       }
 
-      // ── Key indicator (always drawn) ──
-      if (detectedKey && keyDisplayAlpha > 0.01) {
-        drawKeyIndicator(ctx, detectedKey, detectedMode, detectedConf, detectedCamelot, keyDrift, driftMessage, keyDisplayAlpha, waveW, hsla);
+      // ── Off-key indicator (always drawn) ──
+      if (keyDisplayAlpha > 0.01) {
+        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, keyDrift, offKeyHistory, keyDisplayAlpha, waveW, hsla);
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -999,92 +1018,123 @@ function drawMeters(
 }
 
 // ── Shared: Key indicator ──
-function drawKeyIndicator(
+function drawOffKeyIndicator(
   ctx: CanvasRenderingContext2D,
-  detectedKey: string,
-  detectedMode: string,
-  detectedConf: number,
-  detectedCamelot: string,
+  establishedKey: string,
+  establishedMode: string,
+  status: 'listening' | 'in-tune' | 'slight' | 'off-key' | 'key-change',
+  detail: string,
   keyDrift: number,
-  driftMessage: string,
-  keyDisplayAlpha: number,
+  history: number[],
+  alpha: number,
   waveW: number,
   hsla: (a: number) => string,
 ) {
   ctx.save();
-  ctx.globalAlpha = keyDisplayAlpha;
+  ctx.globalAlpha = alpha;
 
-  const boxW = driftMessage ? Math.max(130, ctx.measureText(driftMessage).width + 24) : 90;
-  const boxH = driftMessage ? 48 : 36;
+  const boxW = 140;
+  const boxH = status === 'in-tune' || status === 'listening' ? 40 : 52;
   const kx = waveW - boxW - 8;
   const ky = 8;
 
-  ctx.fillStyle = keyDrift >= 3
-    ? `hsla(0, 70%, 15%, 0.85)`
-    : keyDrift >= 1
-      ? `hsla(40, 70%, 15%, 0.85)`
-      : `hsla(0, 0%, 8%, 0.85)`;
+  // Background color based on status
+  const bgColor = status === 'off-key'
+    ? 'hsla(0, 70%, 12%, 0.9)'
+    : status === 'key-change'
+      ? 'hsla(280, 60%, 15%, 0.9)'
+      : status === 'slight'
+        ? 'hsla(40, 60%, 12%, 0.9)'
+        : 'hsla(0, 0%, 8%, 0.88)';
+
+  ctx.fillStyle = bgColor;
   ctx.beginPath();
   ctx.roundRect(kx, ky, boxW, boxH, 6);
   ctx.fill();
 
-  ctx.strokeStyle = keyDrift >= 3
-    ? `hsla(0, 80%, 50%, 0.6)`
-    : keyDrift >= 1
-      ? `hsla(40, 80%, 50%, 0.4)`
-      : hsla(0.2);
+  // Border
+  const borderColor = status === 'off-key'
+    ? 'hsla(0, 80%, 50%, 0.6)'
+    : status === 'key-change'
+      ? 'hsla(280, 70%, 55%, 0.5)'
+      : status === 'slight'
+        ? 'hsla(40, 80%, 50%, 0.4)'
+        : status === 'in-tune'
+          ? 'hsla(140, 60%, 40%, 0.4)'
+          : hsla(0.15);
+  ctx.strokeStyle = borderColor;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.roundRect(kx, ky, boxW, boxH, 6);
   ctx.stroke();
 
+  // Label
   ctx.font = '7px monospace';
   ctx.textAlign = 'left';
   ctx.fillStyle = hsla(0.35);
-  ctx.fillText('KEY', kx + 6, ky + 11);
+  ctx.fillText('OFF-KEY FINDER', kx + 6, ky + 11);
 
-  ctx.textAlign = 'right';
-  ctx.font = '8px monospace';
-  ctx.fillStyle = hsla(0.3);
-  ctx.fillText(detectedCamelot, kx + boxW - 6, ky + 11);
+  // Reference key (small, right-aligned)
+  if (establishedKey) {
+    ctx.textAlign = 'right';
+    ctx.font = '8px monospace';
+    ctx.fillStyle = hsla(0.3);
+    ctx.fillText(`ref: ${establishedKey}${establishedMode === 'Minor' ? 'm' : 'M'}`, kx + boxW - 6, ky + 11);
+  }
 
+  // Status indicator
   ctx.textAlign = 'left';
-  ctx.font = 'bold 14px monospace';
-  ctx.fillStyle = keyDrift >= 3
-    ? 'hsla(0, 80%, 60%, 1)'
-    : keyDrift >= 1
-      ? 'hsla(40, 80%, 60%, 1)'
-      : hsla(0.85);
-  ctx.fillText(`${detectedKey} ${detectedMode === 'Minor' ? 'm' : 'M'}`, kx + 6, ky + 28);
+  if (status === 'in-tune') {
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = 'hsla(140, 70%, 55%, 0.9)';
+    ctx.fillText('✓ In Tune', kx + 6, ky + 30);
+  } else if (status === 'listening') {
+    ctx.font = '11px monospace';
+    ctx.fillStyle = hsla(0.4);
+    ctx.fillText('◎ Listening…', kx + 6, ky + 30);
+  } else if (status === 'slight') {
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = 'hsla(40, 80%, 60%, 0.9)';
+    ctx.fillText('⚠ Slight Drift', kx + 6, ky + 30);
+  } else if (status === 'off-key') {
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = 'hsla(0, 80%, 60%, 1)';
+    ctx.fillText('✗ Off-Key', kx + 6, ky + 30);
+  } else if (status === 'key-change') {
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = 'hsla(280, 70%, 65%, 0.9)';
+    ctx.fillText('◆ Key Change', kx + 6, ky + 30);
+  }
 
-  const confBarX = kx + 60;
-  const confBarY = ky + 20;
-  const confBarW = boxW - 68;
-  const confBarH = 4;
-  ctx.fillStyle = hsla(0.1);
-  ctx.beginPath();
-  ctx.roundRect(confBarX, confBarY, confBarW, confBarH, 2);
-  ctx.fill();
-  const confFill = (detectedConf / 100) * confBarW;
-  ctx.fillStyle = keyDrift >= 3
-    ? 'hsla(0, 70%, 50%, 0.7)'
-    : hsla(0.4);
-  ctx.beginPath();
-  ctx.roundRect(confBarX, confBarY, confFill, confBarH, 2);
-  ctx.fill();
+  // Drift history sparkline (when not in-tune/listening)
+  if (history.length > 1 && (status !== 'in-tune' && status !== 'listening')) {
+    const sparkX = kx + 6;
+    const sparkY = ky + 36;
+    const sparkW = boxW - 12;
+    const sparkH = 10;
 
-  ctx.font = '7px monospace';
-  ctx.textAlign = 'right';
-  ctx.fillStyle = hsla(0.3);
-  ctx.fillText(`${detectedConf}%`, kx + boxW - 6, ky + 28);
+    ctx.beginPath();
+    ctx.strokeStyle = status === 'off-key'
+      ? 'hsla(0, 70%, 55%, 0.5)'
+      : status === 'key-change'
+        ? 'hsla(280, 60%, 55%, 0.4)'
+        : 'hsla(40, 70%, 55%, 0.4)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < history.length; i++) {
+      const x = sparkX + (i / (history.length - 1)) * sparkW;
+      const y = sparkY + sparkH - (Math.min(history[i], 6) / 6) * sparkH;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
 
-  if (driftMessage) {
-    ctx.font = 'bold 9px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = keyDrift >= 3
-      ? 'hsla(0, 80%, 65%, 0.9)'
-      : 'hsla(40, 80%, 60%, 0.8)';
-    ctx.fillText(driftMessage, kx + 6, ky + 43);
+  // Detail text
+  if (detail && status !== 'in-tune' && status !== 'listening') {
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = hsla(0.4);
+    ctx.fillText(detail, kx + boxW - 6, ky + 30);
   }
 
   ctx.restore();
