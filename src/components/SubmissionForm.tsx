@@ -136,6 +136,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
