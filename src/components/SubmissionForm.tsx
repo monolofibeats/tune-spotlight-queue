@@ -1206,15 +1206,39 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           {/* Submit Buttons - Stacked on mobile */}
           {(submissionsOpen || isAdmin) && (
             <div className="flex flex-col gap-2">
+              {/* Upload Progress Bar */}
+              {isUploadingFile && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Uploading file...
+                    </span>
+                    <span className="font-medium">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Free/Default Submit Button - Dark style */}
               <Button
                 type="submit"
                 size="lg"
                 variant={submissionPaid && !isAdmin ? "default" : "secondary"}
                 className="w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploadingFile}
               >
-                {isSubmitting ? (
+                {isUploadingFile ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading... {uploadProgress}%
+                  </>
+                ) : isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     {submissionPaid && !isAdmin ? 'Processing...' : 'Submitting...'}
@@ -1250,7 +1274,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                   {isUploadingFile ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Uploading...
+                      Uploading... {uploadProgress}%
                     </>
                   ) : (
                     <>
