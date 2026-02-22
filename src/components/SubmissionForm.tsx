@@ -306,6 +306,25 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
   const { play } = useSoundEffects();
 
+  // Helper: invoke edge function with retry (up to 3 attempts)
+  const invokeWithRetry = async (
+    fnName: string,
+    body: Record<string, unknown>,
+    retries = 3,
+  ): Promise<{ data: any; error: any }> => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const { data, error } = await supabase.functions.invoke(fnName, { body });
+      if (!error) return { data, error: null };
+      console.warn(`[${fnName}] attempt ${attempt}/${retries} failed:`, error);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1500 * attempt)); // back-off
+      } else {
+        return { data: null, error };
+      }
+    }
+    return { data: null, error: new Error('Unexpected') };
+  };
+
   // Handle payment verification on return
   useEffect(() => {
     const verifyPayment = async () => {
@@ -319,22 +338,30 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       // Handle priority payment verification
       if (paymentStatus === 'success' && sessionId) {
         try {
-          const { data, error } = await supabase.functions.invoke('verify-payment', {
-            body: { sessionId },
-          });
+          const { data, error } = await invokeWithRetry('verify-payment', { sessionId });
 
           if (error) throw error;
 
-          if (data.success) {
+          if (data?.success) {
             play('success');
             toast({
               title: "Payment successful! 🎉",
               description: data.message,
             });
             watchlistRef?.current?.refreshList();
+          } else if (data && !data.success) {
+            toast({
+              title: "Payment pending",
+              description: data.message || "Your payment is still processing. Please refresh in a moment.",
+            });
           }
         } catch (error) {
           console.error('Payment verification error:', error);
+          toast({
+            title: "Verification issue",
+            description: "Your payment was received but verification failed. Your submission will appear shortly.",
+            variant: "destructive",
+          });
         }
 
         window.history.replaceState({}, '', currentPath);
@@ -350,13 +377,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       // Handle submission payment verification
       if (submissionPayment === 'success' && sessionId) {
         try {
-          const { data, error } = await supabase.functions.invoke('verify-submission-payment', {
-            body: { sessionId },
-          });
+          const { data, error } = await invokeWithRetry('verify-submission-payment', { sessionId });
 
           if (error) throw error;
 
-          if (data.success) {
+          if (data?.success) {
             play('success');
             toast({
               title: "Song submitted! 🎵",
@@ -381,9 +406,19 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               } catch {}
               localStorage.removeItem('upstar_pending_paid_submission');
             }
+          } else if (data && !data.success) {
+            toast({
+              title: "Payment pending",
+              description: data.message || "Your payment is still processing. Please refresh in a moment.",
+            });
           }
         } catch (error) {
           console.error('Submission payment verification error:', error);
+          toast({
+            title: "Verification issue",
+            description: "Your payment was received but verification failed. Your submission will appear shortly.",
+            variant: "destructive",
+          });
         }
 
         window.history.replaceState({}, '', currentPath);
