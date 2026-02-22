@@ -308,11 +308,9 @@ export function NowPlayingPanel({
                 <div className="space-y-4">
                   {/* Song Header */}
                   <div className="flex items-start gap-4">
-                    <PositionBadge
-                      position={position}
-                      badgeClassName="w-14 h-12 rounded-xl text-lg"
-                      showGlow={position <= 3}
-                    />
+                    <div className="relative shrink-0 w-14 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                      <Play className="w-6 h-6 text-primary fill-primary" />
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
