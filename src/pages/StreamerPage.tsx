@@ -173,6 +173,17 @@ function StreamerPageContent() {
         </div>
       </section>
 
+      {/* Public Waiting List */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-xl">
+          <PublicQueueDisplay
+            streamerId={streamer.id}
+            streamerSlug={streamer.slug}
+            trackedSubmissions={currentSubmissions}
+          />
+        </div>
+      </section>
+
       {/* Stream Embed (looping video, Twitch, YouTube etc.) - always shown if configured */}
       <section className="pb-4 px-4">
         <div className="container mx-auto max-w-3xl">
