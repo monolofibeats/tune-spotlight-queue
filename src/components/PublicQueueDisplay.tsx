@@ -58,7 +58,13 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
         .order('created_at', { ascending: true });
 
       if (!error && data) {
-        setQueue(data as unknown as QueueItem[]);
+        // Filter out submissions containing banned word "nextup"
+        const banned = 'nextup';
+        const filtered = (data as unknown as QueueItem[]).filter(item =>
+          !(item.artist_name?.toLowerCase().includes(banned) ||
+            item.song_title?.toLowerCase().includes(banned))
+        );
+        setQueue(filtered);
       }
       setIsLoading(false);
     };

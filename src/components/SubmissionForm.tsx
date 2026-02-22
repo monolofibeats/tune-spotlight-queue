@@ -782,6 +782,20 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       return;
     }
     
+    // Ban "nextup" keyword
+    const bannedWord = 'nextup';
+    const containsBanned = [artistName, songTitle, songUrl].some(
+      val => val && val.toLowerCase().includes(bannedWord)
+    );
+    if (containsBanned) {
+      toast({
+        title: "Submission blocked",
+        description: "Your submission contains a restricted keyword.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Required fields
     if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
         (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
