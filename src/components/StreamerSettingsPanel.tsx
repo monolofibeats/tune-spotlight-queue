@@ -307,6 +307,23 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               />
             </TabsContent>
 
+            <TabsContent value="banner" className="space-y-6">
+              <BannerEditor
+                settings={{
+                  bannerEnabled,
+                  bannerText,
+                  bannerLink,
+                  bannerColor,
+                }}
+                onChange={(updates) => {
+                  if (updates.bannerEnabled !== undefined) setBannerEnabled(updates.bannerEnabled);
+                  if (updates.bannerText !== undefined) setBannerText(updates.bannerText);
+                  if (updates.bannerLink !== undefined) setBannerLink(updates.bannerLink);
+                  if (updates.bannerColor !== undefined) setBannerColor(updates.bannerColor);
+                }}
+              />
+            </TabsContent>
+
             <TabsContent value="stream" className="space-y-6">
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
               <StreamEmbedConfig streamerId={initialStreamer.id} />
