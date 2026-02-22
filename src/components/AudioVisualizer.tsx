@@ -14,6 +14,7 @@ interface AudioVisualizerProps {
   className?: string;
   showLUFS?: boolean;
   showDBFS?: boolean;
+  showKeyFinder?: boolean;
 }
 
 function parseHslTriplet(input: string) {
@@ -295,19 +296,21 @@ function keyDistance(key1: string, mode1: string, key2: string, mode2: string): 
 // ── Main Component ──
 // ═══════════════════════════════════════
 
-export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true }: AudioVisualizerProps) {
+export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true, showKeyFinder: showKeyFinderProp = true }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizerMode>('spectrum');
   const modeRef = useRef<VisualizerMode>('spectrum');
   const showLUFSRef = useRef(showLUFSProp);
   const showDBFSRef = useRef(showDBFSProp);
+  const showKeyFinderRef = useRef(showKeyFinderProp);
   const { analyserRef, freqDataRef, timeDomainRef, isPlayingRef } = useAudioAnalyser(audioElement);
 
   // Keep refs in sync with props
   useEffect(() => { modeRef.current = mode; }, [mode]);
   useEffect(() => { showLUFSRef.current = showLUFSProp; }, [showLUFSProp]);
   useEffect(() => { showDBFSRef.current = showDBFSProp; }, [showDBFSProp]);
+  useEffect(() => { showKeyFinderRef.current = showKeyFinderProp; }, [showKeyFinderProp]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -573,13 +576,15 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
         drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSRef.current !== false, showDBFSRef.current !== false);
       }
 
-      // ── Off-key indicator (always drawn) ──
+      // ── Off-key indicator (conditionally drawn) ──
       // Also lerp smoothSeverity every frame for smooth color transitions
-      if (hasAudio && establishedKey) {
-        // keep smoothing even between key updates
-      }
-      if (keyDisplayAlpha > 0.01) {
-        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, smoothSeverity, offKeyHistory, keyDisplayAlpha, waveW, hsla);
+      if (showKeyFinderRef.current !== false) {
+        if (hasAudio && establishedKey) {
+          // keep smoothing even between key updates
+        }
+        if (keyDisplayAlpha > 0.01) {
+          drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, smoothSeverity, offKeyHistory, keyDisplayAlpha, waveW, hsla);
+        }
       }
 
       rafRef.current = requestAnimationFrame(draw);
