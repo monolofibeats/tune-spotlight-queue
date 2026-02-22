@@ -310,6 +310,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
   useEffect(() => { modeRef.current = mode; }, [mode]);
   useEffect(() => { showLUFSRef.current = showLUFSProp; }, [showLUFSProp]);
   useEffect(() => { showDBFSRef.current = showDBFSProp; }, [showDBFSProp]);
+  useEffect(() => { showKeyFinderRef.current = showKeyFinderProp; }, [showKeyFinderProp]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
