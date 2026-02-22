@@ -576,13 +576,15 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
         drawMeters(ctx, clampedLufs, clampedDb, waveW, waveH, hsla, showLUFSRef.current !== false, showDBFSRef.current !== false);
       }
 
-      // ── Off-key indicator (always drawn) ──
+      // ── Off-key indicator (conditionally drawn) ──
       // Also lerp smoothSeverity every frame for smooth color transitions
-      if (hasAudio && establishedKey) {
-        // keep smoothing even between key updates
-      }
-      if (keyDisplayAlpha > 0.01) {
-        drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, smoothSeverity, offKeyHistory, keyDisplayAlpha, waveW, hsla);
+      if (showKeyFinderRef.current !== false) {
+        if (hasAudio && establishedKey) {
+          // keep smoothing even between key updates
+        }
+        if (keyDisplayAlpha > 0.01) {
+          drawOffKeyIndicator(ctx, establishedKey, establishedMode, offKeyStatus, offKeyDetail, smoothSeverity, offKeyHistory, keyDisplayAlpha, waveW, hsla);
+        }
       }
 
       rafRef.current = requestAnimationFrame(draw);
