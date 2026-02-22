@@ -25,7 +25,6 @@ import {
   FormFieldBuilder, 
   DesignCustomizer, 
   PricingSettings,
-  BannerEditor,
 } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 
