@@ -14,6 +14,7 @@ interface AudioVisualizerProps {
   className?: string;
   showLUFS?: boolean;
   showDBFS?: boolean;
+  showKeyFinder?: boolean;
 }
 
 function parseHslTriplet(input: string) {
