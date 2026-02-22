@@ -328,16 +328,17 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
         </Button>
       </div>
 
-      {/* Pedestal - 3 spots */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1, 2, 3].map(pos => {
+      {/* Pedestal - podium layout: #2 left, #1 center (elevated), #3 right */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        {[2, 1, 3].map(pos => {
           const song = topSongs.find(ts => ts.position === pos);
           const isOver = dragOverPosition === pos;
+          const elevationClass = pos === 1 ? 'sm:-mb-6' : pos === 2 ? 'sm:-mb-2' : '';
 
           return (
             <motion.div
               key={pos}
-              className={`relative rounded-xl border-2 border-dashed p-4 transition-all ${getSpotHeight(pos)} flex flex-col items-center justify-center gap-2
+              className={`relative rounded-xl border-2 border-dashed p-4 transition-all ${getSpotHeight(pos)} ${elevationClass} flex flex-col items-center justify-center gap-2
                 ${isOver ? 'border-primary bg-primary/10 scale-[1.02]' : song ? getPositionStyle(pos) + ' border-solid' : 'border-border/50 bg-muted/10'}
               `}
               onDragOver={(e) => handleDragOver(e, pos)}
