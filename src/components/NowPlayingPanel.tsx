@@ -142,6 +142,7 @@ export function NowPlayingPanel({
     showVisualizer: true,
     showLUFS: true,
     showDBFS: true,
+    showKeyFinder: true,
     showStemSeparation: true,
     showSubmitterInsights: true,
     showSpotifyEmbed: true,
