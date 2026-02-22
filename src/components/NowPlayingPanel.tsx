@@ -380,7 +380,7 @@ export function NowPlayingPanel({
                       
                       {/* Audio Visualizer */}
                       {cfg.showVisualizer && (
-                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} />
+                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} showKeyFinder={cfg.showKeyFinder} />
                       )}
                       
                       {/* Stem Separation */}

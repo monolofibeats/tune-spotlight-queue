@@ -58,6 +58,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
       { key: 'showVisualizer', label: 'Audio Visualizer', defaultValue: true },
       { key: 'showLUFS', label: 'LUFS Meter', defaultValue: true },
       { key: 'showDBFS', label: 'dBFS Peak Meter', defaultValue: true },
+      { key: 'showKeyFinder', label: 'Off-Key Finder', defaultValue: true },
       { key: 'showStemSeparation', label: 'Stem Separation', defaultValue: true },
       { key: 'showSubmitterInsights', label: 'Submitter Insights', defaultValue: true },
       { key: 'showSpotifyEmbed', label: 'Spotify Embed Player', defaultValue: true },
