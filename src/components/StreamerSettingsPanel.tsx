@@ -10,6 +10,7 @@ import {
   Eye,
   Radio,
   RefreshCw,
+  Flag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +26,7 @@ import {
   FormFieldBuilder, 
   DesignCustomizer, 
   PricingSettings,
+  BannerEditor,
 } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 
@@ -198,6 +200,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
     { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
+    { id: 'banner', label: 'Banner', icon: Flag },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
@@ -300,6 +303,23 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   if (newSettings.backgroundGradient !== undefined) setBackgroundGradient(newSettings.backgroundGradient);
                   if (newSettings.animationStyle !== undefined) setAnimationStyle(newSettings.animationStyle);
                   if (newSettings.cardStyle !== undefined) setCardStyle(newSettings.cardStyle);
+                }}
+              />
+            </TabsContent>
+
+            <TabsContent value="banner" className="space-y-6">
+              <BannerEditor
+                settings={{
+                  bannerEnabled,
+                  bannerText,
+                  bannerLink,
+                  bannerColor,
+                }}
+                onChange={(updates) => {
+                  if (updates.bannerEnabled !== undefined) setBannerEnabled(updates.bannerEnabled);
+                  if (updates.bannerText !== undefined) setBannerText(updates.bannerText);
+                  if (updates.bannerLink !== undefined) setBannerLink(updates.bannerLink);
+                  if (updates.bannerColor !== undefined) setBannerColor(updates.bannerColor);
                 }}
               />
             </TabsContent>
