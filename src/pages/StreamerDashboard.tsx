@@ -415,7 +415,13 @@ const StreamerDashboard = () => {
       });
     const next = pendingQueue[0];
     if (next) {
-      handleOpenNowPlaying(next, null, false, 1);
+      // Start loading immediately, then fetch signed URL in background
+      handleOpenNowPlaying(next, null, !!next.audio_file_url, 1);
+      if (next.audio_file_url) {
+        getSignedAudioUrl(next.audio_file_url).then(signedUrl => {
+          setNowPlaying(prev => prev.submission?.id === next.id ? { ...prev, audioUrl: signedUrl, isLoading: false } : prev);
+        });
+      }
     } else {
       setNowPlaying({ submission: null, audioUrl: null, isLoading: false, position: 0 });
     }
