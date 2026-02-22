@@ -272,7 +272,16 @@ const StreamerDashboard = () => {
         .order('amount_paid', { ascending: false })
         .order('created_at', { ascending: true });
       if (!error && data) {
-        setSubmissions(data);
+        // Filter out submissions containing banned word "nextup"
+        const filtered = data.filter(s => {
+          const banned = 'nextup';
+          return !(
+            s.artist_name?.toLowerCase().includes(banned) ||
+            s.song_title?.toLowerCase().includes(banned) ||
+            s.song_url?.toLowerCase().includes(banned)
+          );
+        });
+        setSubmissions(filtered);
       }
     };
 
