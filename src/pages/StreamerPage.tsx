@@ -14,6 +14,7 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
 import { useStreamSession } from '@/hooks/useStreamSession';
@@ -169,6 +170,17 @@ function StreamerPageContent() {
       <section className="pb-4 px-4">
         <div className="container mx-auto max-w-xl">
           <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={!!streamer.show_top_songs} topSongsMessage={streamer.top_songs_message} />
+        </div>
+      </section>
+
+      {/* Public Waiting List */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-xl">
+          <PublicQueueDisplay
+            streamerId={streamer.id}
+            streamerSlug={streamer.slug}
+            trackedSubmissions={currentSubmissions}
+          />
         </div>
       </section>
 
