@@ -14,6 +14,7 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
 import { useStreamSession } from '@/hooks/useStreamSession';
