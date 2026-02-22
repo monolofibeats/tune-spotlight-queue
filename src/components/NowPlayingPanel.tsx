@@ -89,6 +89,7 @@ export interface NowPlayingConfig {
   showVisualizer?: boolean;
   showLUFS?: boolean;
   showDBFS?: boolean;
+  showKeyFinder?: boolean;
   showStemSeparation?: boolean;
   showSubmitterInsights?: boolean;
   showSpotifyEmbed?: boolean;
