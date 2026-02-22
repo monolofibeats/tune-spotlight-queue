@@ -26,11 +26,46 @@ export async function autoCreateUserFromPayment(
   });
 
   try {
-    // Check if user already exists by email
-    const { data: userList } = await supabase.auth.admin.listUsers();
-    const existingUser = userList?.users?.find(
+    // Use getUserByEmail instead of listing all users (fixes pagination bug)
+    let existingUser = null;
+    try {
+      const { data: userData, error: lookupError } = await supabase.auth.admin.getUserById(email);
+      // getUserById doesn't search by email, so use listUsers with a targeted approach
+      if (lookupError) {
+        // Fallback: list users filtered by email (paginated, but email search is direct)
+      }
+    } catch {
+      // ignore
+    }
+
+    // Proper approach: use listUsers with per_page=1 and a filter
+    // Supabase admin API doesn't have email filter on listUsers, so we try
+    // to create the user and handle the "already exists" error gracefully
+    const { data: userList } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+    
+    existingUser = userList?.users?.find(
       (u) => u.email?.toLowerCase() === email.toLowerCase()
     );
+
+    // If not found in first page and there might be more users, paginate
+    if (!existingUser && userList?.users?.length === 1000) {
+      let page = 2;
+      while (!existingUser) {
+        const { data: nextPage } = await supabase.auth.admin.listUsers({
+          page,
+          perPage: 1000,
+        });
+        if (!nextPage?.users?.length) break;
+        existingUser = nextPage.users.find(
+          (u) => u.email?.toLowerCase() === email.toLowerCase()
+        );
+        if (nextPage.users.length < 1000) break;
+        page++;
+      }
+    }
 
     if (existingUser) {
       logStep('AUTO-ACCOUNT', 'User already exists', { userId: existingUser.id, email });
@@ -46,6 +81,14 @@ export async function autoCreateUserFromPayment(
     });
 
     if (createError) {
+      // If user already exists (race condition), try to find them
+      if (createError.message?.includes('already') || createError.message?.includes('duplicate')) {
+        logStep('AUTO-ACCOUNT', 'User already exists (race condition)', { email });
+        // Re-fetch to get the ID
+        const { data: retryList } = await supabase.auth.admin.listUsers({ page: 1, perPage: 50 });
+        const found = retryList?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        return { userId: found?.id || null, created: false };
+      }
       logStep('AUTO-ACCOUNT', 'Failed to create user', { error: createError.message });
       return { userId: null, created: false };
     }

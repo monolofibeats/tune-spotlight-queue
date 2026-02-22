@@ -43,6 +43,25 @@ serve(async (req) => {
     const { sessionId } = validationResult.data;
     logStep("Verifying session", { sessionId });
 
+    // ── Idempotency: check if this session was already processed via earnings
+    const { data: existingEarning } = await supabaseClient
+      .from("streamer_earnings")
+      .select("submission_id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (existingEarning?.submission_id) {
+      logStep("Already processed via earnings", { submissionId: existingEarning.submission_id });
+      return new Response(JSON.stringify({
+        success: true,
+        message: "Submission already processed",
+        submissionId: existingEarning.submission_id,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });

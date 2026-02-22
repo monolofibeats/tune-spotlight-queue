@@ -32,7 +32,34 @@ serve(async (req) => {
     }
 
     const { sessionId } = await req.json();
+    if (!sessionId || typeof sessionId !== "string" || sessionId.length > 500) {
+      throw new Error("Invalid sessionId");
+    }
     logStep("Verifying session", { sessionId });
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false }
+    });
+
+    // ── Idempotency check: if a submission was already created for this Stripe
+    // session, return it instead of inserting a duplicate.
+    const { data: existingEarning } = await supabase
+      .from("streamer_earnings")
+      .select("submission_id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (existingEarning?.submission_id) {
+      logStep("Already processed, returning existing submission", { submissionId: existingEarning.submission_id });
+      return new Response(JSON.stringify({
+        success: true,
+        message: "Your priority submission has been added to the queue!",
+        submissionId: existingEarning.submission_id,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -53,7 +80,8 @@ serve(async (req) => {
     }
 
     const metadata = session.metadata || {};
-    const amountPaid = parseFloat(metadata.amount_paid || "0");
+    // Use Stripe's authoritative amount instead of fragile metadata string
+    const amountPaid = Math.round((session.amount_total || 0)) / 100;
     const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 
     const stripeEmail = session.customer_details?.email || metadata.email || null;
@@ -67,10 +95,6 @@ serve(async (req) => {
     const finalUserId = metadata.user_id || autoUserId || null;
 
     logStep("Creating submission", { metadata, amountPaid, accountCreated });
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false }
-    });
 
     const { data: submission, error: insertError } = await supabase
       .from("submissions")
@@ -92,6 +116,17 @@ serve(async (req) => {
       .single();
 
     if (insertError) {
+      // Duplicate key = already processed (race condition safety net)
+      if (insertError.code === '23505') {
+        logStep("Duplicate insert detected, returning success");
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Your priority submission has been added to the queue!",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       logStep("Insert error", { error: insertError });
       throw new Error(`Failed to create submission: ${insertError.message}`);
     }
