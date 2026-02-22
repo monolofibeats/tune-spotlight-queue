@@ -199,7 +199,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
     { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
-    { id: 'banner', label: 'Banner', icon: Flag },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
