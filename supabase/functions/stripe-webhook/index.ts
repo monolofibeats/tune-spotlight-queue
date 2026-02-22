@@ -1,0 +1,192 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { autoCreateUserFromPayment } from "../_shared/auto-create-user.ts";
+import { recordEarning } from "../_shared/record-earning.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
+};
+
+const logStep = (step: string, details?: unknown) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    apiVersion: "2025-08-27.basil",
+  });
+
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  if (!webhookSecret) {
+    logStep("ERROR: STRIPE_WEBHOOK_SECRET not configured");
+    return new Response("Webhook secret not configured", { status: 500 });
+  }
+
+  const signature = req.headers.get("stripe-signature");
+  if (!signature) {
+    logStep("ERROR: No stripe-signature header");
+    return new Response("No signature", { status: 400 });
+  }
+
+  const body = await req.text();
+  let event: Stripe.Event;
+
+  try {
+    event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+  } catch (err) {
+    logStep("Signature verification failed", { error: String(err) });
+    return new Response(`Webhook signature verification failed: ${err}`, { status: 400 });
+  }
+
+  logStep("Event received", { type: event.type, id: event.id });
+
+  if (event.type !== "checkout.session.completed") {
+    // We only care about completed checkouts
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  const session = event.data.object as Stripe.Checkout.Session;
+  const metadata = session.metadata || {};
+
+  logStep("Processing checkout session", {
+    sessionId: session.id,
+    paymentStatus: session.payment_status,
+    metadata,
+  });
+
+  // Only process paid sessions
+  if (session.payment_status !== "paid") {
+    logStep("Session not paid, skipping");
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
+  // Determine payment type from metadata
+  const isSubmissionPayment = metadata.type === "submission";
+  const isPriorityPayment = !isSubmissionPayment && metadata.song_url;
+
+  if (!isSubmissionPayment && !isPriorityPayment) {
+    logStep("Not a submission/priority payment, skipping", { metadata });
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  const sessionId = session.id;
+
+  try {
+    // Idempotency: check if already processed
+    const { data: existingEarning } = await supabase
+      .from("streamer_earnings")
+      .select("submission_id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (existingEarning?.submission_id) {
+      logStep("Already processed", { submissionId: existingEarning.submission_id });
+      return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
+    }
+
+    // Also check submissions table directly for idempotency
+    // (in case earning recording failed but submission was created)
+    const { data: existingSubs } = await supabase
+      .from("submissions")
+      .select("id")
+      .eq("email", session.customer_details?.email || metadata.email || "___none___")
+      .eq("song_url", metadata.song_url || "___none___")
+      .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString()) // within last 5 min
+      .limit(1);
+
+    if (existingSubs && existingSubs.length > 0) {
+      logStep("Submission already exists (matched by email+song_url)", { id: existingSubs[0].id });
+      return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
+    }
+
+    const stripeEmail = session.customer_details?.email || metadata.email || null;
+    const siteUrl = "https://tune-spotlight-queue.lovable.app";
+
+    const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
+      stripeEmail,
+      siteUrl,
+    );
+
+    const finalUserId = metadata.user_id || autoUserId || null;
+    const amountPaid = Math.round((session.amount_total || 0)) / 100;
+    const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
+
+    logStep("Creating submission", {
+      isPriority: isPriorityPayment,
+      amountPaid,
+      songTitle: metadata.song_title,
+      streamerId: metadata.streamer_id,
+      accountCreated,
+    });
+
+    const { data: submission, error: insertError } = await supabase
+      .from("submissions")
+      .insert({
+        song_url: metadata.song_url,
+        platform: metadata.platform || "other",
+        artist_name: metadata.artist_name || "Unknown Artist",
+        song_title: metadata.song_title || "Untitled",
+        message: metadata.message || null,
+        email: stripeEmail,
+        amount_paid: amountPaid,
+        is_priority: isPriorityPayment ? true : false,
+        status: "pending",
+        audio_file_url: audioFileUrl || null,
+        streamer_id: metadata.streamer_id || null,
+        user_id: finalUserId,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      if (insertError.code === "23505") {
+        logStep("Duplicate insert (race condition), OK");
+        return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
+      }
+      logStep("Insert error", insertError);
+      throw new Error(`Failed to create submission: ${insertError.message}`);
+    }
+
+    logStep("Submission created", { submissionId: submission.id });
+
+    // Record earnings
+    if (metadata.streamer_id) {
+      try {
+        await recordEarning({
+          stripeSessionId: sessionId,
+          streamerId: metadata.streamer_id,
+          submissionId: submission.id,
+          paymentType: isPriorityPayment ? "priority" : "submission",
+          customerEmail: stripeEmail,
+        });
+        logStep("Earnings recorded");
+      } catch (e) {
+        logStep("Warning: Failed to record earnings (non-fatal)", { error: String(e) });
+      }
+    }
+
+    logStep("Webhook processing complete", { submissionId: submission.id });
+
+    return new Response(JSON.stringify({ received: true, submissionId: submission.id }), {
+      status: 200,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
+    // Return 500 so Stripe retries the webhook
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+  }
+});
