@@ -303,6 +303,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
   const modeRef = useRef<VisualizerMode>('spectrum');
   const showLUFSRef = useRef(showLUFSProp);
   const showDBFSRef = useRef(showDBFSProp);
+  const showKeyFinderRef = useRef(showKeyFinderProp);
   const { analyserRef, freqDataRef, timeDomainRef, isPlayingRef } = useAudioAnalyser(audioElement);
 
   // Keep refs in sync with props
