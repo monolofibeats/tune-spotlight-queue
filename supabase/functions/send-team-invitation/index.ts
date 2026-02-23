@@ -160,7 +160,7 @@ serve(async (req) => {
                 <p><strong>${streamer.display_name}</strong> has invited you to join their team on UpStar as a <strong>${roleLabels[role] || role}</strong>.</p>
                 <p>As a team member, you'll be able to help manage their streamer dashboard.</p>
                 <div style="margin: 30px 0;">
-                  <a href="https://tune-spotlight-queue.lovable.app/auth" 
+                  <a href="${Deno.env.get("SITE_URL") || "https://upstargg.lovable.app"}/auth" 
                      style="background: #f5a623; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                     Accept Invitation
                   </a>
