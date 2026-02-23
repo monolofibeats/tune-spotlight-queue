@@ -449,7 +449,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       // Use XMLHttpRequest for progress tracking
       const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/song-files/${fileName}`;
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
