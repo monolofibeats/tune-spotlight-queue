@@ -1,7 +1,8 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, Sparkles, ChevronDown, ExternalLink, Search, Lock, Eye, Send } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -10,18 +11,19 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
-import { CursorFollower } from '@/components/discovery/CursorFollower';
-import { SoundwaveBackgroundCanvas } from '@/components/discovery/SoundwaveBackgroundCanvas';
-import { AnimatedCounter } from '@/components/discovery/AnimatedCounter';
-import { LiveCounter } from '@/components/discovery/LiveCounter';
 import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
-import { GlowButton } from '@/components/discovery/GlowButton';
-import { AnimatedCard } from '@/components/discovery/AnimatedCard';
-import { BlurReveal, GlitchText } from '@/components/discovery/TextEffects';
 import { PerformanceToggle } from '@/components/PerformanceToggle';
 import upstarLogo from '@/assets/upstar-logo.png';
-import upstarHeroStar from '@/assets/upstar-hero-star.png';
 import { useState, useMemo } from 'react';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
 
 const Discovery = () => {
   const { streamers, isLoading } = useActiveStreamers();
@@ -31,21 +33,15 @@ const Discovery = () => {
   const [showRoster, setShowRoster] = useState(false);
   const [rosterSearch, setRosterSearch] = useState('');
   const [showAllStreamers, setShowAllStreamers] = useState(false);
-  const { scrollYProgress } = useScroll();
-  
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
   
-  // Top 6 streamers for the grid
   const displayedStreamers = useMemo(() => {
     const all = [...liveStreamers, ...offlineStreamers];
     return showAllStreamers ? all : all.slice(0, 6);
   }, [liveStreamers, offlineStreamers, showAllStreamers]);
 
-  // Filtered streamers for roster dialog
   const filteredRosterStreamers = useMemo(() => {
     const all = [...liveStreamers, ...offlineStreamers];
     if (!rosterSearch.trim()) return all;
@@ -73,31 +69,31 @@ const Discovery = () => {
   ];
 
   return (
-    <>
-      <SoundwaveBackgroundCanvas />
-      <div className="min-h-screen relative overflow-hidden" style={{ background: 'transparent' }}>
-        <CursorFollower />
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle grid background */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(hsl(var(--border) / 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--border) / 0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+        }}
+      />
+
       {/* Header */}
-      <motion.header 
-        className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-border/20"
-        style={{ opacity: headerOpacity }}
-      >
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/30">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
-            <Link to="/" className="flex items-center group">
-              <motion.img 
-                src={upstarLogo} 
-                alt="UpStar" 
-                className="h-20 w-auto"
-                whileHover={{ scale: 1.05, rotate: -2 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              />
+            <Link to="/" className="flex items-center">
+              <img src={upstarLogo} alt="UpStar" className="h-20 w-auto" />
             </Link>
             <nav className="flex items-center gap-3">
               <Link to="/auth">
-                <GlowButton variant="primary" size="default">
+                <Button size="sm" className="h-9 px-5 text-xs font-medium">
                   {t('nav.signIn')}
-                </GlowButton>
+                </Button>
               </Link>
               <TooltipProvider>
                 <PerformanceToggle />
@@ -105,183 +101,147 @@ const Discovery = () => {
             </nav>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Building Phase Banner */}
       <BuildingPhaseBanner />
 
       {/* Hero Section */}
-      <motion.section 
-        className="pt-8 pb-16 px-4 relative z-10"
-        style={{ scale: heroScale }}
-      >
-        <div className="container mx-auto max-w-5xl text-center">
+      <section className="pt-8 pb-20 px-4 relative z-10">
+        <div className="container mx-auto max-w-4xl text-center">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
           >
-            <motion.h1 
-              className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 leading-tight flex flex-col items-center gap-1"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              {/* Title line — star is truly absolute (no effect on span width) */}
-              <span className="relative inline-flex justify-center">
-                {t('discovery.heroTitle')}
-                <motion.span
-                  className="absolute -right-8 -top-3 sm:-right-10 sm:-top-4 md:-right-12 md:-top-5 pointer-events-none"
-                  animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <img src={upstarHeroStar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
-                </motion.span>
+            {/* Status badge */}
+            <motion.div variants={fadeUp} custom={0}>
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border/50 bg-card/50 text-xs font-mono text-muted-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                Beta · Building in public
               </span>
-              {/* Highlight centers to the same midpoint as the title text */}
-              <motion.span 
-                className="text-primary whitespace-normal sm:whitespace-nowrap"
-                animate={{ 
-                  textShadow: [
-                    '0 0 20px hsl(var(--primary) / 0.5)',
-                    '0 0 40px hsl(var(--primary) / 0.8)',
-                    '0 0 20px hsl(var(--primary) / 0.5)',
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {t('discovery.heroHighlight')}
-              </motion.span>
+            </motion.div>
+
+            {/* Title */}
+            <motion.h1
+              variants={fadeUp}
+              custom={1}
+              className="text-4xl sm:text-5xl md:text-7xl font-display font-bold leading-[1.1] tracking-tight"
+            >
+              {t('discovery.heroTitle')}
+              <br />
+              <span className="text-primary">{t('discovery.heroHighlight')}</span>
             </motion.h1>
-            
-            <motion.p 
-              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
+
+            {/* Subtitle */}
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed"
             >
               {t('discovery.heroSubtitle')}
             </motion.p>
 
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.5 }}
+            {/* CTA Buttons */}
+            <motion.div
+              variants={fadeUp}
+              custom={3}
+              className="flex flex-col sm:flex-row gap-3 justify-center pt-2"
             >
-              <GlowButton 
-                variant="primary" 
+              <Button
                 size="lg"
+                className="h-12 px-8 text-sm font-medium gap-2"
                 onClick={() => setShowRoster(true)}
               >
-                <Radio className="w-5 h-5" />
+                <Radio className="w-4 h-4" />
                 {t('discovery.browseStreamers')}
-              </GlowButton>
-              <motion.button
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-8 text-sm font-medium gap-2 opacity-50 cursor-not-allowed"
                 disabled
               >
                 <Lock className="w-4 h-4" />
                 {t('discovery.becomeStreamerInvite')}
-              </motion.button>
+              </Button>
             </motion.div>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* Active Streamers Section */}
-      <section id="streamers" className="py-16 px-4 relative z-10">
+      {/* Stats Strip */}
+      <section className="py-12 px-4 relative z-10 border-y border-border/20">
+        <div className="container mx-auto max-w-4xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08, duration: 0.4 }}
+                className="text-center space-y-1"
+              >
+                <stat.icon className="w-5 h-5 text-primary mx-auto mb-2" />
+                <div className="text-2xl font-display font-bold tabular-nums">{stat.value}</div>
+                <div className="text-xs text-muted-foreground">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Active Streamers */}
+      <section id="streamers" className="py-20 px-4 relative z-10">
         <div className="container mx-auto max-w-5xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            <motion.h2 
-              className="text-3xl md:text-5xl font-display font-bold mb-4"
-            >
+            <h2 className="text-2xl md:text-4xl font-display font-bold mb-3">
               {t('discovery.sectionStreamers')}
-            </motion.h2>
-            <p className="text-muted-foreground text-lg">
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-lg mx-auto">
               {t('discovery.sectionStreamersSubtitle')}
             </p>
           </motion.div>
 
-          {/* Streamer Grid - Top 6 or all */}
           {displayedStreamers.length > 0 && (
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {displayedStreamers.map((streamer, index) => (
                   <StreamerCard key={streamer.id} streamer={streamer} index={index} isLive={streamer.is_live || false} />
                 ))}
               </div>
               {!showAllStreamers && streamers.length > 6 && (
-                <motion.div 
-                  className="text-center mt-8"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                >
-                  <GlowButton variant="outline" onClick={() => setShowRoster(true)}>
+                <div className="text-center mt-8">
+                  <Button variant="outline" size="sm" onClick={() => setShowRoster(true)} className="gap-2">
                     Show More
-                    <ArrowRight className="w-4 h-4" />
-                  </GlowButton>
-                </motion.div>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               )}
             </div>
           )}
 
           {isLoading && (
             <div className="text-center py-16">
-              <motion.div 
-                className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full mx-auto mb-4"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              />
-              <p className="text-muted-foreground">{t('discovery.loadingStreamers')}</p>
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4 animate-spin" />
+              <p className="text-sm text-muted-foreground">{t('discovery.loadingStreamers')}</p>
             </div>
           )}
 
           {!isLoading && streamers.length === 0 && (
-            <AnimatedCard className="text-center">
-              <div className="py-16 px-8">
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-6" />
-                </motion.div>
-                <h3 className="text-xl font-semibold mb-3">{t('discovery.noStreamersYet')}</h3>
-                <p className="text-muted-foreground mb-6">{t('discovery.beFirstStreamer')}</p>
-              </div>
-            </AnimatedCard>
+            <div className="text-center py-16 rounded-xl border border-border/50 bg-card/30">
+              <Users className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">{t('discovery.noStreamersYet')}</h3>
+              <p className="text-sm text-muted-foreground">{t('discovery.beFirstStreamer')}</p>
+            </div>
           )}
-        </div>
-      </section>
-
-      {/* Stats Section - Below streamers, 4 in a row */}
-      <section className="py-16 px-4 relative z-10">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <AnimatedCard key={stat.label} delay={index * 0.1} className="text-center">
-                <div className="p-5">
-                  <motion.div
-                    whileHover={{ scale: 1.2, rotate: 10 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <stat.icon className="w-7 h-7 text-primary mx-auto mb-3" />
-                  </motion.div>
-                  <div className="text-3xl font-bold mb-1">
-                    <AnimatedCounter value={stat.value} />
-                  </div>
-                  <div className="text-xs text-muted-foreground">{stat.label}</div>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -289,93 +249,70 @@ const Discovery = () => {
       <section className="py-20 px-4 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-14"
           >
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-2xl md:text-4xl font-display font-bold mb-3">
               {t('discovery.howItWorksTitle')}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-sm">
               {t('discovery.howItWorksSubtitle')}
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { step: '01', title: t('discovery.step1Title'), desc: t('discovery.step1Desc') },
               { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
               { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
             ].map((item, index) => (
-              <AnimatedCard key={item.step} delay={index * 0.15} className="h-full">
-                <motion.div
-                  className="relative p-8 text-center h-full flex flex-col min-h-[320px]"
-                  initial="rest"
-                  animate="rest"
-                  whileHover="hover"
-                >
-                  <motion.span
-                    className="absolute top-4 left-4 text-xs font-mono text-primary/50"
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
-                  >
-                    {item.step}
-                  </motion.span>
-
-                  <motion.div
-                    className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5 border border-primary/20"
-                    variants={{
-                      rest: { scale: 1, rotate: 0 },
-                      hover: {
-                        scale: 1.1,
-                        rotate: 360,
-                        transition: { duration: 0.6, ease: 'easeInOut' },
-                      },
-                    }}
-                  >
-                    <motion.span
-                      className="text-2xl font-bold text-primary"
-                      variants={{
-                        rest: { rotate: 0 },
-                        hover: {
-                          rotate: [0, -15, 15, 0],
-                          transition: { duration: 0.45, ease: 'easeInOut' },
-                        },
-                      }}
-                    >
-                      {index + 1}
-                    </motion.span>
-                  </motion.div>
-
-                  <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
-                </motion.div>
-              </AnimatedCard>
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                className="relative p-8 rounded-xl border border-border/50 bg-card/30 hover:border-primary/30 transition-colors duration-300"
+              >
+                <span className="absolute top-4 right-4 text-xs font-mono text-muted-foreground/40">
+                  {item.step}
+                </span>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-5 border border-primary/20">
+                  <span className="text-sm font-display font-bold text-primary">{index + 1}</span>
+                </div>
+                <h3 className="font-display font-semibold text-base mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* For Streamers Section - Features focused */}
+      {/* For Streamers */}
       <section id="for-streamers" className="py-20 px-4 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -40 }}
+              initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
-              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5">{t('discovery.forStreamers')}</Badge>
-              <h2 className="text-3xl md:text-5xl font-display font-bold mb-5">
+              <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/5 text-xs font-mono">
+                {t('discovery.forStreamers')}
+              </Badge>
+              <h2 className="text-2xl md:text-4xl font-display font-bold mb-4">
                 {t('discovery.streamerFeaturesTitle')}
               </h2>
-              <p className="text-muted-foreground text-lg mb-8">
+              <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
                 {t('discovery.streamerFeaturesSubtitle')}
               </p>
-              <h3 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wider">{t('discovery.featuresLabel')}</h3>
-              <ul className="space-y-4 mb-8">
+              <h3 className="text-xs font-display font-semibold text-primary mb-3 uppercase tracking-widest">
+                {t('discovery.featuresLabel')}
+              </h3>
+              <ul className="space-y-3 mb-8">
                 {[
                   t('discovery.feat1'),
                   t('discovery.feat2'),
@@ -383,34 +320,36 @@ const Discovery = () => {
                   t('discovery.feat4'),
                   t('discovery.feat5'),
                 ].map((feature, index) => (
-                  <motion.li 
-                    key={feature} 
-                    className="flex items-center gap-3"
-                    initial={{ opacity: 0, x: -20 }}
+                  <motion.li
+                    key={feature}
+                    className="flex items-center gap-3 text-sm"
+                    initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.06 }}
                   >
-                    <motion.div 
-                      className="w-2 h-2 rounded-full bg-primary"
-                      animate={{ scale: [1, 1.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
-                    />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                     <span>{feature}</span>
                   </motion.li>
                 ))}
               </ul>
-              <h3 className="text-sm font-semibold text-primary mb-2 uppercase tracking-wider">{t('discovery.monetizationLabel')}</h3>
+              <h3 className="text-xs font-display font-semibold text-primary mb-2 uppercase tracking-widest">
+                {t('discovery.monetizationLabel')}
+              </h3>
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
-              <motion.button
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
-                disabled
-              >
-                <Lock className="w-4 h-4" />
-                {t('discovery.contactSales')}
-              </motion.button>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 opacity-50 cursor-not-allowed"
+                  disabled
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  {t('discovery.contactSales')}
+                </Button>
+              </div>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
@@ -421,68 +360,56 @@ const Discovery = () => {
               </Dialog>
             </motion.div>
 
-            {/* Features highlight card instead of money card */}
-            <div className="relative bg-card rounded-xl border border-border/50 overflow-hidden">
-              <motion.div
-                className="bg-gradient-to-br from-primary/20 via-primary/10 to-transparent p-10 border border-primary/20"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <div className="text-center space-y-6">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                  >
-                    <Sparkles className="w-12 h-12 text-primary mx-auto mb-2" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold">{t('discovery.platformHighlightTitle')}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {t('discovery.platformHighlightDesc')}
-                  </p>
-                  <motion.div 
-                    className="text-sm text-muted-foreground p-4 rounded-lg bg-background/50 border border-border/30"
-                    animate={{ opacity: [0.7, 1, 0.7] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    {t('discovery.lowestFees')}
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
+            {/* Feature highlight card */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="rounded-xl border border-border/50 bg-card/30 p-10 text-center space-y-5"
+            >
+              <Zap className="w-10 h-10 text-primary mx-auto" />
+              <h3 className="text-xl font-display font-bold">{t('discovery.platformHighlightTitle')}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {t('discovery.platformHighlightDesc')}
+              </p>
+              <div className="text-xs text-muted-foreground p-3 rounded-lg bg-background/50 border border-border/30 font-mono">
+                {t('discovery.lowestFees')}
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section - Before FAQ */}
+      {/* CTA Section */}
       <section className="py-16 px-4 relative z-10">
-        <div className="container mx-auto max-w-3xl">
-          <div className="p-10 text-center">
-              <motion.h2
-                className="text-2xl md:text-4xl font-display font-bold mb-4"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                {t('discovery.ctaTitle')}
-              </motion.h2>
-              <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                {t('discovery.ctaSubtitle')}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <GlowButton variant="primary" size="lg" onClick={() => setShowRoster(true)}>
-                  <Send className="w-5 h-5" />
-                  {t('discovery.ctaSubmit')}
-                </GlowButton>
-                <motion.button
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border border-border/50 bg-muted/30 text-muted-foreground cursor-not-allowed opacity-60"
-                  disabled
-                >
-                  <Eye className="w-5 h-5" />
-                  {t('discovery.ctaReview')}
-                </motion.button>
-              </div>
-            </div>
+        <div className="container mx-auto max-w-3xl text-center">
+          <motion.h2
+            className="text-2xl md:text-4xl font-display font-bold mb-4"
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            {t('discovery.ctaTitle')}
+          </motion.h2>
+          <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
+            {t('discovery.ctaSubtitle')}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" className="h-12 px-8 gap-2" onClick={() => setShowRoster(true)}>
+              <Send className="w-4 h-4" />
+              {t('discovery.ctaSubmit')}
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 px-8 gap-2 opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <Eye className="w-4 h-4" />
+              {t('discovery.ctaReview')}
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -490,57 +417,54 @@ const Discovery = () => {
       <section className="py-20 px-4 relative z-10">
         <div className="container mx-auto max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-14"
           >
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-4">
+            <h2 className="text-2xl md:text-4xl font-display font-bold mb-3">
               {t('discovery.faqTitle')}
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-sm">
               {t('discovery.faqSubtitle')}
             </p>
           </motion.div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
+                transition={{ delay: index * 0.05 }}
+                className="rounded-xl border border-border/50 bg-card/30 overflow-hidden hover:border-border/80 transition-colors duration-200"
               >
-                <AnimatedCard>
-                  <motion.button
-                    onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                    className="w-full flex items-center justify-between p-5 text-left"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <span className="font-medium text-lg">{faq.question}</span>
-                    <motion.div
-                      animate={{ rotate: expandedFaq === index ? 180 : 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    </motion.div>
-                  </motion.button>
+                <button
+                  onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <span className="font-medium text-sm">{faq.question}</span>
                   <motion.div
-                    initial={false}
-                    animate={{ 
-                      height: expandedFaq === index ? 'auto' : 0,
-                      opacity: expandedFaq === index ? 1 : 0,
-                    }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
+                    animate={{ rotate: expandedFaq === index ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div className="px-5 pb-5 text-muted-foreground leading-relaxed">
-                      {faq.answer}
-                    </div>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 ml-4" />
                   </motion.div>
-                </AnimatedCard>
+                </button>
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: expandedFaq === index ? 'auto' : 0,
+                    opacity: expandedFaq === index ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
@@ -555,7 +479,7 @@ const Discovery = () => {
           </DialogHeader>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
+            <Input
               placeholder={t('discovery.rosterSearch')}
               value={rosterSearch}
               onChange={(e) => setRosterSearch(e.target.value)}
@@ -579,81 +503,66 @@ const Discovery = () => {
 
       <LanguageSwitcher />
       <Footer />
-      </div>
-    </>
+    </div>
   );
 };
 
-// Streamer Card Component
+// Streamer Card — clean, no 3D tilt
 function StreamerCard({ streamer, index, isLive = false }: { streamer: any; index: number; isLive?: boolean }) {
   const { t } = useLanguage();
   return (
-    <AnimatedCard delay={index * 0.08} glowColor={isLive ? '--destructive' : '--primary'}>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.35, delay: index * 0.05 }}
+    >
       <Link
         to={`/${streamer.slug}`}
-        className={`block p-5 ${
-          isLive ? 'bg-gradient-to-br from-destructive/10 to-transparent' : ''
+        className={`block p-5 rounded-xl border border-border/50 bg-card/30 hover:border-primary/30 transition-colors duration-200 ${
+          isLive ? 'border-l-2 border-l-red-500' : ''
         }`}
       >
         <div className="flex items-start gap-4">
-          <motion.div 
-            className="relative"
-            whileHover={{ scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 400 }}
-          >
+          <div className="relative shrink-0">
             {streamer.avatar_url ? (
               <img
                 src={streamer.avatar_url}
                 alt={streamer.display_name}
-                className="w-14 h-14 rounded-full object-cover ring-2 ring-border"
+                className="w-12 h-12 rounded-full object-cover ring-1 ring-border"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center ring-2 ring-primary/30">
-                <span className="text-xl font-bold text-primary">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                <span className="text-lg font-display font-bold text-primary">
                   {streamer.display_name.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
             {isLive && (
-              <motion.div 
-                className="absolute -bottom-1 -right-1 w-5 h-5 bg-destructive rounded-full border-2 border-background flex items-center justify-center"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <div className="w-2 h-2 bg-white rounded-full" />
-              </motion.div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full border-2 border-background" />
             )}
-          </motion.div>
-          
+          </div>
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-lg truncate">{streamer.display_name}</h3>
+              <h3 className="font-display font-semibold text-sm truncate">{streamer.display_name}</h3>
               {isLive && (
-                <motion.div
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <Badge variant="destructive" className="text-[10px] px-2 py-0.5">
-                    LIVE
-                  </Badge>
-                </motion.div>
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">
+                  LIVE
+                </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground truncate mb-2">
+            <p className="text-xs text-muted-foreground truncate mb-1.5">
               {streamer.bio || t('discovery.contentReviewer')}
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {streamer.twitch_url && (
-                <motion.div whileHover={{ scale: 1.2 }}>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </motion.div>
-              )}
-              <span className="font-mono">/{streamer.slug}</span>
+              {streamer.twitch_url && <ExternalLink className="w-3 h-3" />}
+              <span className="font-mono text-[11px]">/{streamer.slug}</span>
             </div>
           </div>
         </div>
       </Link>
-    </AnimatedCard>
+    </motion.div>
   );
 }
 
