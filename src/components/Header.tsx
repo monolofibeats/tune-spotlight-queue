@@ -162,9 +162,8 @@ export function Header() {
               </Link>
             )}
             
-            {/* Performance toggle - always visible at the end */}
             <div className="border-l border-border/30 pl-3 ml-1">
-              <PerformanceToggle />
+              <LanguageSwitcher variant="header" />
             </div>
           </nav>
 
