@@ -1207,6 +1207,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     onChange={(e) => setMessage(e.target.value)}
                     className="min-h-[80px] text-sm resize-none bg-background/50"
                     required={requireMessage}
+                    disabled={formDisabled}
                   />
                 </div>
               )}
