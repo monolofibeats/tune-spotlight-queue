@@ -1230,6 +1230,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       <Switch
                         checked={!!value}
                         onCheckedChange={(checked) => setDynamicValue(field.field_name, checked)}
+                        disabled={formDisabled}
                       />
                     </div>
                   );
