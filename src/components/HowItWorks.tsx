@@ -146,6 +146,7 @@ function LiveIllustration() {
 
 export function HowItWorks() {
   const [showTip, setShowTip] = useState(false);
+  const [tipExpanded, setTipExpanded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInViewRef = useRef(false);
