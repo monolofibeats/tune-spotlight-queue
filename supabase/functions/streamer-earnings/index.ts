@@ -62,19 +62,19 @@ serve(async (req) => {
     if (!streamerId) throw new Error("Streamer profile not found");
 
     // Fetch earnings from DB (RLS ensures only own earnings)
-    const { data: earnings, error: earningsError } = await supabaseClient
+    const { data: earnings, error: earningsError } = await supabaseAdmin
       .from("streamer_earnings")
       .select("*")
-      .eq("streamer_id", streamer.id)
+      .eq("streamer_id", streamerId)
       .order("created_at", { ascending: false });
 
     if (earningsError) throw earningsError;
 
     // Fetch completed payouts
-    const { data: payouts } = await supabaseClient
+    const { data: payouts } = await supabaseAdmin
       .from("payout_requests")
       .select("amount_cents, status")
-      .eq("streamer_id", streamer.id)
+      .eq("streamer_id", streamerId)
       .eq("status", "completed");
 
     const totalPayoutsCents = (payouts || []).reduce((sum, p) => sum + p.amount_cents, 0);
