@@ -1016,6 +1016,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       {songUrlLabel} {(showSongUrl ? <span className="text-destructive">*</span> : null)}
                     </label>
                     <Input
+                      disabled={formDisabled}
                       placeholder={songUrlPlaceholder}
                       value={songUrl}
                       onChange={(e) => {
