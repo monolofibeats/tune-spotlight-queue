@@ -165,31 +165,19 @@ export function HowItWorks() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         isInViewRef.current = entry.isIntersecting;
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !showTip) {
           startTimer();
-        } else {
-          setShowTip(false);
-          if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
         }
       },
       { threshold: 0.3 }
     );
     observer.observe(section);
 
-    const handleScroll = () => {
-      if (isInViewRef.current) {
-        setShowTip(false);
-        startTimer();
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
       if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
     };
-  }, [startTimer]);
+  }, [startTimer, showTip]);
 
   const { t } = useLanguage();
   const steps = [
