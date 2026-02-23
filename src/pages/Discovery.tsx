@@ -497,7 +497,7 @@ const Discovery = () => {
         </DialogContent>
       </Dialog>
 
-      <LanguageSwitcher />
+      
       <Footer />
     </div>
   );
