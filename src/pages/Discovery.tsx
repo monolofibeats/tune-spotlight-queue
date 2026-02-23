@@ -12,7 +12,6 @@ import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
-import { PerformanceToggle } from '@/components/PerformanceToggle';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState, useMemo } from 'react';
 
