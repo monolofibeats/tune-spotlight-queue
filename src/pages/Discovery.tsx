@@ -114,7 +114,7 @@ const Discovery = () => {
               <img
                 src={upstarLogoSquare}
                 alt="UpStar"
-                className="w-32 h-32 md:w-44 md:h-44 object-contain"
+                className="w-40 h-40 md:w-56 md:h-56 object-contain"
               />
             </motion.div>
 
