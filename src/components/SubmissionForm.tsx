@@ -1098,7 +1098,6 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     id="audio-file-input"
                     disabled={formDisabled}
                   />
-                  />
                   {audioFile ? (
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                       <Music2 className="w-5 h-5 text-emerald-500 shrink-0" />
