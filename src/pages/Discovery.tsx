@@ -93,9 +93,7 @@ const Discovery = () => {
                   {t('nav.signIn')}
                 </Button>
               </Link>
-              <TooltipProvider>
-                <PerformanceToggle />
-              </TooltipProvider>
+              <LanguageSwitcher variant="header" />
             </nav>
           </div>
         </div>
