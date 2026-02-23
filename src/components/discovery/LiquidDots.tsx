@@ -1,29 +1,34 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
 
-function generateDots() {
+function generateGridDots() {
   const dots: { x: string; y: string; size: number; duration: number; delay: number }[] = [];
-  for (let i = 0; i < 60; i++) {
-    dots.push({
-      x: `${5 + Math.random() * 90}%`,
-      y: `${5 + Math.random() * 90}%`,
-      size: 2 + Math.random() * 2,
-      duration: 5 + Math.random() * 6,
-      delay: Math.random() * 4,
-    });
+  const cols = 20;
+  const rows = 14;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const jitterX = (Math.random() - 0.5) * 2;
+      const jitterY = (Math.random() - 0.5) * 2;
+      dots.push({
+        x: `${(c / (cols - 1)) * 94 + 3 + jitterX}%`,
+        y: `${(r / (rows - 1)) * 94 + 3 + jitterY}%`,
+        size: 2 + Math.random() * 1.5,
+        duration: 4 + Math.random() * 5,
+        delay: Math.random() * 3,
+      });
+    }
   }
   return dots;
 }
 
-const staticDots = generateDots();
+const gridDots = generateGridDots();
 
 export function LiquidDots() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-      {staticDots.map((dot, i) => (
+      {gridDots.map((dot, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full bg-foreground/20"
+          className="absolute rounded-full bg-foreground/40"
           style={{
             left: dot.x,
             top: dot.y,
@@ -31,9 +36,9 @@ export function LiquidDots() {
             height: dot.size,
           }}
           animate={{
-            x: [0, 8, -6, 4, 0],
-            y: [0, -7, 5, -3, 0],
-            opacity: [0.15, 0.4, 0.1, 0.3, 0.15],
+            x: [0, 6, -4, 3, 0],
+            y: [0, -5, 4, -2, 0],
+            opacity: [0.3, 0.6, 0.2, 0.5, 0.3],
           }}
           transition={{
             duration: dot.duration,
