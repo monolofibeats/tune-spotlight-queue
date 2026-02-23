@@ -135,6 +135,7 @@ const Browse = () => {
                 <CategorySection
                   key={category.value}
                   label={category.label}
+                  icon={category.icon}
                   description={category.description}
                   streamers={grouped[category.value]}
                   placeholders={PLACEHOLDER_STREAMERS[category.value] || []}
