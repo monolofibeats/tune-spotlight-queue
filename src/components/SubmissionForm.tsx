@@ -1115,7 +1115,6 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         className="shrink-0 h-8 w-8 p-0"
                         disabled={formDisabled}
                       >
-                      >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
