@@ -230,29 +230,37 @@ export function HowItWorks() {
         </div>
 
         {/* PS note + CTA */}
+        {/* PS tip */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="mt-6 text-center"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/40 border border-border/20 backdrop-blur-sm">
+            <Sparkles className="w-3 h-3 text-primary/70" />
+            <p className="text-[11px] text-muted-foreground/80 italic">
+              <span className="text-foreground/60 font-medium not-italic">Psst…</span> Want to skip the line? A small boost supports creators & gets you heard faster.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-10 text-center space-y-5"
+          transition={{ delay: 0.6 }}
+          className="mt-14 text-center"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/60 border border-border/30">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs text-muted-foreground">
-              <span className="text-foreground font-medium">PS:</span> Want to skip the line? Pay a small fee to boost your spot — and support your favorite creators!
-            </p>
-          </div>
-
-          <div>
-            <Link
-              to="/browse"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
-            >
-              Find a Streamer & Submit
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          <Link
+            to="/browse"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
+          >
+            Find a Streamer & Submit
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </motion.div>
       </div>
     </section>
