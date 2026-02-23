@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const teamInvitationSchema = z.object({
+  email: z.string().email().max(320),
+  role: z.enum(["viewer", "editor", "admin"]),
+  streamer_id: z.string().uuid(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,14 +44,15 @@ serve(async (req) => {
       });
     }
 
-    const { email, role, streamer_id } = await req.json();
-
-    if (!email || !role || !streamer_id) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+    const rawBody = await req.json();
+    const parsed = teamInvitationSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid input", details: parsed.error.flatten() }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const { email, role, streamer_id } = parsed.data;
 
     // Verify the user owns this streamer profile
     const { data: streamer, error: streamerError } = await supabaseClient

@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const stemSeparationSchema = z.object({
+  action: z.enum(["start", "check", "minutes_left"]),
+  submission_id: z.string().uuid().optional(),
+  stem_types: z.array(z.string().max(50)).min(1).max(8).optional(),
+  job_id: z.string().uuid().optional(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,12 +36,20 @@ serve(async (req) => {
   );
 
   try {
-    const { action, submission_id, stem_types, job_id } = await req.json();
+    const rawBody = await req.json();
+    const parsed = stemSeparationSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid input", details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { action, submission_id, stem_types, job_id } = parsed.data;
 
     // ── ACTION: start ──
     // Fetches the audio file, uploads to LALAL.AI, starts split tasks for each stem type
     if (action === "start") {
-      if (!submission_id || !stem_types || !Array.isArray(stem_types) || stem_types.length === 0) {
+      if (!submission_id || !stem_types || stem_types.length === 0) {
         return new Response(JSON.stringify({ error: "submission_id and stem_types[] required" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

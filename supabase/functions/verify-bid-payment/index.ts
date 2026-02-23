@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { recordEarning } from "../_shared/record-earning.ts";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const verifyBidSchema = z.object({
+  sessionId: z.string().min(1).max(500),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,10 +31,15 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { sessionId } = await req.json();
-    if (!sessionId) {
-      throw new Error('Session ID is required');
+    const rawBody = await req.json();
+    const parsed = verifyBidSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid input", details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const { sessionId } = parsed.data;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
