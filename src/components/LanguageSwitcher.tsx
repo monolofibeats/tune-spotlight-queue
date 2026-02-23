@@ -229,7 +229,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                 : 'hover:bg-muted/50'
             }`}
           >
-            {lang.flag}
+            <FlagIcon countryCode={lang.flag} className="w-5 h-3.5" />
           </button>
         ))}
         <button
