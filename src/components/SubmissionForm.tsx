@@ -961,7 +961,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div 
             className={`field-glow-sync rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50 relative ${
-              !submissionsOpen ? 'opacity-50 pointer-events-none' : ''
+              !submissionsOpen && !isAdmin ? 'opacity-60' : ''
             }`}
           >
             {/* Submissions Closed Overlay */}
