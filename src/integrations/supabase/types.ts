@@ -1395,6 +1395,42 @@ export type Database = {
       }
     }
     Views: {
+      public_submission_bids: {
+        Row: {
+          created_at: string | null
+          submission_id: string | null
+          total_paid_cents: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          submission_id?: string | null
+          total_paid_cents?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          submission_id?: string | null
+          total_paid_cents?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_bids_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "public_submissions_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submission_bids_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: true
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_submissions_queue: {
         Row: {
           amount_paid: number | null
