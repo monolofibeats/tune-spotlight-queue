@@ -43,19 +43,19 @@ serve(async (req) => {
     const { sessionId } = validationResult.data;
     logStep("Verifying session", { sessionId });
 
-    // ── Idempotency: check if this session was already processed via earnings
-    const { data: existingEarning } = await supabaseClient
-      .from("streamer_earnings")
-      .select("submission_id")
+    // ── Idempotency: check if this session was already processed via submissions table
+    const { data: existingSubmission } = await supabaseClient
+      .from("submissions")
+      .select("id")
       .eq("stripe_session_id", sessionId)
       .maybeSingle();
 
-    if (existingEarning?.submission_id) {
-      logStep("Already processed via earnings", { submissionId: existingEarning.submission_id });
+    if (existingSubmission?.id) {
+      logStep("Already processed", { submissionId: existingSubmission.id });
       return new Response(JSON.stringify({
         success: true,
         message: "Submission already processed",
-        submissionId: existingEarning.submission_id,
+        submissionId: existingSubmission.id,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -109,6 +109,7 @@ serve(async (req) => {
         status: 'pending',
         audio_file_url: (session.metadata.audio_file_url || session.metadata.audioFileUrl || '').trim() || null,
         streamer_id: session.metadata.streamer_id || null,
+        stripe_session_id: sessionId,
       })
       .select()
       .single();
