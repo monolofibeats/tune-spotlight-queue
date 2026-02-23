@@ -83,7 +83,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
     (lang) => lang.label.toLowerCase().includes(search.toLowerCase()) || lang.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const currentFlag = isTranslated ? '🌐' : (FLAG_MAP[language] || '🇬🇧');
+  const currentFlagCode = FLAG_MAP[language] || 'gb';
 
   if (variant === 'header') {
     return (
