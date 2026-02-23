@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, Music, Palette, Gamepad2, PenTool, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
@@ -11,11 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Streamer } from '@/types/streamer';
 
 const CONTENT_TYPES = [
-  { value: 'music', label: '🎵 Music', description: 'Submit beats, tracks & songs for live review' },
-  { value: 'art', label: '🎨 Art', description: 'Get your visual art critiqued on stream' },
-  { value: 'games', label: '🎮 Games', description: 'Share indie games & game design for feedback' },
-  { value: 'writing', label: '✍️ Writing', description: 'Poems, lyrics & stories reviewed live' },
-  { value: 'other', label: '✨ Other', description: 'All other creative submissions' },
+  { value: 'music', label: 'Music', icon: Music, description: 'Submit beats, tracks & songs for live review' },
+  { value: 'art', label: 'Art', icon: Palette, description: 'Get your visual art critiqued on stream' },
+  { value: 'games', label: 'Games', icon: Gamepad2, description: 'Share indie games & game design for feedback' },
+  { value: 'writing', label: 'Writing', icon: PenTool, description: 'Poems, lyrics & stories reviewed live' },
+  { value: 'other', label: 'Other', icon: Sparkles, description: 'All other creative submissions' },
 ];
 
 const PLACEHOLDER_STREAMERS: Record<string, Array<{ name: string; bio: string }>> = {
@@ -135,6 +135,7 @@ const Browse = () => {
                 <CategorySection
                   key={category.value}
                   label={category.label}
+                  icon={category.icon}
                   description={category.description}
                   streamers={grouped[category.value]}
                   placeholders={PLACEHOLDER_STREAMERS[category.value] || []}
@@ -152,11 +153,13 @@ const Browse = () => {
 
 function CategorySection({
   label,
+  icon: Icon,
   description,
   streamers,
   placeholders,
 }: {
   label: string;
+  icon: any;
   description: string;
   streamers: StreamerWithVideo[];
   placeholders: Array<{ name: string; bio: string }>;
@@ -166,7 +169,10 @@ function CategorySection({
   return (
     <section>
       <div className="mb-4">
-        <h2 className="text-xl font-display font-bold text-foreground">{label}</h2>
+        <div className="flex items-center gap-2">
+          <Icon className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-display font-bold text-foreground">{label}</h2>
+        </div>
         <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
       </div>
 
