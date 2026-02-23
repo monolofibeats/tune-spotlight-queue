@@ -327,10 +327,8 @@ export default function Settings() {
     { id: 'profile', label: t('settings.tab.profile'), icon: User },
     { id: 'notifications', label: t('settings.tab.notifications'), icon: Bell },
     { id: 'language', label: t('settings.tab.language'), icon: Globe },
-    { id: 'devices', label: t('settings.tab.devices'), icon: Mic },
     ...(hasStreamerAccess ? [
       { id: 'streamer-profile', label: t('settings.tab.streamerProfile'), icon: User },
-      { id: 'social', label: t('settings.tab.social'), icon: LinkIcon },
       ...(canManageTeam ? [{ id: 'team', label: t('settings.tab.team'), icon: Users }] : []),
     ] : []),
   ];
