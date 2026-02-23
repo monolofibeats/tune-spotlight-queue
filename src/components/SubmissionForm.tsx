@@ -1190,6 +1190,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-10 text-sm bg-background/50"
                     required={requireEmail}
+                    disabled={formDisabled}
                   />
                 </div>
               )}
