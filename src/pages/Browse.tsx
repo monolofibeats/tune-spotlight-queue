@@ -153,11 +153,13 @@ const Browse = () => {
 
 function CategorySection({
   label,
+  icon: Icon,
   description,
   streamers,
   placeholders,
 }: {
   label: string;
+  icon: any;
   description: string;
   streamers: StreamerWithVideo[];
   placeholders: Array<{ name: string; bio: string }>;
