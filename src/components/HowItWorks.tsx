@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles, HelpCircle } from 'lucide-react';
+import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles, HelpCircle, ChevronRight, Zap } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -232,98 +232,122 @@ export function HowItWorks() {
 
         {/* Steps grid with floating PS tip */}
         <div className="relative">
-          {/* PS tip - floating above card 3, right-aligned, delayed appearance */}
-          <AnimatePresence>
-            {showTip && (
-              <motion.div
-                initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 10, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="hidden md:block absolute top-8 -right-4 z-20"
-                style={{ transform: 'translateX(40%)' }}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+            {steps.map((item, index) => (
+              <div key={item.step} className={`relative ${index === 2 ? 'z-10' : ''}`}>
                 <motion.div
-                  onClick={(e) => { e.stopPropagation(); setTipExpanded(!tipExpanded); }}
-                  className="cursor-pointer"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ delay: index * 0.12, duration: 0.5 }}
+                  whileHover={{ y: -4 }}
+                  onClick={() => window.location.href = '/browse'}
+                  className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer h-full"
                 >
-                  {/* Collapsed tip */}
-                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md shadow-lg shadow-emerald-500/10">
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    <p className="text-[11px] text-emerald-300/90 italic">
-                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot 💚
-                    </p>
-                    <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
-                      <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
-                    </div>
+                  <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
+                    {item.step}
                   </div>
+                  <div className="relative pt-2">
+                    {item.illustration}
+                  </div>
+                  <div className="p-5 pt-2">
+                    <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                  </div>
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.4 }}
+                    style={{ transformOrigin: 'left', width: '100%' }}
+                  />
+                </motion.div>
 
-                  {/* Expanded card */}
+                {/* Desktop PS tip - peeking from behind top-right of card 3 */}
+                {index === 2 && (
                   <AnimatePresence>
-                    {tipExpanded && (
+                    {showTip && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0, y: -4 }}
-                        animate={{ opacity: 1, height: 'auto', y: 0 }}
-                        exit={{ opacity: 0, height: 0, y: -4 }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
-                        className="overflow-hidden"
+                        initial={{ opacity: 0, x: 10, y: 5 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                        className="hidden md:block absolute -top-3 -right-3 z-[-1]"
                       >
-                        <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl shadow-emerald-500/10 max-w-[260px]">
-                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
-                            Want your track heard first? Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
-                            100% goes directly to the streamer you're supporting!
-                          </p>
-                          <Link
-                            to="/browse"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            Find a Streamer & Boost
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        </div>
+                        <motion.div
+                          onClick={(e) => { e.stopPropagation(); setTipExpanded(!tipExpanded); }}
+                          className="cursor-pointer"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.97 }}
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-t-lg rounded-r-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md shadow-lg shadow-emerald-500/10 -mb-1 translate-x-[60%] translate-y-[-20%]">
+                            <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
+                            <p className="text-[11px] text-emerald-300/90 font-medium whitespace-nowrap">
+                              <span className="text-emerald-200 font-semibold">Psst…</span> tap me 💚
+                            </p>
+                            <motion.div 
+                              className="w-5 h-5 rounded-full border border-emerald-400/50 bg-emerald-500/25 flex items-center justify-center shrink-0"
+                              animate={{ scale: [1, 1.15, 1] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                            >
+                              <ChevronRight className="w-3 h-3 text-emerald-300" />
+                            </motion.div>
+                          </div>
+                        </motion.div>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Expanded tip - appears as a "bonus step" to the right of the grid */}
+          <AnimatePresence>
+            {tipExpanded && showTip && (
+              <motion.div
+                initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -10, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="hidden md:block mt-6 ml-auto max-w-sm"
+              >
+                <div className="relative p-6 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5">
+                  <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-emerald-500/10 leading-none select-none">
+                    💎
+                  </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <h3 className="font-display font-bold text-sm text-emerald-200">Boost Your Spot</h3>
+                  </div>
+                  <p className="text-xs text-emerald-200/80 leading-relaxed mb-4">
+                    Want your track heard first? Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
+                    100% of the fee goes directly to the streamer you're supporting — it's a win-win!
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      to="/browse"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/30 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Find a Streamer & Boost
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    <button
+                      onClick={() => setTipExpanded(false)}
+                      className="text-[10px] text-emerald-400/50 hover:text-emerald-400/80 transition-colors"
+                    >
+                      dismiss
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-            {steps.map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ delay: index * 0.12, duration: 0.5 }}
-                whileHover={{ y: -4 }}
-                onClick={() => window.location.href = '/browse'}
-                className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer"
-              >
-                <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
-                  {item.step}
-                </div>
-                <div className="relative pt-2">
-                  {item.illustration}
-                </div>
-                <div className="p-5 pt-2">
-                  <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                </div>
-                <motion.div
-                  className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
-                  initial={{ scaleX: 0 }}
-                  whileHover={{ scaleX: 1 }}
-                  transition={{ duration: 0.4 }}
-                  style={{ transformOrigin: 'left', width: '100%' }}
-                />
-              </motion.div>
-            ))}
-          </div>
 
           {/* Mobile PS tip */}
           <AnimatePresence>
