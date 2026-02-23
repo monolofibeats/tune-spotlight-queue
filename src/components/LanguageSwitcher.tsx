@@ -121,7 +121,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-foreground hover:bg-primary/10 transition-colors text-left"
                   >
-                    <span className="text-sm">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.flag} />
                     <span>{lang.label}</span>
                   </button>
                 ))}
