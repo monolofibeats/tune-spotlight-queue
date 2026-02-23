@@ -1,7 +1,9 @@
-import { motion } from 'framer-motion';
-import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles, HelpCircle } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 function LinkIllustration() {
   return (
