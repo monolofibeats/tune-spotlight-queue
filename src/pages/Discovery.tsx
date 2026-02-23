@@ -5,14 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
-import { PerformanceToggle } from '@/components/PerformanceToggle';
 import upstarLogo from '@/assets/upstar-logo.png';
 import { useState, useMemo } from 'react';
 
@@ -95,9 +93,7 @@ const Discovery = () => {
                   {t('nav.signIn')}
                 </Button>
               </Link>
-              <TooltipProvider>
-                <PerformanceToggle />
-              </TooltipProvider>
+              <LanguageSwitcher variant="header" />
             </nav>
           </div>
         </div>
@@ -501,7 +497,7 @@ const Discovery = () => {
         </DialogContent>
       </Dialog>
 
-      <LanguageSwitcher />
+      
       <Footer />
     </div>
   );

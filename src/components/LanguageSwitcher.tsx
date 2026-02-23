@@ -3,9 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, X, Search } from 'lucide-react';
 import { useLanguage, Language } from '@/hooks/useLanguage';
 
-const manualLanguages: { code: Language; label: string }[] = [
-  { code: 'de', label: 'DE' },
-  { code: 'en', label: 'EN' },
+const FLAG_MAP: Record<string, string> = {
+  en: '🇬🇧',
+  de: '🇩🇪',
+};
+
+const manualLanguages: { code: Language; label: string; flag: string }[] = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
 ];
 
 const POPULAR_LANGUAGES = [
@@ -41,13 +46,16 @@ const POPULAR_LANGUAGES = [
   { code: 'hr', label: 'Hrvatski', flag: '🇭🇷' },
 ];
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  variant?: 'floating' | 'header';
+}
+
+export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps) {
   const { language, setLanguage, showTranslatePicker, setShowTranslatePicker, translateTo, resetTranslation, isTranslated } = useLanguage();
   const [search, setSearch] = useState('');
   const pickerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Close picker on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
@@ -66,9 +74,94 @@ export function LanguageSwitcher() {
     (lang) => lang.label.toLowerCase().includes(search.toLowerCase()) || lang.code.toLowerCase().includes(search.toLowerCase())
   );
 
+  const currentFlag = isTranslated ? '🌐' : (FLAG_MAP[language] || '🇬🇧');
+
+  if (variant === 'header') {
+    return (
+      <div ref={pickerRef} className="relative">
+        {/* Dropdown */}
+        <AnimatePresence>
+          {showTranslatePicker && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+              transition={{ duration: 0.15 }}
+              className="absolute top-full right-0 mt-2 w-56 max-h-72 rounded-lg bg-card border border-border/50 shadow-xl overflow-hidden z-[60]"
+            >
+              <div className="p-2 border-b border-border/30">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search..."
+                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-muted/50 border-none rounded-md outline-none placeholder:text-muted-foreground/50 text-foreground"
+                  />
+                </div>
+              </div>
+              <div className="overflow-y-auto max-h-52 p-1">
+                {filteredLanguages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      translateTo(lang.code, lang.label);
+                      setSearch('');
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-foreground hover:bg-primary/10 transition-colors text-left"
+                  >
+                    <span className="text-sm">{lang.flag}</span>
+                    <span>{lang.label}</span>
+                  </button>
+                ))}
+                {filteredLanguages.length === 0 && (
+                  <p className="text-center text-muted-foreground text-xs py-3">No languages found</p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Header buttons */}
+        <div className="flex items-center gap-1">
+          {manualLanguages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => {
+                if (isTranslated) resetTranslation();
+                setLanguage(lang.code);
+              }}
+              className={`flex items-center justify-center w-7 h-7 rounded-md text-sm transition-all ${
+                language === lang.code && !isTranslated
+                  ? 'bg-primary/15 ring-1 ring-primary/30'
+                  : 'hover:bg-muted/50'
+              }`}
+              title={lang.label}
+            >
+              {lang.flag}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowTranslatePicker(!showTranslatePicker)}
+            className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
+              isTranslated || showTranslatePicker
+                ? 'bg-primary/15 ring-1 ring-primary/30'
+                : 'hover:bg-muted/50 text-muted-foreground'
+            }`}
+            title="More languages"
+          >
+            {showTranslatePicker ? <X className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Floating variant (bottom-right)
   return (
     <div ref={pickerRef} className="fixed bottom-4 right-4 z-50">
-      {/* Language picker dropdown */}
       <AnimatePresence>
         {showTranslatePicker && (
           <motion.div
@@ -76,9 +169,8 @@ export function LanguageSwitcher() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-14 right-0 w-64 max-h-80 rounded-xl bg-card border border-border/50 shadow-xl backdrop-blur-lg overflow-hidden"
+            className="absolute bottom-14 right-0 w-64 max-h-80 rounded-lg bg-card border border-border/50 shadow-xl overflow-hidden"
           >
-            {/* Search */}
             <div className="p-2 border-b border-border/30">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -92,8 +184,6 @@ export function LanguageSwitcher() {
                 />
               </div>
             </div>
-
-            {/* Language list */}
             <div className="overflow-y-auto max-h-60 p-1">
               {filteredLanguages.map((lang) => (
                 <button
@@ -116,7 +206,6 @@ export function LanguageSwitcher() {
         )}
       </AnimatePresence>
 
-      {/* Switcher bar */}
       <div className="flex gap-1 p-1 rounded-full bg-card/90 backdrop-blur-lg border border-border/50 shadow-lg">
         {manualLanguages.map((lang) => (
           <button
@@ -125,43 +214,25 @@ export function LanguageSwitcher() {
               if (isTranslated) resetTranslation();
               setLanguage(lang.code);
             }}
-            className={`relative flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all ${
+            className={`relative flex items-center justify-center w-9 h-9 rounded-full text-sm transition-all ${
               language === lang.code && !isTranslated
-                ? 'text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-primary/15 ring-1 ring-primary/30'
+                : 'hover:bg-muted/50'
             }`}
           >
-            {language === lang.code && !isTranslated && (
-              <motion.div
-                layoutId="language-indicator"
-                className="absolute inset-0 rounded-full bg-primary"
-                transition={{ type: 'spring', duration: 0.3 }}
-              />
-            )}
-            <span className="relative z-10">{lang.label}</span>
+            {lang.flag}
           </button>
         ))}
-
-        {/* Globe button for other languages */}
         <button
           onClick={() => setShowTranslatePicker(!showTranslatePicker)}
-          className={`relative flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all ${
+          className={`relative flex items-center justify-center w-9 h-9 rounded-full text-sm transition-all ${
             isTranslated || showTranslatePicker
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-primary/15 ring-1 ring-primary/30'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
           title="Translate to any language"
         >
-          {(isTranslated || showTranslatePicker) && (
-            <motion.div
-              layoutId="language-indicator"
-              className="absolute inset-0 rounded-full bg-primary"
-              transition={{ type: 'spring', duration: 0.3 }}
-            />
-          )}
-          <span className="relative z-10">
-            {showTranslatePicker ? <X className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-          </span>
+          {showTranslatePicker ? <X className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
         </button>
       </div>
     </div>

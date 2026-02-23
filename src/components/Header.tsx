@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LiveIndicator } from './LiveIndicator';
 import { BidNotificationBell } from './BidNotificationBell';
-import { PerformanceToggle } from './PerformanceToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { SignOutDialog } from './SignOutDialog';
 import { AdminStreamerChat } from './AdminStreamerChat';
 import { useAuth } from '@/hooks/useAuth';
@@ -162,9 +162,8 @@ export function Header() {
               </Link>
             )}
             
-            {/* Performance toggle - always visible at the end */}
             <div className="border-l border-border/30 pl-3 ml-1">
-              <PerformanceToggle />
+              <LanguageSwitcher variant="header" />
             </div>
           </nav>
 
@@ -189,7 +188,7 @@ export function Header() {
         >
           <nav className="flex flex-col gap-2">
             <div className="flex items-center justify-end pb-2 border-b border-border/30">
-              <PerformanceToggle />
+              <LanguageSwitcher variant="header" />
             </div>
             
             {/* Streamer Mobile Menu */}
