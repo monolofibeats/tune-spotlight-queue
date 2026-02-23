@@ -31,10 +31,15 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { sessionId } = await req.json();
-    if (!sessionId) {
-      throw new Error('Session ID is required');
+    const rawBody = await req.json();
+    const parsed = verifyBidSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid input", details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const { sessionId } = parsed.data;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
