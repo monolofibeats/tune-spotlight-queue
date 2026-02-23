@@ -354,6 +354,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_feedback: {
         Row: {
           contact_info: string | null

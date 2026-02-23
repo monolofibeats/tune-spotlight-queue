@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -16,6 +16,8 @@ import { LiquidDots } from '@/components/discovery/LiquidDots';
 import upstarLogo from '@/assets/upstar-logo.png';
 import upstarLogoSquare from '@/assets/upstar-logo-square.png';
 import { useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -34,6 +36,9 @@ const Discovery = () => {
   const [showRoster, setShowRoster] = useState(false);
   const [rosterSearch, setRosterSearch] = useState('');
   const [showAllStreamers, setShowAllStreamers] = useState(false);
+  const [salesEmail, setSalesEmail] = useState('');
+  const [salesSubmitting, setSalesSubmitting] = useState(false);
+  const [salesSubmitted, setSalesSubmitted] = useState(false);
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
@@ -257,16 +262,48 @@ const Discovery = () => {
               <p className="text-xs text-muted-foreground mb-6">
                 {t('discovery.streamerCTA')}
               </p>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 opacity-50 cursor-not-allowed"
-                  disabled
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  {t('discovery.contactSales')}
-                </Button>
+              <div className="space-y-3">
+                {salesSubmitted ? (
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Check className="w-4 h-4" />
+                    {t('discovery.salesSubmitted') || 'Thanks! We\'ll be in touch soon.'}
+                  </div>
+                ) : (
+                  <div className="flex gap-2 max-w-sm">
+                    <Input
+                      type="email"
+                      placeholder={t('discovery.salesEmailPlaceholder') || 'Your email address'}
+                      value={salesEmail}
+                      onChange={(e) => setSalesEmail(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      className="gap-1.5 shrink-0"
+                      disabled={!salesEmail.trim() || salesSubmitting}
+                      onClick={async () => {
+                        if (!salesEmail.includes('@')) {
+                          toast.error('Please enter a valid email');
+                          return;
+                        }
+                        setSalesSubmitting(true);
+                        const { error } = await supabase
+                          .from('sales_inquiries')
+                          .insert({ email: salesEmail.trim() } as any);
+                        setSalesSubmitting(false);
+                        if (error) {
+                          toast.error('Something went wrong');
+                        } else {
+                          setSalesSubmitted(true);
+                          toast.success('Inquiry sent!');
+                        }
+                      }}
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      {t('discovery.salesSend') || 'Send'}
+                    </Button>
+                  </div>
+                )}
               </div>
               <Dialog open={showApplicationForm} onOpenChange={setShowApplicationForm}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
