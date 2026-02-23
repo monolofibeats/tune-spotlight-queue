@@ -193,7 +193,8 @@ export function HowItWorks() {
               viewport={{ once: true, margin: '-40px' }}
               transition={{ delay: index * 0.12, duration: 0.5 }}
               whileHover={{ y: -4 }}
-              className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30"
+              onClick={() => window.location.href = '/browse'}
+              className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer"
             >
               {/* Step number accent */}
               <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
