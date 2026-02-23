@@ -98,15 +98,8 @@ const Browse = () => {
     return groups;
   }, [filtered]);
 
-  // Count categories with content
-  const activeCategories = CONTENT_TYPES.filter(ct => grouped[ct.value].length > 0);
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-14">
-        {/* Header */}
+  // Always show all categories (real + placeholders when empty)
+  const allCategories = CONTENT_TYPES;
         <section className="py-8 px-4 border-b border-border/20">
           <div className="container mx-auto max-w-5xl">
             <div className="flex items-center gap-3 mb-6">
