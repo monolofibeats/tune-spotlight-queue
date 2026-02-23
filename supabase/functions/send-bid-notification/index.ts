@@ -76,7 +76,7 @@ serve(async (req) => {
               <p>Someone has placed a higher bid on your submission "<strong>${songTitle}</strong>" by ${artistName}.</p>
               <p>To reclaim your position in the queue, you can place a new bid of <strong>${offerAmount}</strong> or more.</p>
               <div style="margin: 30px 0;">
-                <a href="https://tune-spotlight-queue.lovable.app/my-songs" 
+                <a href="${Deno.env.get("SITE_URL") || "https://upstargg.lovable.app"}/my-songs" 
                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
                   Place New Bid
                 </a>
