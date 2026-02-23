@@ -242,7 +242,7 @@ export function HowItWorks() {
                   transition={{ delay: index * 0.12, duration: 0.5 }}
                   whileHover={{ y: -4 }}
                   onClick={() => window.location.href = '/browse'}
-                  className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer h-full"
+                  className="group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer h-full"
                 >
                   <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
                     {item.step}
@@ -272,7 +272,7 @@ export function HowItWorks() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className="hidden md:block absolute -top-3 right-4"
+                        className="hidden md:block absolute -top-8 -right-6"
                         style={{ zIndex: -1 }}
                       >
                         <motion.div
