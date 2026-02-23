@@ -12,6 +12,7 @@ interface SalesInquiry {
   id: string;
   email: string;
   status: string;
+  message: string | null;
   admin_notes: string | null;
   created_at: string;
 }
