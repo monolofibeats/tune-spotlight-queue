@@ -138,31 +138,67 @@ const Discovery = () => {
               {t('discovery.heroSubtitle')}
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <motion.div
               variants={fadeUp}
               custom={3}
-              className="flex flex-col sm:flex-row gap-3 justify-center pt-2"
+              className="flex justify-center pt-2"
             >
               <Button
                 size="lg"
-                className="h-12 px-8 text-sm font-medium gap-2"
+                className="h-14 px-12 text-base font-medium gap-2.5"
                 onClick={() => setShowRoster(true)}
               >
-                <Radio className="w-4 h-4" />
+                <Radio className="w-5 h-5" />
                 {t('discovery.browseStreamers')}
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12 px-8 text-sm font-medium gap-2 opacity-50 cursor-not-allowed"
-                disabled
-              >
-                <Lock className="w-4 h-4" />
-                {t('discovery.becomeStreamerInvite')}
               </Button>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 px-4 relative z-10">
+        <div className="container mx-auto max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-2xl md:text-4xl font-display font-bold mb-3">
+              {t('discovery.howItWorksTitle')}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {t('discovery.howItWorksSubtitle')}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { step: '01', title: t('discovery.step1Title'), desc: t('discovery.step1Desc') },
+              { step: '02', title: t('discovery.step2Title'), desc: t('discovery.step2Desc') },
+              { step: '03', title: t('discovery.step3Title'), desc: t('discovery.step3Desc') },
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                className="relative p-8 rounded-xl border border-border/50 bg-card/30 hover:border-primary/30 transition-colors duration-300"
+              >
+                <span className="absolute top-4 right-4 text-xs font-mono text-muted-foreground/40">
+                  {item.step}
+                </span>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-5 border border-primary/20">
+                  <span className="text-sm font-display font-bold text-primary">{index + 1}</span>
+                </div>
+                <h3 className="font-display font-semibold text-base mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
