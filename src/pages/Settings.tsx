@@ -327,10 +327,8 @@ export default function Settings() {
     { id: 'profile', label: t('settings.tab.profile'), icon: User },
     { id: 'notifications', label: t('settings.tab.notifications'), icon: Bell },
     { id: 'language', label: t('settings.tab.language'), icon: Globe },
-    { id: 'devices', label: t('settings.tab.devices'), icon: Mic },
     ...(hasStreamerAccess ? [
       { id: 'streamer-profile', label: t('settings.tab.streamerProfile'), icon: User },
-      { id: 'social', label: t('settings.tab.social'), icon: LinkIcon },
       ...(canManageTeam ? [{ id: 'team', label: t('settings.tab.team'), icon: Users }] : []),
     ] : []),
   ];
@@ -409,15 +407,6 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('settings.profile.phone')}</Label>
-                  <Input id="phone" type="tel" placeholder={t('settings.profile.phonePlaceholder')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">{t('settings.profile.bio')}</Label>
-                  <Textarea id="bio" placeholder={t('settings.profile.bioPlaceholder')} value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
-                </div>
               </div>
             </TabsContent>
 
@@ -485,74 +474,6 @@ export default function Settings() {
               )}
             </TabsContent>
 
-            {/* Voice & Video Tab */}
-            <TabsContent value="devices" className="space-y-6">
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
-                <h2 className="font-semibold text-lg">{t('settings.devices.title')}</h2>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Mic className="w-4 h-4" />
-                      {t('settings.devices.microphone')}
-                    </Label>
-                    <Select value={selectedMicrophone} onValueChange={setSelectedMicrophone}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t('settings.devices.selectMicrophone')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
-                        {audioDevices.filter(d => d.deviceId).map((d) => (
-                          <SelectItem key={d.deviceId} value={d.deviceId}>
-                            {d.label || `Microphone ${d.deviceId.slice(0, 8)}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Monitor className="w-4 h-4" />
-                      {t('settings.devices.speaker')}
-                    </Label>
-                    <Select value={selectedSpeaker} onValueChange={setSelectedSpeaker}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t('settings.devices.selectSpeaker')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
-                        {speakerDevices.filter(d => d.deviceId).map((d) => (
-                          <SelectItem key={d.deviceId} value={d.deviceId}>
-                            {d.label || `Speaker ${d.deviceId.slice(0, 8)}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Video className="w-4 h-4" />
-                      {t('settings.devices.camera')}
-                    </Label>
-                    <Select value={selectedCamera} onValueChange={setSelectedCamera}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t('settings.devices.selectCamera')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="default">{t('settings.devices.systemDefault')}</SelectItem>
-                        {videoDevices.filter(d => d.deviceId).map((d) => (
-                          <SelectItem key={d.deviceId} value={d.deviceId}>
-                            {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
 
             {/* Streamer Profile Tab */}
             {hasStreamerAccess && (
@@ -572,12 +493,6 @@ export default function Settings() {
                         onChange={(e) => setStreamerDisplayName(e.target.value)}
                         placeholder={t('settings.streamer.displayNamePlaceholder')}
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t('settings.streamer.profileUrl')}</Label>
-                      <div className="flex items-center h-10 px-4 bg-muted rounded-lg text-muted-foreground text-sm">
-                        upstar.gg/{streamerData.slug}
-                      </div>
                     </div>
                   </div>
 
@@ -616,40 +531,6 @@ export default function Settings() {
               </TabsContent>
             )}
 
-            {/* Social Tab */}
-            {hasStreamerAccess && (
-              <TabsContent value="social" className="space-y-6">
-                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">{t('settings.social.title')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.social.subtitle')}
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="twitchUrl">Twitch</Label>
-                      <Input id="twitchUrl" value={twitchUrl} onChange={(e) => setTwitchUrl(e.target.value)} placeholder="https://twitch.tv/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="youtubeUrl">YouTube</Label>
-                      <Input id="youtubeUrl" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="tiktokUrl">TikTok</Label>
-                      <Input id="tiktokUrl" value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} placeholder="https://tiktok.com/@..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="instagramUrl">Instagram</Label>
-                      <Input id="instagramUrl" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="twitterUrl">X (Twitter)</Label>
-                      <Input id="twitterUrl" value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/..." />
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            )}
 
             {/* Team Tab */}
             {canManageTeam && (
