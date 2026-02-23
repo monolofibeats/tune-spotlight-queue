@@ -266,13 +266,13 @@ const Discovery = () => {
                 {salesSubmitted ? (
                   <div className="flex items-center gap-2 text-sm text-primary">
                     <Check className="w-4 h-4" />
-                    {t('discovery.salesSubmitted') || 'Thanks! We\'ll be in touch soon.'}
+                    Thanks! We'll be in touch soon.
                   </div>
                 ) : (
                   <div className="flex gap-2 max-w-sm">
                     <Input
                       type="email"
-                      placeholder={t('discovery.salesEmailPlaceholder') || 'Your email address'}
+                      placeholder="Your email address"
                       value={salesEmail}
                       onChange={(e) => setSalesEmail(e.target.value)}
                       className="h-9 text-xs"
@@ -300,7 +300,7 @@ const Discovery = () => {
                       }}
                     >
                       <Send className="w-3.5 h-3.5" />
-                      {t('discovery.salesSend') || 'Send'}
+                      Send
                     </Button>
                   </div>
                 )}
