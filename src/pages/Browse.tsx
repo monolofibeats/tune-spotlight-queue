@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, Music, Palette, Gamepad2, PenTool, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
