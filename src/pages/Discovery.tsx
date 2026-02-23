@@ -300,7 +300,7 @@ const Discovery = () => {
                       }}
                     >
                       <Send className="w-3.5 h-3.5" />
-                      {t('discovery.salesSend') || 'Send'}
+                      Send
                     </Button>
                   </div>
                 )}
