@@ -270,7 +270,7 @@ const Discovery = () => {
                     Thanks! We'll be in touch soon.
                   </div>
                 ) : (
-                  <div className="flex gap-2 max-w-sm">
+                  <div className="space-y-2 max-w-sm">
                     <Input
                       type="email"
                       placeholder="Your email address"
@@ -278,9 +278,16 @@ const Discovery = () => {
                       onChange={(e) => setSalesEmail(e.target.value)}
                       className="h-9 text-xs"
                     />
+                    <Textarea
+                      placeholder="What are you most interested in? (optional)"
+                      value={salesMessage}
+                      onChange={(e) => setSalesMessage(e.target.value)}
+                      className="text-xs min-h-[60px] resize-none"
+                      rows={2}
+                    />
                     <Button
                       size="sm"
-                      className="gap-1.5 shrink-0"
+                      className="gap-1.5 w-full"
                       disabled={!salesEmail.trim() || salesSubmitting}
                       onClick={async () => {
                         if (!salesEmail.includes('@')) {
@@ -290,7 +297,7 @@ const Discovery = () => {
                         setSalesSubmitting(true);
                         const { error } = await supabase
                           .from('sales_inquiries')
-                          .insert({ email: salesEmail.trim() } as any);
+                          .insert({ email: salesEmail.trim(), message: salesMessage.trim() || null } as any);
                         setSalesSubmitting(false);
                         if (error) {
                           toast.error('Something went wrong');
