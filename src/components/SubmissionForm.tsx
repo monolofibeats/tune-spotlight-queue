@@ -1245,6 +1245,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       <Select
                         value={(value as string) ?? ''}
                         onValueChange={(v) => setDynamicValue(field.field_name, v)}
+                        disabled={formDisabled}
                       >
                         <SelectTrigger className="h-10 text-sm bg-background/50">
                           <SelectValue placeholder={placeholder || `Select ${label}`} />
