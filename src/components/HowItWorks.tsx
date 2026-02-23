@@ -146,6 +146,7 @@ function LiveIllustration() {
 
 export function HowItWorks() {
   const [showTip, setShowTip] = useState(false);
+  const [tipExpanded, setTipExpanded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInViewRef = useRef(false);
@@ -235,26 +236,58 @@ export function HowItWorks() {
           <AnimatePresence>
             {showTip && (
               <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.9, rotate: -2 }}
-                animate={{ opacity: 1, y: 0, scale: 1, rotate: 1.5 }}
-                exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 10, scale: 0.95 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="hidden md:flex absolute -top-5 -right-3 z-10 items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-lg shadow-emerald-500/5"
+                className="hidden md:block absolute top-8 -right-4 z-20"
+                style={{ transform: 'translateX(40%)' }}
               >
-                <Sparkles className="w-3 h-3 text-emerald-400" />
-                <p className="text-[11px] text-emerald-300/90 italic">
-                  <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
-                </p>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0 hover:bg-emerald-500/30 transition-colors" onClick={(e) => e.stopPropagation()}>
+                <motion.div
+                  onClick={(e) => { e.stopPropagation(); setTipExpanded(!tipExpanded); }}
+                  className="cursor-pointer"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  {/* Collapsed tip */}
+                  <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md shadow-lg shadow-emerald-500/10">
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <p className="text-[11px] text-emerald-300/90 italic">
+                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot 💚
+                    </p>
+                    <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-[220px] text-xs">
-                    Pay a small fee to jump ahead in the queue. 100% of the boost goes directly to the streamer you're supporting!
-                  </TooltipContent>
-                </Tooltip>
+                    </div>
+                  </div>
+
+                  {/* Expanded card */}
+                  <AnimatePresence>
+                    {tipExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -4 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -4 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl shadow-emerald-500/10 max-w-[260px]">
+                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                            Want your track heard first? Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
+                            100% goes directly to the streamer you're supporting!
+                          </p>
+                          <Link
+                            to="/browse"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Find a Streamer & Boost
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -301,21 +334,40 @@ export function HowItWorks() {
                 exit={{ opacity: 0, y: -4 }}
                 className="md:hidden mt-4 flex justify-end"
               >
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md">
-                  <Sparkles className="w-3 h-3 text-emerald-400" />
-                  <p className="text-[11px] text-emerald-300/90 italic">
-                    <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
-                  </p>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
-                        <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[220px] text-xs">
-                      Pay a small fee to jump ahead in the queue. 100% of the boost goes directly to the streamer you're supporting!
-                    </TooltipContent>
-                  </Tooltip>
+                <div onClick={() => setTipExpanded(!tipExpanded)} className="cursor-pointer">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <p className="text-[11px] text-emerald-300/90 italic">
+                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot 💚
+                    </p>
+                    <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {tipExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
+                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                            Want your track heard first? Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
+                            100% goes directly to the streamer!
+                          </p>
+                          <Link
+                            to="/browse"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
+                          >
+                            Find a Streamer & Boost
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
