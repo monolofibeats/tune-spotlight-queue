@@ -230,9 +230,10 @@ export function HowItWorks() {
           </p>
         </motion.div>
 
-        {/* Steps grid with floating PS tip */}
-        <div className="relative">
-          <div className={`grid grid-cols-1 gap-5 ${tipExpanded && showTip ? 'md:grid-cols-4' : 'md:grid-cols-3'} md:gap-6 transition-all duration-500`}>
+        {/* Steps + optional expanded tip side by side */}
+        <div className="relative flex gap-6 items-stretch">
+          {/* 3-step grid - never changes */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 flex-1 min-w-0">
             {steps.map((item, index) => (
               <div key={item.step} className={`relative ${index === 2 ? 'z-10' : ''}`}>
                 <motion.div
@@ -302,101 +303,99 @@ export function HowItWorks() {
                 )}
               </div>
             ))}
-
-            {/* Expanded tip - inline as 4th column */}
-            <AnimatePresence>
-              {tipExpanded && showTip && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, width: 'auto', scale: 1 }}
-                  exit={{ opacity: 0, width: 0, scale: 0.9 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className="hidden md:block min-w-0"
-                >
-                  <div className="relative p-6 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 h-full flex flex-col justify-center">
-                    <div className="absolute top-3 right-3 text-[32px] leading-none select-none">
-                      💎
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
-                        <Zap className="w-4 h-4 text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-sm text-emerald-200">Boost Your Spot</h3>
-                    </div>
-                    <p className="text-xs text-emerald-200/80 leading-relaxed mb-4">
-                      Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
-                      100% goes directly to the streamer — it's a win-win!
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Link
-                        to="/browse"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/30 transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Boost Now
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                      <button
-                        onClick={() => setTipExpanded(false)}
-                        className="text-[10px] text-emerald-400/50 hover:text-emerald-400/80 transition-colors"
-                      >
-                        dismiss
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
-          {/* Mobile PS tip */}
+          {/* Expanded tip panel - slides in on the right, doesn't affect the grid */}
           <AnimatePresence>
-            {showTip && (
+            {tipExpanded && showTip && (
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                className="md:hidden mt-4 flex justify-end"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 220 }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="hidden md:block overflow-hidden shrink-0"
               >
-                <div onClick={() => setTipExpanded(!tipExpanded)} className="cursor-pointer">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                    <p className="text-[11px] text-emerald-300/90 italic">
-                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot 💚
-                    </p>
-                    <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
-                      <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
-                    </div>
+                <div className="relative p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 h-full flex flex-col justify-center w-[220px]">
+                  <div className="absolute top-3 right-3 text-[28px] leading-none select-none">
+                    💎
                   </div>
-                  <AnimatePresence>
-                    {tipExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
-                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
-                            Want your track heard first? Pay a small boost fee to <span className="text-emerald-300 font-semibold">jump ahead in the queue</span>. 
-                            100% goes directly to the streamer!
-                          </p>
-                          <Link
-                            to="/browse"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
-                          >
-                            Find a Streamer & Boost
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                      <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
+                  </div>
+                  <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
+                    Pay a small fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
+                    100% goes to the streamer!
+                  </p>
+                  <Link
+                    to="/browse"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Boost Now
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                  <button
+                    onClick={() => setTipExpanded(false)}
+                    className="text-[10px] text-emerald-400/50 hover:text-emerald-400/80 transition-colors self-start"
+                  >
+                    dismiss
+                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Mobile PS tip */}
+        <AnimatePresence>
+          {showTip && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="md:hidden mt-4 flex justify-end"
+            >
+              <div onClick={() => setTipExpanded(!tipExpanded)} className="cursor-pointer">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
+                  <Sparkles className="w-3 h-3 text-emerald-400" />
+                  <p className="text-[11px] text-emerald-300/90 italic">
+                    <span className="text-emerald-200 font-semibold not-italic">Psst…</span> wanna know a secret? 🤫
+                  </p>
+                  <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
+                    <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {tipExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
+                        <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                          Pay a small boost fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
+                          100% goes directly to the streamer!
+                        </p>
+                        <Link
+                          to="/browse"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
+                        >
+                          Boost Now
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* CTA */}
         <motion.div
