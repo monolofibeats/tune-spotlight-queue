@@ -230,12 +230,11 @@ export function HowItWorks() {
           </p>
         </motion.div>
 
-        {/* Steps + optional expanded tip side by side */}
-        <div className="relative flex gap-6 items-stretch">
-          {/* 3-step grid - never changes */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 flex-1 min-w-0">
+        {/* 3-step grid - always centered, never changes */}
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {steps.map((item, index) => (
-              <div key={item.step} className={`relative ${index === 2 ? 'z-10' : ''}`}>
+              <div key={item.step} className="relative" style={{ zIndex: index === 2 ? 10 : 1 }}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -264,29 +263,30 @@ export function HowItWorks() {
                   />
                 </motion.div>
 
-                {/* Desktop PS tip - peeking from behind top-right of card 3 */}
+                {/* Desktop PS tip - peeking from behind top-right of card 3, clipped by card */}
                 {index === 2 && !tipExpanded && (
                   <AnimatePresence>
                     {showTip && (
                       <motion.div
-                        initial={{ opacity: 0, x: 10, y: 5 }}
-                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className="hidden md:block absolute -top-3 -right-3 z-[-1]"
+                        className="hidden md:block absolute -top-3 right-0 translate-x-[55%]"
+                        style={{ zIndex: -1, clipPath: 'inset(0 0 0 0)' }}
                       >
                         <motion.div
                           onClick={(e) => { e.stopPropagation(); setTipExpanded(true); }}
                           className="cursor-pointer"
-                          whileHover={{ scale: 1.05 }}
+                          whileHover={{ scale: 1.05, x: 8 }}
                           whileTap={{ scale: 0.97 }}
                           animate={{ y: [0, -3, 0] }}
                           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                         >
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-t-lg rounded-r-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md shadow-lg shadow-emerald-500/10 -mb-1 translate-x-[60%] translate-y-[-20%]">
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-r-lg border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
                             <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
                             <p className="text-[11px] text-emerald-300/90 font-medium whitespace-nowrap">
-                              <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret? 🤫
+                              <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret?
                             </p>
                             <motion.div 
                               className="w-5 h-5 rounded-full border border-emerald-400/50 bg-emerald-500/25 flex items-center justify-center shrink-0"
@@ -305,20 +305,18 @@ export function HowItWorks() {
             ))}
           </div>
 
-          {/* Expanded tip panel - slides in on the right, doesn't affect the grid */}
+          {/* Expanded tip - absolutely positioned to the right of the grid, doesn't affect layout */}
           <AnimatePresence>
             {tipExpanded && showTip && (
               <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 220 }}
-                exit={{ opacity: 0, width: 0 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="hidden md:block overflow-hidden shrink-0"
+                className="hidden md:block absolute top-0 left-full ml-6"
+                style={{ width: 210 }}
               >
-                <div className="relative p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 h-full flex flex-col justify-center w-[220px]">
-                  <div className="absolute top-3 right-3 text-[28px] leading-none select-none">
-                    💎
-                  </div>
+                <div className="p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 flex flex-col justify-center">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
                       <Zap className="w-3.5 h-3.5 text-emerald-400" />
