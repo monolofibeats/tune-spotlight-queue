@@ -167,6 +167,9 @@ function InquiryCard({
                 minute: '2-digit',
               })}
             </p>
+            {inquiry.message && (
+              <p className="text-xs text-foreground/70 mt-1 italic">"{inquiry.message}"</p>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {inquiry.status === 'pending' && (
