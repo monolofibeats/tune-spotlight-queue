@@ -57,6 +57,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     isActive: submissionPaid,
   } = usePricingConfig('submission', streamerId);
   const { isActive: submissionsOpen } = usePricingConfig('submissions_open', streamerId);
+  const formDisabled = !submissionsOpen && !isAdmin;
 
   const { fields: streamerFormFields } = useStreamerFormFields(streamerId);
 
@@ -961,7 +962,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div 
             className={`field-glow-sync rounded-xl p-4 md:p-6 space-y-4 bg-card/50 border border-border/50 relative ${
-              !submissionsOpen ? 'opacity-50 pointer-events-none' : ''
+              !submissionsOpen && !isAdmin ? 'opacity-60' : ''
             }`}
           >
             {/* Submissions Closed Overlay */}
@@ -1015,6 +1016,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       {songUrlLabel} {(showSongUrl ? <span className="text-destructive">*</span> : null)}
                     </label>
                     <Input
+                      disabled={formDisabled}
                       placeholder={songUrlPlaceholder}
                       value={songUrl}
                       onChange={(e) => {
@@ -1094,6 +1096,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     onChange={handleFileChange}
                     className="hidden"
                     id="audio-file-input"
+                    disabled={formDisabled}
                   />
                   {audioFile ? (
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
@@ -1110,6 +1113,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         size="sm"
                         onClick={removeAudioFile}
                         className="shrink-0 h-8 w-8 p-0"
+                        disabled={formDisabled}
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -1121,6 +1125,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full h-10 text-sm border border-dashed border-border/50 bg-transparent hover:bg-transparent hover:border-border transition-all duration-200 hover:scale-[1.01] group"
+                      disabled={formDisabled}
                     >
                       <Upload className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
                       <span className="transition-transform duration-200 group-hover:scale-105">{t('submission.uploadFile')}</span>
@@ -1145,6 +1150,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         onChange={(e) => setArtistName(e.target.value)}
                         className="h-10 text-sm bg-background/50"
                         required={requireArtist}
+                        disabled={formDisabled}
                       />
                     </div>
                   )}
@@ -1161,6 +1167,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         onChange={(e) => setSongTitle(e.target.value)}
                         className="h-10 text-sm bg-background/50"
                         required={requireTitle}
+                        disabled={formDisabled}
                       />
                     </div>
                   )}
@@ -1180,6 +1187,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-10 text-sm bg-background/50"
                     required={requireEmail}
+                    disabled={formDisabled}
                   />
                 </div>
               )}
@@ -1196,6 +1204,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     onChange={(e) => setMessage(e.target.value)}
                     className="min-h-[80px] text-sm resize-none bg-background/50"
                     required={requireMessage}
+                    disabled={formDisabled}
                   />
                 </div>
               )}
@@ -1218,6 +1227,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       <Switch
                         checked={!!value}
                         onCheckedChange={(checked) => setDynamicValue(field.field_name, checked)}
+                        disabled={formDisabled}
                       />
                     </div>
                   );
@@ -1232,6 +1242,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       <Select
                         value={(value as string) ?? ''}
                         onValueChange={(v) => setDynamicValue(field.field_name, v)}
+                        disabled={formDisabled}
                       >
                         <SelectTrigger className="h-10 text-sm bg-background/50">
                           <SelectValue placeholder={placeholder || `Select ${label}`} />
@@ -1260,6 +1271,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         onChange={(e) => setDynamicValue(field.field_name, e.target.value)}
                         className="min-h-[80px] text-sm resize-none bg-background/50"
                         required={isRequired}
+                        disabled={formDisabled}
                       />
                     </div>
                   );
@@ -1277,6 +1289,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       onChange={(e) => setDynamicValue(field.field_name, e.target.value)}
                       className="h-10 text-sm bg-background/50"
                       required={isRequired}
+                      disabled={formDisabled}
                     />
                   </div>
                 );
