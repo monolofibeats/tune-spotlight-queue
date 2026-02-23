@@ -129,6 +129,7 @@ serve(async (req) => {
         user_id: user?.id || "",
         email: customerEmail,
         bid_amount_cents: bidAmountCents.toString(),
+        streamer_id: submission.streamer_id || "",
       },
     });
 
