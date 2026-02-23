@@ -144,14 +144,15 @@ const Discovery = () => {
               custom={3}
               className="flex justify-center pt-2"
             >
-              <Button
-                size="lg"
-                className="h-14 px-12 text-base font-medium gap-2.5"
-                onClick={() => setShowRoster(true)}
-              >
-                <Radio className="w-5 h-5" />
-                {t('discovery.browseStreamers')}
-              </Button>
+              <Link to="/browse">
+                <Button
+                  size="lg"
+                  className="h-14 px-12 text-base font-medium gap-2.5"
+                >
+                  <Radio className="w-5 h-5" />
+                  {t('discovery.browseStreamers')}
+                </Button>
+              </Link>
             </motion.div>
           </motion.div>
         </div>
