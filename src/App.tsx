@@ -28,6 +28,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import Support from "./pages/Support";
+import Browse from "./pages/Browse";
 
 const queryClient = new QueryClient();
 
