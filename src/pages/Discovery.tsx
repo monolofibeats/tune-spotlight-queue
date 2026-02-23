@@ -330,8 +330,8 @@ const Discovery = () => {
             <Button
               variant="outline"
               size="lg"
-              className="h-12 px-8 gap-2 opacity-50 cursor-not-allowed"
-              disabled
+              className="h-12 px-8 gap-2"
+              onClick={() => setShowApplicationForm(true)}
             >
               <Eye className="w-4 h-4" />
               {t('discovery.ctaReview')}
