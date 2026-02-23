@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AdminStreamerManager } from '@/components/AdminStreamerManager';
 import { AdminChatPanel } from '@/components/AdminChatPanel';
 import { AdminPayoutRequests } from '@/components/AdminPayoutRequests';
+import { AdminSalesInquiries } from '@/components/AdminSalesInquiries';
 
 const Dashboard = () => {
   useAuth();
