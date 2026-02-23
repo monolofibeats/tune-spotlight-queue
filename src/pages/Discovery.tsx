@@ -16,6 +16,8 @@ import { LiquidDots } from '@/components/discovery/LiquidDots';
 import upstarLogo from '@/assets/upstar-logo.png';
 import upstarLogoSquare from '@/assets/upstar-logo-square.png';
 import { useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
