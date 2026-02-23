@@ -149,7 +149,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
               }`}
               title={lang.label}
             >
-              {lang.flag}
+              <FlagIcon countryCode={lang.flag} className="w-5 h-3.5" />
             </button>
           ))}
           <button
