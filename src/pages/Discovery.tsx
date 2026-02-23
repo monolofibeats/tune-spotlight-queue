@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -144,14 +144,15 @@ const Discovery = () => {
               custom={3}
               className="flex justify-center pt-2"
             >
-              <Button
-                size="lg"
-                className="h-14 px-12 text-base font-medium gap-2.5"
-                onClick={() => setShowRoster(true)}
-              >
-                <Radio className="w-5 h-5" />
-                {t('discovery.browseStreamers')}
-              </Button>
+              <Link to="/browse">
+                <Button
+                  size="lg"
+                  className="h-14 px-12 text-base font-medium gap-2.5"
+                >
+                  <Radio className="w-5 h-5" />
+                  {t('discovery.browseStreamers')}
+                </Button>
+              </Link>
             </motion.div>
           </motion.div>
         </div>
@@ -232,10 +233,12 @@ const Discovery = () => {
               </div>
               {!showAllStreamers && streamers.length > 6 && (
                 <div className="text-center mt-8">
-                  <Button variant="outline" size="sm" onClick={() => setShowRoster(true)} className="gap-2">
-                    Show More
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
+                  <Link to="/browse">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      Show More
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -389,10 +392,12 @@ const Discovery = () => {
             {t('discovery.ctaSubtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" className="h-12 px-8 gap-2" onClick={() => setShowRoster(true)}>
-              <Send className="w-4 h-4" />
-              {t('discovery.ctaSubmit')}
-            </Button>
+            <Link to="/browse">
+              <Button size="lg" className="h-12 px-8 gap-2">
+                <Send className="w-4 h-4" />
+                {t('discovery.ctaSubmit')}
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"
