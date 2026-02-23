@@ -55,17 +55,22 @@ const Dashboard = () => {
               <TabsTrigger value="streamers" className="rounded-lg px-6">
                 Support
               </TabsTrigger>
+              <TabsTrigger value="sales" className="rounded-lg px-6">
+                Sales
+              </TabsTrigger>
               <TabsTrigger value="payouts" className="rounded-lg px-6">
                 Payouts
               </TabsTrigger>
             </TabsList>
 
-            {/* Streamers Tab */}
             <TabsContent value="streamers">
               <AdminStreamerManager />
             </TabsContent>
 
-            {/* Payouts Tab */}
+            <TabsContent value="sales">
+              <AdminSalesInquiries />
+            </TabsContent>
+
             <TabsContent value="payouts">
               <AdminPayoutRequests />
             </TabsContent>
