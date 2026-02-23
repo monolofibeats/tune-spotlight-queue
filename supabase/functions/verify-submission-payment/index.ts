@@ -109,6 +109,7 @@ serve(async (req) => {
         status: 'pending',
         audio_file_url: (session.metadata.audio_file_url || session.metadata.audioFileUrl || '').trim() || null,
         streamer_id: session.metadata.streamer_id || null,
+        stripe_session_id: sessionId,
       })
       .select()
       .single();
