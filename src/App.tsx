@@ -6,10 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { PerformanceModeProvider } from "@/hooks/usePerformanceMode";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { PerformancePrompt } from "@/components/PerformancePrompt";
 import { AppErrorBoundary } from "@/components/AppErrorBoundary";
 import Discovery from "./pages/Discovery";
 import StreamerPage from "./pages/StreamerPage";
