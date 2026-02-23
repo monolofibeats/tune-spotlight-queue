@@ -272,8 +272,8 @@ export function HowItWorks() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className="hidden md:block absolute -top-3 right-0 translate-x-[55%]"
-                        style={{ zIndex: -1, clipPath: 'inset(0 0 0 0)' }}
+                        className="hidden md:block absolute top-3 right-0 translate-x-[55%]"
+                        style={{ zIndex: -1 }}
                       >
                         <motion.div
                           onClick={(e) => { e.stopPropagation(); setTipExpanded(true); }}
