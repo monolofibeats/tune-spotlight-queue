@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const stemSeparationSchema = z.object({
+  action: z.enum(["start", "check", "minutes_left"]),
+  submission_id: z.string().uuid().optional(),
+  stem_types: z.array(z.string().max(50)).min(1).max(8).optional(),
+  job_id: z.string().uuid().optional(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
