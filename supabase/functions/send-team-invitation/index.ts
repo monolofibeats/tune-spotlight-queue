@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const teamInvitationSchema = z.object({
+  email: z.string().email().max(320),
+  role: z.enum(["viewer", "editor", "admin"]),
+  streamer_id: z.string().uuid(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
