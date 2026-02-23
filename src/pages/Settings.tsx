@@ -409,15 +409,6 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('settings.profile.phone')}</Label>
-                  <Input id="phone" type="tel" placeholder={t('settings.profile.phonePlaceholder')} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">{t('settings.profile.bio')}</Label>
-                  <Textarea id="bio" placeholder={t('settings.profile.bioPlaceholder')} value={bio} onChange={(e) => setBio(e.target.value)} rows={3} />
-                </div>
               </div>
             </TabsContent>
 
