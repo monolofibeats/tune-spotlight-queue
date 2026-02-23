@@ -539,7 +539,7 @@ function StreamerCard({ streamer, index, isLive = false }: { streamer: any; inde
               </div>
             )}
             {isLive && (
-              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full border-2 border-background" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full border-2 border-background" />
             )}
           </div>
 
