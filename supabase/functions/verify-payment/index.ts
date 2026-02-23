@@ -86,7 +86,7 @@ serve(async (req) => {
 
     const stripeEmail = session.customer_details?.email || metadata.email || null;
 
-    const origin = req.headers.get("origin") || "https://tune-spotlight-queue.lovable.app";
+    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
     const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
