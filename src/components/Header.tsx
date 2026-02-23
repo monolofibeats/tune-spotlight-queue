@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LiveIndicator } from './LiveIndicator';
 import { BidNotificationBell } from './BidNotificationBell';
-import { PerformanceToggle } from './PerformanceToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { SignOutDialog } from './SignOutDialog';
 import { AdminStreamerChat } from './AdminStreamerChat';
 import { useAuth } from '@/hooks/useAuth';
