@@ -1127,7 +1127,6 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       className="w-full h-10 text-sm border border-dashed border-border/50 bg-transparent hover:bg-transparent hover:border-border transition-all duration-200 hover:scale-[1.01] group"
                       disabled={formDisabled}
                     >
-                    >
                       <Upload className="w-4 h-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
                       <span className="transition-transform duration-200 group-hover:scale-105">{t('submission.uploadFile')}</span>
                     </Button>
