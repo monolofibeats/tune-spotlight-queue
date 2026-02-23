@@ -127,7 +127,7 @@ export function SpotBiddingDialog({
       
       if (submissionIds.length > 0) {
         const { data: bids } = await supabase
-          .from('submission_bids')
+          .from('public_submission_bids')
           .select('submission_id, total_paid_cents')
           .in('submission_id', submissionIds);
 
