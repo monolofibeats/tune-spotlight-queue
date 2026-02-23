@@ -39,6 +39,7 @@ const Discovery = () => {
   const [salesEmail, setSalesEmail] = useState('');
   const [salesSubmitting, setSalesSubmitting] = useState(false);
   const [salesSubmitted, setSalesSubmitted] = useState(false);
+  const [salesMessage, setSalesMessage] = useState('');
 
   const liveStreamers = streamers.filter(s => s.is_live);
   const offlineStreamers = streamers.filter(s => !s.is_live);
