@@ -11,12 +11,36 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Streamer } from '@/types/streamer';
 
 const CONTENT_TYPES = [
-  { value: 'music', label: 'Music' },
-  { value: 'art', label: 'Art' },
-  { value: 'games', label: 'Games' },
-  { value: 'writing', label: 'Writing' },
-  { value: 'other', label: 'Other' },
+  { value: 'music', label: '🎵 Music', description: 'Submit beats, tracks & songs for live review' },
+  { value: 'art', label: '🎨 Art', description: 'Get your visual art critiqued on stream' },
+  { value: 'games', label: '🎮 Games', description: 'Share indie games & game design for feedback' },
+  { value: 'writing', label: '✍️ Writing', description: 'Poems, lyrics & stories reviewed live' },
+  { value: 'other', label: '✨ Other', description: 'All other creative submissions' },
 ];
+
+// Placeholder cards shown when a category has no real streamers yet
+const PLACEHOLDER_STREAMERS: Record<string, Array<{ name: string; bio: string }>> = {
+  music: [
+    { name: 'BeatReviewr', bio: 'Hip-hop & trap beat reactions' },
+    { name: 'MelodyCheck', bio: 'Pop & R&B song reviews' },
+    { name: 'BassDrop Live', bio: 'Electronic & EDM critiques' },
+  ],
+  art: [
+    { name: 'SketchCritic', bio: 'Digital art & illustration feedback' },
+    { name: 'Canvas Live', bio: 'Painting & mixed media reviews' },
+  ],
+  games: [
+    { name: 'IndieSpotlight', bio: 'Indie game playtests & feedback' },
+    { name: 'GameDevReview', bio: 'Game design critique sessions' },
+  ],
+  writing: [
+    { name: 'WordSmith Live', bio: 'Poetry & lyrics deep dives' },
+    { name: 'StoryStream', bio: 'Short fiction & creative writing' },
+  ],
+  other: [
+    { name: 'CreativeHub', bio: 'Podcasts, videos & more' },
+  ],
+};
 
 interface StreamerWithVideo extends Streamer {
   video_url?: string | null;
