@@ -11,11 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Streamer } from '@/types/streamer';
 
 const CONTENT_TYPES = [
-  { value: 'music', label: '🎵 Music', description: 'Submit beats, tracks & songs for live review' },
-  { value: 'art', label: '🎨 Art', description: 'Get your visual art critiqued on stream' },
-  { value: 'games', label: '🎮 Games', description: 'Share indie games & game design for feedback' },
-  { value: 'writing', label: '✍️ Writing', description: 'Poems, lyrics & stories reviewed live' },
-  { value: 'other', label: '✨ Other', description: 'All other creative submissions' },
+  { value: 'music', label: 'Music', icon: Music, description: 'Submit beats, tracks & songs for live review' },
+  { value: 'art', label: 'Art', icon: Palette, description: 'Get your visual art critiqued on stream' },
+  { value: 'games', label: 'Games', icon: Gamepad2, description: 'Share indie games & game design for feedback' },
+  { value: 'writing', label: 'Writing', icon: PenTool, description: 'Poems, lyrics & stories reviewed live' },
+  { value: 'other', label: 'Other', icon: Sparkles, description: 'All other creative submissions' },
 ];
 
 const PLACEHOLDER_STREAMERS: Record<string, Array<{ name: string; bio: string }>> = {
