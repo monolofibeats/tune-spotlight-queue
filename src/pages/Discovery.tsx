@@ -71,17 +71,8 @@ const Discovery = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Subtle grid background */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(hsl(var(--border) / 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--border) / 0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* Liquid dots background */}
+      <LiquidDots />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/30">
