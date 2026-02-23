@@ -35,13 +35,11 @@ const App = () => (
   <AppErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <PerformanceModeProvider>
           <AuthProvider>
             <ThemeWrapper>
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                <PerformancePrompt />
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Discovery />} />
