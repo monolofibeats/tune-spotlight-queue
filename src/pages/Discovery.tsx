@@ -390,10 +390,12 @@ const Discovery = () => {
             {t('discovery.ctaSubtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" className="h-12 px-8 gap-2" onClick={() => setShowRoster(true)}>
-              <Send className="w-4 h-4" />
-              {t('discovery.ctaSubmit')}
-            </Button>
+            <Link to="/browse">
+              <Button size="lg" className="h-12 px-8 gap-2">
+                <Send className="w-4 h-4" />
+                {t('discovery.ctaSubmit')}
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"
