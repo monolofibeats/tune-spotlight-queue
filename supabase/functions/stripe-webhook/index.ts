@@ -110,7 +110,7 @@ serve(async (req) => {
     }
 
     const stripeEmail = session.customer_details?.email || metadata.email || null;
-    const siteUrl = "https://tune-spotlight-queue.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
 
     const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
       stripeEmail,
