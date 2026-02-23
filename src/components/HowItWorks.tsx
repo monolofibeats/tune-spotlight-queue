@@ -195,8 +195,8 @@ export function HowItWorks() {
   const steps = [
     {
       step: '01',
-      title: 'Drop Your Link',
-      description: 'Paste any music link — Spotify, SoundCloud, YouTube, anything.',
+      title: 'Upload a File or Drop Your Link',
+      description: 'Upload any file up to 100 MB or just drop a link to it — Spotify, SoundCloud, YouTube, anything.',
       illustration: <LinkIllustration />,
     },
     {
