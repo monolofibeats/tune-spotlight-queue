@@ -155,7 +155,8 @@ serve(async (req) => {
       .from('submission_bids')
       .select('*, submissions!inner(status, song_title)')
       .neq('submission_id', submissionId)
-      .order('total_paid_cents', { ascending: false });
+      .order('total_paid_cents', { ascending: false })
+      .limit(100);
 
     const currentTotal = (existingBid?.total_paid_cents || 0) + bidAmountCents;
     
