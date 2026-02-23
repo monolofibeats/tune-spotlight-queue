@@ -53,53 +53,103 @@ function LinkIllustration() {
 }
 
 function QueueIllustration() {
-  const rows = [
-    { pos: 1, w: '85%', highlight: false, delay: 0 },
-    { pos: 2, w: '70%', highlight: true, delay: 0.1 },
-    { pos: 3, w: '55%', highlight: false, delay: 0.2 },
-    { pos: 4, w: '40%', highlight: false, delay: 0.3 },
+  const [phase, setPhase] = useState<'idle' | 'reviewing' | 'climbing'>('idle');
+  const cycleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const cycle = () => {
+      setPhase('idle');
+      cycleRef.current = setTimeout(() => {
+        setPhase('reviewing');
+        cycleRef.current = setTimeout(() => {
+          setPhase('climbing');
+          cycleRef.current = setTimeout(cycle, 2800);
+        }, 1200);
+      }, 2200);
+    };
+    cycle();
+    return () => { if (cycleRef.current) clearTimeout(cycleRef.current); };
+  }, []);
+
+  // Track data: label, width, isYou
+  const tracks = [
+    { label: 'Track A', w: '85%', isYou: false },
+    { label: 'YOU ⚡', w: '70%', isYou: true },
+    { label: 'Track C', w: '55%', isYou: false },
+    { label: 'Track D', w: '40%', isYou: false },
   ];
+
+  // During 'idle': show all 4 at positions 1-4
+  // During 'reviewing': #1 gets a checkmark + fades
+  // During 'climbing': #1 gone, others shift up, show in positions 1-3
+
+  const showReviewBadge = phase === 'reviewing';
+  const shifted = phase === 'climbing';
+
+  const visibleTracks = shifted ? tracks.slice(1) : tracks;
 
   return (
     <div className="relative w-full h-32 flex flex-col items-center justify-center gap-1.5 px-6">
-      {rows.map((row) => (
-        <motion.div
-          key={row.pos}
-          className="flex items-center gap-2 w-full max-w-[200px]"
-          initial={{ opacity: 0, x: -12 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: row.delay + 0.3 }}
-        >
-          <span className="text-[9px] font-mono text-muted-foreground/40 w-4 shrink-0 text-right">
-            #{row.pos}
-          </span>
-          <motion.div
-            className={`h-5 rounded-md ${
-              row.highlight
-                ? 'bg-gradient-to-r from-primary/30 to-primary/10 border border-primary/30'
-                : 'bg-muted/30 border border-border/20'
-            }`}
-            style={{ width: row.w }}
-            animate={row.highlight ? { scale: [1, 1.03, 1] } : {}}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            {row.highlight && (
-              <div className="h-full flex items-center px-2">
-                <span className="text-[8px] font-bold text-primary tracking-wide">YOU ⚡</span>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-      ))}
+      <AnimatePresence mode="popLayout">
+        {visibleTracks.map((track, index) => {
+          const pos = index + 1;
+          const isFirst = index === 0 && !shifted;
+          const widths: Record<string, string> = { '85%': '85%', '70%': '78%', '55%': '68%', '40%': '55%' };
 
-      {/* Animated arrow showing queue movement */}
+          return (
+            <motion.div
+              key={track.label}
+              layout
+              className="flex items-center gap-2 w-full max-w-[200px]"
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: showReviewBadge && isFirst ? 0.4 : 1, x: 0 }}
+              exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              <span className="text-[9px] font-mono text-muted-foreground/40 w-4 shrink-0 text-right">
+                #{pos}
+              </span>
+              <motion.div
+                className={`h-5 rounded-md ${
+                  track.isYou
+                    ? 'bg-gradient-to-r from-primary/30 to-primary/10 border border-primary/30'
+                    : showReviewBadge && isFirst
+                      ? 'bg-emerald-500/15 border border-emerald-500/30'
+                      : 'bg-muted/30 border border-border/20'
+                }`}
+                style={{ width: shifted ? widths[track.w] || track.w : track.w }}
+                animate={track.isYou && !showReviewBadge ? { scale: [1, 1.03, 1] } : {}}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                <div className="h-full flex items-center px-2">
+                  {showReviewBadge && isFirst ? (
+                    <motion.span
+                      className="text-[8px] font-bold text-emerald-400 tracking-wide"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                    >
+                      ✓ Reviewed
+                    </motion.span>
+                  ) : track.isYou ? (
+                    <span className="text-[8px] font-bold text-primary tracking-wide">YOU ⚡</span>
+                  ) : null}
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+
+      {/* Arrow indicating upward movement */}
       <motion.div
         className="absolute right-4 top-1/2 -translate-y-1/2"
-        animate={{ y: [-8, 8, -8], opacity: [0.3, 0.7, 0.3] }}
-        transition={{ repeat: Infinity, duration: 2 }}
+        animate={shifted
+          ? { y: [-4, -12, -4], opacity: [0.5, 0.9, 0.5] }
+          : { y: [-8, 8, -8], opacity: [0.3, 0.7, 0.3] }
+        }
+        transition={{ repeat: Infinity, duration: shifted ? 1 : 2 }}
       >
-        <ArrowDown className="w-3 h-3 text-primary/40" />
+        <ArrowDown className={`w-3 h-3 text-primary/40 ${shifted ? 'rotate-180' : ''}`} />
       </motion.div>
     </div>
   );
