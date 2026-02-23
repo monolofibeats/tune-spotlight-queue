@@ -397,10 +397,6 @@ export function HowItWorks() {
             )}
           </AnimatePresence>
         </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
         {/* CTA */}
         <motion.div
