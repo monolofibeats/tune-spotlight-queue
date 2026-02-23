@@ -41,6 +41,14 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Rate limit: 10 requests per 60 seconds per IP
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed } = await checkRateLimit(clientIp, "create-submission-payment", 10, 60);
+    if (!allowed) {
+      logStep("Rate limited", { ip: clientIp });
+      return rateLimitResponse(corsHeaders);
+    }
+
     // Parse and validate input
     const rawBody = await req.json();
     const validationResult = requestSchema.safeParse(rawBody);

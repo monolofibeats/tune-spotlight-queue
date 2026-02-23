@@ -21,6 +21,14 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Rate limit: 10 requests per 60 seconds per IP
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed } = await checkRateLimit(clientIp, "create-priority-payment", 10, 60);
+    if (!allowed) {
+      logStep("Rate limited", { ip: clientIp });
+      return rateLimitResponse(corsHeaders);
+    }
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
