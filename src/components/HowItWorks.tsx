@@ -283,7 +283,7 @@ export function HowItWorks() {
                           animate={{ y: [0, -3, 0] }}
                           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                         >
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-r-lg border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
                             <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
                             <p className="text-[11px] text-emerald-300/90 font-medium whitespace-nowrap">
                               <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret?
