@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { recordEarning } from "../_shared/record-earning.ts";
+import { z } from "https://esm.sh/zod@3.25.76";
+
+const verifyBidSchema = z.object({
+  sessionId: z.string().min(1).max(500),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
