@@ -305,27 +305,6 @@ const Discovery = () => {
         </div>
       </section>
 
-      {/* Stats Strip */}
-      <section className="py-12 px-4 relative z-10 border-y border-border/20">
-        <div className="container mx-auto max-w-4xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.4 }}
-                className="text-center space-y-1"
-              >
-                <stat.icon className="w-5 h-5 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-display font-bold tabular-nums">{stat.value}</div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-16 px-4 relative z-10">
