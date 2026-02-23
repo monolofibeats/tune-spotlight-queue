@@ -494,12 +494,6 @@ export default function Settings() {
                         placeholder={t('settings.streamer.displayNamePlaceholder')}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>{t('settings.streamer.profileUrl')}</Label>
-                      <div className="flex items-center h-10 px-4 bg-muted rounded-lg text-muted-foreground text-sm">
-                        upstar.gg/{streamerData.slug}
-                      </div>
-                    </div>
                   </div>
 
                   <div className="space-y-2">
