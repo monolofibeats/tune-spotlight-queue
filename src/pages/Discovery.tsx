@@ -520,7 +520,7 @@ function StreamerCard({ streamer, index, isLive = false }: { streamer: any; inde
       <Link
         to={`/${streamer.slug}`}
         className={`block p-5 rounded-xl border border-border/50 bg-card/30 hover:border-primary/30 transition-colors duration-200 ${
-          isLive ? 'border-l-2 border-l-red-500' : ''
+          isLive ? 'border-l-2 border-l-destructive' : ''
         }`}
       >
         <div className="flex items-start gap-4">
