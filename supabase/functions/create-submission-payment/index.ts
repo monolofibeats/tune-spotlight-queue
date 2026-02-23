@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://esm.sh/zod@3.25.76";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,6 +40,14 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+
+    // Rate limit: 10 requests per 60 seconds per IP
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { allowed } = await checkRateLimit(clientIp, "create-submission-payment", 10, 60);
+    if (!allowed) {
+      logStep("Rate limited", { ip: clientIp });
+      return rateLimitResponse(corsHeaders);
+    }
 
     // Parse and validate input
     const rawBody = await req.json();
