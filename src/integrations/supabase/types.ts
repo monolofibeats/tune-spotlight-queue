@@ -360,6 +360,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          message: string | null
           processed_at: string | null
           processed_by: string | null
           status: string
@@ -370,6 +371,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          message?: string | null
           processed_at?: string | null
           processed_by?: string | null
           status?: string
@@ -380,6 +382,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          message?: string | null
           processed_at?: string | null
           processed_by?: string | null
           status?: string

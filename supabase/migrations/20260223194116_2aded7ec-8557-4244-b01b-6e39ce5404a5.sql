@@ -1,0 +1,1 @@
+ALTER TABLE public.sales_inquiries ADD COLUMN message TEXT;
