@@ -1318,6 +1318,7 @@ export type Database = {
           song_url: string
           status: string
           streamer_id: string | null
+          stripe_session_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -1337,6 +1338,7 @@ export type Database = {
           song_url: string
           status?: string
           streamer_id?: string | null
+          stripe_session_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -1356,6 +1358,7 @@ export type Database = {
           song_url?: string
           status?: string
           streamer_id?: string | null
+          stripe_session_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
