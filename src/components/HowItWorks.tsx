@@ -183,68 +183,78 @@ export function HowItWorks() {
           </p>
         </motion.div>
 
-        {/* Steps - always visible, stacked vertically on mobile, horizontal on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {steps.map((item, index) => (
-            <motion.div
-              key={item.step}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ delay: index * 0.12, duration: 0.5 }}
-              whileHover={{ y: -4 }}
-              onClick={() => window.location.href = '/browse'}
-              className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer"
-            >
-              {/* Step number accent */}
-              <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
-                {item.step}
-              </div>
-
-              {/* Illustration */}
-              <div className="relative pt-2">
-                {item.illustration}
-              </div>
-
-              {/* Text content */}
-              <div className="p-5 pt-2">
-                <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-              </div>
-
-              {/* Bottom progress line on hover */}
-              <motion.div
-                className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
-                initial={{ scaleX: 0 }}
-                whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.4 }}
-                style={{ transformOrigin: 'left', width: '100%' }}
-              />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Connecting arrows between cards (desktop only) */}
-        <div className="hidden md:flex justify-center -mt-[calc(50%+1rem)] mb-[calc(50%-2rem)] pointer-events-none" aria-hidden>
-          {/* These are decorative and handled by the grid gap */}
-        </div>
-
-        {/* PS note + CTA */}
-        {/* PS tip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="mt-6 text-center"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/40 border border-border/20 backdrop-blur-sm">
-            <Sparkles className="w-3 h-3 text-primary/70" />
-            <p className="text-[11px] text-muted-foreground/80 italic">
-              <span className="text-foreground/60 font-medium not-italic">Psst…</span> Want to skip the line? A small boost supports creators & gets you heard faster.
+        {/* Steps grid with floating PS tip */}
+        <div className="relative">
+          {/* PS tip - floating above card 3, right-aligned */}
+          <motion.div
+            initial={{ opacity: 0, y: 8, rotate: -1 }}
+            whileInView={{ opacity: 1, y: 0, rotate: 1.5 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="hidden md:flex absolute -top-5 right-0 z-10 items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-lg shadow-emerald-500/5"
+          >
+            <Sparkles className="w-3 h-3 text-emerald-400" />
+            <p className="text-[11px] text-emerald-300/90 italic">
+              <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
             </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+            {steps.map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ delay: index * 0.12, duration: 0.5 }}
+                whileHover={{ y: -4 }}
+                onClick={() => window.location.href = '/browse'}
+                className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer"
+              >
+                {/* Step number accent */}
+                <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
+                  {item.step}
+                </div>
+
+                {/* Illustration */}
+                <div className="relative pt-2">
+                  {item.illustration}
+                </div>
+
+                {/* Text content */}
+                <div className="p-5 pt-2">
+                  <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                </div>
+
+                {/* Bottom progress line on hover */}
+                <motion.div
+                  className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
+                  initial={{ scaleX: 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.4 }}
+                  style={{ transformOrigin: 'left', width: '100%' }}
+                />
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
+
+          {/* Mobile PS tip */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="md:hidden mt-4 flex justify-end"
+          >
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md">
+              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <p className="text-[11px] text-emerald-300/90 italic">
+                <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
+              </p>
+            </div>
+          </motion.div>
+        </div>
 
         {/* CTA */}
         <motion.div
