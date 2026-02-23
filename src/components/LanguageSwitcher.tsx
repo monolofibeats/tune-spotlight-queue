@@ -4,47 +4,56 @@ import { Globe, X, Search } from 'lucide-react';
 import { useLanguage, Language } from '@/hooks/useLanguage';
 
 const FLAG_MAP: Record<string, string> = {
-  en: '🇬🇧',
-  de: '🇩🇪',
+  en: 'gb',
+  de: 'de',
 };
 
 const manualLanguages: { code: Language; label: string; flag: string }[] = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'en', label: 'English', flag: 'gb' },
+  { code: 'de', label: 'Deutsch', flag: 'de' },
 ];
 
 const POPULAR_LANGUAGES = [
-  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'pt', label: 'Português', flag: '🇧🇷' },
-  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
-  { code: 'ja', label: '日本語', flag: '🇯🇵' },
-  { code: 'ko', label: '한국어', flag: '🇰🇷' },
-  { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
-  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
-  { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
-  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
-  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
-  { code: 'sv', label: 'Svenska', flag: '🇸🇪' },
-  { code: 'uk', label: 'Українська', flag: '🇺🇦' },
-  { code: 'th', label: 'ไทย', flag: '🇹🇭' },
-  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩' },
-  { code: 'ro', label: 'Română', flag: '🇷🇴' },
-  { code: 'cs', label: 'Čeština', flag: '🇨🇿' },
-  { code: 'el', label: 'Ελληνικά', flag: '🇬🇷' },
-  { code: 'hu', label: 'Magyar', flag: '🇭🇺' },
-  { code: 'da', label: 'Dansk', flag: '🇩🇰' },
-  { code: 'fi', label: 'Suomi', flag: '🇫🇮' },
-  { code: 'no', label: 'Norsk', flag: '🇳🇴' },
-  { code: 'bg', label: 'Български', flag: '🇧🇬' },
-  { code: 'he', label: 'עברית', flag: '🇮🇱' },
-  { code: 'ms', label: 'Bahasa Melayu', flag: '🇲🇾' },
-  { code: 'sk', label: 'Slovenčina', flag: '🇸🇰' },
-  { code: 'hr', label: 'Hrvatski', flag: '🇭🇷' },
+  { code: 'ru', label: 'Русский', flag: 'ru' },
+  { code: 'es', label: 'Español', flag: 'es' },
+  { code: 'fr', label: 'Français', flag: 'fr' },
+  { code: 'pt', label: 'Português', flag: 'br' },
+  { code: 'it', label: 'Italiano', flag: 'it' },
+  { code: 'ja', label: '日本語', flag: 'jp' },
+  { code: 'ko', label: '한국어', flag: 'kr' },
+  { code: 'zh-CN', label: '中文', flag: 'cn' },
+  { code: 'ar', label: 'العربية', flag: 'sa' },
+  { code: 'hi', label: 'हिन्दी', flag: 'in' },
+  { code: 'tr', label: 'Türkçe', flag: 'tr' },
+  { code: 'pl', label: 'Polski', flag: 'pl' },
+  { code: 'nl', label: 'Nederlands', flag: 'nl' },
+  { code: 'sv', label: 'Svenska', flag: 'se' },
+  { code: 'uk', label: 'Українська', flag: 'ua' },
+  { code: 'th', label: 'ไทย', flag: 'th' },
+  { code: 'vi', label: 'Tiếng Việt', flag: 'vn' },
+  { code: 'id', label: 'Bahasa Indonesia', flag: 'id' },
+  { code: 'ro', label: 'Română', flag: 'ro' },
+  { code: 'cs', label: 'Čeština', flag: 'cz' },
+  { code: 'el', label: 'Ελληνικά', flag: 'gr' },
+  { code: 'hu', label: 'Magyar', flag: 'hu' },
+  { code: 'da', label: 'Dansk', flag: 'dk' },
+  { code: 'fi', label: 'Suomi', flag: 'fi' },
+  { code: 'no', label: 'Norsk', flag: 'no' },
+  { code: 'bg', label: 'Български', flag: 'bg' },
+  { code: 'he', label: 'עברית', flag: 'il' },
+  { code: 'ms', label: 'Bahasa Melayu', flag: 'my' },
+  { code: 'sk', label: 'Slovenčina', flag: 'sk' },
+  { code: 'hr', label: 'Hrvatski', flag: 'hr' },
 ];
+
+const FlagIcon = ({ countryCode, className = "w-4 h-3" }: { countryCode: string; className?: string }) => (
+  <img 
+    src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`} 
+    alt=""
+    className={`object-cover rounded-sm shadow-sm ${className}`}
+    loading="lazy"
+  />
+);
 
 interface LanguageSwitcherProps {
   variant?: 'floating' | 'header';
@@ -74,7 +83,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
     (lang) => lang.label.toLowerCase().includes(search.toLowerCase()) || lang.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const currentFlag = isTranslated ? '🌐' : (FLAG_MAP[language] || '🇬🇧');
+  
 
   if (variant === 'header') {
     return (
@@ -112,7 +121,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-foreground hover:bg-primary/10 transition-colors text-left"
                   >
-                    <span className="text-sm">{lang.flag}</span>
+                    <FlagIcon countryCode={lang.flag} />
                     <span>{lang.label}</span>
                   </button>
                 ))}
@@ -140,7 +149,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
               }`}
               title={lang.label}
             >
-              {lang.flag}
+              <FlagIcon countryCode={lang.flag} className="w-5 h-3.5" />
             </button>
           ))}
           <button
@@ -194,7 +203,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-primary/10 transition-colors text-left"
                 >
-                  <span className="text-lg">{lang.flag}</span>
+                  <FlagIcon countryCode={lang.flag} className="w-5 h-3.5" />
                   <span>{lang.label}</span>
                 </button>
               ))}
@@ -220,7 +229,7 @@ export function LanguageSwitcher({ variant = 'floating' }: LanguageSwitcherProps
                 : 'hover:bg-muted/50'
             }`}
           >
-            {lang.flag}
+            <FlagIcon countryCode={lang.flag} className="w-5 h-3.5" />
           </button>
         ))}
         <button
