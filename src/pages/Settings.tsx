@@ -531,40 +531,6 @@ export default function Settings() {
               </TabsContent>
             )}
 
-            {/* Social Tab */}
-            {hasStreamerAccess && (
-              <TabsContent value="social" className="space-y-6">
-                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">{t('settings.social.title')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.social.subtitle')}
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="twitchUrl">Twitch</Label>
-                      <Input id="twitchUrl" value={twitchUrl} onChange={(e) => setTwitchUrl(e.target.value)} placeholder="https://twitch.tv/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="youtubeUrl">YouTube</Label>
-                      <Input id="youtubeUrl" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="tiktokUrl">TikTok</Label>
-                      <Input id="tiktokUrl" value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} placeholder="https://tiktok.com/@..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="instagramUrl">Instagram</Label>
-                      <Input id="instagramUrl" value={instagramUrl} onChange={(e) => setInstagramUrl(e.target.value)} placeholder="https://instagram.com/..." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="twitterUrl">X (Twitter)</Label>
-                      <Input id="twitterUrl" value={twitterUrl} onChange={(e) => setTwitterUrl(e.target.value)} placeholder="https://x.com/..." />
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            )}
 
             {/* Team Tab */}
             {canManageTeam && (
