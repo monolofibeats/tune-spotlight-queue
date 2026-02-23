@@ -169,7 +169,10 @@ function CategorySection({
   return (
     <section>
       <div className="mb-4">
-        <h2 className="text-xl font-display font-bold text-foreground">{label}</h2>
+        <div className="flex items-center gap-2">
+          <Icon className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-display font-bold text-foreground">{label}</h2>
+        </div>
         <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
       </div>
 
