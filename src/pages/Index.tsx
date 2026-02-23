@@ -9,6 +9,7 @@ import { Sparkles } from 'lucide-react';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
+import upstarLogo from '@/assets/upstar-logo-square.png';
 
 const Index = () => {
   const { isLive } = useStreamSession();
@@ -25,7 +26,18 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className="flex flex-col items-center"
           >
+            {/* Big UpStar Logo */}
+            <motion.img
+              src={upstarLogo}
+              alt="UpStar"
+              className="w-28 h-28 md:w-40 md:h-40 object-contain mb-6"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            />
+
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/50 bg-card/30 mb-4 ${isLive ? 'pulse-glow' : ''}`}>
               <Sparkles className={`w-3 h-3 ${isLive ? 'text-primary animate-pulse' : 'text-muted-foreground'}`} />
               <span className="text-xs font-medium text-muted-foreground">
