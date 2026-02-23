@@ -109,12 +109,13 @@ const Discovery = () => {
             animate="visible"
             className="space-y-6"
           >
-            {/* Status badge */}
-            <motion.div variants={fadeUp} custom={0}>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border/50 bg-card/50 text-xs font-mono text-muted-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                Beta · Building in public
-              </span>
+            {/* Big UpStar Logo */}
+            <motion.div variants={fadeUp} custom={0} className="flex justify-center">
+              <img
+                src={upstarLogoSquare}
+                alt="UpStar"
+                className="w-32 h-32 md:w-44 md:h-44 object-contain"
+              />
             </motion.div>
 
             {/* Title */}
