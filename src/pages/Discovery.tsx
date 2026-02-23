@@ -272,7 +272,7 @@ const Discovery = () => {
                   <div className="flex gap-2 max-w-sm">
                     <Input
                       type="email"
-                      placeholder={t('discovery.salesEmailPlaceholder') || 'Your email address'}
+                      placeholder="Your email address"
                       value={salesEmail}
                       onChange={(e) => setSalesEmail(e.target.value)}
                       className="h-9 text-xs"
