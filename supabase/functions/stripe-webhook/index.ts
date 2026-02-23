@@ -97,18 +97,15 @@ serve(async (req) => {
       return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
     }
 
-    // Also check submissions table directly for idempotency
-    // (in case earning recording failed but submission was created)
-    const { data: existingSubs } = await supabase
+    // Also check submissions table directly by stripe_session_id for idempotency
+    const { data: existingSub } = await supabase
       .from("submissions")
       .select("id")
-      .eq("email", session.customer_details?.email || metadata.email || "___none___")
-      .eq("song_url", metadata.song_url || "___none___")
-      .gte("created_at", new Date(Date.now() - 5 * 60 * 1000).toISOString()) // within last 5 min
-      .limit(1);
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
 
-    if (existingSubs && existingSubs.length > 0) {
-      logStep("Submission already exists (matched by email+song_url)", { id: existingSubs[0].id });
+    if (existingSub?.id) {
+      logStep("Submission already exists (matched by stripe_session_id)", { id: existingSub.id });
       return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
     }
 
@@ -147,6 +144,7 @@ serve(async (req) => {
         audio_file_url: audioFileUrl || null,
         streamer_id: metadata.streamer_id || null,
         user_id: finalUserId,
+        stripe_session_id: sessionId,
       })
       .select()
       .single();
