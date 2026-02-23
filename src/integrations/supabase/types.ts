@@ -1441,6 +1441,10 @@ export type Database = {
       }
     }
     Functions: {
+      check_submission_rate_limit: {
+        Args: { _streamer_id: string; _user_id?: string }
+        Returns: boolean
+      }
       get_team_role: {
         Args: { _streamer_id: string; _user_id: string }
         Returns: string
