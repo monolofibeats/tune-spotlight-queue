@@ -28,14 +28,38 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("Not authenticated");
 
-    // Get streamer profile
-    const { data: streamer, error: streamerError } = await supabaseClient
-      .from("streamers")
-      .select("id, slug, display_name")
-      .eq("user_id", user.id)
-      .single();
+    // Use service role for data queries (RLS on earnings only allows owner, not team members)
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
 
-    if (streamerError || !streamer) throw new Error("Streamer profile not found");
+    // Get streamer profile - first try as owner, then as team member
+    let streamerId: string | null = null;
+
+    const { data: ownStreamer } = await supabaseAdmin
+      .from("streamers")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (ownStreamer) {
+      streamerId = ownStreamer.id;
+    } else {
+      // Check if user is an accepted team member
+      const { data: teamMember } = await supabaseAdmin
+        .from("streamer_team_members")
+        .select("streamer_id")
+        .eq("user_id", user.id)
+        .eq("invitation_status", "accepted")
+        .limit(1)
+        .maybeSingle();
+
+      if (teamMember) streamerId = teamMember.streamer_id;
+    }
+
+    if (!streamerId) throw new Error("Streamer profile not found");
 
     // Fetch earnings from DB (RLS ensures only own earnings)
     const { data: earnings, error: earningsError } = await supabaseClient
