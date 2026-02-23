@@ -12,6 +12,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { StreamerApplicationForm } from '@/components/StreamerApplicationForm';
 import { BuildingPhaseBanner } from '@/components/BuildingPhaseBanner';
 import { HowItWorks } from '@/components/HowItWorks';
+import { LiquidDots } from '@/components/discovery/LiquidDots';
 import upstarLogo from '@/assets/upstar-logo.png';
 import upstarLogoSquare from '@/assets/upstar-logo-square.png';
 import { useState, useMemo } from 'react';
@@ -70,17 +71,8 @@ const Discovery = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Subtle grid background */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(hsl(var(--border) / 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--border) / 0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-        }}
-      />
+      {/* Liquid dots background */}
+      <LiquidDots />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/30">
@@ -114,7 +106,7 @@ const Discovery = () => {
               <img
                 src={upstarLogoSquare}
                 alt="UpStar"
-                className="w-32 h-32 md:w-44 md:h-44 object-contain"
+                className="w-40 h-40 md:w-56 md:h-56 object-contain"
               />
             </motion.div>
 
