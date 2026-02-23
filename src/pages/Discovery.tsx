@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { useActiveStreamers } from '@/hooks/useStreamer';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Footer } from '@/components/Footer';
