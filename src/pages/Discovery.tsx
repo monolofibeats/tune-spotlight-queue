@@ -266,7 +266,7 @@ const Discovery = () => {
                 {salesSubmitted ? (
                   <div className="flex items-center gap-2 text-sm text-primary">
                     <Check className="w-4 h-4" />
-                    {t('discovery.salesSubmitted') || 'Thanks! We\'ll be in touch soon.'}
+                    Thanks! We'll be in touch soon.
                   </div>
                 ) : (
                   <div className="flex gap-2 max-w-sm">
