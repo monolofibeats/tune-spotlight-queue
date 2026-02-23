@@ -57,6 +57,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     isActive: submissionPaid,
   } = usePricingConfig('submission', streamerId);
   const { isActive: submissionsOpen } = usePricingConfig('submissions_open', streamerId);
+  const formDisabled = !submissionsOpen && !isAdmin;
 
   const { fields: streamerFormFields } = useStreamerFormFields(streamerId);
 
