@@ -335,12 +335,6 @@ export function HowItWorks() {
                     Boost Now
                     <ArrowRight className="w-3 h-3" />
                   </Link>
-                  <button
-                    onClick={() => setTipExpanded(false)}
-                    className="text-[10px] text-emerald-400/50 hover:text-emerald-400/80 transition-colors self-start"
-                  >
-                    dismiss
-                  </button>
                 </div>
               </motion.div>
             )}
