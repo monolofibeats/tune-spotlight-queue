@@ -233,7 +233,12 @@ const Discovery = () => {
               </div>
               {!showAllStreamers && streamers.length > 6 && (
                 <div className="text-center mt-8">
-                  <Button variant="outline" size="sm" onClick={() => setShowRoster(true)} className="gap-2">
+                  <Link to="/browse">
+                    <Button variant="outline" size="sm" className="gap-2">
+                      Show More
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
                     Show More
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
