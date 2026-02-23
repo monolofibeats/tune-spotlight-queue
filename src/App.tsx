@@ -133,7 +133,6 @@ const App = () => (
               </TooltipProvider>
             </ThemeWrapper>
           </AuthProvider>
-        </PerformanceModeProvider>
       </LanguageProvider>
     </QueryClientProvider>
   </AppErrorBoundary>

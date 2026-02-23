@@ -188,7 +188,7 @@ export function Header() {
         >
           <nav className="flex flex-col gap-2">
             <div className="flex items-center justify-end pb-2 border-b border-border/30">
-              <PerformanceToggle />
+              <LanguageSwitcher variant="header" />
             </div>
             
             {/* Streamer Mobile Menu */}
