@@ -54,12 +54,6 @@ const Discovery = () => {
     );
   }, [liveStreamers, offlineStreamers, rosterSearch]);
 
-  const stats = [
-    { label: t('discovery.activeStreamers'), value: 0, icon: Users },
-    { label: t('discovery.songsReviewed'), value: 0, icon: Music },
-    { label: t('discovery.liveNow'), value: 0, icon: Radio },
-    { label: t('discovery.weeklyViews'), value: 0, icon: TrendingUp },
-  ];
 
   const faqs = [
     { question: t('discovery.faq1q'), answer: t('discovery.faq1a') },
