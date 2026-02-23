@@ -44,6 +44,7 @@ const App = () => (
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Discovery />} />
+                    <Route path="/browse" element={<Browse />} />
                     <Route path="/imprint" element={<Imprint />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsOfService />} />
