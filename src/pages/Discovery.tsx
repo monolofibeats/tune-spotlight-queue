@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap } from 'lucide-react';
+import { Radio, Users, Music, TrendingUp, ArrowRight, ChevronDown, ExternalLink, Search, Lock, Eye, Send, Zap, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
