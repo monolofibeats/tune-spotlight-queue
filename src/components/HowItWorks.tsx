@@ -234,7 +234,7 @@ export function HowItWorks() {
         <div className="relative">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {steps.map((item, index) => (
-              <div key={item.step} className="relative" style={{ zIndex: index === 2 ? 10 : 1 }}>
+              <div key={item.step} className={`relative ${index === 2 ? 'overflow-hidden' : ''}`} style={{ zIndex: index === 2 ? 10 : 1 }}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -272,8 +272,8 @@ export function HowItWorks() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className="hidden md:block absolute -top-3 right-0 translate-x-[55%]"
-                        style={{ zIndex: -1, clipPath: 'inset(0 0 0 0)' }}
+                        className="hidden md:block absolute top-3 right-0 translate-x-[55%]"
+                        style={{ zIndex: -1 }}
                       >
                         <motion.div
                           onClick={(e) => { e.stopPropagation(); setTipExpanded(true); }}
