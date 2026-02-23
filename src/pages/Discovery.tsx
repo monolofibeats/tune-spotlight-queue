@@ -455,7 +455,9 @@ const Discovery = () => {
         </DialogContent>
       </Dialog>
 
-      
+      {/* Building Phase Banner */}
+      <BuildingPhaseBanner />
+
       <Footer />
     </div>
   );
