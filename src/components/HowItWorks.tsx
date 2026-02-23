@@ -145,8 +145,52 @@ function LiveIllustration() {
 }
 
 export function HowItWorks() {
-  const { t } = useLanguage();
+  const [showTip, setShowTip] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInViewRef = useRef(false);
 
+  const startTimer = useCallback(() => {
+    if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(() => {
+      if (isInViewRef.current) setShowTip(true);
+    }, 2000);
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInViewRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          startTimer();
+        } else {
+          setShowTip(false);
+          if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(section);
+
+    const handleScroll = () => {
+      if (isInViewRef.current) {
+        setShowTip(false);
+        startTimer();
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    };
+  }, [startTimer]);
+
+  const { t } = useLanguage();
   const steps = [
     {
       step: '01',
