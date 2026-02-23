@@ -64,6 +64,24 @@ serve(async (req) => {
 
     logStep("Processing bid", { submissionId, bidAmountCents, email });
 
+    // IDEMPOTENCY CHECK: Prevent replay attacks by checking if this session was already processed
+    const { data: alreadyProcessed } = await supabaseAdmin
+      .from('submission_bids')
+      .select('id')
+      .eq('stripe_session_id', sessionId)
+      .maybeSingle();
+
+    if (alreadyProcessed) {
+      logStep("Session already processed, skipping", { sessionId });
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: "This payment has already been processed." 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const { data: existingBid } = await supabaseAdmin
       .from('submission_bids')
       .select('*')
@@ -77,6 +95,7 @@ serve(async (req) => {
         .update({
           bid_amount_cents: bidAmountCents,
           total_paid_cents: newTotal,
+          stripe_session_id: sessionId,
           updated_at: new Date().toISOString(),
         })
         .eq('submission_id', submissionId);
@@ -91,6 +110,7 @@ serve(async (req) => {
           email: email,
           bid_amount_cents: bidAmountCents,
           total_paid_cents: bidAmountCents,
+          stripe_session_id: sessionId,
         });
       
       logStep("Bid created");

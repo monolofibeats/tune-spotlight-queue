@@ -1256,6 +1256,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          stripe_session_id: string | null
           submission_id: string
           total_paid_cents: number
           updated_at: string
@@ -1266,6 +1267,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          stripe_session_id?: string | null
           submission_id: string
           total_paid_cents?: number
           updated_at?: string
@@ -1276,6 +1278,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          stripe_session_id?: string | null
           submission_id?: string
           total_paid_cents?: number
           updated_at?: string
