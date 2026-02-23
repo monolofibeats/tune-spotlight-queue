@@ -18,7 +18,6 @@ const CONTENT_TYPES = [
   { value: 'other', label: '✨ Other', description: 'All other creative submissions' },
 ];
 
-// Placeholder cards shown when a category has no real streamers yet
 const PLACEHOLDER_STREAMERS: Record<string, Array<{ name: string; bio: string }>> = {
   music: [
     { name: 'BeatReviewr', bio: 'Hip-hop & trap beat reactions' },
@@ -51,7 +50,6 @@ const Browse = () => {
   const [search, setSearch] = useState('');
   const [videoUrls, setVideoUrls] = useState<Record<string, string | null>>({});
 
-  // Fetch looping video URLs for all streamers
   useEffect(() => {
     const fetchVideos = async () => {
       const { data } = await supabase
@@ -89,7 +87,6 @@ const Browse = () => {
     );
   }, [enrichedStreamers, search]);
 
-  // Group by content type
   const grouped = useMemo(() => {
     const groups: Record<string, StreamerWithVideo[]> = {};
     CONTENT_TYPES.forEach(ct => {
@@ -98,8 +95,11 @@ const Browse = () => {
     return groups;
   }, [filtered]);
 
-  // Always show all categories (real + placeholders when empty)
-  const allCategories = CONTENT_TYPES;
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      <main className="pt-14">
         <section className="py-8 px-4 border-b border-border/20">
           <div className="container mx-auto max-w-5xl">
             <div className="flex items-center gap-3 mb-6">
@@ -123,30 +123,23 @@ const Browse = () => {
           </div>
         </section>
 
-        {/* Category Feeds */}
         <div className="py-6 px-4">
-          <div className="container mx-auto max-w-5xl space-y-10">
+          <div className="container mx-auto max-w-5xl space-y-12">
             {isLoading ? (
               <div className="text-center py-20">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4 animate-spin" />
                 <p className="text-sm text-muted-foreground">Loading streamers...</p>
               </div>
-            ) : activeCategories.length > 0 ? (
-              activeCategories.map((category) => (
+            ) : (
+              CONTENT_TYPES.map((category) => (
                 <CategorySection
                   key={category.value}
                   label={category.label}
+                  description={category.description}
                   streamers={grouped[category.value]}
+                  placeholders={PLACEHOLDER_STREAMERS[category.value] || []}
                 />
               ))
-            ) : (
-              <div className="text-center py-20 rounded-xl border border-border/50 bg-card/30">
-                <h3 className="text-lg font-semibold mb-2">No streamers found</h3>
-                <p className="text-sm text-muted-foreground mb-4">Try a different search term</p>
-                <Button variant="outline" size="sm" onClick={() => setSearch('')}>
-                  Clear Search
-                </Button>
-              </div>
             )}
           </div>
         </div>
@@ -157,16 +150,61 @@ const Browse = () => {
   );
 };
 
-function CategorySection({ label, streamers }: { label: string; streamers: StreamerWithVideo[] }) {
+function CategorySection({
+  label,
+  description,
+  streamers,
+  placeholders,
+}: {
+  label: string;
+  description: string;
+  streamers: StreamerWithVideo[];
+  placeholders: Array<{ name: string; bio: string }>;
+}) {
+  const hasReal = streamers.length > 0;
+
   return (
     <section>
-      <h2 className="text-lg font-display font-bold mb-4 text-foreground/90">{label}</h2>
+      <div className="mb-4">
+        <h2 className="text-xl font-display font-bold text-foreground">{label}</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {streamers.map((streamer, index) => (
-          <StreamerCard key={streamer.id} streamer={streamer} index={index} />
-        ))}
+        {hasReal
+          ? streamers.map((streamer, index) => (
+              <StreamerCard key={streamer.id} streamer={streamer} index={index} />
+            ))
+          : placeholders.map((ph, index) => (
+              <PlaceholderCard key={ph.name} name={ph.name} bio={ph.bio} index={index} />
+            ))}
       </div>
     </section>
+  );
+}
+
+function PlaceholderCard({ name, bio, index }: { name: string; bio: string; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.3) }}
+    >
+      <div className="block rounded-xl overflow-hidden border border-dashed border-border/60 bg-card/20 opacity-60">
+        <div className="relative aspect-video bg-muted/20 flex items-center justify-center">
+          <span className="text-4xl font-display font-bold text-muted-foreground/20">
+            {name.charAt(0).toUpperCase()}
+          </span>
+          <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-muted/40 text-[10px] text-muted-foreground">
+            Coming soon
+          </div>
+        </div>
+        <div className="p-3">
+          <span className="font-display font-semibold text-sm text-muted-foreground">{name}</span>
+          <p className="text-xs text-muted-foreground/60 mt-1">{bio}</p>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -183,10 +221,8 @@ function StreamerCard({ streamer, index }: { streamer: StreamerWithVideo; index:
         to={`/${streamer.slug}`}
         className="group block rounded-xl overflow-hidden border border-border/50 bg-card/40 hover:border-primary/40 transition-all duration-200"
       >
-        {/* Media area */}
         <div className="relative aspect-video bg-muted/30 overflow-hidden">
           {isLive ? (
-            /* LIVE state — pulsing overlay */
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-primary/20 to-primary/5">
               {streamer.avatar_url ? (
                 <img
@@ -211,7 +247,6 @@ function StreamerCard({ streamer, index }: { streamer: StreamerWithVideo; index:
               </div>
             </div>
           ) : streamer.video_url ? (
-            /* Offline with looping video */
             <video
               src={streamer.video_url}
               autoPlay
@@ -221,7 +256,6 @@ function StreamerCard({ streamer, index }: { streamer: StreamerWithVideo; index:
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : streamer.avatar_url ? (
-            /* Offline fallback — avatar */
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <img
                 src={streamer.avatar_url}
@@ -230,7 +264,6 @@ function StreamerCard({ streamer, index }: { streamer: StreamerWithVideo; index:
               />
             </div>
           ) : (
-            /* Offline fallback — initial */
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <span className="text-4xl font-display font-bold text-muted-foreground/30">
                 {streamer.display_name.charAt(0).toUpperCase()}
@@ -239,19 +272,12 @@ function StreamerCard({ streamer, index }: { streamer: StreamerWithVideo; index:
           )}
         </div>
 
-        {/* Info bar */}
         <div className="p-3">
           <div className="flex items-center gap-2">
             {!isLive && streamer.avatar_url && (
-              <img
-                src={streamer.avatar_url}
-                alt=""
-                className="w-6 h-6 rounded-full object-cover shrink-0"
-              />
+              <img src={streamer.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
             )}
-            <span className="font-display font-semibold text-sm truncate">
-              {streamer.display_name}
-            </span>
+            <span className="font-display font-semibold text-sm truncate">{streamer.display_name}</span>
           </div>
           {streamer.bio && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{streamer.bio}</p>
