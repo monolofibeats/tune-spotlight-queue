@@ -54,6 +54,7 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
         .eq('streamer_id', streamerId)
         .eq('status', 'pending')
         .order('is_priority', { ascending: false })
+        .order('boost_amount', { ascending: false })
         .order('amount_paid', { ascending: false })
         .order('created_at', { ascending: true });
 

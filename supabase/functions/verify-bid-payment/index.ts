@@ -122,6 +122,7 @@ serve(async (req) => {
       .update({
         is_priority: true,
         boost_amount: newTotalCents / 100,
+        amount_paid: newTotalCents / 100,
       })
       .eq('id', submissionId);
 
