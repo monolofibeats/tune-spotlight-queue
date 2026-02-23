@@ -1,44 +1,55 @@
 import { motion } from 'framer-motion';
 
-function generateGridDots() {
-  const dots: { x: string; y: string; size: number; duration: number; delay: number }[] = [];
-  const cols = 20;
-  const rows = 14;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const jitterX = (Math.random() - 0.5) * 2;
-      const jitterY = (Math.random() - 0.5) * 2;
-      dots.push({
-        x: `${(c / (cols - 1)) * 94 + 3 + jitterX}%`,
-        y: `${(r / (rows - 1)) * 94 + 3 + jitterY}%`,
-        size: 2 + Math.random() * 1.5,
-        duration: 4 + Math.random() * 5,
-        delay: Math.random() * 3,
-      });
-    }
+function generateWaveDots() {
+  const dots: { x: number; y: number; size: number; duration: number; delay: number }[] = [];
+  const count = 200;
+  
+  for (let i = 0; i < count; i++) {
+    // Base position with loose clustering
+    const baseX = Math.random() * 100;
+    const baseY = Math.random() * 100;
+    
+    // Apply sine wave distortion to Y based on X position
+    const waveOffset = Math.sin((baseX / 100) * Math.PI * 3) * 12;
+    const wave2 = Math.cos((baseX / 100) * Math.PI * 2 + 1.5) * 8;
+    
+    // Density variation — more dots cluster near wave peaks
+    const densityBias = Math.abs(Math.sin((baseX / 100) * Math.PI * 2.5));
+    if (Math.random() > 0.4 + densityBias * 0.4) continue;
+    
+    const y = baseY + waveOffset + wave2;
+    if (y < 0 || y > 100) continue;
+    
+    dots.push({
+      x: baseX,
+      y,
+      size: 1.5 + Math.random() * 2,
+      duration: 5 + Math.random() * 7,
+      delay: Math.random() * 4,
+    });
   }
   return dots;
 }
 
-const gridDots = generateGridDots();
+const waveDots = generateWaveDots();
 
 export function LiquidDots() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-      {gridDots.map((dot, i) => (
+      {waveDots.map((dot, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full bg-foreground/40"
           style={{
-            left: dot.x,
-            top: dot.y,
+            left: `${dot.x}%`,
+            top: `${dot.y}%`,
             width: dot.size,
             height: dot.size,
           }}
           animate={{
-            x: [0, 6, -4, 3, 0],
-            y: [0, -5, 4, -2, 0],
-            opacity: [0.3, 0.6, 0.2, 0.5, 0.3],
+            x: [0, 10, -8, 5, 0],
+            y: [0, -8, 6, -4, 0],
+            opacity: [0.25, 0.55, 0.15, 0.45, 0.25],
           }}
           transition={{
             duration: dot.duration,
