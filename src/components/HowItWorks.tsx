@@ -231,19 +231,33 @@ export function HowItWorks() {
 
         {/* Steps grid with floating PS tip */}
         <div className="relative">
-          {/* PS tip - floating above card 3, right-aligned */}
-          <motion.div
-            initial={{ opacity: 0, y: 8, rotate: -1 }}
-            whileInView={{ opacity: 1, y: 0, rotate: 1.5 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="hidden md:flex absolute -top-5 right-0 z-10 items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-lg shadow-emerald-500/5"
-          >
-            <Sparkles className="w-3 h-3 text-emerald-400" />
-            <p className="text-[11px] text-emerald-300/90 italic">
-              <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
-            </p>
-          </motion.div>
+          {/* PS tip - floating above card 3, right-aligned, delayed appearance */}
+          <AnimatePresence>
+            {showTip && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9, rotate: -2 }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotate: 1.5 }}
+                exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="hidden md:flex absolute -top-5 -right-3 z-10 items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-lg shadow-emerald-500/5"
+              >
+                <Sparkles className="w-3 h-3 text-emerald-400" />
+                <p className="text-[11px] text-emerald-300/90 italic">
+                  <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
+                </p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0 hover:bg-emerald-500/30 transition-colors" onClick={(e) => e.stopPropagation()}>
+                      <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[220px] text-xs">
+                    Pay a small fee to jump ahead in the queue. 100% of the boost goes directly to the streamer you're supporting!
+                  </TooltipContent>
+                </Tooltip>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {steps.map((item, index) => (
@@ -257,23 +271,16 @@ export function HowItWorks() {
                 onClick={() => window.location.href = '/browse'}
                 className="group relative rounded-2xl border border-border/40 bg-card/40 overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer"
               >
-                {/* Step number accent */}
                 <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
                   {item.step}
                 </div>
-
-                {/* Illustration */}
                 <div className="relative pt-2">
                   {item.illustration}
                 </div>
-
-                {/* Text content */}
                 <div className="p-5 pt-2">
                   <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                 </div>
-
-                {/* Bottom progress line on hover */}
                 <motion.div
                   className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
                   initial={{ scaleX: 0 }}
@@ -286,20 +293,33 @@ export function HowItWorks() {
           </div>
 
           {/* Mobile PS tip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            className="md:hidden mt-4 flex justify-end"
-          >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md">
-              <Sparkles className="w-3 h-3 text-emerald-400" />
-              <p className="text-[11px] text-emerald-300/90 italic">
-                <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
-              </p>
-            </div>
-          </motion.div>
+          <AnimatePresence>
+            {showTip && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="md:hidden mt-4 flex justify-end"
+              >
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md">
+                  <Sparkles className="w-3 h-3 text-emerald-400" />
+                  <p className="text-[11px] text-emerald-300/90 italic">
+                    <span className="text-emerald-200 font-semibold not-italic">Psst…</span> Boost your spot & support creators 💚
+                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
+                        <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">
+                      Pay a small fee to jump ahead in the queue. 100% of the boost goes directly to the streamer you're supporting!
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* CTA */}
