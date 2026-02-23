@@ -1170,6 +1170,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                         onChange={(e) => setSongTitle(e.target.value)}
                         className="h-10 text-sm bg-background/50"
                         required={requireTitle}
+                        disabled={formDisabled}
                       />
                     </div>
                   )}
