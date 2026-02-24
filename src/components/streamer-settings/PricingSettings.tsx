@@ -115,8 +115,8 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
 
   const handleSave = async () => {
-    if (skipLine.min <= 0) {
-      toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeDesc'), variant: 'destructive' });
+    if (skipLine.min < 2.5) {
+      toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum must be at least €2.50', variant: 'destructive' });
       return;
     }
     setIsSaving(true);
@@ -240,12 +240,15 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                   <Label className="text-sm">{t('pricing.skipLine.minPrice')}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={0.5} max={500} step={0.5} value={skipLine.min}
-                      onChange={(e) => setSkipLine(s => ({ ...s, min: parseFloat(e.target.value) || 0.5 }))}
+                    <Input type="number" min={2.5} max={500} step={0.5} value={skipLine.min}
+                      onChange={(e) => {
+                        const val = Math.max(2.5, parseFloat(e.target.value) || 2.5);
+                        setSkipLine(s => ({ ...s, min: val }));
+                      }}
                       className="w-24 h-9 text-right" />
                   </div>
                 </div>
-                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={0.5} max={50} step={0.5} />
+                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={50} step={0.5} />
               </div>
 
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
@@ -271,7 +274,8 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                   step={0.5}
                   value={submission.min}
                   onChange={(e) => {
-                    const val = Math.max(0, parseFloat(e.target.value) || 0);
+                    let val = Math.max(0, parseFloat(e.target.value) || 0);
+                    if (val > 0 && val < 2.5) val = 2.5;
                     setSubmission(s => ({ ...s, min: val, isActive: val > 0 }));
                   }}
                   className="w-24 h-9 text-right"
@@ -280,7 +284,10 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
             </div>
             <Slider
               value={[submission.min]}
-              onValueChange={([val]) => setSubmission(s => ({ ...s, min: val, isActive: val > 0 }))}
+              onValueChange={([val]) => {
+                const snapped = val > 0 && val < 2.5 ? 2.5 : val;
+                setSubmission(s => ({ ...s, min: snapped, isActive: snapped > 0 }));
+              }}
               min={0}
               max={20}
               step={0.5}
@@ -353,7 +360,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
 
       <Button
         onClick={handleSave}
-        disabled={isSaving || skipLine.min <= 0}
+        disabled={isSaving || skipLine.min < 2.5}
         className="w-full"
         size="lg"
       >
