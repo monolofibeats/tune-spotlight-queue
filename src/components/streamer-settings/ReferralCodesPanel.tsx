@@ -131,46 +131,67 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          {codes.map((c) => (
-            <div
-              key={c.id}
-              className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                c.is_used
-                  ? 'bg-muted/30 border-border/30 opacity-60'
-                  : 'bg-secondary/30 border-border/50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <code className={`font-mono text-sm font-bold tracking-wider ${c.is_used ? 'line-through text-muted-foreground' : 'text-primary'}`}>
-                  {c.code}
-                </code>
-                <Badge variant={c.is_used ? 'secondary' : 'default'} className="text-[10px]">
-                  {c.is_used ? 'Used' : '10% OFF'}
-                </Badge>
+          {codes.map((c) => {
+            const isRevealed = revealedIds.has(c.id);
+            return (
+              <div
+                key={c.id}
+                className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                  c.is_used
+                    ? 'bg-muted/30 border-border/30 opacity-60'
+                    : 'bg-secondary/30 border-border/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <code className={`font-mono text-sm font-bold tracking-wider select-none ${c.is_used ? 'line-through text-muted-foreground' : 'text-primary'} ${!c.is_used && !isRevealed ? 'blur-sm' : ''}`}>
+                    {c.code}
+                  </code>
+                  <Badge variant={c.is_used ? 'secondary' : 'default'} className="text-[10px]">
+                    {c.is_used ? 'Used' : '10% OFF'}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-1">
+                  {c.is_used && c.used_by_email && (
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
+                      {c.used_by_email}
+                    </span>
+                  )}
+                  {!c.is_used && (
+                    <>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => {
+                          setRevealedIds(prev => {
+                            const next = new Set(prev);
+                            if (next.has(c.id)) next.delete(c.id);
+                            else next.add(c.id);
+                            return next;
+                          });
+                        }}
+                        title={isRevealed ? 'Hide code' : 'Reveal code'}
+                      >
+                        {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => copyCode(c.id, c.code)}
+                      >
+                        {copiedId === c.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {c.is_used && c.used_by_email && (
-                  <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                    {c.used_by_email}
-                  </span>
-                )}
-                {!c.is_used && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7"
-                    onClick={() => copyCode(c.id, c.code)}
-                  >
-                    {copiedId === c.id ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
