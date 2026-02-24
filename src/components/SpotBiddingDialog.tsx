@@ -213,7 +213,7 @@ export function SpotBiddingDialog({
         toast({ title: t('bidding.codeExpired'), description: t('bidding.codeExpiredDesc'), variant: 'destructive' });
       } else {
         setDiscountPercent(data.discount_percent);
-        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+        toast({ title: t('bidding.discountAppliedToast').replace('{percent}', String(data.discount_percent)), description: t('bidding.discountAppliedToastDesc') });
       }
     } catch {
       setDiscountPercent(null);
