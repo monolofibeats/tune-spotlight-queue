@@ -727,7 +727,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Social Tab */}
-            <TabsContent value="social" className="space-y-6">
+            <TabsContent value="social" forceMount className={`space-y-6 ${activeTab !== 'social' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Streaming Platforms</h2>
                 
