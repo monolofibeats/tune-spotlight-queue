@@ -149,6 +149,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
   const handleDiscard = useCallback(() => {
     syncFromStreamer(streamer);
+    pricingRef.current?.discard();
     toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
   }, [streamer, syncFromStreamer]);
 
