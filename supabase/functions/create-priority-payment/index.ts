@@ -47,10 +47,11 @@ serve(async (req) => {
       platform,
       audioFileUrl,
       streamerId,
-      streamerSlug, // New: slug for redirect URL
+      streamerSlug,
+      referralCode,
     } = await req.json();
 
-    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug });
+    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
 
     // Fetch minimum amount from pricing_config (prefer streamer-specific, fall back to global)
     const { data: pricingConfigs } = await supabase
