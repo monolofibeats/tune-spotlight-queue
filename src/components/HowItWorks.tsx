@@ -245,7 +245,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
     const code = generateReferralCode();
     const { error } = await supabase.from('referral_codes').insert({
       code,
-      discount_percent: 10,
+      discount_percent: 5,
       source: 'homepage',
       is_used: false,
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
