@@ -204,13 +204,13 @@ export function SpotBiddingDialog({
 
       if (error || !data) {
         setDiscountPercent(null);
-        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
+        toast({ title: t('bidding.invalidCode'), description: t('bidding.invalidCodeDesc'), variant: 'destructive' });
       } else if (data.is_used) {
         setDiscountPercent(null);
-        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
+        toast({ title: t('bidding.codeUsed'), description: t('bidding.codeUsedDesc'), variant: 'destructive' });
       } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
         setDiscountPercent(null);
-        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
+        toast({ title: t('bidding.codeExpired'), description: t('bidding.codeExpiredDesc'), variant: 'destructive' });
       } else {
         setDiscountPercent(data.discount_percent);
         toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
