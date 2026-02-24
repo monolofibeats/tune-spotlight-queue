@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   Dialog,
   DialogContent,
@@ -56,6 +57,7 @@ export function SpotBiddingDialog({
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
+  const { t } = useLanguage();
   const [spots, setSpots] = useState<SpotPrice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -178,8 +180,8 @@ export function SpotBiddingDialog({
     } catch (error) {
       console.error('Error fetching spot prices:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load spot prices',
+        title: t('bidding.error'),
+        description: t('bidding.errorLoadSpots'),
         variant: 'destructive',
       });
     } finally {
@@ -202,16 +204,16 @@ export function SpotBiddingDialog({
 
       if (error || !data) {
         setDiscountPercent(null);
-        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
+        toast({ title: t('bidding.invalidCode'), description: t('bidding.invalidCodeDesc'), variant: 'destructive' });
       } else if (data.is_used) {
         setDiscountPercent(null);
-        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
+        toast({ title: t('bidding.codeUsed'), description: t('bidding.codeUsedDesc'), variant: 'destructive' });
       } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
         setDiscountPercent(null);
-        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
+        toast({ title: t('bidding.codeExpired'), description: t('bidding.codeExpiredDesc'), variant: 'destructive' });
       } else {
         setDiscountPercent(data.discount_percent);
-        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+        toast({ title: t('bidding.discountAppliedToast').replace('{percent}', String(data.discount_percent)), description: t('bidding.discountAppliedToastDesc') });
       }
     } catch {
       setDiscountPercent(null);
@@ -247,8 +249,8 @@ export function SpotBiddingDialog({
         if (error) throw error;
 
         toast({
-          title: 'Priority submission added! 🎉',
-          description: `Admin bypass: Claimed spot #${spotPosition}`,
+          title: t('bidding.adminBypass'),
+          description: t('bidding.adminBypassDesc').replace('{position}', String(spotPosition)),
         });
         
         onOpenChange(false);
@@ -286,7 +288,7 @@ export function SpotBiddingDialog({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to process';
       toast({
-        title: 'Failed',
+        title: t('bidding.failed'),
         description: errorMessage,
         variant: 'destructive',
       });
@@ -302,10 +304,10 @@ export function SpotBiddingDialog({
         <DialogHeader className="space-y-1">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
-            Skip the Waiting List
+            {t('bidding.title')}
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Choose your spot in the queue. Higher positions get reviewed first!
+            {t('bidding.desc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -346,7 +348,7 @@ export function SpotBiddingDialog({
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold text-sm sm:text-base">#{spot.position}</span>
                         {isAvailable && (
-                          <Badge variant="secondary" className="text-[10px] sm:text-xs">Available</Badge>
+                          <Badge variant="secondary" className="text-[10px] sm:text-xs">{t('bidding.available')}</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
@@ -356,7 +358,7 @@ export function SpotBiddingDialog({
                       )}
                       {!isAvailable && (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          Bid: €{spot.currentPrice.toFixed(2)}
+                          {t('bidding.bid')}: €{spot.currentPrice.toFixed(2)}
                         </p>
                       )}
                     </div>
@@ -379,7 +381,7 @@ export function SpotBiddingDialog({
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
                       ) : (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          {isAvailable ? 'to claim' : `+${incrementPercent}%`}
+                          {isAvailable ? t('bidding.toClaim') : `+${incrementPercent}%`}
                         </p>
                       )}
                     </div>
@@ -395,7 +397,7 @@ export function SpotBiddingDialog({
                   <div className="relative flex-1">
                     <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
-                      placeholder="Discount code"
+                      placeholder={t('bidding.discountPlaceholder')}
                       value={discountCode}
                       onChange={(e) => {
                         setDiscountCode(e.target.value.toUpperCase());
@@ -412,14 +414,14 @@ export function SpotBiddingDialog({
                     disabled={!discountCode.trim() || isValidatingCode || discountPercent !== null}
                     onClick={() => validateDiscountCode(discountCode)}
                   >
-                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : t('bidding.apply')}
                   </Button>
                 </div>
                 {discountPercent && (
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                     <Tag className="w-3 h-3 text-emerald-400" />
                     <span className="text-[11px] text-emerald-300 font-medium">
-                      {discountPercent}% discount will be applied at checkout
+                      {t('bidding.discountApplied').replace('{percent}', String(discountPercent))}
                     </span>
                   </div>
                 )}
@@ -427,7 +429,7 @@ export function SpotBiddingDialog({
             )}
 
             <p className="text-xs text-muted-foreground text-center pt-2">
-              If someone outbids you, you'll receive an email notification with the option to bid again.
+              {t('bidding.outbidNotice')}
             </p>
           </div>
         )}
