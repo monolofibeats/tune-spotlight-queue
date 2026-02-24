@@ -358,7 +358,7 @@ export function SpotBiddingDialog({
                       )}
                       {!isAvailable && (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          Bid: €{spot.currentPrice.toFixed(2)}
+                          {t('bidding.bid')}: €{spot.currentPrice.toFixed(2)}
                         </p>
                       )}
                     </div>
