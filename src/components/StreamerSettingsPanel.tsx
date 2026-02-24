@@ -145,7 +145,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     );
   }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss]);
 
-  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
   const triggerShake = useCallback(() => {
     setIsShaking(true);
