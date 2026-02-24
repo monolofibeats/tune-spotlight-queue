@@ -118,17 +118,34 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     if (bi) { setBidIncrementPercent(bi.min_amount_cents); setBidIncrementActive(bi.is_active); }
   };
 
+  // Default values used when no config rows exist yet
+  const defaultSkipLine: PricingFormState = { min: 0.5, max: 100, step: 0.5, isActive: true };
+  const defaultSubmission: PricingFormState = { min: 1, max: 20, step: 0.5, isActive: false };
+  const defaultSubmissionsOpen = true;
+  const defaultBidIncrementPercent = 10;
+  const defaultBidIncrementActive = true;
+
   useEffect(() => {
     const sl = configs['skip_line'];
     const sub = configs['submission'];
     const so = configs['submissions_open'];
     const bi = configs['bid_increment'];
-    if (!sl || !sub) return;
 
-    const skipChanged = skipLine.min !== sl.min_amount_cents / 100 || skipLine.max !== sl.max_amount_cents / 100 || skipLine.step !== sl.step_cents / 100 || skipLine.isActive !== sl.is_active;
-    const subChanged = submission.min !== sub.min_amount_cents / 100 || submission.max !== sub.max_amount_cents / 100 || submission.step !== sub.step_cents / 100 || submission.isActive !== sub.is_active;
-    const openChanged = so ? submissionsOpen !== so.is_active : false;
-    const bidChanged = bi ? bidIncrementPercent !== bi.min_amount_cents || bidIncrementActive !== bi.is_active : false;
+    // Compare against saved config if it exists, otherwise compare against defaults
+    const savedSkip = sl
+      ? { min: sl.min_amount_cents / 100, max: sl.max_amount_cents / 100, step: sl.step_cents / 100, isActive: sl.is_active }
+      : defaultSkipLine;
+    const savedSub = sub
+      ? { min: sub.min_amount_cents / 100, max: sub.max_amount_cents / 100, step: sub.step_cents / 100, isActive: sub.is_active }
+      : defaultSubmission;
+    const savedOpen = so ? so.is_active : defaultSubmissionsOpen;
+    const savedBidPercent = bi ? bi.min_amount_cents : defaultBidIncrementPercent;
+    const savedBidActive = bi ? bi.is_active : defaultBidIncrementActive;
+
+    const skipChanged = skipLine.min !== savedSkip.min || skipLine.max !== savedSkip.max || skipLine.step !== savedSkip.step || skipLine.isActive !== savedSkip.isActive;
+    const subChanged = submission.min !== savedSub.min || submission.max !== savedSub.max || submission.step !== savedSub.step || submission.isActive !== savedSub.isActive;
+    const openChanged = submissionsOpen !== savedOpen;
+    const bidChanged = bidIncrementPercent !== savedBidPercent || bidIncrementActive !== savedBidActive;
 
     const changed = skipChanged || subChanged || openChanged || bidChanged;
     setHasChanges(changed);
