@@ -624,7 +624,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Design Tab */}
-            <TabsContent value="design" className="space-y-6">
+            <TabsContent value="design" forceMount className={`space-y-6 ${activeTab !== 'design' ? 'hidden' : ''}`}>
               {/* Live Preview */}
               <div className="bg-card/50 border border-border/50 rounded-xl p-4 space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Live Preview</p>
