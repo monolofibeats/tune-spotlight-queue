@@ -352,8 +352,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   viewport={{ once: true, margin: '-20px' }}
                   transition={{ delay: index * 0.1, duration: 0.4 }}
                   whileHover={compact ? { y: -2, scale: 1.02 } : { y: -4 }}
-                  onClick={compact ? undefined : () => window.location.href = '/browse'}
-                  className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? 'sm:!transform-none sm:!rotate-0' : 'cursor-pointer rounded-2xl'}`}
+                   onClick={compact ? scrollToSubmissionForm : () => window.location.href = '/browse'}
+                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer ${compact ? 'sm:!transform-none sm:!rotate-0' : 'rounded-2xl'}`}
                 >
                   {!compact && (
                     <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
