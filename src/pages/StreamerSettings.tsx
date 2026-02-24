@@ -439,7 +439,10 @@ const StreamerSettings = () => {
             </div>
           </motion.div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(tab) => {
+              if (anyUnsaved) triggerShake();
+              setActiveTab(tab);
+            }} className="space-y-6">
             <ScrollArea className="w-full">
               <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
