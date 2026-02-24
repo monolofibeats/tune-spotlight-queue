@@ -389,12 +389,6 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         </TabsContent>
       </Tabs>
 
-      {(submission.isActive && submission.min >= submission.max) && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
-          <AlertCircle className="w-4 h-4" />
-          <span className="text-sm">{t('pricing.minLessThanMax')}</span>
-        </div>
-      )}
 
 
       <ReferralCodesPanel streamerId={streamerId} />
