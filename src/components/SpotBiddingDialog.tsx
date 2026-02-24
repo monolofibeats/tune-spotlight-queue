@@ -378,6 +378,44 @@ export function SpotBiddingDialog({
               );
             })}
 
+            {/* Discount Code Input */}
+            {!isAdmin && (
+              <div className="pt-2 border-t border-border/30 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Discount code"
+                      value={discountCode}
+                      onChange={(e) => {
+                        setDiscountCode(e.target.value.toUpperCase());
+                        setDiscountPercent(null);
+                      }}
+                      className="h-9 text-xs pl-9 bg-background/50 font-mono tracking-wider"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 text-xs"
+                    disabled={!discountCode.trim() || isValidatingCode || discountPercent !== null}
+                    onClick={() => validateDiscountCode(discountCode)}
+                  >
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                  </Button>
+                </div>
+                {discountPercent && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                    <Tag className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[11px] text-emerald-300 font-medium">
+                      {discountPercent}% discount will be applied at checkout
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground text-center pt-2">
               If someone outbids you, you'll receive an email notification with the option to bid again.
             </p>
