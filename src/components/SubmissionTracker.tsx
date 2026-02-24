@@ -80,6 +80,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
           email=""
           platform={biddingSub.platform}
           audioFileUrl={biddingSub.audioFileUrl}
+          originalSubmissionId={biddingSub.submissionId || null}
           streamerId={biddingSub.streamerId}
           streamerSlug={biddingSub.streamerSlug}
         />
