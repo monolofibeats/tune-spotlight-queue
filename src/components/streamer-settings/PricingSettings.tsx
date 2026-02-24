@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { 
   DollarSign, 
   Settings, 
@@ -38,6 +38,11 @@ interface PricingFormState {
   max: number;
   step: number;
   isActive: boolean;
+}
+
+export interface PricingSettingsHandle {
+  save: () => Promise<void>;
+  hasChanges: boolean;
 }
 
 interface PricingSettingsProps {
