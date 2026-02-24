@@ -426,7 +426,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className="hidden md:block absolute top-0 left-full ml-6"
+                  className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-0 left-full ml-6`}
                   style={{ width: 210 }}
                 >
                   <div className="p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 flex flex-col justify-center">
