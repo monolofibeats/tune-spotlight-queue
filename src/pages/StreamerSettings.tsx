@@ -403,7 +403,12 @@ const StreamerSettings = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-24 pb-12 px-4">
+      <motion.main 
+        key={`main-${shakeKey}`}
+        animate={shakeKey > 0 ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : {}}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
+        className="pt-24 pb-12 px-4"
+      >
         <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
