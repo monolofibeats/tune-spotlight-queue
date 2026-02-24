@@ -271,6 +271,7 @@ const StreamerSettings = () => {
     toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
   }, [streamer]);
 
+  const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
     if (!streamer || oldValue === newValue) return;
     
     try {
