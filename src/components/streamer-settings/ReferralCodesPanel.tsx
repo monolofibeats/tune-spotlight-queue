@@ -84,7 +84,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
   const copyCode = (id: string, code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
-    toast({ title: 'Code copied!', description: code });
+    toast({ title: 'Code copied!' });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
