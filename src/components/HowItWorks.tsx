@@ -377,12 +377,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'p-1.5 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
+                   <div className={compact ? 'p-1 sm:p-2 pt-0 overflow-hidden' : 'p-5 pt-2'}>
                      {compact && (
-                       <span className="text-[7px] sm:text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
+                       <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
-                     <h3 className={`font-display font-bold ${compact ? 'text-[8px] sm:text-[10px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                     <p className={`text-muted-foreground ${compact ? 'text-[6px] sm:text-[9px] leading-snug' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                     <h3 className={`font-display font-bold ${compact ? 'text-[7px] sm:text-[9px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[5.5px] sm:text-[8px] leading-snug' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
