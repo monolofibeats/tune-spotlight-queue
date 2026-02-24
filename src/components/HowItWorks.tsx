@@ -369,8 +369,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                     <div className="relative h-10 sm:h-16 overflow-hidden flex items-start justify-center -mt-1 sm:-mt-2">
-                       <div className="scale-[0.4] sm:scale-[0.55] origin-top pointer-events-none">
+                     <div className="relative flex items-center justify-center" style={{ height: 56 }}>
+                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ transform: 'scale(0.42)', transformOrigin: 'center center' }}>
                         {item.illustration}
                        </div>
                      </div>
@@ -379,7 +379,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0 overflow-hidden' : 'p-5 pt-2'}>
+                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0.5' : 'p-5 pt-2'}>
                      {compact && (
                        <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
