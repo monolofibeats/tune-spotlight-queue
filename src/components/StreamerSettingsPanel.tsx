@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Save, 
   Loader2, 
@@ -10,6 +10,8 @@ import {
   Eye,
   Radio,
   RefreshCw,
+  AlertTriangle,
+  Undo2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,8 +28,8 @@ import {
   DesignCustomizer, 
   PricingSettings,
 } from '@/components/streamer-settings';
+import type { PricingSettingsHandle } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
-
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
 
@@ -59,6 +61,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
+  const pricingRef = useRef<PricingSettingsHandle>(null);
+  const [shakeKey, setShakeKey] = useState(0);
+  const [pricingHasChanges, setPricingHasChanges] = useState(false);
 
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
@@ -83,8 +88,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
 
-  useEffect(() => {
-    const s = streamer;
+  const syncFromStreamer = useCallback((s: ExtendedStreamer) => {
     setHeroTitle(s.hero_title || '');
     setHeroSubtitle(s.hero_subtitle || '');
     setWelcomeMessage(s.welcome_message || '');
@@ -104,7 +108,48 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setShowHowItWorks(s.show_how_it_works ?? true);
     setShowStreamEmbed(s.show_stream_embed ?? true);
     setCustomCss(s.custom_css || '');
-  }, [streamer]);
+  }, []);
+
+  useEffect(() => {
+    syncFromStreamer(streamer);
+  }, [streamer, syncFromStreamer]);
+
+  // Detect unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    const s = streamer;
+    return (
+      heroTitle !== (s.hero_title || '') ||
+      heroSubtitle !== (s.hero_subtitle || '') ||
+      welcomeMessage !== (s.welcome_message || '') ||
+      primaryColor !== (s.primary_color || '45 90% 50%') ||
+      accentColor !== (s.accent_color || '45 90% 50%') ||
+      fontFamily !== (s.font_family || 'system') ||
+      buttonStyle !== (s.button_style || 'rounded') ||
+      backgroundType !== (s.background_type || 'solid') ||
+      backgroundImageUrl !== (s.background_image_url || '') ||
+      backgroundGradient !== (s.background_gradient || '') ||
+      animationStyle !== (s.animation_style || 'subtle') ||
+      cardStyle !== (s.card_style || 'glass') ||
+      bannerEnabled !== (s.banner_enabled || false) ||
+      bannerText !== (s.banner_text || '') ||
+      bannerLink !== (s.banner_link || '') ||
+      bannerColor !== (s.banner_color || '45 90% 50%') ||
+      showHowItWorks !== (s.show_how_it_works ?? true) ||
+      showStreamEmbed !== (s.show_stream_embed ?? true) ||
+      customCss !== (s.custom_css || '')
+    );
+  }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss]);
+
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+
+  const triggerShake = useCallback(() => {
+    setShakeKey(k => k + 1);
+  }, []);
+
+  const handleDiscard = useCallback(() => {
+    syncFromStreamer(streamer);
+    toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
+  }, [streamer, syncFromStreamer]);
 
   const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
     if (!streamer || oldValue === newValue) return;
@@ -122,9 +167,18 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveAll = async () => {
     if (!streamer) return;
     setIsSaving(true);
+
+    // Save pricing if it has changes
+    try {
+      if (pricingRef.current?.hasChanges) {
+        await pricingRef.current.save();
+      }
+    } catch (e) {
+      console.error('Pricing save error:', e);
+    }
 
     try {
       if (heroTitle !== streamer.hero_title) await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
@@ -174,6 +228,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
         title: t('pageSettings.saved'),
         description: t('pageSettings.savedDesc'),
       });
+      refreshPreview();
     } catch (error) {
       console.error('Save error:', error);
       toast({
@@ -201,32 +256,36 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
-  // After saving, refresh the preview
-  const originalHandleSave = handleSave;
-  const handleSaveAndRefresh = async () => {
-    await originalHandleSave();
-    refreshPreview();
-  };
-
   return (
     <motion.div
+      key={`settings-${shakeKey}`}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0,
+        x: shakeKey > 0 ? [0, -8, 8, -6, 6, -3, 3, 0] : 0,
+      }}
+      transition={{
+        x: { duration: 0.4, ease: 'easeInOut' },
+      }}
       className="space-y-6"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
-        <div className="flex gap-2 order-2 sm:order-1">
+        <div className="flex items-center gap-3 order-2 sm:order-1">
           <Button variant="outline" asChild>
             <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
               <Eye className="w-4 h-4" />
               {t('pageSettings.preview')}
             </a>
           </Button>
-          <Button onClick={handleSaveAndRefresh} disabled={isSaving} className="gap-2">
+          {anyUnsaved && (
+            <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
+          )}
+          <Button onClick={handleSaveAll} disabled={isSaving} size="lg" className="gap-2 min-w-[220px] text-base font-bold shadow-lg shadow-primary/20">
             {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Save className="w-4 h-4" />
+              <Save className="w-5 h-5" />
             )}
             {t('pageSettings.saveChanges')}
           </Button>
@@ -243,7 +302,13 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left side: Settings */}
         <div className="w-full lg:w-1/2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(tab) => {
+            if (anyUnsaved) {
+              triggerShake();
+              return;
+            }
+            setActiveTab(tab);
+          }} className="space-y-6">
             <ScrollArea className="w-full">
               <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
@@ -285,7 +350,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-6">
-              <PricingSettings streamerId={streamer.id} />
+              <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
             <TabsContent value="design" className="space-y-6">
@@ -303,7 +368,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                 }}
               />
             </TabsContent>
-
 
             <TabsContent value="stream" className="space-y-6">
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
@@ -337,6 +401,44 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           </div>
         </div>
       </div>
+
+      {/* Floating unsaved changes bar */}
+      <AnimatePresence>
+        {anyUnsaved && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/30 shadow-lg shadow-primary/10 backdrop-blur-md">
+              <AlertTriangle className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm font-medium whitespace-nowrap">You have unsaved changes</span>
+              <div className="flex gap-2 ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDiscard}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  Discard
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveAll}
+                  disabled={isSaving}
+                  className="gap-1.5"
+                >
+                  {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Save
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
