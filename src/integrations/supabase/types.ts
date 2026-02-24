@@ -1192,6 +1192,7 @@ export type Database = {
           primary_color: string | null
           rejection_reason: string | null
           show_how_it_works: boolean | null
+          show_public_queue: boolean | null
           show_stream_embed: boolean | null
           show_top_songs: boolean | null
           slug: string
@@ -1238,6 +1239,7 @@ export type Database = {
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
+          show_public_queue?: boolean | null
           show_stream_embed?: boolean | null
           show_top_songs?: boolean | null
           slug: string
@@ -1284,6 +1286,7 @@ export type Database = {
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
+          show_public_queue?: boolean | null
           show_stream_embed?: boolean | null
           show_top_songs?: boolean | null
           slug?: string

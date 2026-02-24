@@ -94,6 +94,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
+  const [showTopSongs, setShowTopSongs] = useState(false);
+  const [showPublicQueue, setShowPublicQueue] = useState(true);
   const [customCss, setCustomCss] = useState('');
 
   const syncFromStreamer = useCallback((s: ExtendedStreamer) => {
@@ -115,6 +117,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setBannerColor(s.banner_color || '45 90% 50%');
     setShowHowItWorks(s.show_how_it_works ?? true);
     setShowStreamEmbed(s.show_stream_embed ?? true);
+    setShowTopSongs(s.show_top_songs ?? false);
+    setShowPublicQueue((s as any).show_public_queue ?? true);
     setCustomCss(s.custom_css || '');
   }, []);
 
@@ -144,9 +148,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       bannerColor !== (s.banner_color || '45 90% 50%') ||
       showHowItWorks !== (s.show_how_it_works ?? true) ||
       showStreamEmbed !== (s.show_stream_embed ?? true) ||
+      showTopSongs !== (s.show_top_songs ?? false) ||
+      showPublicQueue !== ((s as any).show_public_queue ?? true) ||
       customCss !== (s.custom_css || '')
     );
-  }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss]);
+  }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
@@ -241,6 +247,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           banner_color: bannerColor,
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
+          show_top_songs: showTopSongs,
+          show_public_queue: showPublicQueue,
           custom_css: customCss || null,
         })
         .eq('id', streamer.id)
@@ -375,6 +383,42 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   <div className="space-y-2">
                     <Label htmlFor="welcomeMessage">{t('pageSettings.hero.welcomeLabel')}</Label>
                     <Textarea id="welcomeMessage" value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)} placeholder={t('pageSettings.hero.welcomePlaceholder')} rows={2} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section Visibility Toggles */}
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">Section Visibility</h3>
+                <p className="text-sm text-muted-foreground">Choose which sections are visible on your submit page.</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>How It Works</Label>
+                      <p className="text-xs text-muted-foreground">Step-by-step guide for submitters</p>
+                    </div>
+                    <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Top Songs Pedestal</Label>
+                      <p className="text-xs text-muted-foreground">Showcase your top 3 favorite submissions</p>
+                    </div>
+                    <Switch checked={showTopSongs} onCheckedChange={setShowTopSongs} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Public Waiting List</Label>
+                      <p className="text-xs text-muted-foreground">Show pending submissions queue publicly</p>
+                    </div>
+                    <Switch checked={showPublicQueue} onCheckedChange={setShowPublicQueue} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Stream Embed</Label>
+                      <p className="text-xs text-muted-foreground">Show your live stream embed on the page</p>
+                    </div>
+                    <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
                   </div>
                 </div>
               </div>
