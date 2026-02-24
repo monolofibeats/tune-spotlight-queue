@@ -61,12 +61,12 @@ function StreamerPageContent() {
         .maybeSingle();
 
       if (sub) {
+        const amountCents = notif?.offer_amount_cents || 200;
         setOutbidInfo({
           songTitle: sub.song_title,
           artistName: sub.artist_name,
-          suggestedAmount: notif?.offer_amount_cents 
-            ? `€${(notif.offer_amount_cents / 100).toFixed(2)}` 
-            : '€2.00',
+          suggestedAmountCents: amountCents,
+          submissionId: outbidSubmissionId!,
         });
         setShowOutbidBanner(true);
       }
