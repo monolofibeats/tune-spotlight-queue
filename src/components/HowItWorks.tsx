@@ -209,6 +209,17 @@ interface HowItWorksProps {
   compact?: boolean;
 }
 
+const scrollToSubmissionForm = () => {
+  const form = document.querySelector('form');
+  if (form) {
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      const firstInput = form.querySelector('input, textarea, select') as HTMLElement;
+      firstInput?.focus();
+    }, 500);
+  }
+};
+
 export function HowItWorks({ compact = false }: HowItWorksProps) {
   const [showTip, setShowTip] = useState(false);
   const [tipExpanded, setTipExpanded] = useState(false);
