@@ -899,8 +899,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       const capturedEmail = email || '';
       const capturedPlatform = platform || 'other';
 
-      // handleFreeSubmit uploads the file and returns the URL via uploadedAudioUrlRef
-      await handleFreeSubmit();
+      // handleFreeSubmit uploads the file and returns the submission ID
+      const newSubmissionId = await handleFreeSubmit();
       
       // NOW capture the uploaded audio URL (after handleFreeSubmit has uploaded it)
       const uploadedFileUrl = uploadedAudioUrlRef.current;
