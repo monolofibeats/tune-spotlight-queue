@@ -34,7 +34,22 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
   const [submissions, setSubmissions] = useState<TrackedSubmission[]>([]);
 
   useEffect(() => {
-    setSubmissions(getTrackedSubmissions());
+    // On mount, clean up old submissions that have no submissionId
+    // (tracked before the ID fix) — they can never be verified, so treat
+    // anything older than 2 hours without an ID as processed.
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+    const now = Date.now();
+    const all = getTrackedSubmissions();
+    let cleaned = false;
+    const updated = all.map((s) => {
+      if (!s.submissionId && !s.doneStatus && now - s.trackedAt > TWO_HOURS) {
+        cleaned = true;
+        return { ...s, doneStatus: 'reviewed' as const };
+      }
+      return s;
+    });
+    if (cleaned) saveTrackedSubmissions(updated);
+    setSubmissions(updated);
   }, []);
 
   // Poll Supabase to mark submissions as done when streamer processes them
