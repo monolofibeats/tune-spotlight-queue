@@ -8,6 +8,7 @@ import { OutbidCounterDialog } from '@/components/OutbidCounterDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
+import { sanitizeCSS } from '@/lib/sanitizeCSS';
 import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
@@ -338,7 +339,7 @@ function StreamerPageContent() {
 
         {/* Custom CSS */}
         {streamer.custom_css && (
-          <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />
+          <style dangerouslySetInnerHTML={{ __html: sanitizeCSS(streamer.custom_css) }} />
         )}
       </div>
     </StreamerThemeProvider>
