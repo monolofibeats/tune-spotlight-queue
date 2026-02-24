@@ -484,7 +484,7 @@ const StreamerSettings = () => {
 
 
             {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6">
+            <TabsContent value="profile" forceMount className={`space-y-6 ${activeTab !== 'profile' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Basic Information</h2>
                 
