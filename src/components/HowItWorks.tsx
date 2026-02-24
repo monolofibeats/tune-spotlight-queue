@@ -369,12 +369,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                  <div className={compact ? 'p-2 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
-                    {compact && (
-                      <span className="text-[9px] font-mono text-primary/60 font-bold">{item.step}</span>
-                    )}
-                    <h3 className={`font-display font-bold ${compact ? 'text-[10px] sm:text-[11px] mb-0.5 leading-snug' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                    <p className={`text-muted-foreground ${compact ? 'text-[9px] sm:text-[10px] leading-snug line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                   <div className={compact ? 'p-1.5 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
+                     {compact && (
+                       <span className="text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
+                     )}
+                     <h3 className={`font-display font-bold ${compact ? 'text-[9px] sm:text-[11px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[8px] sm:text-[10px] leading-tight line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
