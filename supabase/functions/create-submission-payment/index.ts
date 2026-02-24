@@ -81,12 +81,42 @@ serve(async (req) => {
       throw new Error('Paid submissions are not currently active');
     }
 
-    // Validate amount is within configured range
+    // Validate amount is within configured range (allow discounted amounts below min)
     const minAmount = pricingConfig.min_amount_cents / 100;
     const maxAmount = pricingConfig.max_amount_cents / 100;
     
-    if (amount < minAmount || amount > maxAmount) {
+    // If a referral code is provided, allow amounts down to 10% below min
+    const effectiveMin = referralCode ? minAmount * 0.9 : minAmount;
+    
+    if (amount < effectiveMin || amount > maxAmount) {
       throw new Error(`Amount must be between €${minAmount.toFixed(2)} and €${maxAmount.toFixed(2)}`);
+    }
+
+    // Validate referral code server-side
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    let validatedReferralCode: string | null = null;
+    if (referralCode) {
+      const { data: codeData, error: codeError } = await serviceClient
+        .from('referral_codes')
+        .select('id, code, discount_percent, is_used, expires_at')
+        .eq('code', referralCode)
+        .maybeSingle();
+
+      if (codeError || !codeData) {
+        throw new Error('Invalid referral code');
+      }
+      if (codeData.is_used) {
+        throw new Error('Referral code has already been used');
+      }
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        throw new Error('Referral code has expired');
+      }
+      validatedReferralCode = codeData.code;
+      logStep("Referral code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
     }
 
     // Authenticate user (optional - allow guest checkout)
