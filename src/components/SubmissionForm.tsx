@@ -768,10 +768,44 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     setAudioFile(null);
     setUploadedAudioUrl(null);
     setDynamicValues({});
+    setReferralCode('');
+    setReferralDiscount(null);
     uploadedAudioUrlRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const validateReferralCode = async (code: string) => {
+    if (!code.trim()) {
+      setReferralDiscount(null);
+      return;
+    }
+    setIsValidatingCode(true);
+    try {
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('discount_percent, is_used, expires_at')
+        .eq('code', code.trim().toUpperCase())
+        .maybeSingle();
+
+      if (error || !data) {
+        setReferralDiscount(null);
+        toast({ title: 'Invalid code', description: 'This referral code does not exist.', variant: 'destructive' });
+      } else if (data.is_used) {
+        setReferralDiscount(null);
+        toast({ title: 'Code already used', description: 'This referral code has already been redeemed.', variant: 'destructive' });
+      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setReferralDiscount(null);
+        toast({ title: 'Code expired', description: 'This referral code has expired.', variant: 'destructive' });
+      } else {
+        setReferralDiscount(data.discount_percent);
+        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+      }
+    } catch {
+      setReferralDiscount(null);
+    }
+    setIsValidatingCode(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
