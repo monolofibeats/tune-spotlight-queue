@@ -362,8 +362,18 @@ export function SpotBiddingDialog({
                     </div>
 
                     <div className="text-right shrink-0">
+                      {discountPercent ? (
+                        <div className="flex items-center gap-1.5 justify-end">
+                          <p className="text-xs sm:text-sm text-muted-foreground line-through">
+                            €{spot.yourPrice.toFixed(2)}
+                          </p>
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 py-0">
+                            -{discountPercent}%
+                          </Badge>
+                        </div>
+                      ) : null}
                       <p className="text-base sm:text-lg font-bold text-primary">
-                        €{spot.yourPrice.toFixed(2)}
+                        €{(discountPercent ? spot.yourPrice * (1 - discountPercent / 100) : spot.yourPrice).toFixed(2)}
                       </p>
                       {selectedSpot === spot.position && isProcessing ? (
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
