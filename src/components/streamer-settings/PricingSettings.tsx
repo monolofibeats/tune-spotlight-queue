@@ -308,7 +308,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                 <Input
                   type="number"
                   min={0}
-                  max={20}
+                  max={1000}
                   step={0.5}
                   value={submission.min}
                   onChange={(e) => {
