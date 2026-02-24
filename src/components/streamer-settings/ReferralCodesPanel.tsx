@@ -73,7 +73,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
       if (error) throw error;
 
-      toast({ title: 'Referral codes generated!' });
+      toast({ title: 'Discount codes generated!' });
       await fetchCodes();
     } catch (e: any) {
       toast({ title: 'Failed to generate codes', description: e?.message, variant: 'destructive' });
@@ -107,7 +107,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
             <Gift className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm">Referral Codes</h4>
+            <h4 className="font-semibold text-sm">Discount Codes</h4>
             <p className="text-xs text-muted-foreground">
               {codes.length}/{MONTHLY_LIMIT} codes this month · {availableCount} available · {usedCount} used
             </p>
@@ -123,7 +123,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
       {codes.length === 0 ? (
         <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground mb-3">No referral codes generated yet this month.</p>
+          <p className="text-sm text-muted-foreground mb-3">No discount codes generated yet this month.</p>
           <Button size="sm" onClick={generateCodes} disabled={isGenerating} className="gap-1.5">
             <Gift className="w-3.5 h-3.5" />
             Generate {MONTHLY_LIMIT} Codes

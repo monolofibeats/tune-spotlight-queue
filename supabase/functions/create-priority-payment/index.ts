@@ -47,10 +47,11 @@ serve(async (req) => {
       platform,
       audioFileUrl,
       streamerId,
-      streamerSlug, // New: slug for redirect URL
+      streamerSlug,
+      referralCode,
     } = await req.json();
 
-    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug });
+    logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
 
     // Fetch minimum amount from pricing_config (prefer streamer-specific, fall back to global)
     const { data: pricingConfigs } = await supabase
@@ -69,6 +70,28 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+    // Validate referral/discount code if provided
+    let validatedReferralCode: string | null = null;
+    if (referralCode) {
+      const { data: codeData, error: codeError } = await supabase
+        .from('referral_codes')
+        .select('id, code, discount_percent, is_used, expires_at')
+        .eq('code', referralCode)
+        .maybeSingle();
+
+      if (codeError || !codeData) {
+        throw new Error('Invalid discount code');
+      }
+      if (codeData.is_used) {
+        throw new Error('Discount code has already been used');
+      }
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        throw new Error('Discount code has expired');
+      }
+      validatedReferralCode = codeData.code;
+      logStep("Discount code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
+    }
 
     // Build the redirect URL - go back to streamer page if slug provided, else root
     const origin = req.headers.get("origin") || "";
@@ -104,11 +127,20 @@ serve(async (req) => {
         amount_paid: amount.toString(),
         streamer_id: streamerId || "",
         streamer_slug: streamerSlug || "",
-        // Store both keys to be resilient against older/newer verifiers
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",
+        referral_code: validatedReferralCode || "",
       },
     });
+
+    // Mark discount code as used after session creation
+    if (validatedReferralCode) {
+      await supabase
+        .from('referral_codes')
+        .update({ is_used: true, used_by_email: email || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .eq('code', validatedReferralCode);
+      logStep("Discount code marked as used", { code: validatedReferralCode });
+    }
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 

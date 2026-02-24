@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Loader2, Crown, Medal, Award } from 'lucide-react';
+import { Zap, Loader2, Crown, Medal, Award, Tag, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +17,8 @@ import {
 
 interface SpotPrice {
   position: number;
-  currentPrice: number; // Total already paid for this spot
-  yourPrice: number; // What you need to pay to claim it
+  currentPrice: number;
+  yourPrice: number;
   songTitle?: string;
   artistName?: string;
 }
@@ -32,9 +32,9 @@ interface SpotBiddingDialogProps {
   message?: string;
   email: string;
   platform: string;
-  audioFileUrl?: string | null; // Pre-uploaded audio file path
-  streamerId?: string | null; // Streamer context for marketplace
-  streamerSlug?: string | null; // Streamer slug for redirect after payment
+  audioFileUrl?: string | null;
+  streamerId?: string | null;
+  streamerSlug?: string | null;
   onSuccess?: () => void;
 }
 
@@ -61,11 +61,16 @@ export function SpotBiddingDialog({
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<number | null>(null);
   const [incrementPercent, setIncrementPercent] = useState(10);
-  const [minBidAmount, setMinBidAmount] = useState<number | null>(null); // Start as null until loaded
+  const [minBidAmount, setMinBidAmount] = useState<number | null>(null);
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
 
   useEffect(() => {
     if (open) {
       fetchSpotPrices();
+      setDiscountCode('');
+      setDiscountPercent(null);
     }
   }, [open]);
 
@@ -182,6 +187,38 @@ export function SpotBiddingDialog({
     }
   };
 
+  const validateDiscountCode = async (code: string) => {
+    if (!code.trim()) {
+      setDiscountPercent(null);
+      return;
+    }
+    setIsValidatingCode(true);
+    try {
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('discount_percent, is_used, expires_at')
+        .eq('code', code.trim().toUpperCase())
+        .maybeSingle();
+
+      if (error || !data) {
+        setDiscountPercent(null);
+        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
+      } else if (data.is_used) {
+        setDiscountPercent(null);
+        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
+      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setDiscountPercent(null);
+        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
+      } else {
+        setDiscountPercent(data.discount_percent);
+        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+      }
+    } catch {
+      setDiscountPercent(null);
+    }
+    setIsValidatingCode(false);
+  };
+
   const handleSelectSpot = async (spotPosition: number) => {
     const spot = spots.find(s => s.position === spotPosition);
     if (!spot) return;
@@ -219,10 +256,15 @@ export function SpotBiddingDialog({
         return;
       }
 
+      // Apply discount to amount
+      const finalAmount = discountPercent
+        ? spot.yourPrice * (1 - discountPercent / 100)
+        : spot.yourPrice;
+
       // Regular users go through Stripe
       const { data, error } = await supabase.functions.invoke('create-priority-payment', {
         body: {
-          amount: spot.yourPrice,
+          amount: finalAmount,
           songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
@@ -233,6 +275,7 @@ export function SpotBiddingDialog({
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
           streamerSlug: streamerSlug || null,
+          referralCode: discountPercent ? discountCode.trim().toUpperCase() : undefined,
         },
       });
 
@@ -334,6 +377,44 @@ export function SpotBiddingDialog({
                 </motion.button>
               );
             })}
+
+            {/* Discount Code Input */}
+            {!isAdmin && (
+              <div className="pt-2 border-t border-border/30 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Discount code"
+                      value={discountCode}
+                      onChange={(e) => {
+                        setDiscountCode(e.target.value.toUpperCase());
+                        setDiscountPercent(null);
+                      }}
+                      className="h-9 text-xs pl-9 bg-background/50 font-mono tracking-wider"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 text-xs"
+                    disabled={!discountCode.trim() || isValidatingCode || discountPercent !== null}
+                    onClick={() => validateDiscountCode(discountCode)}
+                  >
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                  </Button>
+                </div>
+                {discountPercent && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                    <Tag className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[11px] text-emerald-300 font-medium">
+                      {discountPercent}% discount will be applied at checkout
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <p className="text-xs text-muted-foreground text-center pt-2">
               If someone outbids you, you'll receive an email notification with the option to bid again.
