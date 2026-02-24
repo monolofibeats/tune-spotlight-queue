@@ -12,6 +12,9 @@ import {
   RefreshCw,
   AlertTriangle,
   Undo2,
+  Monitor,
+  Tablet,
+  Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
