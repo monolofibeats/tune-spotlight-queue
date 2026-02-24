@@ -420,14 +420,17 @@ const StreamerSettings = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-3">
                 <Button variant="outline" asChild>
                   <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
                     <Eye className="w-4 h-4" />
                     Preview
                   </a>
                 </Button>
-                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2">
+                {anyUnsaved && (
+                  <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
+                )}
+                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2 min-w-[160px]">
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
