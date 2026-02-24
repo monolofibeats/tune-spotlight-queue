@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.25.76";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const teamInvitationSchema = z.object({
   email: z.string().email().max(320),
@@ -19,6 +20,13 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limit: 5 requests per 300 seconds (email sending)
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rateLimitResult = await checkRateLimit(clientIp, "send-team-invitation", 5, 300);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(corsHeaders, rateLimitResult.retryAfterSeconds);
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -108,10 +116,8 @@ serve(async (req) => {
       (u) => u.email?.toLowerCase() === email.toLowerCase()
     );
 
-    // If the invited user already has an account, auto-accept the invitation
     const autoAccept = !!invitedUser?.id;
 
-    // Create the team member record
     const { data: member, error: insertError } = await supabaseClient
       .from("streamer_team_members")
       .insert({
@@ -174,7 +180,6 @@ serve(async (req) => {
         });
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
-        // Don't fail the invitation if email fails
       }
     }
 
