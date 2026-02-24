@@ -22,6 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
+import { ReferralCodesPanel } from './ReferralCodesPanel';
 
 interface PricingConfig {
   id: string;
