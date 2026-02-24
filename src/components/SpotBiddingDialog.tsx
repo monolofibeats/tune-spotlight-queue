@@ -256,10 +256,15 @@ export function SpotBiddingDialog({
         return;
       }
 
+      // Apply discount to amount
+      const finalAmount = discountPercent
+        ? spot.yourPrice * (1 - discountPercent / 100)
+        : spot.yourPrice;
+
       // Regular users go through Stripe
       const { data, error } = await supabase.functions.invoke('create-priority-payment', {
         body: {
-          amount: spot.yourPrice,
+          amount: finalAmount,
           songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
@@ -270,6 +275,7 @@ export function SpotBiddingDialog({
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
           streamerSlug: streamerSlug || null,
+          referralCode: discountPercent ? discountCode.trim().toUpperCase() : undefined,
         },
       });
 
