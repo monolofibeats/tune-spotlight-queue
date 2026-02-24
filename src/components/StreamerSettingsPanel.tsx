@@ -189,6 +189,24 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       console.error('Pricing save error:', e);
     }
 
+    // Save form fields if changed
+    try {
+      if (formFieldRef.current?.hasChanges) {
+        await formFieldRef.current.save();
+      }
+    } catch (e) {
+      console.error('Form fields save error:', e);
+    }
+
+    // Save stream embed if changed
+    try {
+      if (streamEmbedRef.current?.hasChanges) {
+        await streamEmbedRef.current.save();
+      }
+    } catch (e) {
+      console.error('Stream embed save error:', e);
+    }
+
     try {
       if (heroTitle !== streamer.hero_title) await logContentChange('hero_title', streamer.hero_title || '', heroTitle);
       if (heroSubtitle !== streamer.hero_subtitle) await logContentChange('hero_subtitle', streamer.hero_subtitle || '', heroSubtitle);
