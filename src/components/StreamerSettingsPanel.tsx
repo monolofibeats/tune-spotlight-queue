@@ -273,10 +273,19 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const [previewKey, setPreviewKey] = useState(0);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'phone'>('desktop');
 
   const refreshPreview = () => {
     setPreviewKey((k) => k + 1);
   };
+
+  const previewDimensions = {
+    desktop: { width: '133.33%', height: '133.33%', scale: 0.75 },
+    tablet: { width: '768px', height: '133.33%', scale: 0.65 },
+    phone: { width: '375px', height: '133.33%', scale: 0.55 },
+  };
+
+  const currentPreview = previewDimensions[previewDevice];
 
   const tabs = [
     { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
