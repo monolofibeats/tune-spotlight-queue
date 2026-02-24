@@ -1536,25 +1536,7 @@ export type Database = {
       }
       generate_streamer_referral_codes: {
         Args: { _streamer_id: string }
-        Returns: {
-          code: string
-          created_at: string
-          discount_percent: number
-          expires_at: string | null
-          id: string
-          is_used: boolean
-          source: string
-          streamer_id: string | null
-          used_at: string | null
-          used_by_email: string | null
-          used_on_session_id: string | null
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "referral_codes"
-          isOneToOne: false
-          isSetofReturn: true
-        }
+        Returns: undefined
       }
       get_team_role: {
         Args: { _streamer_id: string; _user_id: string }
