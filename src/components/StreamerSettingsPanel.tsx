@@ -148,6 +148,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       bannerColor !== (s.banner_color || '45 90% 50%') ||
       showHowItWorks !== (s.show_how_it_works ?? true) ||
       showStreamEmbed !== (s.show_stream_embed ?? true) ||
+      showTopSongs !== (s.show_top_songs ?? false) ||
+      showPublicQueue !== ((s as any).show_public_queue ?? true) ||
       customCss !== (s.custom_css || '')
     );
   }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss]);
