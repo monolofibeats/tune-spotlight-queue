@@ -27,12 +27,55 @@ import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
 function StreamerPageContent() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { streamer, isLoading, error } = useStreamer();
   const { t } = useLanguage();
   const { currentSubmissions, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   // useStreamSession is provided by StreamSessionProvider scoped to this streamer in StreamerPage
   const { isLive } = useStreamSession();
+
+  // Handle ?outbid= query param from email magic links
+  const outbidSubmissionId = searchParams.get('outbid');
+  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmount: string } | null>(null);
+  const [showOutbidBanner, setShowOutbidBanner] = useState(false);
+
+  useEffect(() => {
+    if (!outbidSubmissionId) return;
+    
+    const fetchOutbidInfo = async () => {
+      const { data: sub } = await supabase
+        .from('submissions')
+        .select('song_title, artist_name')
+        .eq('id', outbidSubmissionId)
+        .maybeSingle();
+
+      const { data: notif } = await supabase
+        .from('bid_notifications')
+        .select('offer_amount_cents')
+        .eq('submission_id', outbidSubmissionId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (sub) {
+        setOutbidInfo({
+          songTitle: sub.song_title,
+          artistName: sub.artist_name,
+          suggestedAmount: notif?.offer_amount_cents 
+            ? `€${(notif.offer_amount_cents / 100).toFixed(2)}` 
+            : '€2.00',
+        });
+        setShowOutbidBanner(true);
+      }
+
+      // Clean up URL
+      searchParams.delete('outbid');
+      setSearchParams(searchParams, { replace: true });
+    };
+
+    fetchOutbidInfo();
+  }, [outbidSubmissionId]);
 
   if (isLoading) {
     return (
