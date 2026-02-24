@@ -138,7 +138,7 @@ serve(async (req) => {
         amount_paid: amount.toString(),
         streamer_id: streamerId || "",
         streamer_slug: streamerSlug || "",
-        audioFileUrl: audioFileUrl || "",
+        audio_file_url: audioFileUrl || "",
         referral_code: validatedReferralCode || "",
         original_submission_id: originalSubmissionId || "",
       },
