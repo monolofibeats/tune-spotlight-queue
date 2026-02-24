@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, 
   Save, 
@@ -15,7 +15,9 @@ import {
   DollarSign,
   Globe,
   Flag,
-  Sparkles
+  Sparkles,
+  Undo2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -35,6 +37,7 @@ import {
   PricingSettings,
   LanguageSettings,
 } from '@/components/streamer-settings';
+import type { PricingSettingsHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
