@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Loader2, Crown, Medal, Award } from 'lucide-react';
+import { Zap, Loader2, Crown, Medal, Award, Tag, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +17,8 @@ import {
 
 interface SpotPrice {
   position: number;
-  currentPrice: number; // Total already paid for this spot
-  yourPrice: number; // What you need to pay to claim it
+  currentPrice: number;
+  yourPrice: number;
   songTitle?: string;
   artistName?: string;
 }
@@ -32,9 +32,9 @@ interface SpotBiddingDialogProps {
   message?: string;
   email: string;
   platform: string;
-  audioFileUrl?: string | null; // Pre-uploaded audio file path
-  streamerId?: string | null; // Streamer context for marketplace
-  streamerSlug?: string | null; // Streamer slug for redirect after payment
+  audioFileUrl?: string | null;
+  streamerId?: string | null;
+  streamerSlug?: string | null;
   onSuccess?: () => void;
 }
 
@@ -61,7 +61,10 @@ export function SpotBiddingDialog({
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<number | null>(null);
   const [incrementPercent, setIncrementPercent] = useState(10);
-  const [minBidAmount, setMinBidAmount] = useState<number | null>(null); // Start as null until loaded
+  const [minBidAmount, setMinBidAmount] = useState<number | null>(null);
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
 
   useEffect(() => {
     if (open) {
