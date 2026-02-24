@@ -67,6 +67,11 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
   const [bidIncrementPercent, setBidIncrementPercent] = useState(10);
   const [bidIncrementActive, setBidIncrementActive] = useState(true);
 
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+    hasChanges,
+  }), [hasChanges]);
+
   useEffect(() => {
     fetchConfigs();
   }, [streamerId]);
