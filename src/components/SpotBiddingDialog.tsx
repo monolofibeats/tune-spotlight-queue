@@ -187,6 +187,38 @@ export function SpotBiddingDialog({
     }
   };
 
+  const validateDiscountCode = async (code: string) => {
+    if (!code.trim()) {
+      setDiscountPercent(null);
+      return;
+    }
+    setIsValidatingCode(true);
+    try {
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('discount_percent, is_used, expires_at')
+        .eq('code', code.trim().toUpperCase())
+        .maybeSingle();
+
+      if (error || !data) {
+        setDiscountPercent(null);
+        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
+      } else if (data.is_used) {
+        setDiscountPercent(null);
+        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
+      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setDiscountPercent(null);
+        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
+      } else {
+        setDiscountPercent(data.discount_percent);
+        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+      }
+    } catch {
+      setDiscountPercent(null);
+    }
+    setIsValidatingCode(false);
+  };
+
   const handleSelectSpot = async (spotPosition: number) => {
     const spot = spots.find(s => s.position === spotPosition);
     if (!spot) return;
