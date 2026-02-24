@@ -247,6 +247,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           banner_color: bannerColor,
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
+          show_top_songs: showTopSongs,
+          show_public_queue: showPublicQueue,
           custom_css: customCss || null,
         })
         .eq('id', streamer.id)
