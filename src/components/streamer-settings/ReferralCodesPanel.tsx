@@ -107,7 +107,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
             <Gift className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm">Referral Codes</h4>
+            <h4 className="font-semibold text-sm">Discount Codes</h4>
             <p className="text-xs text-muted-foreground">
               {codes.length}/{MONTHLY_LIMIT} codes this month · {availableCount} available · {usedCount} used
             </p>
