@@ -368,17 +368,6 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         </div>
       )}
 
-      <Card className="bg-primary/5 border-primary/20">
-        <CardContent className="py-4">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="w-5 h-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">{t('pricing.proTip')}</p>
-              <p className="text-sm text-muted-foreground">{t('pricing.proTipDesc')}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <ReferralCodesPanel streamerId={streamerId} />
 

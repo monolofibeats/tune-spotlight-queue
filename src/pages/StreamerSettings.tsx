@@ -403,7 +403,12 @@ const StreamerSettings = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-24 pb-12 px-4">
+      <motion.main 
+        key={`main-${shakeKey}`}
+        animate={shakeKey > 0 ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : {}}
+        transition={{ duration: 0.4, ease: 'easeInOut' }}
+        className="pt-24 pb-12 px-4"
+      >
         <div className="container mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -420,14 +425,17 @@ const StreamerSettings = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-3">
                 <Button variant="outline" asChild>
                   <a href={`/${streamer.slug}/submit`} target="_blank" rel="noopener noreferrer" className="gap-2">
                     <Eye className="w-4 h-4" />
                     Preview
                   </a>
                 </Button>
-                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2">
+                {anyUnsaved && (
+                  <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
+                )}
+                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2 min-w-[160px]">
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
@@ -440,7 +448,10 @@ const StreamerSettings = () => {
           </motion.div>
 
           <Tabs value={activeTab} onValueChange={(tab) => {
-              if (anyUnsaved) triggerShake();
+              if (anyUnsaved) {
+                triggerShake();
+                return; // Block tab switch
+              }
               setActiveTab(tab);
             }} className="space-y-6">
             <ScrollArea className="w-full">
@@ -765,24 +776,16 @@ const StreamerSettings = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
+      </motion.main>
 
       {/* Floating unsaved changes bar */}
       <AnimatePresence>
         {anyUnsaved && (
           <motion.div
-            key={`unsaved-bar-${shakeKey}`}
             initial={{ y: 100, opacity: 0 }}
-            animate={{ 
-              y: 0, 
-              opacity: 1,
-              x: shakeKey > 0 ? [0, -6, 6, -4, 4, -2, 2, 0] : 0,
-            }}
+            animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            transition={{ 
-              y: { type: 'spring', stiffness: 400, damping: 30 },
-              x: { duration: 0.4, ease: 'easeInOut' },
-            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
           >
             <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/30 shadow-lg shadow-primary/10 backdrop-blur-md">
