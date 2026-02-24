@@ -332,7 +332,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Free (€0.00)</span>
-              <span>€20.00</span>
+              <span>€1,000.00</span>
             </div>
           </div>
 
