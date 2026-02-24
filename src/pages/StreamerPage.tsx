@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle, TrendingUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamSessionProvider } from '@/hooks/useStreamSession';
 import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
