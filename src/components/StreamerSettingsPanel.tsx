@@ -62,7 +62,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
   const pricingRef = useRef<PricingSettingsHandle>(null);
-  const [shakeKey, setShakeKey] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
   const [pricingHasChanges, setPricingHasChanges] = useState(false);
 
   const [heroTitle, setHeroTitle] = useState('');
