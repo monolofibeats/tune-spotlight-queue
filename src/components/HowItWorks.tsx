@@ -453,7 +453,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
                         <Zap className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
-                      <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
+                      <h3 className="font-display font-bold text-xs text-emerald-200">{t('howItWorks.tip.boostTitle')}</h3>
                     </div>
                      <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
                        Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
