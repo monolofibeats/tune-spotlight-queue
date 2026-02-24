@@ -327,7 +327,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                 setSubmission(s => ({ ...s, min: snapped, isActive: snapped > 0 }));
               }}
               min={0}
-              max={20}
+              max={1000}
               step={0.5}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
