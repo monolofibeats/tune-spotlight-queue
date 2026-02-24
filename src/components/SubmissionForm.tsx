@@ -1223,7 +1223,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               {showEmail && (
                 <div>
                   <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {emailLabel} {requireEmail ? <span className="text-destructive">*</span> : <span className="text-muted-foreground/60 text-[10px]">({t('submission.optional')})</span>}
+                    {emailLabel} {requireEmail ? <span className="text-destructive">*</span> : <span className="text-muted-foreground/60 text-xs">({t('submission.optional')})</span>}
                   </label>
                   <Input
                     type="email"
