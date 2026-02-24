@@ -176,6 +176,78 @@ serve(async (req) => {
       }
     }
 
+    // Outbid notifications: notify other paid submissions that got displaced
+    if (isPriorityPayment && metadata.streamer_id && amountPaid > 0) {
+      try {
+        // Get bid increment config
+        const { data: bidConfigs } = await supabase
+          .from('pricing_config')
+          .select('*')
+          .eq('config_type', 'bid_increment');
+        const bidConfig = bidConfigs?.find(r => r.streamer_id === metadata.streamer_id) 
+          ?? bidConfigs?.find(r => r.streamer_id === null) 
+          ?? bidConfigs?.[0];
+        const incrementPercent = bidConfig?.min_amount_cents || 10;
+
+        const currentTotalCents = Math.round(amountPaid * 100);
+
+        // Find other pending paid submissions for this streamer that are now below this one
+        const { data: competingSubmissions } = await supabase
+          .from('submissions')
+          .select('id, email, amount_paid, boost_amount, user_id')
+          .eq('streamer_id', metadata.streamer_id)
+          .eq('status', 'pending')
+          .eq('is_priority', true)
+          .neq('id', submission.id);
+
+        for (const comp of competingSubmissions || []) {
+          const compTotalCents = Math.round((comp.boost_amount || comp.amount_paid || 0) * 100);
+          
+          // Only notify if they paid less AND have a different email
+          if (compTotalCents > 0 && compTotalCents < currentTotalCents && comp.email && comp.email !== stripeEmail) {
+            const suggestedBid = Math.ceil(currentTotalCents * (1 + incrementPercent / 100));
+
+            await supabase
+              .from('bid_notifications')
+              .insert({
+                submission_id: comp.id,
+                email: comp.email,
+                user_id: comp.user_id || null,
+                notification_type: 'outbid',
+                offer_amount_cents: suggestedBid,
+              });
+
+            logStep("Outbid notification created", { 
+              email: comp.email, 
+              compTotal: compTotalCents, 
+              newTotal: currentTotalCents,
+              suggestedBid 
+            });
+          }
+        }
+
+        // Trigger email sending
+        try {
+          await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-bid-notification`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({}),
+            }
+          );
+          logStep("Email notifications triggered");
+        } catch (emailErr) {
+          logStep("Email trigger failed (non-fatal)", { error: String(emailErr) });
+        }
+      } catch (notifErr) {
+        logStep("Outbid notification failed (non-fatal)", { error: String(notifErr) });
+      }
+    }
+
     logStep("Webhook processing complete", { submissionId: submission.id });
 
     return new Response(JSON.stringify({ received: true, submissionId: submission.id }), {
