@@ -546,7 +546,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Content Tab */}
-            <TabsContent value="content" className="space-y-6">
+            <TabsContent value="content" forceMount className={`space-y-6 ${activeTab !== 'content' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Hero Section Text</h2>
                 <p className="text-sm text-muted-foreground">
