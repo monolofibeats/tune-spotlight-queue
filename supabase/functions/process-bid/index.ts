@@ -55,7 +55,7 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { submissionId, bidAmount, email } = validationResult.data;
+    const { submissionId, bidAmount, email, streamerSlug } = validationResult.data;
     logStep("Input validated", { submissionId, bidAmount });
 
     // Get user if authenticated
