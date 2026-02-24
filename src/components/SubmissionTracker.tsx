@@ -87,8 +87,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
                   </Button>
                 </div>
               </motion.div>
-            );
-          })}
+          ))}
         </AnimatePresence>
       </div>
 
