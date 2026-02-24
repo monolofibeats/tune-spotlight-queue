@@ -949,6 +949,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email: capturedEmail,
           platform: capturedPlatform,
           audioFileUrl: uploadedFileUrl,
+          submissionId: newSubmissionId || null,
         });
         setTimeout(() => {
           setShowPostSubmitOffer(true);
