@@ -42,6 +42,7 @@ interface PricingFormState {
 
 export interface PricingSettingsHandle {
   save: () => Promise<void>;
+  discard: () => void;
   hasChanges: boolean;
 }
 
@@ -68,10 +69,17 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
   const [bidIncrementPercent, setBidIncrementPercent] = useState(10);
   const [bidIncrementActive, setBidIncrementActive] = useState(true);
 
+  const handleDiscard = () => {
+    syncFormState(configs);
+    setHasChanges(false);
+    onChangeStatus?.(false);
+  };
+
   useImperativeHandle(ref, () => ({
     save: handleSave,
+    discard: handleDiscard,
     hasChanges,
-  }), [hasChanges]);
+  }), [hasChanges, configs]);
 
   useEffect(() => {
     fetchConfigs();
