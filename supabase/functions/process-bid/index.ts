@@ -13,6 +13,7 @@ const requestSchema = z.object({
   submissionId: z.string().uuid(),
   bidAmount: z.number().min(0.5).max(1000),
   email: z.string().email().max(255),
+  streamerSlug: z.string().max(100).optional(),
 });
 
 const logStep = (step: string, details?: unknown) => {
