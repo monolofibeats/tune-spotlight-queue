@@ -38,9 +38,23 @@ function StreamerPageContent() {
 
   // Handle ?outbid= query param from email magic links
   const outbidSubmissionId = searchParams.get('outbid');
+  const bidPaymentStatus = searchParams.get('bid_payment');
   const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmountCents: number; submissionId: string } | null>(null);
   const [showOutbidBanner, setShowOutbidBanner] = useState(false);
   const [showOutbidDialog, setShowOutbidDialog] = useState(false);
+
+  // Handle bid payment success redirect
+  useEffect(() => {
+    if (bidPaymentStatus === 'success') {
+      toast({
+        title: '🎉 Bid successful!',
+        description: 'Your song has been boosted in the queue.',
+      });
+      searchParams.delete('bid_payment');
+      searchParams.delete('session_id');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [bidPaymentStatus]);
 
   useEffect(() => {
     if (!outbidSubmissionId) return;
