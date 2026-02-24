@@ -196,12 +196,59 @@ function LiveIllustration() {
   );
 }
 
+function generateReferralCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'TIP-';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export function HowItWorks() {
   const [showTip, setShowTip] = useState(false);
   const [tipExpanded, setTipExpanded] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const referralCreatedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInViewRef = useRef(false);
+
+  const handleTipExpand = useCallback(async () => {
+    setTipExpanded(true);
+    if (referralCreatedRef.current) return;
+    referralCreatedRef.current = true;
+
+    // Check localStorage to avoid duplicate codes per browser
+    const stored = localStorage.getItem('upstar_tip_referral');
+    if (stored) {
+      setReferralCode(stored);
+      return;
+    }
+
+    const code = generateReferralCode();
+    const { error } = await supabase.from('referral_codes').insert({
+      code,
+      discount_percent: 10,
+      source: 'homepage',
+      is_used: false,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    if (!error) {
+      setReferralCode(code);
+      localStorage.setItem('upstar_tip_referral', code);
+    }
+  }, []);
+
+  const copyReferralCode = () => {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    setCodeCopied(true);
+    toast({ title: '10% discount code copied!', description: referralCode });
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
 
   const startTimer = useCallback(() => {
     if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
