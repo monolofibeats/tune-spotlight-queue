@@ -363,7 +363,7 @@ export function HowItWorks() {
                         style={{ zIndex: -1 }}
                       >
                         <motion.div
-                          onClick={(e) => { e.stopPropagation(); setTipExpanded(true); }}
+                          onClick={(e) => { e.stopPropagation(); handleTipExpand(); }}
                           className="cursor-pointer"
                           whileHover={{ scale: 1.05, x: 8 }}
                           whileTap={{ scale: 0.97 }}
