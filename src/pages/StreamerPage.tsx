@@ -201,6 +201,52 @@ function StreamerPageContent() {
         </div>
       </section>
 
+      {/* Outbid Banner */}
+      <AnimatePresence>
+        {showOutbidBanner && outbidInfo && (
+          <motion.section
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="pb-4 px-4"
+          >
+            <div className="container mx-auto max-w-xl">
+              <div className="relative rounded-xl border border-primary/30 bg-primary/5 p-5">
+                <button
+                  onClick={() => setShowOutbidBanner(false)}
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm mb-1">You've been outbid!</h3>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Someone placed a higher bid on <strong className="text-foreground">"{outbidInfo.songTitle}"</strong> by {outbidInfo.artistName}. 
+                      Bid <strong className="text-primary">{outbidInfo.suggestedAmount}</strong> or more to reclaim your spot.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="hero"
+                      onClick={() => {
+                        setShowOutbidBanner(false);
+                        // Scroll to submission form
+                        document.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                    >
+                      Place Higher Bid →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
       {/* How It Works - between hero and form */}
       {(streamer.show_how_it_works ?? true) && (
         <section className="pb-4 px-4">
