@@ -46,30 +46,22 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
       if (withIds.length === 0) return;
 
       const ids = withIds.map((s) => s.submissionId!);
+      // Use public_submissions_queue view which only shows pending submissions
+      // If a submission is no longer in this view, it's been processed
       const { data } = await supabase
-        .from('submissions')
-        .select('id, status')
+        .from('public_submissions_queue')
+        .select('id')
         .in('id', ids);
 
       if (!data) return;
 
-      // Map processed submissions to their new status
-      const statusMap = new Map(data.map((r) => [r.id, r.status]));
+      const stillPendingIds = new Set(data.map((r) => r.id));
 
       let changed = false;
       const updated = all.map((s) => {
         if (!s.submissionId || s.doneStatus) return s;
-        const dbStatus = statusMap.get(s.submissionId);
-        if (dbStatus && dbStatus !== 'pending') {
-          changed = true;
-          const doneStatus =
-            dbStatus === 'reviewed' ? 'reviewed'
-            : dbStatus === 'skipped' ? 'skipped'
-            : 'deleted';
-          return { ...s, doneStatus } as TrackedSubmission;
-        }
-        // If not found in DB results, RLS hides non-pending rows → treat as reviewed
-        if (!statusMap.has(s.submissionId)) {
+        // If no longer in the pending queue, it's been processed
+        if (!stillPendingIds.has(s.submissionId)) {
           changed = true;
           return { ...s, doneStatus: 'reviewed' as const };
         }
@@ -83,7 +75,7 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
     };
 
     checkStatuses();
-    const interval = setInterval(checkStatuses, 15_000);
+    const interval = setInterval(checkStatuses, 8_000);
     return () => clearInterval(interval);
   }, []);
 

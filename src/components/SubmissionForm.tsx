@@ -37,7 +37,7 @@ interface SubmissionFormProps {
   watchlistRef?: React.RefObject<WatchlistRef>;
   streamerId?: string;
   streamerSlug?: string;
-  onSubmissionTracked?: (sub: { songTitle: string; artistName: string; songUrl: string; platform: string; audioFileUrl: string | null; streamerId: string | null; streamerSlug: string | null }) => void;
+  onSubmissionTracked?: (sub: { submissionId?: string; songTitle: string; artistName: string; songUrl: string; platform: string; audioFileUrl: string | null; streamerId: string | null; streamerSlug: string | null }) => void;
 }
 
 interface FlyingCard {
@@ -546,7 +546,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     }
     
     // Direct database insert for free submissions
-    const { error } = await supabase.from('submissions').insert({
+    const { data: insertedRow, error } = await supabase.from('submissions').insert({
       song_url: finalSongUrl,
       platform: platform || 'other',
       artist_name: artistName || 'Unknown Artist',
@@ -558,11 +558,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       user_id: user?.id || null,
       audio_file_url: audioFileUrl,
       streamer_id: streamerId || null,
-    });
+    }).select('id').maybeSingle();
 
     if (error) {
       throw new Error(error.message);
     }
+
+    return insertedRow?.id || null;
   };
 
   const handleSocialLogin = async (provider: 'google' | 'apple') => {
@@ -897,8 +899,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       const capturedEmail = email || '';
       const capturedPlatform = platform || 'other';
 
-      // handleFreeSubmit uploads the file and returns the URL via uploadedAudioUrlRef
-      await handleFreeSubmit();
+      // handleFreeSubmit uploads the file and returns the submission ID
+      const newSubmissionId = await handleFreeSubmit();
       
       // NOW capture the uploaded audio URL (after handleFreeSubmit has uploaded it)
       const uploadedFileUrl = uploadedAudioUrlRef.current;
@@ -926,6 +928,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
       // Track submission in localStorage for upsell
       onSubmissionTracked?.({
+        submissionId: newSubmissionId || undefined,
         songTitle: capturedSongTitle,
         artistName: capturedArtistName,
         songUrl: capturedSongUrl,
