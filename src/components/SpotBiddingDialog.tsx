@@ -298,13 +298,13 @@ export function SpotBiddingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] rounded-xl p-4 sm:p-6">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
             Skip the Waiting List
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Choose your spot in the queue. Higher positions get reviewed first!
           </DialogDescription>
         </DialogHeader>
