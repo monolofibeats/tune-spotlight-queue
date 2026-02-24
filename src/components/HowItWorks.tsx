@@ -514,7 +514,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className={`${compact ? 'p-2.5 max-w-[200px]' : 'p-4 max-w-[260px]'} rounded-b-xl rounded-tl-xl border border-t-0 border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl ml-auto`}>
+                        <div className={`${compact ? 'p-2.5 max-w-[200px]' : 'p-4 max-w-[260px]'} rounded-b-xl border border-t-0 border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl ml-auto`}>
                            <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
                              Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
                            </p>
