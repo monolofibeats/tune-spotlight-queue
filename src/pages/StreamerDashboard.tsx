@@ -971,6 +971,7 @@ const StreamerDashboard = () => {
                 </TabsContent>
               )}
             </Tabs>
+            </motion.div>
           </div>
         </main>
 
