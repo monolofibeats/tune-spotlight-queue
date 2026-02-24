@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Input validation schema
 const requestSchema = z.object({
-  amount: z.number().min(0.5).max(100),
+  amount: z.number().min(0.01).max(100),
   songUrl: z.string().max(2000),
   artistName: z.string().max(200).optional().default('Unknown Artist'),
   songTitle: z.string().max(200).optional().default('Untitled'),
@@ -21,6 +21,7 @@ const requestSchema = z.object({
   audioFileUrl: z.string().max(500).optional().nullable(),
   streamerSlug: z.string().max(100).optional().nullable(),
   streamerId: z.string().max(100).optional().nullable(),
+  referralCode: z.string().max(20).optional().nullable(),
 });
 
 const logStep = (step: string, details?: unknown) => {
