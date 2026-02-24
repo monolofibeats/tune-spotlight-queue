@@ -533,43 +533,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
         </div>
       </div>
 
-      {/* Floating unsaved changes bar */}
-      <AnimatePresence>
-        {anyUnsaved && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
-          >
-            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/30 shadow-lg shadow-primary/10 backdrop-blur-md">
-              <AlertTriangle className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-sm font-medium whitespace-nowrap">You have unsaved changes</span>
-              <div className="flex gap-2 ml-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDiscard}
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Undo2 className="w-3.5 h-3.5" />
-                  Discard
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveAll}
-                  disabled={isSaving}
-                  className="gap-1.5"
-                >
-                  {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  Save
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }
