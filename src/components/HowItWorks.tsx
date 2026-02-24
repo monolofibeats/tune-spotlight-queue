@@ -369,8 +369,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                     <div className="relative h-10 sm:h-16 overflow-hidden flex items-start justify-center -mt-1 sm:-mt-2">
-                       <div className="scale-[0.4] sm:scale-[0.55] origin-top pointer-events-none">
+                     <div className="relative flex items-center justify-center" style={{ height: 56 }}>
+                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ transform: 'scale(0.42)', transformOrigin: 'center center' }}>
                         {item.illustration}
                        </div>
                      </div>
@@ -379,7 +379,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0 overflow-hidden' : 'p-5 pt-2'}>
+                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0.5' : 'p-5 pt-2'}>
                      {compact && (
                        <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
@@ -487,7 +487,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           )}
         </div>
 
-        {/* Mobile PS tip - peeking behind 3rd card */}
+        {/* Mobile PS tip - single expanding box */}
         {(
           <AnimatePresence>
             {showTip && (
@@ -498,16 +498,24 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                 className={`${compact ? 'sm:hidden' : 'md:hidden'} -mt-3 flex justify-end pr-2`}
                 style={{ zIndex: 0 }}
               >
-                <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
-                  <div className={`inline-flex items-center gap-1.5 ${tipExpanded ? 'rounded-t-lg border-b-0' : 'rounded-lg'} border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-0.5' : 'px-3.5 py-1.5'}`}>
-                    <Sparkles className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} text-emerald-400`} />
-                     <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
-                       <span className="text-emerald-200 font-semibold not-italic">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')} 🤫
+                <div
+                  onClick={() => { if (!tipExpanded) handleTipExpand(); }}
+                  className={`cursor-pointer rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-1' : 'px-3.5 py-1.5'} ${tipExpanded ? (compact ? 'max-w-[200px]' : 'max-w-[260px]') : ''}`}
+                >
+                  {/* Header row */}
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} text-emerald-400 shrink-0`} />
+                    <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
+                      <span className="text-emerald-200 font-semibold not-italic">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')} 🤫
                     </p>
-                    <div className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0`}>
-                      <HelpCircle className={`${compact ? 'w-1.5 h-1.5' : 'w-2.5 h-2.5'} text-emerald-300`} />
-                    </div>
+                    {!tipExpanded && (
+                      <div className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0`}>
+                        <HelpCircle className={`${compact ? 'w-1.5 h-1.5' : 'w-2.5 h-2.5'} text-emerald-300`} />
+                      </div>
+                    )}
                   </div>
+
+                  {/* Expanded content - same box */}
                   <AnimatePresence>
                     {tipExpanded && (
                       <motion.div
@@ -516,25 +524,26 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className={`${compact ? 'p-2.5 max-w-[200px]' : 'p-4 max-w-[260px]'} rounded-b-xl border border-t-0 border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl ml-auto`}>
-                           <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
-                             {t('howItWorks.tip.boostDesc')}
-                           </p>
+                        <div className={`${compact ? 'pt-1.5 mt-1.5' : 'pt-2 mt-2'} border-t border-emerald-500/20`}>
+                          <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
+                            {t('howItWorks.tip.boostDesc')}
+                          </p>
                           <Link
                             to="/browse"
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 ${compact ? 'text-[9px]' : 'text-[11px]'} font-semibold hover:bg-emerald-500/30 transition-colors`}
+                            onClick={(e) => e.stopPropagation()}
                           >
                             {t('howItWorks.tip.boostNow')}
                             <ArrowRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                           </Link>
                           {referralCode && (
                             <div className={`${compact ? 'mt-1.5 pt-1' : 'mt-3 pt-2'} border-t border-emerald-500/20`}>
-                               <p className={`${compact ? 'text-[8px]' : 'text-[10px]'} text-emerald-300/70 mb-1`}>🎁 {t('howItWorks.tip.discountCode')}</p>
-                               <button
-                                 onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                                 className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                               >
-                                 <code className={`${compact ? 'text-[9px]' : 'text-[11px]'} font-mono font-bold text-emerald-200 tracking-wider`}>{referralCode}</code>
+                              <p className={`${compact ? 'text-[8px]' : 'text-[10px]'} text-emerald-300/70 mb-1`}>🎁 {t('howItWorks.tip.discountCode')}</p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                                className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                              >
+                                <code className={`${compact ? 'text-[9px]' : 'text-[11px]'} font-mono font-bold text-emerald-200 tracking-wider`}>{referralCode}</code>
                                 {codeCopied ? <Check className="w-2.5 h-2.5 text-emerald-300 ml-auto" /> : <Copy className="w-2.5 h-2.5 text-emerald-400/60 ml-auto" />}
                               </button>
                             </div>
