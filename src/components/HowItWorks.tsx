@@ -361,7 +361,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                    <div className="relative h-12 sm:h-14 scale-[0.55] sm:scale-[0.6] origin-center pointer-events-none">
+                     <div className="relative h-10 sm:h-14 scale-[0.5] sm:scale-[0.6] origin-center pointer-events-none">
                       {item.illustration}
                     </div>
                   ) : (
