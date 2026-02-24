@@ -415,8 +415,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         >
                           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
                             <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
-                            <p className={`text-emerald-300/90 font-medium whitespace-nowrap ${compact ? 'text-[10px]' : 'text-[11px]'}`}>
-                              <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret?
+                             <p className={`text-emerald-300/90 font-medium whitespace-nowrap ${compact ? 'text-[10px]' : 'text-[11px]'}`}>
+                               <span className="text-emerald-200 font-semibold">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')}
                             </p>
                             <motion.div 
                               className="w-5 h-5 rounded-full border border-emerald-400/50 bg-emerald-500/25 flex items-center justify-center shrink-0"
