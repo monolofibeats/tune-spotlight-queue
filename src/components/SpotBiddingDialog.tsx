@@ -36,6 +36,7 @@ interface SpotBiddingDialogProps {
   audioFileUrl?: string | null;
   streamerId?: string | null;
   streamerSlug?: string | null;
+  originalSubmissionId?: string | null;
   onSuccess?: () => void;
 }
 
