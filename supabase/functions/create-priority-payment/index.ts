@@ -127,11 +127,20 @@ serve(async (req) => {
         amount_paid: amount.toString(),
         streamer_id: streamerId || "",
         streamer_slug: streamerSlug || "",
-        // Store both keys to be resilient against older/newer verifiers
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",
+        referral_code: validatedReferralCode || "",
       },
     });
+
+    // Mark discount code as used after session creation
+    if (validatedReferralCode) {
+      await supabase
+        .from('referral_codes')
+        .update({ is_used: true, used_by_email: email || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .eq('code', validatedReferralCode);
+      logStep("Discount code marked as used", { code: validatedReferralCode });
+    }
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
