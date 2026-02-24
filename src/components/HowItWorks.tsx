@@ -209,6 +209,17 @@ interface HowItWorksProps {
   compact?: boolean;
 }
 
+const scrollToSubmissionForm = () => {
+  const form = document.querySelector('form');
+  if (form) {
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      const firstInput = form.querySelector('input, textarea, select') as HTMLElement;
+      firstInput?.focus();
+    }, 500);
+  }
+};
+
 export function HowItWorks({ compact = false }: HowItWorksProps) {
   const [showTip, setShowTip] = useState(false);
   const [tipExpanded, setTipExpanded] = useState(false);
@@ -234,7 +245,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
     const code = generateReferralCode();
     const { error } = await supabase.from('referral_codes').insert({
       code,
-      discount_percent: 10,
+      discount_percent: 5,
       source: 'homepage',
       is_used: false,
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -250,7 +261,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
     if (!referralCode) return;
     navigator.clipboard.writeText(referralCode);
     setCodeCopied(true);
-    toast({ title: '10% discount code copied!', description: referralCode });
+    toast({ title: '5% discount code copied!', description: referralCode });
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
@@ -325,7 +336,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
+        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
             {steps.map((item, index) => {
               // Compact mobile: alternate offsets & slight rotations for visual variety
               const compactMobileStyles = compact ? {
@@ -341,8 +352,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   viewport={{ once: true, margin: '-20px' }}
                   transition={{ delay: index * 0.1, duration: 0.4 }}
                   whileHover={compact ? { y: -2, scale: 1.02 } : { y: -4 }}
-                  onClick={compact ? undefined : () => window.location.href = '/browse'}
-                  className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? 'sm:!transform-none sm:!rotate-0' : 'cursor-pointer rounded-2xl'}`}
+                   onClick={compact ? scrollToSubmissionForm : () => window.location.href = '/browse'}
+                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer ${compact ? 'sm:!transform-none sm:!rotate-0' : 'rounded-2xl'}`}
                 >
                   {!compact && (
                     <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
@@ -350,7 +361,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                    <div className="relative h-12 sm:h-14 scale-[0.55] sm:scale-[0.6] origin-center pointer-events-none">
+                     <div className="relative h-10 sm:h-14 scale-[0.5] sm:scale-[0.6] origin-center pointer-events-none">
                       {item.illustration}
                     </div>
                   ) : (
@@ -358,12 +369,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                  <div className={compact ? 'p-2 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
-                    {compact && (
-                      <span className="text-[9px] font-mono text-primary/60 font-bold">{item.step}</span>
-                    )}
-                    <h3 className={`font-display font-bold ${compact ? 'text-[10px] sm:text-[11px] mb-0.5 leading-snug' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                    <p className={`text-muted-foreground ${compact ? 'text-[9px] sm:text-[10px] leading-snug line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                   <div className={compact ? 'p-1.5 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
+                     {compact && (
+                       <span className="text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
+                     )}
+                     <h3 className={`font-display font-bold ${compact ? 'text-[9px] sm:text-[11px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[8px] sm:text-[10px] leading-tight line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
@@ -436,10 +447,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       </div>
                       <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
                     </div>
-                    <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
-                      Pay a small fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                      100% goes to the streamer!
-                    </p>
+                     <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
+                       Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                     </p>
                     <Link
                       to="/browse"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
@@ -450,12 +460,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </Link>
                     {referralCode && (
                       <div className="mt-2 pt-2 border-t border-emerald-500/20">
-                        <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                        >
-                          <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                       <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 5% discount code:</p>
+                         <button
+                           onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                           className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                         >
+                           <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
                           {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
                         </button>
                       </div>
@@ -496,10 +506,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         className="overflow-hidden"
                       >
                         <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
-                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
-                            Pay a small boost fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                            100% goes directly to the streamer!
-                          </p>
+                           <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                             Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                           </p>
                           <Link
                             to="/browse"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
@@ -509,12 +518,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                           </Link>
                           {referralCode && (
                             <div className="mt-3 pt-2 border-t border-emerald-500/20">
-                              <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                              >
-                                <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                               <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 5% discount code:</p>
+                               <button
+                                 onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                               >
+                                 <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
                                 {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
                               </button>
                             </div>
