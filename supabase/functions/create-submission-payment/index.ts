@@ -184,8 +184,18 @@ serve(async (req) => {
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",
         streamer_id: streamerId || "",
+        referral_code: validatedReferralCode || "",
       },
     });
+
+    // Mark referral code as used after session creation
+    if (validatedReferralCode) {
+      await serviceClient
+        .from('referral_codes')
+        .update({ is_used: true, used_by_email: customerEmail || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .eq('code', validatedReferralCode);
+      logStep("Referral code marked as used", { code: validatedReferralCode });
+    }
 
     logStep("Checkout session created", { sessionId: session.id });
 
