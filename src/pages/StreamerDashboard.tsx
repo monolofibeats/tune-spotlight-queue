@@ -134,6 +134,8 @@ const StreamerDashboard = () => {
   const [dashboardShaking, setDashboardShaking] = useState(false);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
 
+  const [dashboardActiveTab, setDashboardActiveTab] = useState('submissions');
+
   // View options for header/title visibility
   const [viewOptions, setViewOptions] = useState<DashboardViewOptions>({
     showHeader: true,
