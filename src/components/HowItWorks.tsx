@@ -297,20 +297,20 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
   const steps = [
     {
       step: '01',
-      title: 'Upload a File or Drop Your Link',
-      description: 'Upload any file up to 100 MB or just drop a link to it — Spotify, SoundCloud, YouTube, anything.',
+      title: t('howItWorks.step1.fullTitle'),
+      description: t('howItWorks.step1.fullDesc'),
       illustration: <LinkIllustration />,
     },
     {
       step: '02',
-      title: 'Join the Queue',
-      description: 'Your track enters the live queue. The streamer plays it on stream.',
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.fullDesc'),
       illustration: <QueueIllustration />,
     },
     {
       step: '03',
-      title: 'Get Reviewed Live',
-      description: 'Watch in real-time as the streamer listens and gives feedback.',
+      title: t('howItWorks.step3.fullTitle'),
+      description: t('howItWorks.step3.fullDesc'),
       illustration: <LiveIllustration />,
     },
   ];
