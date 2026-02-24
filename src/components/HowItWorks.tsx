@@ -467,8 +467,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           )}
         </div>
 
-        {/* Mobile PS tip - only on homepage */}
-        {!compact && (
+        {/* Mobile PS tip */}
+        {(
           <AnimatePresence>
             {showTip && (
               <motion.div
