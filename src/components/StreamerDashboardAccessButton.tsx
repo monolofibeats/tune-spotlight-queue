@@ -16,6 +16,10 @@ export function StreamerDashboardAccessButton({ streamerId, streamerUserId, stre
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
 
+  // Hide in preview mode
+  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
+  if (isPreview) return null;
+
   useEffect(() => {
     if (!user) return;
 
