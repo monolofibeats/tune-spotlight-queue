@@ -336,7 +336,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
+        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
             {steps.map((item, index) => {
               // Compact mobile: alternate offsets & slight rotations for visual variety
               const compactMobileStyles = compact ? {
