@@ -128,10 +128,10 @@ export const FormFieldBuilder = forwardRef<FormFieldBuilderHandle, FormFieldBuil
 
   const handleSave = async () => {
     // Find changed fields and batch update
-    const updates: Promise<any>[] = [];
+    const updates: PromiseLike<any>[] = [];
     for (const field of fields) {
       const saved = savedFields.find(s => s.id === field.id);
-      if (!saved) continue; // new fields already saved via addField
+      if (!saved) continue;
       if (
         field.field_label !== saved.field_label ||
         field.field_type !== saved.field_type ||
