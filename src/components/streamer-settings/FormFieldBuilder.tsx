@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -46,8 +46,15 @@ interface FormField {
   options?: { values: string[] };
 }
 
+export interface FormFieldBuilderHandle {
+  save: () => Promise<void>;
+  discard: () => void;
+  hasChanges: boolean;
+}
+
 interface FormFieldBuilderProps {
   streamerId: string;
+  onChangeStatus?: (hasChanges: boolean) => void;
 }
 
 const FIELD_TYPES = [
@@ -60,10 +67,38 @@ const FIELD_TYPES = [
   { value: 'toggle', label: 'Yes/No', icon: ToggleLeft },
 ];
 
-export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
+function fieldsEqual(a: FormField[], b: FormField[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (
+      a[i].id !== b[i].id ||
+      a[i].field_label !== b[i].field_label ||
+      a[i].field_type !== b[i].field_type ||
+      a[i].placeholder !== b[i].placeholder ||
+      a[i].is_required !== b[i].is_required ||
+      a[i].is_enabled !== b[i].is_enabled ||
+      a[i].field_order !== b[i].field_order
+    ) return false;
+  }
+  return true;
+}
+
+export const FormFieldBuilder = forwardRef<FormFieldBuilderHandle, FormFieldBuilderProps>(function FormFieldBuilder({ streamerId, onChangeStatus }, ref) {
   const { t } = useLanguage();
   const [fields, setFields] = useState<FormField[]>([]);
+  const [savedFields, setSavedFields] = useState<FormField[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const parseFields = (data: any[]): FormField[] =>
+    data.map(f => ({
+      ...f,
+      placeholder: f.placeholder ?? '',
+      is_required: f.is_required ?? false,
+      is_enabled: f.is_enabled ?? true,
+      field_order: f.field_order ?? 0,
+      options: f.options as { values: string[] } | undefined,
+    }));
 
   const fetchFields = useCallback(async () => {
     const { data, error } = await supabase
@@ -73,14 +108,9 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       .order('field_order');
 
     if (!error && data) {
-      setFields(data.map(f => ({
-        ...f,
-        placeholder: f.placeholder ?? '',
-        is_required: f.is_required ?? false,
-        is_enabled: f.is_enabled ?? true,
-        field_order: f.field_order ?? 0,
-        options: f.options as { values: string[] } | undefined,
-      })));
+      const parsed = parseFields(data);
+      setFields(parsed);
+      setSavedFields(parsed);
     }
     setIsLoading(false);
   }, [streamerId]);
@@ -88,6 +118,63 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
   useEffect(() => {
     fetchFields();
   }, [fetchFields]);
+
+  // Track changes
+  useEffect(() => {
+    const changed = !fieldsEqual(fields, savedFields);
+    setHasChanges(changed);
+    onChangeStatus?.(changed);
+  }, [fields, savedFields, onChangeStatus]);
+
+  const handleSave = async () => {
+    // Find changed fields and batch update
+    const updates: Promise<any>[] = [];
+    for (const field of fields) {
+      const saved = savedFields.find(s => s.id === field.id);
+      if (!saved) continue; // new fields already saved via addField
+      if (
+        field.field_label !== saved.field_label ||
+        field.field_type !== saved.field_type ||
+        field.placeholder !== saved.placeholder ||
+        field.is_required !== saved.is_required ||
+        field.is_enabled !== saved.is_enabled ||
+        field.field_order !== saved.field_order
+      ) {
+        updates.push(
+          supabase.from('streamer_form_fields').update({
+            field_label: field.field_label,
+            field_type: field.field_type,
+            placeholder: field.placeholder,
+            is_required: field.is_required,
+            is_enabled: field.is_enabled,
+            field_order: field.field_order,
+          }).eq('id', field.id)
+        );
+      }
+    }
+
+    if (updates.length > 0) {
+      const results = await Promise.all(updates);
+      const hasError = results.some((r: any) => r.error);
+      if (hasError) {
+        toast({ title: t('formBuilder.failedSave'), variant: 'destructive' });
+        return;
+      }
+    }
+
+    // Sync saved state
+    setSavedFields([...fields]);
+  };
+
+  const handleDiscard = () => {
+    setFields([...savedFields]);
+  };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+    discard: handleDiscard,
+    hasChanges,
+  }), [hasChanges, fields, savedFields]);
 
   const addField = async () => {
     const newField = {
@@ -108,35 +195,21 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       .single();
 
     if (!error && data) {
-      setFields(prev => [...prev, {
-        ...data,
-        placeholder: data.placeholder ?? '',
-        is_required: data.is_required ?? false,
-        is_enabled: data.is_enabled ?? true,
-        field_order: data.field_order ?? 0,
-        options: data.options as { values: string[] } | undefined,
-      }]);
+      const parsed = parseFields([data])[0];
+      setFields(prev => [...prev, parsed]);
+      setSavedFields(prev => [...prev, parsed]);
     } else {
       toast({ title: t('formBuilder.failedAdd'), variant: 'destructive' });
     }
   };
 
-  const updateField = async (id: string, updates: Partial<FormField>) => {
+  const updateField = (id: string, updates: Partial<FormField>) => {
     setFields(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
-
-    const { error } = await supabase
-      .from('streamer_form_fields')
-      .update(updates)
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: t('formBuilder.failedSave'), variant: 'destructive' });
-      await fetchFields();
-    }
   };
 
   const deleteField = async (id: string) => {
     setFields(prev => prev.filter(f => f.id !== id));
+    setSavedFields(prev => prev.filter(f => f.id !== id));
     const { error } = await supabase
       .from('streamer_form_fields')
       .delete()
@@ -148,7 +221,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
     }
   };
 
-  const moveField = async (index: number, direction: 'up' | 'down') => {
+  const moveField = (index: number, direction: 'up' | 'down') => {
     const newFields = [...fields];
     const swapIndex = direction === 'up' ? index - 1 : index + 1;
     if (swapIndex < 0 || swapIndex >= newFields.length) return;
@@ -156,11 +229,6 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
     [newFields[index], newFields[swapIndex]] = [newFields[swapIndex], newFields[index]];
     const reordered = newFields.map((f, i) => ({ ...f, field_order: i }));
     setFields(reordered);
-
-    await Promise.all([
-      supabase.from('streamer_form_fields').update({ field_order: reordered[index].field_order }).eq('id', reordered[index].id),
-      supabase.from('streamer_form_fields').update({ field_order: reordered[swapIndex].field_order }).eq('id', reordered[swapIndex].id),
-    ]);
   };
 
   if (isLoading) {
@@ -224,9 +292,8 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                         <div className="space-y-1.5">
                           <Label className="text-xs">{t('formBuilder.label')}</Label>
                           <Input
-                            key={`label-${field.id}-${field.field_label}`}
-                            defaultValue={field.field_label}
-                            onBlur={(e) => { const val = e.target.value; void updateField(field.id, { field_label: val }); }}
+                            value={field.field_label}
+                            onChange={(e) => updateField(field.id, { field_label: e.target.value })}
                             className="h-9"
                           />
                         </div>
@@ -240,7 +307,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                               <Lock className="w-3 h-3 ml-auto shrink-0 opacity-50" />
                             </div>
                           ) : (
-                            <Select value={field.field_type} onValueChange={(value) => { void updateField(field.id, { field_type: value }); }}>
+                            <Select value={field.field_type} onValueChange={(value) => updateField(field.id, { field_type: value })}>
                               <SelectTrigger className="h-9">
                                 <SelectValue>
                                   {(() => {
@@ -271,9 +338,8 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                         <div className="space-y-1.5">
                           <Label className="text-xs">{t('formBuilder.placeholder')}</Label>
                           <Input
-                            key={`placeholder-${field.id}-${field.placeholder}`}
-                            defaultValue={field.placeholder || ''}
-                            onBlur={(e) => { const val = e.target.value; void updateField(field.id, { placeholder: val }); }}
+                            value={field.placeholder || ''}
+                            onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                             placeholder={t('formBuilder.placeholderHint')}
                             className="h-9"
                           />
@@ -284,7 +350,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                             <Switch
                               id={`required-${field.id}`}
                               checked={field.is_required}
-                              onCheckedChange={(checked) => { void updateField(field.id, { is_required: checked }); }}
+                              onCheckedChange={(checked) => updateField(field.id, { is_required: checked })}
                             />
                             <Label htmlFor={`required-${field.id}`} className="text-xs">{t('formBuilder.required')}</Label>
                           </div>
@@ -294,7 +360,7 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
                       <div className="flex items-center gap-2 pt-5 shrink-0">
                         <Switch
                           checked={field.is_enabled}
-                          onCheckedChange={(checked) => { void updateField(field.id, { is_enabled: checked }); }}
+                          onCheckedChange={(checked) => updateField(field.id, { is_enabled: checked })}
                         />
                         <Button
                           variant="ghost"
@@ -317,4 +383,4 @@ export function FormFieldBuilder({ streamerId }: FormFieldBuilderProps) {
       </Card>
     </div>
   );
-}
+});
