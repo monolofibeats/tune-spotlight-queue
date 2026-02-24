@@ -232,7 +232,7 @@ const StreamerSettings = () => {
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
-  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges;
 
   const triggerShake = useCallback(() => {
     setShakeKey(k => k + 1);
