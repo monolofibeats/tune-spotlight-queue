@@ -335,9 +335,19 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             )}
             {t('pageSettings.saveChanges')}
           </Button>
-          {anyUnsaved && (
-            <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
-          )}
+          <AnimatePresence>
+            {anyUnsaved && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary text-xs font-medium"
+              >
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Unsaved Changes
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         
         <div className="order-1 sm:order-2 sm:text-right">
