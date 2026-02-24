@@ -1342,6 +1342,44 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           {/* Submit Buttons - Stacked on mobile */}
           {(submissionsOpen || isAdmin) && (
             <div className="flex flex-col gap-2">
+              {/* Referral Code Input - only for paid submissions */}
+              {submissionPaid && !isAdmin && (
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Referral code"
+                      value={referralCode}
+                      onChange={(e) => {
+                        setReferralCode(e.target.value.toUpperCase());
+                        setReferralDiscount(null);
+                      }}
+                      className="h-9 text-xs pl-9 bg-background/50 font-mono tracking-wider"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 text-xs"
+                    disabled={!referralCode.trim() || isValidatingCode || referralDiscount !== null}
+                    onClick={() => validateReferralCode(referralCode)}
+                  >
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : referralDiscount ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                  </Button>
+                </div>
+              )}
+              {referralDiscount && submissionPaid && !isAdmin && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <Tag className="w-3 h-3 text-emerald-400" />
+                  <span className="text-[11px] text-emerald-300 font-medium">
+                    {referralDiscount}% discount applied! 
+                    <span className="text-muted-foreground line-through ml-2">€{submissionPrice.toFixed(2)}</span>
+                    <span className="text-emerald-200 font-bold ml-1">€{(submissionPrice * (1 - referralDiscount / 100)).toFixed(2)}</span>
+                  </span>
+                </div>
+              )}
+
               {/* Upload Progress Bar */}
               {isUploadingFile && (
                 <div className="space-y-1.5">
@@ -1382,7 +1420,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                 ) : submissionPaid && !isAdmin ? (
                   <>
                     <DollarSign className="w-4 h-4" />
-                    Submit (€{submissionPrice.toFixed(2)})
+                    {referralDiscount ? (
+                      <>Submit (€{(submissionPrice * (1 - referralDiscount / 100)).toFixed(2)})</>
+                    ) : (
+                      <>Submit (€{submissionPrice.toFixed(2)})</>
+                    )}
                   </>
                 ) : isAdmin && submissionPaid ? (
                   <>
