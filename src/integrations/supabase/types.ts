@@ -375,6 +375,56 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          discount_percent: number
+          expires_at: string | null
+          id: string
+          is_used: boolean
+          source: string
+          streamer_id: string | null
+          used_at: string | null
+          used_by_email: string | null
+          used_on_session_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean
+          source?: string
+          streamer_id?: string | null
+          used_at?: string | null
+          used_by_email?: string | null
+          used_on_session_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean
+          source?: string
+          streamer_id?: string | null
+          used_at?: string | null
+          used_by_email?: string | null
+          used_on_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_inquiries: {
         Row: {
           admin_notes: string | null

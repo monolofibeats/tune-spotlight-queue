@@ -1,9 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles, HelpCircle, ChevronRight, Zap } from 'lucide-react';
+import { Link2, ArrowDown, Headphones, ArrowRight, Sparkles, HelpCircle, ChevronRight, Zap, Copy, Check } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 function LinkIllustration() {
   return (
@@ -194,12 +196,59 @@ function LiveIllustration() {
   );
 }
 
+function generateReferralCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'TIP-';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export function HowItWorks() {
   const [showTip, setShowTip] = useState(false);
   const [tipExpanded, setTipExpanded] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const referralCreatedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInViewRef = useRef(false);
+
+  const handleTipExpand = useCallback(async () => {
+    setTipExpanded(true);
+    if (referralCreatedRef.current) return;
+    referralCreatedRef.current = true;
+
+    // Check localStorage to avoid duplicate codes per browser
+    const stored = localStorage.getItem('upstar_tip_referral');
+    if (stored) {
+      setReferralCode(stored);
+      return;
+    }
+
+    const code = generateReferralCode();
+    const { error } = await supabase.from('referral_codes').insert({
+      code,
+      discount_percent: 10,
+      source: 'homepage',
+      is_used: false,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    if (!error) {
+      setReferralCode(code);
+      localStorage.setItem('upstar_tip_referral', code);
+    }
+  }, []);
+
+  const copyReferralCode = () => {
+    if (!referralCode) return;
+    navigator.clipboard.writeText(referralCode);
+    setCodeCopied(true);
+    toast({ title: '10% discount code copied!', description: referralCode });
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
 
   const startTimer = useCallback(() => {
     if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
@@ -314,7 +363,7 @@ export function HowItWorks() {
                         style={{ zIndex: -1 }}
                       >
                         <motion.div
-                          onClick={(e) => { e.stopPropagation(); setTipExpanded(true); }}
+                          onClick={(e) => { e.stopPropagation(); handleTipExpand(); }}
                           className="cursor-pointer"
                           whileHover={{ scale: 1.05, x: 8 }}
                           whileTap={{ scale: 0.97 }}
@@ -373,6 +422,18 @@ export function HowItWorks() {
                     Boost Now
                     <ArrowRight className="w-3 h-3" />
                   </Link>
+                  {referralCode && (
+                    <div className="mt-2 pt-2 border-t border-emerald-500/20">
+                      <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                      >
+                        <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                        {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -388,7 +449,7 @@ export function HowItWorks() {
               exit={{ opacity: 0, y: -4 }}
               className="md:hidden mt-4 flex justify-end"
             >
-              <div onClick={() => setTipExpanded(!tipExpanded)} className="cursor-pointer">
+              <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
                   <Sparkles className="w-3 h-3 text-emerald-400" />
                   <p className="text-[11px] text-emerald-300/90 italic">
@@ -418,6 +479,18 @@ export function HowItWorks() {
                           Boost Now
                           <ArrowRight className="w-3 h-3" />
                         </Link>
+                        {referralCode && (
+                          <div className="mt-3 pt-2 border-t border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                            >
+                              <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                              {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}

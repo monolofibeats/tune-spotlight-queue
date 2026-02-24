@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2, Check } from 'lucide-react';
+import { Star, Send, Loader2, DollarSign, Zap, Shield, Ban, Upload, X, Music2, Check, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -140,6 +140,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
+  const [referralCode, setReferralCode] = useState('');
+  const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
   const [showPostSubmitOffer, setShowPostSubmitOffer] = useState(false);
   const [lastSubmittedSong, setLastSubmittedSong] = useState<{
@@ -724,9 +727,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       };
       localStorage.setItem('upstar_pending_paid_submission', JSON.stringify(pendingData));
       
+      const discountedAmount = referralDiscount 
+        ? submissionPrice * (1 - referralDiscount / 100)
+        : submissionPrice;
+
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
-          amount: submissionPrice,
+          amount: discountedAmount,
           songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
@@ -736,6 +743,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           audioFileUrl, // Pass the uploaded file path
           streamerSlug: streamerSlug || null,
           streamerId: streamerId || null,
+          referralCode: referralDiscount ? referralCode.trim().toUpperCase() : undefined,
         },
       });
 
@@ -765,10 +773,44 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     setAudioFile(null);
     setUploadedAudioUrl(null);
     setDynamicValues({});
+    setReferralCode('');
+    setReferralDiscount(null);
     uploadedAudioUrlRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const validateReferralCode = async (code: string) => {
+    if (!code.trim()) {
+      setReferralDiscount(null);
+      return;
+    }
+    setIsValidatingCode(true);
+    try {
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('discount_percent, is_used, expires_at')
+        .eq('code', code.trim().toUpperCase())
+        .maybeSingle();
+
+      if (error || !data) {
+        setReferralDiscount(null);
+        toast({ title: 'Invalid code', description: 'This referral code does not exist.', variant: 'destructive' });
+      } else if (data.is_used) {
+        setReferralDiscount(null);
+        toast({ title: 'Code already used', description: 'This referral code has already been redeemed.', variant: 'destructive' });
+      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setReferralDiscount(null);
+        toast({ title: 'Code expired', description: 'This referral code has expired.', variant: 'destructive' });
+      } else {
+        setReferralDiscount(data.discount_percent);
+        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+      }
+    } catch {
+      setReferralDiscount(null);
+    }
+    setIsValidatingCode(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1300,6 +1342,44 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           {/* Submit Buttons - Stacked on mobile */}
           {(submissionsOpen || isAdmin) && (
             <div className="flex flex-col gap-2">
+              {/* Referral Code Input - only for paid submissions */}
+              {submissionPaid && !isAdmin && (
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Referral code"
+                      value={referralCode}
+                      onChange={(e) => {
+                        setReferralCode(e.target.value.toUpperCase());
+                        setReferralDiscount(null);
+                      }}
+                      className="h-9 text-xs pl-9 bg-background/50 font-mono tracking-wider"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-9 text-xs"
+                    disabled={!referralCode.trim() || isValidatingCode || referralDiscount !== null}
+                    onClick={() => validateReferralCode(referralCode)}
+                  >
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : referralDiscount ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                  </Button>
+                </div>
+              )}
+              {referralDiscount && submissionPaid && !isAdmin && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <Tag className="w-3 h-3 text-emerald-400" />
+                  <span className="text-[11px] text-emerald-300 font-medium">
+                    {referralDiscount}% discount applied! 
+                    <span className="text-muted-foreground line-through ml-2">€{submissionPrice.toFixed(2)}</span>
+                    <span className="text-emerald-200 font-bold ml-1">€{(submissionPrice * (1 - referralDiscount / 100)).toFixed(2)}</span>
+                  </span>
+                </div>
+              )}
+
               {/* Upload Progress Bar */}
               {isUploadingFile && (
                 <div className="space-y-1.5">
@@ -1340,7 +1420,11 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                 ) : submissionPaid && !isAdmin ? (
                   <>
                     <DollarSign className="w-4 h-4" />
-                    Submit (€{submissionPrice.toFixed(2)})
+                    {referralDiscount ? (
+                      <>Submit (€{(submissionPrice * (1 - referralDiscount / 100)).toFixed(2)})</>
+                    ) : (
+                      <>Submit (€{submissionPrice.toFixed(2)})</>
+                    )}
                   </>
                 ) : isAdmin && submissionPaid ? (
                   <>

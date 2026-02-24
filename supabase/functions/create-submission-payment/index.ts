@@ -11,7 +11,7 @@ const corsHeaders = {
 
 // Input validation schema
 const requestSchema = z.object({
-  amount: z.number().min(0.5).max(100),
+  amount: z.number().min(0.01).max(100),
   songUrl: z.string().max(2000),
   artistName: z.string().max(200).optional().default('Unknown Artist'),
   songTitle: z.string().max(200).optional().default('Untitled'),
@@ -21,6 +21,7 @@ const requestSchema = z.object({
   audioFileUrl: z.string().max(500).optional().nullable(),
   streamerSlug: z.string().max(100).optional().nullable(),
   streamerId: z.string().max(100).optional().nullable(),
+  referralCode: z.string().max(20).optional().nullable(),
 });
 
 const logStep = (step: string, details?: unknown) => {
@@ -58,8 +59,8 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl, streamerSlug, streamerId } = validationResult.data;
-    logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl });
+    const { amount, songUrl, artistName, songTitle, message, email, platform, audioFileUrl, streamerSlug, streamerId, referralCode } = validationResult.data;
+    logStep("Input validated", { amount, platform, hasAudioFile: !!audioFileUrl, hasReferral: !!referralCode });
 
     // Check if submission pricing is active
     // Prefer streamer-specific config, fall back to global (streamer_id IS NULL)
@@ -80,12 +81,42 @@ serve(async (req) => {
       throw new Error('Paid submissions are not currently active');
     }
 
-    // Validate amount is within configured range
+    // Validate amount is within configured range (allow discounted amounts below min)
     const minAmount = pricingConfig.min_amount_cents / 100;
     const maxAmount = pricingConfig.max_amount_cents / 100;
     
-    if (amount < minAmount || amount > maxAmount) {
+    // If a referral code is provided, allow amounts down to 10% below min
+    const effectiveMin = referralCode ? minAmount * 0.9 : minAmount;
+    
+    if (amount < effectiveMin || amount > maxAmount) {
       throw new Error(`Amount must be between €${minAmount.toFixed(2)} and €${maxAmount.toFixed(2)}`);
+    }
+
+    // Validate referral code server-side
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    let validatedReferralCode: string | null = null;
+    if (referralCode) {
+      const { data: codeData, error: codeError } = await serviceClient
+        .from('referral_codes')
+        .select('id, code, discount_percent, is_used, expires_at')
+        .eq('code', referralCode)
+        .maybeSingle();
+
+      if (codeError || !codeData) {
+        throw new Error('Invalid referral code');
+      }
+      if (codeData.is_used) {
+        throw new Error('Referral code has already been used');
+      }
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        throw new Error('Referral code has expired');
+      }
+      validatedReferralCode = codeData.code;
+      logStep("Referral code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
     }
 
     // Authenticate user (optional - allow guest checkout)
@@ -153,8 +184,18 @@ serve(async (req) => {
         audio_file_url: audioFileUrl || "",
         audioFileUrl: audioFileUrl || "",
         streamer_id: streamerId || "",
+        referral_code: validatedReferralCode || "",
       },
     });
+
+    // Mark referral code as used after session creation
+    if (validatedReferralCode) {
+      await serviceClient
+        .from('referral_codes')
+        .update({ is_used: true, used_by_email: customerEmail || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .eq('code', validatedReferralCode);
+      logStep("Referral code marked as used", { code: validatedReferralCode });
+    }
 
     logStep("Checkout session created", { sessionId: session.id });
 
