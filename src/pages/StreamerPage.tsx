@@ -38,8 +38,9 @@ function StreamerPageContent() {
 
   // Handle ?outbid= query param from email magic links
   const outbidSubmissionId = searchParams.get('outbid');
-  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmount: string } | null>(null);
+  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmountCents: number; submissionId: string } | null>(null);
   const [showOutbidBanner, setShowOutbidBanner] = useState(false);
+  const [showOutbidDialog, setShowOutbidDialog] = useState(false);
 
   useEffect(() => {
     if (!outbidSubmissionId) return;
