@@ -449,7 +449,7 @@ export function HowItWorks() {
               exit={{ opacity: 0, y: -4 }}
               className="md:hidden mt-4 flex justify-end"
             >
-              <div onClick={() => setTipExpanded(!tipExpanded)} className="cursor-pointer">
+              <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
                   <Sparkles className="w-3 h-3 text-emerald-400" />
                   <p className="text-[11px] text-emerald-300/90 italic">
