@@ -597,8 +597,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
         (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
-        description: t('submission.needIdentifier') || "Please enter at least an artist name or song title.",
+        title: "Missing information",
+        description: "Please enter at least an artist name or song title.",
         variant: "destructive",
       });
       return;
@@ -606,7 +606,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
     if ((requireEmail && !email.trim()) || (requireMessage && !message.trim())) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
+        title: "Missing information",
         description: "Please fill out the required fields.",
         variant: "destructive",
       });
@@ -616,7 +616,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     // Either song URL or audio file is required
     if ((showSongUrl && !songUrl && !audioFile) || (!showSongUrl && !audioFile)) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
+        title: "Missing information",
         description: showSongUrl
           ? "Please enter a song link or upload an audio file."
           : "Please upload an audio file.",
