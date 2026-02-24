@@ -421,7 +421,7 @@ export function SpotBiddingDialog({
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                     <Tag className="w-3 h-3 text-emerald-400" />
                     <span className="text-[11px] text-emerald-300 font-medium">
-                      {discountPercent}% discount will be applied at checkout
+                      {t('bidding.discountApplied').replace('{percent}', String(discountPercent))}
                     </span>
                   </div>
                 )}
