@@ -335,26 +335,37 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             )}
             {t('pageSettings.saveChanges')}
           </Button>
+        </div>
+        
+        <div className="flex items-center gap-3 order-1 sm:order-2">
           <AnimatePresence>
             {anyUnsaved && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary text-xs font-medium"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-primary/30 shadow-md backdrop-blur-md"
               >
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Unsaved Changes
+                <AlertTriangle className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-xs font-medium whitespace-nowrap">Unsaved changes</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDiscard}
+                  className="gap-1 text-muted-foreground hover:text-foreground h-7 px-2 text-xs"
+                >
+                  <Undo2 className="w-3 h-3" />
+                  Discard
+                </Button>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-        
-        <div className="order-1 sm:order-2 sm:text-right">
-          <h2 className="text-xl font-semibold">{t('pageSettings.customizePage')}</h2>
-          <p className="text-muted-foreground text-sm">
-            upstar.gg/{streamer.slug}
-          </p>
+          <div className="sm:text-right">
+            <h2 className="text-xl font-semibold">{t('pageSettings.customizePage')}</h2>
+            <p className="text-muted-foreground text-sm">
+              upstar.gg/{streamer.slug}
+            </p>
+          </div>
         </div>
       </div>
 
