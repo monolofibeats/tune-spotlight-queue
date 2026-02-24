@@ -1534,6 +1534,10 @@ export type Database = {
         Args: { _streamer_id: string; _user_id?: string }
         Returns: boolean
       }
+      generate_streamer_referral_codes: {
+        Args: { _streamer_id: string }
+        Returns: undefined
+      }
       get_team_role: {
         Args: { _streamer_id: string; _user_id: string }
         Returns: string
