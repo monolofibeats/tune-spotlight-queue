@@ -443,7 +443,10 @@ const StreamerSettings = () => {
           </motion.div>
 
           <Tabs value={activeTab} onValueChange={(tab) => {
-              if (anyUnsaved) triggerShake();
+              if (anyUnsaved) {
+                triggerShake();
+                return; // Block tab switch
+              }
               setActiveTab(tab);
             }} className="space-y-6">
             <ScrollArea className="w-full">
