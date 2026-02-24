@@ -122,6 +122,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setCustomCss(s.custom_css || '');
   }, []);
 
+  // Re-sync when the parent passes a different streamer (e.g. navigating between dashboards)
+  useEffect(() => {
+    setStreamer(initialStreamer as ExtendedStreamer);
+  }, [initialStreamer]);
+
   useEffect(() => {
     syncFromStreamer(streamer);
   }, [streamer, syncFromStreamer]);
