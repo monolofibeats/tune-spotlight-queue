@@ -13,6 +13,7 @@ const requestSchema = z.object({
   submissionId: z.string().uuid(),
   bidAmount: z.number().min(0.5).max(1000),
   email: z.string().email().max(255),
+  streamerSlug: z.string().max(100).optional(),
 });
 
 const logStep = (step: string, details?: unknown) => {
@@ -54,7 +55,7 @@ serve(async (req) => {
       throw new Error(`Invalid input: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
     }
     
-    const { submissionId, bidAmount, email } = validationResult.data;
+    const { submissionId, bidAmount, email, streamerSlug } = validationResult.data;
     logStep("Input validated", { submissionId, bidAmount });
 
     // Get user if authenticated
@@ -102,7 +103,14 @@ serve(async (req) => {
       }
     }
 
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
+    const siteUrl = Deno.env.get("SITE_URL") || req.headers.get("origin") || "https://upstargg.lovable.app";
+    const slug = streamerSlug || '';
+    const successUrl = slug
+      ? `${siteUrl}/${slug}?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`
+      : `${siteUrl}/user/dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = slug
+      ? `${siteUrl}/${slug}?bid_payment=cancelled`
+      : `${siteUrl}/user/dashboard?bid_payment=cancelled`;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -121,8 +129,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${origin}/my-dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/my-dashboard?bid_payment=cancelled`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         type: "bid",
         submission_id: submissionId,
@@ -130,6 +138,7 @@ serve(async (req) => {
         email: customerEmail,
         bid_amount_cents: bidAmountCents.toString(),
         streamer_id: submission.streamer_id || "",
+        streamer_slug: slug,
       },
     });
 
