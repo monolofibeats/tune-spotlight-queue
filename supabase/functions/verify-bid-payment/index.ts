@@ -142,39 +142,63 @@ serve(async (req) => {
       }
     }
 
-    // Get bid increment config (prefer global, fall back to first available)
+    // Get bid increment config for this streamer (fall back to global)
+    const streamerId = metadata.streamer_id;
     const { data: bidConfigs } = await supabaseAdmin
       .from('pricing_config')
       .select('*')
       .eq('config_type', 'bid_increment');
-    const bidConfig = bidConfigs?.find(r => r.streamer_id === null) ?? bidConfigs?.[0];
+    const bidConfig = bidConfigs?.find(r => r.streamer_id === streamerId) 
+      ?? bidConfigs?.find(r => r.streamer_id === null) 
+      ?? bidConfigs?.[0];
 
     const incrementPercent = bidConfig?.min_amount_cents || 10;
-
-    const { data: competingBids } = await supabaseAdmin
-      .from('submission_bids')
-      .select('*, submissions!inner(status, song_title)')
-      .neq('submission_id', submissionId)
-      .order('total_paid_cents', { ascending: false })
-      .limit(100);
-
     const currentTotal = (existingBid?.total_paid_cents || 0) + bidAmountCents;
-    
-    for (const bid of competingBids || []) {
-      if (bid.total_paid_cents < currentTotal && bid.submissions?.status === 'pending') {
-        const suggestedBid = Math.ceil(currentTotal * (1 + incrementPercent / 100));
-        
-        await supabaseAdmin
-          .from('bid_notifications')
-          .insert({
-            submission_id: bid.submission_id,
-            email: bid.email,
-            user_id: bid.user_id || null,
-            notification_type: 'outbid',
-            offer_amount_cents: suggestedBid,
+
+    // Find other paid submissions in the SAME streamer's queue that this bid just overtook
+    if (streamerId) {
+      // Get all other pending submissions for this streamer that have bids
+      const { data: competingBids } = await supabaseAdmin
+        .from('submission_bids')
+        .select('*, submissions!inner(status, song_title, streamer_id, boost_amount)')
+        .neq('submission_id', submissionId)
+        .order('total_paid_cents', { ascending: false });
+
+      for (const bid of competingBids || []) {
+        // Only notify bidders in the same streamer's queue who are now below us
+        if (
+          bid.submissions?.streamer_id === streamerId &&
+          bid.submissions?.status === 'pending' &&
+          bid.total_paid_cents > 0 &&
+          bid.total_paid_cents < currentTotal
+        ) {
+          // Suggest a bid that's incrementPercent% above the current leader
+          const suggestedBid = Math.ceil(currentTotal * (1 + incrementPercent / 100));
+
+          // Don't notify the same person who just bid (no self-notifications)
+          const currentEmail = metadata.email;
+          if (bid.email === currentEmail) {
+            logStep("Skipping self-notification", { email: bid.email });
+            continue;
+          }
+
+          await supabaseAdmin
+            .from('bid_notifications')
+            .insert({
+              submission_id: bid.submission_id,
+              email: bid.email,
+              user_id: bid.user_id || null,
+              notification_type: 'outbid',
+              offer_amount_cents: suggestedBid,
+            });
+
+          logStep("Outbid notification created", { 
+            email: bid.email, 
+            displacedTotal: bid.total_paid_cents, 
+            newLeaderTotal: currentTotal,
+            suggestedBid 
           });
-        
-        logStep("Outbid notification created", { email: bid.email, userId: bid.user_id, suggestedBid });
+        }
       }
     }
 
