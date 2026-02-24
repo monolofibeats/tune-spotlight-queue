@@ -368,25 +368,6 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         </div>
       )}
 
-      <Button
-        onClick={handleSave}
-        disabled={isSaving || skipLine.min < 2.5}
-        className="w-full"
-        size="lg"
-      >
-        {isSaving ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {t('pricing.saving')}
-          </>
-        ) : (
-          <>
-            <Check className="w-4 h-4" />
-            {t('pricing.saveAll')}
-          </>
-        )}
-      </Button>
-
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
@@ -406,4 +387,4 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </p>
     </div>
   );
-}
+});
