@@ -83,7 +83,7 @@ export function OutbidCounterDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] rounded-xl p-4 sm:p-6">
+      <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto rounded-xl p-4 sm:p-6">
         <DialogHeader className="space-y-1">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <TrendingUp className="w-5 h-5 text-primary shrink-0" />
