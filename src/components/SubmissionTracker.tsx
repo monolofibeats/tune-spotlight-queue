@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Music2, Zap, Clock, CheckCircle2, SkipForward, Trash2, X } from 'lucide-react';
+import { Music2, Zap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SpotBiddingDialog } from './SpotBiddingDialog';
@@ -10,28 +10,6 @@ interface SubmissionTrackerProps {
   submissions: TrackedSubmission[];
   onDismiss?: (trackedAt: number) => void;
 }
-
-const doneConfig = {
-  reviewed: {
-    label: 'Reviewed',
-    icon: CheckCircle2,
-    className: 'text-green-500',
-    badgeVariant: 'default' as const,
-    badgeClass: 'bg-green-500/20 text-green-400 border-green-500/30',
-  },
-  skipped: {
-    label: 'Skipped',
-    icon: SkipForward,
-    className: 'text-yellow-500',
-    badgeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  },
-  deleted: {
-    label: 'Removed',
-    icon: Trash2,
-    className: 'text-red-400',
-    badgeClass: 'bg-red-500/20 text-red-400 border-red-500/30',
-  },
-};
 
 export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerProps) {
   const [biddingSub, setBiddingSub] = useState<TrackedSubmission | null>(null);
