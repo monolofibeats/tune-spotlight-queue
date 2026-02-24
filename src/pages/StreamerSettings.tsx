@@ -192,7 +192,85 @@ const StreamerSettings = () => {
     fetchStreamer();
   }, [user, authLoading, navigate]);
 
-  const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
+  // Detect unsaved changes across all settings fields
+  const hasUnsavedChanges = useMemo(() => {
+    if (!streamer) return false;
+    const s = streamer;
+    return (
+      displayName !== (s.display_name || '') ||
+      bio !== (s.bio || '') ||
+      avatarUrl !== (s.avatar_url || '') ||
+      bannerUrl !== (s.banner_url || '') ||
+      heroTitle !== (s.hero_title || '') ||
+      heroSubtitle !== (s.hero_subtitle || '') ||
+      welcomeMessage !== (s.welcome_message || '') ||
+      primaryColor !== (s.primary_color || '45 90% 50%') ||
+      accentColor !== (s.accent_color || '45 90% 50%') ||
+      fontFamily !== (s.font_family || 'system') ||
+      buttonStyle !== (s.button_style || 'rounded') ||
+      backgroundType !== (s.background_type || 'solid') ||
+      backgroundImageUrl !== (s.background_image_url || '') ||
+      backgroundGradient !== (s.background_gradient || '') ||
+      animationStyle !== (s.animation_style || 'subtle') ||
+      cardStyle !== (s.card_style || 'glass') ||
+      bannerEnabled !== (s.banner_enabled || false) ||
+      bannerText !== (s.banner_text || '') ||
+      bannerLink !== (s.banner_link || '') ||
+      bannerColor !== (s.banner_color || '45 90% 50%') ||
+      showHowItWorks !== (s.show_how_it_works ?? true) ||
+      showStreamEmbed !== (s.show_stream_embed ?? true) ||
+      customCss !== (s.custom_css || '') ||
+      twitchUrl !== (s.twitch_url || '') ||
+      youtubeUrl !== (s.youtube_url || '') ||
+      tiktokUrl !== (s.tiktok_url || '') ||
+      instagramUrl !== (s.instagram_url || '') ||
+      twitterUrl !== (s.twitter_url || '') ||
+      pageLanguage !== (s.page_language || 'de')
+    );
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
+
+  const pricingHasChanges = pricingRef.current?.hasChanges ?? false;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+
+  const triggerShake = useCallback(() => {
+    setShakeKey(k => k + 1);
+  }, []);
+
+  const handleDiscard = useCallback(() => {
+    if (!streamer) return;
+    const s = streamer as ExtendedStreamer;
+    setDisplayName(s.display_name || '');
+    setBio(s.bio || '');
+    setAvatarUrl(s.avatar_url || '');
+    setBannerUrl(s.banner_url || '');
+    setHeroTitle(s.hero_title || '');
+    setHeroSubtitle(s.hero_subtitle || '');
+    setWelcomeMessage(s.welcome_message || '');
+    setPrimaryColor(s.primary_color || '45 90% 50%');
+    setAccentColor(s.accent_color || '45 90% 50%');
+    setFontFamily(s.font_family || 'system');
+    setButtonStyle(s.button_style || 'rounded');
+    setBackgroundType(s.background_type || 'solid');
+    setBackgroundImageUrl(s.background_image_url || '');
+    setBackgroundGradient(s.background_gradient || '');
+    setAnimationStyle(s.animation_style || 'subtle');
+    setCardStyle(s.card_style || 'glass');
+    setBannerEnabled(s.banner_enabled || false);
+    setBannerText(s.banner_text || '');
+    setBannerLink(s.banner_link || '');
+    setBannerColor(s.banner_color || '45 90% 50%');
+    setShowHowItWorks(s.show_how_it_works ?? true);
+    setShowStreamEmbed(s.show_stream_embed ?? true);
+    setCustomCss(s.custom_css || '');
+    setTwitchUrl(s.twitch_url || '');
+    setYoutubeUrl(s.youtube_url || '');
+    setTiktokUrl(s.tiktok_url || '');
+    setInstagramUrl(s.instagram_url || '');
+    setTwitterUrl(s.twitter_url || '');
+    setPageLanguage(s.page_language || 'de');
+    toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
+  }, [streamer]);
+
     if (!streamer || oldValue === newValue) return;
     
     try {
