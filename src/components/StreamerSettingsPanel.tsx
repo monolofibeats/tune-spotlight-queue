@@ -58,9 +58,10 @@ interface StreamerSettingsPanelProps {
   onUpdate: (streamer: Streamer) => void;
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
+  onUnsavedChange?: (hasUnsaved: boolean) => void;
 }
 
-export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange }: StreamerSettingsPanelProps) {
+export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange }: StreamerSettingsPanelProps) {
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
@@ -160,6 +161,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
+
+  useEffect(() => {
+    onUnsavedChange?.(anyUnsaved);
+  }, [anyUnsaved, onUnsavedChange]);
 
   const triggerShake = useCallback(() => {
     setIsShaking(true);

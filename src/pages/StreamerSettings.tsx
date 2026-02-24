@@ -37,7 +37,7 @@ import {
   PricingSettings,
   LanguageSettings,
 } from '@/components/streamer-settings';
-import type { PricingSettingsHandle } from '@/components/streamer-settings';
+import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
@@ -65,8 +65,10 @@ const StreamerSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const pricingRef = useRef<PricingSettingsHandle>(null);
+  const formFieldRef = useRef<FormFieldBuilderHandle>(null);
   const [shakeKey, setShakeKey] = useState(0);
   const [pricingHasChanges, setPricingHasChanges] = useState(false);
+  const [formFieldHasChanges, setFormFieldHasChanges] = useState(false);
 
   // Form state - Profile
   const [displayName, setDisplayName] = useState('');
@@ -230,7 +232,7 @@ const StreamerSettings = () => {
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
-  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges;
 
   const triggerShake = useCallback(() => {
     setShakeKey(k => k + 1);
@@ -268,6 +270,8 @@ const StreamerSettings = () => {
     setInstagramUrl(s.instagram_url || '');
     setTwitterUrl(s.twitter_url || '');
     setPageLanguage(s.page_language || 'de');
+    pricingRef.current?.discard();
+    formFieldRef.current?.discard();
     toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
   }, [streamer]);
 
@@ -300,6 +304,15 @@ const StreamerSettings = () => {
       }
     } catch (e) {
       console.error('Pricing save error:', e);
+    }
+
+    // Save form fields if changed
+    try {
+      if (formFieldRef.current?.hasChanges) {
+        await formFieldRef.current.save();
+      }
+    } catch (e) {
+      console.error('Form fields save error:', e);
     }
 
     // Log text content changes for admin review
@@ -607,7 +620,7 @@ const StreamerSettings = () => {
 
             {/* Form Builder Tab */}
             <TabsContent value="form" className="space-y-6">
-              <FormFieldBuilder streamerId={streamer.id} />
+              <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
             {/* Design Tab */}

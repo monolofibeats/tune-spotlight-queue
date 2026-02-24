@@ -130,7 +130,11 @@ const StreamerDashboard = () => {
   const [phoneOptimized, setPhoneOptimized] = useState(true);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
+  const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
+  const [dashboardShaking, setDashboardShaking] = useState(false);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
+
+  const [dashboardActiveTab, setDashboardActiveTab] = useState('submissions');
 
   // View options for header/title visibility
   const [viewOptions, setViewOptions] = useState<DashboardViewOptions>({
@@ -907,7 +911,18 @@ const StreamerDashboard = () => {
               </motion.div>
             )}
 
-            <Tabs defaultValue="submissions" className="space-y-6">
+            <motion.div
+              animate={dashboardShaking ? { x: [0, -4, 4, -3, 3, -1, 1, 0] } : { x: 0 }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+            >
+            <Tabs value={dashboardActiveTab} onValueChange={(tab) => {
+              if (settingsHasUnsaved && dashboardActiveTab === 'settings') {
+                setDashboardShaking(true);
+                setTimeout(() => setDashboardShaking(false), 400);
+                return;
+              }
+              setDashboardActiveTab(tab);
+            }} className="space-y-6">
               <TabsList className="glass p-1 rounded-xl">
                 <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
                   <Music className="w-4 h-4" />
@@ -952,10 +967,11 @@ const StreamerDashboard = () => {
 
               {canEdit && (
                 <TabsContent value="settings">
-                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} />
+                  <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
                 </TabsContent>
               )}
             </Tabs>
+            </motion.div>
           </div>
         </main>
 
