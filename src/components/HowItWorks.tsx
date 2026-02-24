@@ -499,8 +499,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                 <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
                   <div className={`inline-flex items-center gap-1.5 ${tipExpanded ? 'rounded-t-lg border-b-0' : 'rounded-lg'} border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-0.5' : 'px-3.5 py-1.5'}`}>
                     <Sparkles className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} text-emerald-400`} />
-                    <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
-                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> wanna know a secret? 🤫
+                     <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
+                       <span className="text-emerald-200 font-semibold not-italic">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')} 🤫
                     </p>
                     <div className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0`}>
                       <HelpCircle className={`${compact ? 'w-1.5 h-1.5' : 'w-2.5 h-2.5'} text-emerald-300`} />
