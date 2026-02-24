@@ -344,7 +344,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             </ScrollArea>
 
             <TabsContent value="form" className="space-y-6">
-              <FormFieldBuilder streamerId={streamer.id} />
+              <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
             <TabsContent value="content" className="space-y-6">
