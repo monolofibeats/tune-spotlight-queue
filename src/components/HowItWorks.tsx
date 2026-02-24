@@ -479,6 +479,18 @@ export function HowItWorks() {
                           Boost Now
                           <ArrowRight className="w-3 h-3" />
                         </Link>
+                        {referralCode && (
+                          <div className="mt-3 pt-2 border-t border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                            >
+                              <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                              {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
