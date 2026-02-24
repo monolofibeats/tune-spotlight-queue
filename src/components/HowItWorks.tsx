@@ -381,8 +381,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                      {compact && (
                        <span className="text-[7px] sm:text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
-                     <h3 className={`font-display font-bold ${compact ? 'text-[8px] sm:text-[11px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                     <p className={`text-muted-foreground ${compact ? 'text-[7px] sm:text-[10px] leading-tight line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                     <h3 className={`font-display font-bold ${compact ? 'text-[8px] sm:text-[10px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[6px] sm:text-[9px] leading-snug' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
