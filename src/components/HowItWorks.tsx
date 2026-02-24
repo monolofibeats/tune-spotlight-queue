@@ -522,7 +522,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                             to="/browse"
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 ${compact ? 'text-[9px]' : 'text-[11px]'} font-semibold hover:bg-emerald-500/30 transition-colors`}
                           >
-                            Boost Now
+                            {t('howItWorks.tip.boostNow')}
                             <ArrowRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                           </Link>
                           {referralCode && (
