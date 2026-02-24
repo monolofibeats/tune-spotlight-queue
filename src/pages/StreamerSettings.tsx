@@ -782,18 +782,10 @@ const StreamerSettings = () => {
       <AnimatePresence>
         {anyUnsaved && (
           <motion.div
-            key={`unsaved-bar-${shakeKey}`}
             initial={{ y: 100, opacity: 0 }}
-            animate={{ 
-              y: 0, 
-              opacity: 1,
-              x: shakeKey > 0 ? [0, -6, 6, -4, 4, -2, 2, 0] : 0,
-            }}
+            animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            transition={{ 
-              y: { type: 'spring', stiffness: 400, damping: 30 },
-              x: { duration: 0.4, ease: 'easeInOut' },
-            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
           >
             <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/30 shadow-lg shadow-primary/10 backdrop-blur-md">
