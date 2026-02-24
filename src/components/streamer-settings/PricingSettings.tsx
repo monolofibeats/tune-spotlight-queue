@@ -47,9 +47,10 @@ export interface PricingSettingsHandle {
 
 interface PricingSettingsProps {
   streamerId: string;
+  onChangeStatus?: (hasChanges: boolean) => void;
 }
 
-export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettingsProps>(function PricingSettings({ streamerId }, ref) {
+export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettingsProps>(function PricingSettings({ streamerId, onChangeStatus }, ref) {
   const { t } = useLanguage();
   const [configs, setConfigs] = useState<Record<string, PricingConfig>>({});
   const [isLoading, setIsLoading] = useState(true);
