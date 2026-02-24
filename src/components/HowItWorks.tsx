@@ -417,8 +417,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
             })}
           </div>
 
-          {/* Expanded tip - only on homepage */}
-          {!compact && (
+          {/* Expanded tip */}
+          {(
             <AnimatePresence>
               {tipExpanded && showTip && (
                 <motion.div
