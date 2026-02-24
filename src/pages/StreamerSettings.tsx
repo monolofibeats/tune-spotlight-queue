@@ -288,10 +288,19 @@ const StreamerSettings = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveAll = async () => {
     if (!streamer) return;
 
     setIsSaving(true);
+
+    // Save pricing settings if they have changes
+    try {
+      if (pricingRef.current?.hasChanges) {
+        await pricingRef.current.save();
+      }
+    } catch (e) {
+      console.error('Pricing save error:', e);
+    }
 
     // Log text content changes for admin review
     if (heroTitle !== streamer.hero_title) {
@@ -311,18 +320,13 @@ const StreamerSettings = () => {
       const { data, error } = await supabase
         .from('streamers')
         .update({
-          // Profile
           display_name: displayName,
           bio: bio || null,
           avatar_url: avatarUrl || null,
           banner_url: bannerUrl || null,
-          
-          // Content
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
           welcome_message: welcomeMessage || null,
-          
-          // Design
           primary_color: primaryColor || '45 90% 50%',
           accent_color: accentColor || '45 90% 50%',
           font_family: fontFamily,
@@ -332,26 +336,18 @@ const StreamerSettings = () => {
           background_gradient: backgroundGradient || null,
           animation_style: animationStyle,
           card_style: cardStyle,
-          
-          // Banner
           banner_enabled: bannerEnabled,
           banner_text: bannerText || null,
           banner_link: bannerLink || null,
           banner_color: bannerColor,
-          
-          // Layout
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
-          
-          // Social
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
           instagram_url: instagramUrl || null,
           twitter_url: twitterUrl || null,
-          
-          // Language
           page_language: pageLanguage,
         })
         .eq('id', streamer.id)
