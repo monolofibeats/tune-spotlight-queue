@@ -133,6 +133,17 @@ serve(async (req) => {
 
     logStep("Submission created", { submissionId: submission.id });
 
+    // Soft-delete the original free submission if this is an upgrade
+    const originalSubId = metadata.original_submission_id;
+    if (originalSubId) {
+      const { error: deleteErr } = await supabase
+        .from("submissions")
+        .update({ status: "deleted" })
+        .eq("id", originalSubId)
+        .eq("status", "pending");
+      logStep("Original submission soft-deleted", { originalSubId, error: deleteErr?.message || null });
+    }
+
     // Record earnings for the streamer
     if (metadata.streamer_id) {
       try {
