@@ -325,17 +325,24 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
-            {steps.map((item, index) => (
+        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
+            {steps.map((item, index) => {
+              // Compact mobile: alternate offsets & slight rotations for visual variety
+              const compactMobileStyles = compact ? {
+                x: index === 0 ? -6 : index === 1 ? 6 : -4,
+                rotate: index === 0 ? -1.2 : index === 1 ? 1 : -0.8,
+              } : {};
+
+              return (
               <div key={item.step} className="relative" style={{ zIndex: index === 2 ? 10 : 1 }}>
                 <motion.div
-                  initial={{ opacity: 0, y: compact ? 8 : 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: compact ? 10 : 24, ...(compact ? { x: 0, rotate: 0 } : {}) }}
+                  whileInView={{ opacity: 1, y: 0, ...compactMobileStyles }}
                   viewport={{ once: true, margin: '-20px' }}
                   transition={{ delay: index * 0.1, duration: 0.4 }}
-                  whileHover={compact ? { y: -2 } : { y: -4 }}
+                  whileHover={compact ? { y: -2, scale: 1.02 } : { y: -4 }}
                   onClick={compact ? undefined : () => window.location.href = '/browse'}
-                  className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? '' : 'cursor-pointer rounded-2xl'}`}
+                  className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? 'sm:!transform-none sm:!rotate-0' : 'cursor-pointer rounded-2xl'}`}
                 >
                   {!compact && (
                     <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
@@ -367,8 +374,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   />
                 </motion.div>
 
-                {/* Desktop PS tip - only on homepage */}
-                {!compact && index === 2 && !tipExpanded && (
+                {/* Desktop PS tip */}
+                {index === 2 && !tipExpanded && (
                   <AnimatePresence>
                     {showTip && (
                       <motion.div
@@ -376,7 +383,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className="hidden md:block absolute -top-8 -right-6"
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-8 -right-6`}
                         style={{ zIndex: -1 }}
                       >
                         <motion.div
@@ -389,7 +396,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         >
                           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
                             <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
-                            <p className="text-[11px] text-emerald-300/90 font-medium whitespace-nowrap">
+                            <p className={`text-emerald-300/90 font-medium whitespace-nowrap ${compact ? 'text-[10px]' : 'text-[11px]'}`}>
                               <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret?
                             </p>
                             <motion.div 
@@ -406,11 +413,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   </AnimatePresence>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Expanded tip - only on homepage */}
-          {!compact && (
+          {/* Expanded tip */}
+          {(
             <AnimatePresence>
               {tipExpanded && showTip && (
                 <motion.div
@@ -418,7 +426,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className="hidden md:block absolute top-0 left-full ml-6"
+                  className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-0 left-full ml-6`}
                   style={{ width: 210 }}
                 >
                   <div className="p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 flex flex-col justify-center">
@@ -459,15 +467,15 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           )}
         </div>
 
-        {/* Mobile PS tip - only on homepage */}
-        {!compact && (
+        {/* Mobile PS tip */}
+        {(
           <AnimatePresence>
             {showTip && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className="md:hidden mt-4 flex justify-end"
+                className={`${compact ? 'sm:hidden' : 'md:hidden'} mt-4 flex justify-end`}
               >
                 <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
