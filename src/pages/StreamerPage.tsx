@@ -1,8 +1,11 @@
-import { useParams, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { useParams, Navigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Sparkles, AlertCircle, TrendingUp, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
-import { StreamSessionProvider } from '@/hooks/useStreamSession';
+import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { StreamerThemeProvider } from '@/components/StreamerThemeProvider';
 import { StreamerAnnouncementBanner } from '@/components/StreamerAnnouncementBanner';
 import { Header } from '@/components/Header';
@@ -17,19 +20,62 @@ import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
-import { useStreamSession } from '@/hooks/useStreamSession';
+
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
 
 function StreamerPageContent() {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { streamer, isLoading, error } = useStreamer();
   const { t } = useLanguage();
   const { currentSubmissions, trackSubmission, clearSubmission } = useTrackedSubmission(slug || null);
 
   // useStreamSession is provided by StreamSessionProvider scoped to this streamer in StreamerPage
   const { isLive } = useStreamSession();
+
+  // Handle ?outbid= query param from email magic links
+  const outbidSubmissionId = searchParams.get('outbid');
+  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmount: string } | null>(null);
+  const [showOutbidBanner, setShowOutbidBanner] = useState(false);
+
+  useEffect(() => {
+    if (!outbidSubmissionId) return;
+    
+    const fetchOutbidInfo = async () => {
+      const { data: sub } = await supabase
+        .from('submissions')
+        .select('song_title, artist_name')
+        .eq('id', outbidSubmissionId)
+        .maybeSingle();
+
+      const { data: notif } = await supabase
+        .from('bid_notifications')
+        .select('offer_amount_cents')
+        .eq('submission_id', outbidSubmissionId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (sub) {
+        setOutbidInfo({
+          songTitle: sub.song_title,
+          artistName: sub.artist_name,
+          suggestedAmount: notif?.offer_amount_cents 
+            ? `€${(notif.offer_amount_cents / 100).toFixed(2)}` 
+            : '€2.00',
+        });
+        setShowOutbidBanner(true);
+      }
+
+      // Clean up URL
+      searchParams.delete('outbid');
+      setSearchParams(searchParams, { replace: true });
+    };
+
+    fetchOutbidInfo();
+  }, [outbidSubmissionId]);
 
   if (isLoading) {
     return (
@@ -154,6 +200,52 @@ function StreamerPageContent() {
           </motion.div>
         </div>
       </section>
+
+      {/* Outbid Banner */}
+      <AnimatePresence>
+        {showOutbidBanner && outbidInfo && (
+          <motion.section
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="pb-4 px-4"
+          >
+            <div className="container mx-auto max-w-xl">
+              <div className="relative rounded-xl border border-primary/30 bg-primary/5 p-5">
+                <button
+                  onClick={() => setShowOutbidBanner(false)}
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm mb-1">You've been outbid!</h3>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Someone placed a higher bid on <strong className="text-foreground">"{outbidInfo.songTitle}"</strong> by {outbidInfo.artistName}. 
+                      Bid <strong className="text-primary">{outbidInfo.suggestedAmount}</strong> or more to reclaim your spot.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="hero"
+                      onClick={() => {
+                        setShowOutbidBanner(false);
+                        // Scroll to submission form
+                        document.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                    >
+                      Place Higher Bid →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       {/* How It Works - between hero and form */}
       {(streamer.show_how_it_works ?? true) && (
