@@ -274,7 +274,8 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                   step={0.5}
                   value={submission.min}
                   onChange={(e) => {
-                    const val = Math.max(0, parseFloat(e.target.value) || 0);
+                    let val = Math.max(0, parseFloat(e.target.value) || 0);
+                    if (val > 0 && val < 2.5) val = 2.5;
                     setSubmission(s => ({ ...s, min: val, isActive: val > 0 }));
                   }}
                   className="w-24 h-9 text-right"
@@ -283,7 +284,10 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
             </div>
             <Slider
               value={[submission.min]}
-              onValueChange={([val]) => setSubmission(s => ({ ...s, min: val, isActive: val > 0 }))}
+              onValueChange={([val]) => {
+                const snapped = val > 0 && val < 2.5 ? 2.5 : val;
+                setSubmission(s => ({ ...s, min: snapped, isActive: snapped > 0 }));
+              }}
               min={0}
               max={20}
               step={0.5}
