@@ -516,7 +516,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       >
                         <div className={`${compact ? 'p-2.5 max-w-[200px]' : 'p-4 max-w-[260px]'} rounded-b-xl border border-t-0 border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl ml-auto`}>
                            <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
-                             Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                             {t('howItWorks.tip.boostDesc')}
                            </p>
                           <Link
                             to="/browse"
