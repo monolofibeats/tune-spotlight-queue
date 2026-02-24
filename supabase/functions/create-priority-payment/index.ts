@@ -49,6 +49,7 @@ serve(async (req) => {
       streamerId,
       streamerSlug,
       referralCode,
+      originalSubmissionId,
     } = await req.json();
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
