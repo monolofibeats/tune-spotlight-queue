@@ -75,7 +75,7 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
     };
 
     checkStatuses();
-    const interval = setInterval(checkStatuses, 15_000);
+    const interval = setInterval(checkStatuses, 8_000);
     return () => clearInterval(interval);
   }, []);
 
