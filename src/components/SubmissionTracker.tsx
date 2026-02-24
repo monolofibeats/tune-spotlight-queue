@@ -52,7 +52,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
         </div>
 
         <AnimatePresence mode="popLayout">
-            return (
+          {activeSubmissions.map((sub, i) => (
               <motion.div
                 key={sub.trackedAt}
                 initial={{ opacity: 0, y: 8 }}
