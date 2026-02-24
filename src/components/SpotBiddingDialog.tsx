@@ -288,7 +288,7 @@ export function SpotBiddingDialog({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to process';
       toast({
-        title: 'Failed',
+        title: t('bidding.failed'),
         description: errorMessage,
         variant: 'destructive',
       });
