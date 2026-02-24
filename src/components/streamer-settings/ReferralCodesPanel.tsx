@@ -59,36 +59,23 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
   };
 
   const generateCodes = async () => {
-    const remaining = MONTHLY_LIMIT - codes.length;
-    if (remaining <= 0) {
+    if (codes.length >= MONTHLY_LIMIT) {
       toast({ title: 'Monthly limit reached', description: `You can create ${MONTHLY_LIMIT} codes per month.`, variant: 'destructive' });
       return;
     }
 
     setIsGenerating(true);
     try {
-      const newCodes = [];
-      for (let i = 0; i < remaining; i++) {
-        newCodes.push({
-          code: generateCode(),
-          discount_percent: 10,
-          source: 'streamer' as const,
-          streamer_id: streamerId,
-          is_used: false,
-          expires_at: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString(),
-        });
-      }
-
-      const { error } = await supabase
-        .from('referral_codes')
-        .insert(newCodes);
+      const { error } = await supabase.rpc('generate_streamer_referral_codes', {
+        _streamer_id: streamerId,
+      });
 
       if (error) throw error;
 
-      toast({ title: 'Referral codes generated!', description: `${remaining} new code(s) created.` });
+      toast({ title: 'Referral codes generated!' });
       await fetchCodes();
-    } catch (e) {
-      toast({ title: 'Failed to generate codes', variant: 'destructive' });
+    } catch (e: any) {
+      toast({ title: 'Failed to generate codes', description: e?.message, variant: 'destructive' });
     }
     setIsGenerating(false);
   };
