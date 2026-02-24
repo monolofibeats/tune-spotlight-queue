@@ -272,9 +272,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               {t('pageSettings.preview')}
             </a>
           </Button>
-          {anyUnsaved && (
-            <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
-          )}
           <Button onClick={handleSaveAll} disabled={isSaving} size="lg" className="gap-2 min-w-[220px] text-base font-bold shadow-lg shadow-primary/20">
             {isSaving ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -283,6 +280,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             )}
             {t('pageSettings.saveChanges')}
           </Button>
+          {anyUnsaved && (
+            <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
+          )}
         </div>
         
         <div className="order-1 sm:order-2 sm:text-right">
