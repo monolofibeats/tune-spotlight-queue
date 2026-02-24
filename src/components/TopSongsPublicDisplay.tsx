@@ -78,9 +78,9 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
       className="space-y-3"
     >
       <div className="flex items-center justify-center gap-2">
-        <img src={upstarStar} alt="" className="w-5 h-5" />
-        <h3 className="text-sm font-semibold text-center">{t('topSongs.publicTitle')}</h3>
-        <img src={upstarStar} alt="" className="w-5 h-5" />
+        <Trophy className="w-4 h-4 text-primary/60" />
+        <h3 className="text-sm font-semibold text-center tracking-wide">{t('topSongs.publicTitle')}</h3>
+        <Trophy className="w-4 h-4 text-primary/60" />
       </div>
 
       <div className="flex items-end justify-center gap-1.5 sm:gap-2 py-2">
