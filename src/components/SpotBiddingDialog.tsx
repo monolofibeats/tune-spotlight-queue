@@ -304,10 +304,10 @@ export function SpotBiddingDialog({
         <DialogHeader className="space-y-1">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
-            Skip the Waiting List
+            {t('bidding.title')}
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
-            Choose your spot in the queue. Higher positions get reviewed first!
+            {t('bidding.desc')}
           </DialogDescription>
         </DialogHeader>
 
