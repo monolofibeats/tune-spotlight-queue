@@ -230,7 +230,6 @@ const StreamerSettings = () => {
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
-  const pricingHasChanges = pricingRef.current?.hasChanges ?? false;
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
 
   const triggerShake = useCallback(() => {
