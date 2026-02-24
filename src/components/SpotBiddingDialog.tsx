@@ -314,7 +314,7 @@ export function SpotBiddingDialog({
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="space-y-3 py-4">
+          <div className="space-y-2 sm:space-y-3 py-2 sm:py-4">
             {spots.map((spot, index) => {
               const Icon = SPOT_ICONS[index] || Award;
               const colorClass = SPOT_COLORS[index] || 'text-muted-foreground';
