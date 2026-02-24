@@ -696,7 +696,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Banner Tab */}
-            <TabsContent value="banner" className="space-y-6">
+            <TabsContent value="banner" forceMount className={`space-y-6 ${activeTab !== 'banner' ? 'hidden' : ''}`}>
               <BannerEditor
                 settings={{
                   bannerEnabled,
