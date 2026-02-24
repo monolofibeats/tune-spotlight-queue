@@ -143,7 +143,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
 
   const triggerShake = useCallback(() => {
-    setShakeKey(k => k + 1);
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 400);
   }, []);
 
   const handleDiscard = useCallback(() => {
