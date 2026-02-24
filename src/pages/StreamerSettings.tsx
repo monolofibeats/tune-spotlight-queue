@@ -66,6 +66,7 @@ const StreamerSettings = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const pricingRef = useRef<PricingSettingsHandle>(null);
   const [shakeKey, setShakeKey] = useState(0);
+  const [pricingHasChanges, setPricingHasChanges] = useState(false);
 
   // Form state - Profile
   const [displayName, setDisplayName] = useState('');
@@ -229,7 +230,6 @@ const StreamerSettings = () => {
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
-  const pricingHasChanges = pricingRef.current?.hasChanges ?? false;
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
 
   const triggerShake = useCallback(() => {
@@ -435,11 +435,11 @@ const StreamerSettings = () => {
                 {anyUnsaved && (
                   <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
                 )}
-                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2 min-w-[160px]">
+                <Button onClick={handleSaveAll} disabled={isSaving} size="lg" className="gap-2 min-w-[220px] text-base font-bold py-3 shadow-lg shadow-primary/20">
                   {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4" />
+                    <Save className="w-5 h-5" />
                   )}
                   Save Changes
                 </Button>
@@ -702,7 +702,7 @@ const StreamerSettings = () => {
 
             {/* Pricing Tab */}
             <TabsContent value="pricing" className="space-y-6">
-              <PricingSettings ref={pricingRef} streamerId={streamer.id} />
+              <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
             {/* Language Tab */}
