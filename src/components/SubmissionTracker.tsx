@@ -52,7 +52,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
         </div>
 
         <AnimatePresence mode="popLayout">
-          {submissions.map((sub, i) => {
+          {activeSubmissions.map((sub, i) => {
             const isDone = !!sub.doneStatus;
             const doneInfo = sub.doneStatus ? doneConfig[sub.doneStatus] : null;
             const DoneIcon = doneInfo?.icon;
