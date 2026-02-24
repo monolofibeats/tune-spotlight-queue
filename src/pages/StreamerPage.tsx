@@ -155,6 +155,15 @@ function StreamerPageContent() {
         </div>
       </section>
 
+      {/* How It Works - between hero and form */}
+      {(streamer.show_how_it_works ?? true) && (
+        <section className="pb-4 px-4">
+          <div className="container mx-auto max-w-3xl">
+            <HowItWorks />
+          </div>
+        </section>
+      )}
+
       {/* Main Content - Submission Form */}
       <section className="pb-4 px-4">
         <div className="container mx-auto max-w-xl">
