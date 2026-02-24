@@ -69,6 +69,8 @@ export function SpotBiddingDialog({
   useEffect(() => {
     if (open) {
       fetchSpotPrices();
+      setDiscountCode('');
+      setDiscountPercent(null);
     }
   }, [open]);
 
