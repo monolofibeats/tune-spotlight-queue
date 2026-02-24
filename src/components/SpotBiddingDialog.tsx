@@ -274,6 +274,7 @@ export function SpotBiddingDialog({
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
           streamerSlug: streamerSlug || null,
+          originalSubmissionId: originalSubmissionId || null,
           referralCode: discountPercent ? discountCode.trim().toUpperCase() : undefined,
         },
       });
