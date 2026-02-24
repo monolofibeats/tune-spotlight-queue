@@ -36,6 +36,7 @@ interface SpotBiddingDialogProps {
   audioFileUrl?: string | null;
   streamerId?: string | null;
   streamerSlug?: string | null;
+  originalSubmissionId?: string | null;
   onSuccess?: () => void;
 }
 
@@ -54,6 +55,7 @@ export function SpotBiddingDialog({
   audioFileUrl,
   streamerId,
   streamerSlug,
+  originalSubmissionId,
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
@@ -272,6 +274,7 @@ export function SpotBiddingDialog({
           audioFileUrl: audioFileUrl || null,
           streamerId: streamerId || null,
           streamerSlug: streamerSlug || null,
+          originalSubmissionId: originalSubmissionId || null,
           referralCode: discountPercent ? discountCode.trim().toUpperCase() : undefined,
         },
       });

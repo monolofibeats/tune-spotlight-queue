@@ -49,6 +49,7 @@ serve(async (req) => {
       streamerId,
       streamerSlug,
       referralCode,
+      originalSubmissionId,
     } = await req.json();
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
@@ -138,8 +139,8 @@ serve(async (req) => {
         streamer_id: streamerId || "",
         streamer_slug: streamerSlug || "",
         audio_file_url: audioFileUrl || "",
-        audioFileUrl: audioFileUrl || "",
         referral_code: validatedReferralCode || "",
+        original_submission_id: originalSubmissionId || "",
       },
     });
 

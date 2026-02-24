@@ -191,6 +191,7 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
           email=""
           platform={biddingSub.platform}
           audioFileUrl={biddingSub.audioFileUrl}
+          originalSubmissionId={biddingSub.submissionId || null}
           streamerId={streamerId}
           streamerSlug={streamerSlug || ''}
         />

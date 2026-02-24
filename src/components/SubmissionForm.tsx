@@ -153,6 +153,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     email: string;
     platform: string;
     audioFileUrl: string | null;
+    submissionId: string | null;
   } | null>(null);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -948,6 +949,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email: capturedEmail,
           platform: capturedPlatform,
           audioFileUrl: uploadedFileUrl,
+          submissionId: newSubmissionId || null,
         });
         setTimeout(() => {
           setShowPostSubmitOffer(true);
@@ -1506,6 +1508,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email={lastSubmittedSong.email}
           platform={lastSubmittedSong.platform}
           audioFileUrl={lastSubmittedSong.audioFileUrl}
+          originalSubmissionId={lastSubmittedSong.submissionId}
           streamerId={streamerId}
           streamerSlug={streamerSlug}
           onSuccess={() => {
