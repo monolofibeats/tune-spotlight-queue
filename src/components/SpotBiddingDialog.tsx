@@ -249,8 +249,8 @@ export function SpotBiddingDialog({
         if (error) throw error;
 
         toast({
-          title: 'Priority submission added! 🎉',
-          description: `Admin bypass: Claimed spot #${spotPosition}`,
+          title: t('bidding.adminBypass'),
+          description: t('bidding.adminBypassDesc').replace('{position}', String(spotPosition)),
         });
         
         onOpenChange(false);
