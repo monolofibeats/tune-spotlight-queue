@@ -70,7 +70,7 @@ export function PositionBadge({
         <motion.img
           src={upstarStar}
           alt=""
-          className="absolute -top-5 -right-4 w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] z-10"
+          className="absolute -top-4 -right-3 w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] z-10"
           initial={{ scale: 0.8, rotate: -15 }}
           animate={{ 
             scale: [1, 1.15, 1],
