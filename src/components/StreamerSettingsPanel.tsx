@@ -117,6 +117,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setBannerColor(s.banner_color || '45 90% 50%');
     setShowHowItWorks(s.show_how_it_works ?? true);
     setShowStreamEmbed(s.show_stream_embed ?? true);
+    setShowTopSongs(s.show_top_songs ?? false);
+    setShowPublicQueue((s as any).show_public_queue ?? true);
     setCustomCss(s.custom_css || '');
   }, []);
 
