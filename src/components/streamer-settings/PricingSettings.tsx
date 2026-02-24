@@ -286,7 +286,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                       className="w-24 h-9 text-right" />
                   </div>
                 </div>
-                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={50} step={0.5} />
+                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={1000} step={0.5} />
               </div>
 
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
