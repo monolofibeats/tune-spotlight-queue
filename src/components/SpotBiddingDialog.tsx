@@ -348,7 +348,7 @@ export function SpotBiddingDialog({
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold text-sm sm:text-base">#{spot.position}</span>
                         {isAvailable && (
-                          <Badge variant="secondary" className="text-[10px] sm:text-xs">Available</Badge>
+                          <Badge variant="secondary" className="text-[10px] sm:text-xs">{t('bidding.available')}</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
