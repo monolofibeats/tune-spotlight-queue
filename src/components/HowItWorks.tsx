@@ -205,7 +205,11 @@ function generateReferralCode(): string {
   return code;
 }
 
-export function HowItWorks() {
+interface HowItWorksProps {
+  compact?: boolean;
+}
+
+export function HowItWorks({ compact = false }: HowItWorksProps) {
   const [showTip, setShowTip] = useState(false);
   const [tipExpanded, setTipExpanded] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
