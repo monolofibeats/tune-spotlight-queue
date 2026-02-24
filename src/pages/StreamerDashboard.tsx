@@ -130,6 +130,8 @@ const StreamerDashboard = () => {
   const [phoneOptimized, setPhoneOptimized] = useState(true);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
+  const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
+  const [dashboardShaking, setDashboardShaking] = useState(false);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
 
   // View options for header/title visibility
