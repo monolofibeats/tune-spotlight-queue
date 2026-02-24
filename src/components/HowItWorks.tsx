@@ -369,15 +369,17 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                     <div className="relative h-8 sm:h-14 scale-[0.45] sm:scale-[0.6] origin-center pointer-events-none">
-                      {item.illustration}
-                    </div>
+                     <div className="relative h-10 sm:h-16 overflow-hidden flex items-start justify-center -mt-1 sm:-mt-2">
+                       <div className="scale-[0.4] sm:scale-[0.55] origin-top pointer-events-none">
+                        {item.illustration}
+                       </div>
+                     </div>
                   ) : (
                     <div className="relative pt-2">
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'p-1 sm:p-2 pt-0 overflow-hidden' : 'p-5 pt-2'}>
+                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0 overflow-hidden' : 'p-5 pt-2'}>
                      {compact && (
                        <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
