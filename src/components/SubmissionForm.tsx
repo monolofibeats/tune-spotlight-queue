@@ -928,6 +928,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
       // Track submission in localStorage for upsell
       onSubmissionTracked?.({
+        submissionId: newSubmissionId || undefined,
         songTitle: capturedSongTitle,
         artistName: capturedArtistName,
         songUrl: capturedSongUrl,
