@@ -153,6 +153,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     email: string;
     platform: string;
     audioFileUrl: string | null;
+    submissionId: string | null;
   } | null>(null);
   const [user, setUser] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
