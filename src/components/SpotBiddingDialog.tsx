@@ -429,7 +429,7 @@ export function SpotBiddingDialog({
             )}
 
             <p className="text-xs text-muted-foreground text-center pt-2">
-              If someone outbids you, you'll receive an email notification with the option to bid again.
+              {t('bidding.outbidNotice')}
             </p>
           </div>
         )}
