@@ -71,6 +71,28 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
+    // Validate referral/discount code if provided
+    let validatedReferralCode: string | null = null;
+    if (referralCode) {
+      const { data: codeData, error: codeError } = await supabase
+        .from('referral_codes')
+        .select('id, code, discount_percent, is_used, expires_at')
+        .eq('code', referralCode)
+        .maybeSingle();
+
+      if (codeError || !codeData) {
+        throw new Error('Invalid discount code');
+      }
+      if (codeData.is_used) {
+        throw new Error('Discount code has already been used');
+      }
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        throw new Error('Discount code has expired');
+      }
+      validatedReferralCode = codeData.code;
+      logStep("Discount code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
+    }
+
     // Build the redirect URL - go back to streamer page if slug provided, else root
     const origin = req.headers.get("origin") || "";
     const successPath = streamerSlug ? `/${streamerSlug}/submit` : "/";
