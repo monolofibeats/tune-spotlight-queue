@@ -68,11 +68,10 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
             : 'deleted';
           return { ...s, doneStatus } as TrackedSubmission;
         }
-        // If not found in DB at all, treat as deleted
-        if (!statusMap.has(s.submissionId) && data.length > 0) {
-          // Only mark deleted if we specifically queried for it and it's missing
+        // If not found in DB results, RLS hides non-pending rows → treat as reviewed
+        if (!statusMap.has(s.submissionId)) {
           changed = true;
-          return { ...s, doneStatus: 'deleted' as const };
+          return { ...s, doneStatus: 'reviewed' as const };
         }
         return s;
       });
