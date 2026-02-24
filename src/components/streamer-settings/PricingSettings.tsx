@@ -360,7 +360,7 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
 
       <Button
         onClick={handleSave}
-        disabled={isSaving || skipLine.min <= 0}
+        disabled={isSaving || skipLine.min < 2.5}
         className="w-full"
         size="lg"
       >
