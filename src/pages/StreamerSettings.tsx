@@ -484,7 +484,7 @@ const StreamerSettings = () => {
 
 
             {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6">
+            <TabsContent value="profile" forceMount className={`space-y-6 ${activeTab !== 'profile' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Basic Information</h2>
                 
@@ -546,7 +546,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Content Tab */}
-            <TabsContent value="content" className="space-y-6">
+            <TabsContent value="content" forceMount className={`space-y-6 ${activeTab !== 'content' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Hero Section Text</h2>
                 <p className="text-sm text-muted-foreground">
@@ -619,12 +619,12 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Form Builder Tab */}
-            <TabsContent value="form" className="space-y-6">
+            <TabsContent value="form" forceMount className={`space-y-6 ${activeTab !== 'form' ? 'hidden' : ''}`}>
               <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
             {/* Design Tab */}
-            <TabsContent value="design" className="space-y-6">
+            <TabsContent value="design" forceMount className={`space-y-6 ${activeTab !== 'design' ? 'hidden' : ''}`}>
               {/* Live Preview */}
               <div className="bg-card/50 border border-border/50 rounded-xl p-4 space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Live Preview</p>
@@ -696,7 +696,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Banner Tab */}
-            <TabsContent value="banner" className="space-y-6">
+            <TabsContent value="banner" forceMount className={`space-y-6 ${activeTab !== 'banner' ? 'hidden' : ''}`}>
               <BannerEditor
                 settings={{
                   bannerEnabled,
@@ -714,12 +714,12 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Pricing Tab */}
-            <TabsContent value="pricing" className="space-y-6">
+            <TabsContent value="pricing" forceMount className={`space-y-6 ${activeTab !== 'pricing' ? 'hidden' : ''}`}>
               <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
             {/* Language Tab */}
-            <TabsContent value="language" className="space-y-6">
+            <TabsContent value="language" forceMount className={`space-y-6 ${activeTab !== 'language' ? 'hidden' : ''}`}>
               <LanguageSettings
                 language={pageLanguage}
                 onChange={setPageLanguage}
@@ -727,7 +727,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Social Tab */}
-            <TabsContent value="social" className="space-y-6">
+            <TabsContent value="social" forceMount className={`space-y-6 ${activeTab !== 'social' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h2 className="font-semibold text-lg">Streaming Platforms</h2>
                 

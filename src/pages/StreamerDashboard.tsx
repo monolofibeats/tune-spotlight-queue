@@ -942,7 +942,7 @@ const StreamerDashboard = () => {
                 )}
               </TabsList>
 
-              <TabsContent value="submissions">
+              <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
@@ -958,7 +958,7 @@ const StreamerDashboard = () => {
               </TabsContent>
 
               {canEdit && (
-                <TabsContent value="top-songs">
+                <TabsContent value="top-songs" forceMount className={dashboardActiveTab !== 'top-songs' ? 'hidden' : ''}>
                   <div className="glass rounded-2xl p-6 border border-border/30">
                     <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
                   </div>
@@ -966,7 +966,7 @@ const StreamerDashboard = () => {
               )}
 
               {canEdit && (
-                <TabsContent value="settings">
+                <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
                   <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
                 </TabsContent>
               )}
