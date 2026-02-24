@@ -159,7 +159,7 @@ function StreamerPageContent() {
       {(streamer.show_how_it_works ?? true) && (
         <section className="pb-4 px-4">
           <div className="container mx-auto max-w-3xl">
-            <HowItWorks />
+            <HowItWorks compact />
           </div>
         </section>
       )}

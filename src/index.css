@@ -380,14 +380,14 @@ html:not(:has(body[data-streamer-theme="active"])) .stream-inactive {
 /* Modifiers: ONLY set variables / visuals (do not add/remove the pulse animation) */
 .field-glow-active {
   --field-glow-intensity: 1;
-  --field-glow-shadow: 0 0 20px hsl(var(--primary) / 0.5);
-  --field-glow-bg: hsl(var(--primary) / 0.06);
+  --field-glow-shadow: 0 0 28px hsl(var(--primary) / 0.65), 0 0 56px hsl(var(--primary) / 0.25);
+  --field-glow-bg: hsl(var(--primary) / 0.1);
 }
 
 .field-glow-pending {
-  --field-glow-intensity: 0.75;
-  --field-glow-shadow: 0 0 14px hsl(var(--primary) / 0.35);
-  --field-glow-bg: hsl(var(--primary) / 0.03);
+  --field-glow-intensity: 0.85;
+  --field-glow-shadow: 0 0 22px hsl(var(--primary) / 0.5), 0 0 44px hsl(var(--primary) / 0.15);
+  --field-glow-bg: hsl(var(--primary) / 0.06);
 }
 
 /* Marker class kept for backwards compatibility; no behavior needed now. */
