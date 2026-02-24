@@ -62,7 +62,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
   const pricingRef = useRef<PricingSettingsHandle>(null);
-  const [shakeKey, setShakeKey] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
   const [pricingHasChanges, setPricingHasChanges] = useState(false);
 
   const [heroTitle, setHeroTitle] = useState('');
@@ -143,7 +143,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
 
   const triggerShake = useCallback(() => {
-    setShakeKey(k => k + 1);
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 400);
   }, []);
 
   const handleDiscard = useCallback(() => {
@@ -258,16 +259,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
   return (
     <motion.div
-      key={`settings-${shakeKey}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0,
-        x: shakeKey > 0 ? [0, -8, 8, -6, 6, -3, 3, 0] : 0,
-      }}
-      transition={{
-        x: { duration: 0.4, ease: 'easeInOut' },
-      }}
+      animate={isShaking ? { x: [0, -4, 4, -3, 3, -1, 1, 0] } : { x: 0 }}
+      transition={{ duration: 0.35, ease: 'easeInOut' }}
       className="space-y-6"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
