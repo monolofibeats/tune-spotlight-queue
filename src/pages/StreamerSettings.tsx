@@ -435,11 +435,11 @@ const StreamerSettings = () => {
                 {anyUnsaved && (
                   <span className="text-xs font-medium text-primary animate-pulse">Unsaved Changes</span>
                 )}
-                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2 min-w-[160px]">
+                <Button onClick={handleSaveAll} disabled={isSaving} size="lg" className="gap-2 min-w-[220px] text-base font-bold py-3 shadow-lg shadow-primary/20">
                   {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    <Save className="w-4 h-4" />
+                    <Save className="w-5 h-5" />
                   )}
                   Save Changes
                 </Button>
