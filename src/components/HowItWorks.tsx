@@ -463,7 +463,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Boost Now
+                       {t('howItWorks.tip.boostNow')}
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                     {referralCode && (
