@@ -468,7 +468,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </Link>
                     {referralCode && (
                       <div className="mt-2 pt-2 border-t border-emerald-500/20">
-                       <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 5% discount code:</p>
+                       <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 {t('howItWorks.tip.discountCode')}</p>
                          <button
                            onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
