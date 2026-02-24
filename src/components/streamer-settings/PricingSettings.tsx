@@ -278,7 +278,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                   <Label className="text-sm">{t('pricing.skipLine.minPrice')}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={2.5} max={500} step={0.5} value={skipLine.min}
+                    <Input type="number" min={2.5} max={1000} step={0.5} value={skipLine.min}
                       onChange={(e) => {
                         const val = Math.max(2.5, parseFloat(e.target.value) || 2.5);
                         setSkipLine(s => ({ ...s, min: val }));
