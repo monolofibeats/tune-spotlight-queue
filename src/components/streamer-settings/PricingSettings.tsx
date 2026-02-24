@@ -49,7 +49,7 @@ interface PricingSettingsProps {
   streamerId: string;
 }
 
-export function PricingSettings({ streamerId }: PricingSettingsProps) {
+export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettingsProps>(function PricingSettings({ streamerId }, ref) {
   const { t } = useLanguage();
   const [configs, setConfigs] = useState<Record<string, PricingConfig>>({});
   const [isLoading, setIsLoading] = useState(true);
