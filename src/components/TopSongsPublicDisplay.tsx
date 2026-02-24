@@ -84,25 +84,50 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
         <img src={upstarStar} alt="" className="w-5 h-5" />
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {/* Display in visual pedestal order: 2nd, 1st, 3rd */}
+      <div className="flex items-end justify-center gap-1.5 sm:gap-2 py-2">
         {[2, 1, 3].map(pos => {
           const song = songs.find(s => s.position === pos);
-          if (!song) return <div key={pos} />;
+          if (!song) return <div key={pos} className={`w-[90px] sm:w-[110px] ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`} />;
+
+          const podiumHeight = pos === 1 ? 'h-[100px]' : pos === 2 ? 'h-[80px]' : 'h-[65px]';
+          const podiumBg = pos === 1
+            ? 'bg-gradient-to-t from-yellow-600/30 via-yellow-500/10 to-transparent border-yellow-500/40'
+            : pos === 2
+              ? 'bg-gradient-to-t from-slate-400/20 via-slate-300/8 to-transparent border-slate-400/40'
+              : 'bg-gradient-to-t from-amber-700/20 via-amber-600/8 to-transparent border-amber-700/40';
 
           return (
             <motion.div
               key={pos}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: pos * 0.1 }}
-              className={`rounded-xl border p-3 text-center ${getStyle(pos)} ${pos === 1 ? 'sm:-mt-2' : pos === 3 ? 'sm:mt-2' : 'sm:mt-1'}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: pos === 1 ? 0.1 : pos === 2 ? 0 : 0.2, duration: 0.4 }}
+              className={`flex flex-col items-center w-[90px] sm:w-[110px] ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}
             >
-              <div className="flex justify-center mb-1.5">
-                {getIcon(pos)}
+              {/* Song info above */}
+              <div className="w-full mb-1.5 text-center px-0.5">
+                <p className="text-[11px] sm:text-xs font-bold truncate">{song.song_title}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
               </div>
-              <p className="text-xs font-bold truncate">{song.song_title}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+
+              {/* Podium block */}
+              <div className={`w-full ${podiumHeight} rounded-t-lg border border-b-0 ${podiumBg} flex flex-col items-center justify-start pt-2.5`}>
+                <div className="flex items-center justify-center w-7 h-7 rounded-full mb-0.5" style={{
+                  backgroundColor: pos === 1 ? 'rgba(234,179,8,0.2)' : pos === 2 ? 'rgba(148,163,184,0.2)' : 'rgba(180,83,9,0.2)'
+                }}>
+                  {getIcon(pos)}
+                </div>
+                <span className={`text-lg sm:text-xl font-black font-display ${
+                  pos === 1 ? 'text-yellow-400' : pos === 2 ? 'text-slate-300' : 'text-amber-600'
+                }`}>
+                  {pos}
+                </span>
+              </div>
+
+              {/* Base */}
+              <div className={`w-[calc(100%+4px)] h-1.5 rounded-b-sm ${
+                pos === 1 ? 'bg-yellow-500/40' : pos === 2 ? 'bg-slate-400/30' : 'bg-amber-700/30'
+              }`} />
             </motion.div>
           );
         })}
