@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle, TrendingUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { OutbidCounterDialog } from '@/components/OutbidCounterDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
