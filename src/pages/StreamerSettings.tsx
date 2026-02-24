@@ -37,7 +37,7 @@ import {
   PricingSettings,
   LanguageSettings,
 } from '@/components/streamer-settings';
-import type { PricingSettingsHandle } from '@/components/streamer-settings';
+import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
