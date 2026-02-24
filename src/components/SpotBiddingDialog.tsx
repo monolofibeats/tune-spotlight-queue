@@ -180,8 +180,8 @@ export function SpotBiddingDialog({
     } catch (error) {
       console.error('Error fetching spot prices:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load spot prices',
+        title: t('bidding.error'),
+        description: t('bidding.errorLoadSpots'),
         variant: 'destructive',
       });
     } finally {
