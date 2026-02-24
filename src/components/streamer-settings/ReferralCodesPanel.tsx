@@ -123,7 +123,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
       {codes.length === 0 ? (
         <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground mb-3">No referral codes generated yet this month.</p>
+          <p className="text-sm text-muted-foreground mb-3">No discount codes generated yet this month.</p>
           <Button size="sm" onClick={generateCodes} disabled={isGenerating} className="gap-1.5">
             <Gift className="w-3.5 h-3.5" />
             Generate {MONTHLY_LIMIT} Codes

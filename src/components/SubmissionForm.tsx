@@ -796,13 +796,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
       if (error || !data) {
         setReferralDiscount(null);
-        toast({ title: 'Invalid code', description: 'This referral code does not exist.', variant: 'destructive' });
+        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
       } else if (data.is_used) {
         setReferralDiscount(null);
-        toast({ title: 'Code already used', description: 'This referral code has already been redeemed.', variant: 'destructive' });
+        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
       } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
         setReferralDiscount(null);
-        toast({ title: 'Code expired', description: 'This referral code has expired.', variant: 'destructive' });
+        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
       } else {
         setReferralDiscount(data.discount_percent);
         toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
