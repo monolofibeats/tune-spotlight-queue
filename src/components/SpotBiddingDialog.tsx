@@ -337,7 +337,7 @@ export function SpotBiddingDialog({
                     ${isProcessing && selectedSpot !== spot.position ? 'opacity-50' : ''}
                   `}
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${colorClass}`}>
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
