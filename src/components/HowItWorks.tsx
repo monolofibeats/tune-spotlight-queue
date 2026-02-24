@@ -305,57 +305,68 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
-            {t('howItWorks.title')}
-          </h2>
-          <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-            Three steps. No sign-up needed. Just your music.
-          </p>
-        </motion.div>
+    <section ref={sectionRef} className={compact ? 'py-2 px-4' : 'py-16 px-4'}>
+      <div className={`container mx-auto ${compact ? 'max-w-3xl' : 'max-w-4xl'}`}>
+        {!compact && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
+              {t('howItWorks.title')}
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+              Three steps. No sign-up needed. Just your music.
+            </p>
+          </motion.div>
+        )}
 
-        {/* 3-step grid - always centered, never changes */}
+        {/* 3-step grid */}
         <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+          <div className={`grid ${compact ? 'grid-cols-3 gap-3' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
             {steps.map((item, index) => (
               <div key={item.step} className="relative" style={{ zIndex: index === 2 ? 10 : 1 }}>
                 <motion.div
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: compact ? 12 : 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
                   transition={{ delay: index * 0.12, duration: 0.5 }}
-                  whileHover={{ y: -4 }}
-                  onClick={() => window.location.href = '/browse'}
-                  className="group relative rounded-2xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 cursor-pointer h-full"
+                  whileHover={{ y: compact ? -2 : -4 }}
+                  onClick={compact ? undefined : () => window.location.href = '/browse'}
+                  className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? '' : 'cursor-pointer rounded-2xl'}`}
                 >
-                  <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
-                    {item.step}
+                  {!compact && (
+                    <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
+                      {item.step}
+                    </div>
+                  )}
+                  {!compact && (
+                    <div className="relative pt-2">
+                      {item.illustration}
+                    </div>
+                  )}
+                  <div className={compact ? 'p-3' : 'p-5 pt-2'}>
+                    {compact && (
+                      <span className="text-[10px] font-mono text-primary/60 font-bold">{item.step}</span>
+                    )}
+                    <h3 className={`font-display font-bold ${compact ? 'text-xs mb-0.5 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                    <p className={`text-muted-foreground leading-relaxed ${compact ? 'text-[11px]' : 'text-sm'}`}>{item.description}</p>
                   </div>
-                  <div className="relative pt-2">
-                    {item.illustration}
-                  </div>
-                  <div className="p-5 pt-2">
-                    <h3 className="font-display font-bold text-base mb-1.5">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                  </div>
-                  <motion.div
-                    className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.4 }}
-                    style={{ transformOrigin: 'left', width: '100%' }}
-                  />
+                  {!compact && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.4 }}
+                      style={{ transformOrigin: 'left', width: '100%' }}
+                    />
+                  )}
                 </motion.div>
 
-                {/* Desktop PS tip - peeking from behind top-right of card 3, clipped by card */}
-                {index === 2 && !tipExpanded && (
+                {/* Desktop PS tip - only on homepage */}
+                {!compact && index === 2 && !tipExpanded && (
                   <AnimatePresence>
                     {showTip && (
                       <motion.div
@@ -396,130 +407,136 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
             ))}
           </div>
 
-          {/* Expanded tip - absolutely positioned to the right of the grid, doesn't affect layout */}
-          <AnimatePresence>
-            {tipExpanded && showTip && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="hidden md:block absolute top-0 left-full ml-6"
-                style={{ width: 210 }}
-              >
-                <div className="p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
-                      <Zap className="w-3.5 h-3.5 text-emerald-400" />
+          {/* Expanded tip - only on homepage */}
+          {!compact && (
+            <AnimatePresence>
+              {tipExpanded && showTip && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="hidden md:block absolute top-0 left-full ml-6"
+                  style={{ width: 210 }}
+                >
+                  <div className="p-5 rounded-2xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-xl shadow-emerald-500/5 flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                        <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                      </div>
+                      <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
                     </div>
-                    <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
+                    <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
+                      Pay a small fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
+                      100% goes to the streamer!
+                    </p>
+                    <Link
+                      to="/browse"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Boost Now
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    {referralCode && (
+                      <div className="mt-2 pt-2 border-t border-emerald-500/20">
+                        <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                        >
+                          <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                          {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
-                    Pay a small fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                    100% goes to the streamer!
-                  </p>
-                  <Link
-                    to="/browse"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Boost Now
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
-                  {referralCode && (
-                    <div className="mt-2 pt-2 border-t border-emerald-500/20">
-                      <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                      >
-                        <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
-                        {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
-                      </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        </div>
+
+        {/* Mobile PS tip - only on homepage */}
+        {!compact && (
+          <AnimatePresence>
+            {showTip && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="md:hidden mt-4 flex justify-end"
+              >
+                <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <p className="text-[11px] text-emerald-300/90 italic">
+                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> wanna know a secret? 🤫
+                    </p>
+                    <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
                     </div>
-                  )}
+                  </div>
+                  <AnimatePresence>
+                    {tipExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
+                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                            Pay a small boost fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
+                            100% goes directly to the streamer!
+                          </p>
+                          <Link
+                            to="/browse"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
+                          >
+                            Boost Now
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                          {referralCode && (
+                            <div className="mt-3 pt-2 border-t border-emerald-500/20">
+                              <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                              >
+                                <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                                {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        )}
 
-        {/* Mobile PS tip */}
-        <AnimatePresence>
-          {showTip && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              className="md:hidden mt-4 flex justify-end"
-            >
-              <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md">
-                  <Sparkles className="w-3 h-3 text-emerald-400" />
-                  <p className="text-[11px] text-emerald-300/90 italic">
-                    <span className="text-emerald-200 font-semibold not-italic">Psst…</span> wanna know a secret? 🤫
-                  </p>
-                  <div className="w-4 h-4 rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <HelpCircle className="w-2.5 h-2.5 text-emerald-300" />
-                  </div>
-                </div>
-                <AnimatePresence>
-                  {tipExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
-                        <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
-                          Pay a small boost fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                          100% goes directly to the streamer!
-                        </p>
-                        <Link
-                          to="/browse"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
-                        >
-                          Boost Now
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
-                        {referralCode && (
-                          <div className="mt-3 pt-2 border-t border-emerald-500/20">
-                            <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 10% discount code:</p>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                            >
-                              <code className="text-[11px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
-                              {codeCopied ? <Check className="w-3 h-3 text-emerald-300 ml-auto" /> : <Copy className="w-3 h-3 text-emerald-400/60 ml-auto" />}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="mt-14 text-center"
-        >
-          <Link
-            to="/browse"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
+        {/* CTA - only on homepage */}
+        {!compact && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+            className="mt-14 text-center"
           >
-            Find a Streamer & Submit
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </motion.div>
+            <Link
+              to="/browse"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
+            >
+              Find a Streamer & Submit
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        )}
       </div>
     </section>
   );
