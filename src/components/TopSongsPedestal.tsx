@@ -328,62 +328,96 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
         </Button>
       </div>
 
-      {/* Pedestal - podium layout: #2 left, #1 center (elevated), #3 right */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+      {/* Pedestal - Olympic podium: #2 left, #1 center (tallest), #3 right */}
+      <div className="flex items-end justify-center gap-2 sm:gap-3 py-4">
         {[2, 1, 3].map(pos => {
           const song = topSongs.find(ts => ts.position === pos);
           const isOver = dragOverPosition === pos;
-          const elevationClass = pos === 1 ? 'sm:-mb-6' : pos === 2 ? 'sm:-mb-2' : '';
+
+          const podiumHeight = pos === 1 ? 'h-[200px]' : pos === 2 ? 'h-[160px]' : 'h-[130px]';
+          const podiumBg = pos === 1
+            ? 'bg-gradient-to-t from-yellow-600/30 via-yellow-500/15 to-transparent border-yellow-500/40'
+            : pos === 2
+              ? 'bg-gradient-to-t from-slate-400/20 via-slate-300/10 to-transparent border-slate-400/40'
+              : 'bg-gradient-to-t from-amber-700/20 via-amber-600/10 to-transparent border-amber-700/40';
+          const crownGlow = pos === 1 ? 'shadow-[0_0_30px_rgba(234,179,8,0.15)]' : '';
 
           return (
             <motion.div
               key={pos}
-              className={`relative rounded-xl border-2 border-dashed p-4 transition-all ${getSpotHeight(pos)} ${elevationClass} flex flex-col items-center justify-center gap-2
-                ${isOver ? 'border-primary bg-primary/10 scale-[1.02]' : song ? getPositionStyle(pos) + ' border-solid' : 'border-border/50 bg-muted/10'}
-              `}
-              onDragOver={(e) => handleDragOver(e, pos)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, pos)}
-              layout
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: pos === 1 ? 0.1 : pos === 2 ? 0 : 0.2, duration: 0.4 }}
+              className={`relative flex flex-col items-center w-[110px] sm:w-[140px] ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}
             >
-              {/* Position icon */}
-              <div className="flex items-center gap-1.5 mb-1">
-                {getPositionIcon(pos)}
-                <span className="text-xs font-bold text-muted-foreground">#{pos}</span>
+              {/* Song info card floating above the podium */}
+              <div className="w-full mb-2 min-h-[60px] flex flex-col items-center justify-end">
+                <AnimatePresence mode="wait">
+                  {song?.submission ? (
+                    <motion.div
+                      key={song.submission_id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-center w-full px-1"
+                    >
+                      <p className="font-semibold text-xs sm:text-sm truncate">{song.submission.song_title}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-1 h-5 text-[10px] text-muted-foreground hover:text-destructive px-1"
+                        onClick={() => removeFromPedestal(pos)}
+                      >
+                        <X className="w-2.5 h-2.5 mr-0.5" />
+                        {t('topSongs.remove')}
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <motion.p
+                      key="empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.5 }}
+                      className="text-[10px] text-muted-foreground text-center"
+                    >
+                      {t('topSongs.dragHere')}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <AnimatePresence mode="wait">
-                {song?.submission ? (
-                  <motion.div
-                    key={song.submission_id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="text-center w-full"
-                  >
-                    <p className="font-semibold text-sm truncate">{song.submission.song_title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 h-6 text-xs text-muted-foreground hover:text-destructive"
-                      onClick={() => removeFromPedestal(pos)}
-                    >
-                      <X className="w-3 h-3 mr-1" />
-                      {t('topSongs.remove')}
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.p
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-xs text-muted-foreground text-center"
-                  >
-                    {t('topSongs.dragHere')}
-                  </motion.p>
-                )}
-              </AnimatePresence>
+              {/* The podium block */}
+              <div
+                className={`w-full ${podiumHeight} rounded-t-xl border-2 border-b-0 ${podiumBg} ${crownGlow} flex flex-col items-center justify-start pt-4 transition-all
+                  ${isOver ? 'border-primary bg-primary/10 scale-[1.03]' : ''}
+                  ${!song ? 'border-dashed' : 'border-solid'}
+                `}
+                onDragOver={(e) => handleDragOver(e, pos)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, pos)}
+              >
+                {/* Crown / Medal icon */}
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full mb-1 ${
+                  pos === 1 ? 'bg-yellow-500/20' : pos === 2 ? 'bg-slate-400/20' : 'bg-amber-700/20'
+                }`}>
+                  {getPositionIcon(pos)}
+                </div>
+                <span className={`text-2xl sm:text-3xl font-black font-display ${
+                  pos === 1 ? 'text-yellow-400' : pos === 2 ? 'text-slate-300' : 'text-amber-600'
+                }`}>
+                  {pos}
+                </span>
+                <span className={`text-[9px] uppercase tracking-widest font-bold mt-0.5 ${
+                  pos === 1 ? 'text-yellow-400/70' : pos === 2 ? 'text-slate-400/70' : 'text-amber-600/70'
+                }`}>
+                  {pos === 1 ? 'Gold' : pos === 2 ? 'Silver' : 'Bronze'}
+                </span>
+              </div>
+
+              {/* Podium base */}
+              <div className={`w-[calc(100%+8px)] h-2 rounded-b-md ${
+                pos === 1 ? 'bg-yellow-500/40' : pos === 2 ? 'bg-slate-400/30' : 'bg-amber-700/30'
+              }`} />
             </motion.div>
           );
         })}
