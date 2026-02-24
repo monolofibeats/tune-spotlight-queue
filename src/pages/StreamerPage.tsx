@@ -20,7 +20,7 @@ import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
-import { useStreamSession } from '@/hooks/useStreamSession';
+
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
 
