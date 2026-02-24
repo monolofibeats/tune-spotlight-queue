@@ -157,8 +157,8 @@ serve(async (req) => {
         let ctaUrl = `${siteUrl}/my-songs`;
         try {
           const redirectPath = notification.notification_type === 'outbid' && streamerSlug
-            ? `${siteUrl}/s/${streamerSlug}?outbid=${notification.submission_id}`
-            : `${siteUrl}/my-songs`;
+            ? `${siteUrl}/${streamerSlug}/submit?outbid=${notification.submission_id}`
+            : `${siteUrl}/user/dashboard`;
 
           const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'magiclink',
