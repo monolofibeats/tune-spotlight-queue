@@ -597,8 +597,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     if ((requireArtist && !artistName.trim()) || (requireTitle && !songTitle.trim()) ||
         (requireAtLeastOneIdentifier && !artistName.trim() && !songTitle.trim())) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
-        description: t('submission.needIdentifier') || "Please enter at least an artist name or song title.",
+        title: "Missing information",
+        description: "Please enter at least an artist name or song title.",
         variant: "destructive",
       });
       return;
