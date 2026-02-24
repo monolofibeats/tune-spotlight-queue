@@ -447,10 +447,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       </div>
                       <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
                     </div>
-                    <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
-                      Pay a small fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                      100% goes to the streamer!
-                    </p>
+                     <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
+                       Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                     </p>
                     <Link
                       to="/browse"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
