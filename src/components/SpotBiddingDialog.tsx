@@ -381,7 +381,7 @@ export function SpotBiddingDialog({
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
                       ) : (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          {isAvailable ? 'to claim' : `+${incrementPercent}%`}
+                          {isAvailable ? t('bidding.toClaim') : `+${incrementPercent}%`}
                         </p>
                       )}
                     </div>
