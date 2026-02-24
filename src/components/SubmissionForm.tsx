@@ -546,7 +546,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     }
     
     // Direct database insert for free submissions
-    const { error } = await supabase.from('submissions').insert({
+    const { data: insertedRow, error } = await supabase.from('submissions').insert({
       song_url: finalSongUrl,
       platform: platform || 'other',
       artist_name: artistName || 'Unknown Artist',
@@ -558,11 +558,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       user_id: user?.id || null,
       audio_file_url: audioFileUrl,
       streamer_id: streamerId || null,
-    });
+    }).select('id').maybeSingle();
 
     if (error) {
       throw new Error(error.message);
     }
+
+    return insertedRow?.id || null;
   };
 
   const handleSocialLogin = async (provider: 'google' | 'apple') => {
