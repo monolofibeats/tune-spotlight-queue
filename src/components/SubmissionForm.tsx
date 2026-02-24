@@ -1187,7 +1187,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     <div className={`relative ${getFieldGlowClass(2)}`}>
                       <CompletionTick fieldStep={2} />
                       <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {artistLabel} {requireArtist ? <span className="text-destructive">*</span> : requireAtLeastOneIdentifier && <span className="text-muted-foreground/60 text-[10px]">(or song title)</span>}
+                        {artistLabel} {requireArtist && <span className="text-destructive">*</span>}
                       </label>
                       <Input
                         placeholder={artistPlaceholder}
@@ -1204,7 +1204,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                     <div className={`relative ${getFieldGlowClass(3)}`}>
                       <CompletionTick fieldStep={3} />
                       <label className="text-xs text-muted-foreground mb-1.5 block">
-                        {titleLabel} {requireTitle ? <span className="text-destructive">*</span> : requireAtLeastOneIdentifier && <span className="text-muted-foreground/60 text-[10px]">(or artist name)</span>}
+                        {titleLabel} {requireTitle && <span className="text-destructive">*</span>}
                       </label>
                       <Input
                         placeholder={titlePlaceholder}
@@ -1241,7 +1241,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               {showMessage && (
                 <div>
                   <label className="text-xs text-muted-foreground mb-1.5 block">
-                    {messageLabel} {requireMessage && <span className="text-destructive">*</span>}
+                    {messageLabel} {requireMessage ? <span className="text-destructive">*</span> : <span className="text-muted-foreground/60 text-[10px]">({t('submission.optional')})</span>}
                   </label>
                   <Textarea
                     placeholder={messagePlaceholder}

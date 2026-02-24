@@ -297,20 +297,20 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
   const steps = [
     {
       step: '01',
-      title: 'Upload a File or Drop Your Link',
-      description: 'Upload any file up to 100 MB or just drop a link to it — Spotify, SoundCloud, YouTube, anything.',
+      title: t('howItWorks.step1.fullTitle'),
+      description: t('howItWorks.step1.fullDesc'),
       illustration: <LinkIllustration />,
     },
     {
       step: '02',
-      title: 'Join the Queue',
-      description: 'Your track enters the live queue. The streamer plays it on stream.',
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.fullDesc'),
       illustration: <QueueIllustration />,
     },
     {
       step: '03',
-      title: 'Get Reviewed Live',
-      description: 'Watch in real-time as the streamer listens and gives feedback.',
+      title: t('howItWorks.step3.fullTitle'),
+      description: t('howItWorks.step3.fullDesc'),
       illustration: <LiveIllustration />,
     },
   ];
@@ -329,7 +329,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               {t('howItWorks.title')}
             </h2>
             <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-              Three steps. No sign-up needed. Just your music.
+              {t('howItWorks.noSignup')}
             </p>
           </motion.div>
         )}
@@ -415,8 +415,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         >
                           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-950/90 shadow-lg shadow-emerald-500/10">
                             <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
-                            <p className={`text-emerald-300/90 font-medium whitespace-nowrap ${compact ? 'text-[10px]' : 'text-[11px]'}`}>
-                              <span className="text-emerald-200 font-semibold">Psst…</span> wanna know a secret?
+                             <p className={`text-emerald-300/90 font-medium whitespace-nowrap ${compact ? 'text-[10px]' : 'text-[11px]'}`}>
+                               <span className="text-emerald-200 font-semibold">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')}
                             </p>
                             <motion.div 
                               className="w-5 h-5 rounded-full border border-emerald-400/50 bg-emerald-500/25 flex items-center justify-center shrink-0"
@@ -453,22 +453,22 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
                         <Zap className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
-                      <h3 className="font-display font-bold text-xs text-emerald-200">Boost Your Spot</h3>
+                      <h3 className="font-display font-bold text-xs text-emerald-200">{t('howItWorks.tip.boostTitle')}</h3>
                     </div>
                      <p className="text-[11px] text-emerald-200/80 leading-relaxed mb-4">
-                       Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                       {t('howItWorks.tip.boostDesc')}
                      </p>
                     <Link
                       to="/browse"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors mb-2"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Boost Now
+                       {t('howItWorks.tip.boostNow')}
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                     {referralCode && (
                       <div className="mt-2 pt-2 border-t border-emerald-500/20">
-                       <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 Your 5% discount code:</p>
+                       <p className="text-[10px] text-emerald-300/70 mb-1.5">🎁 {t('howItWorks.tip.discountCode')}</p>
                          <button
                            onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
@@ -499,8 +499,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                 <div onClick={() => { if (!tipExpanded) handleTipExpand(); else setTipExpanded(false); }} className="cursor-pointer">
                   <div className={`inline-flex items-center gap-1.5 ${tipExpanded ? 'rounded-t-lg border-b-0' : 'rounded-lg'} border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-0.5' : 'px-3.5 py-1.5'}`}>
                     <Sparkles className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} text-emerald-400`} />
-                    <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
-                      <span className="text-emerald-200 font-semibold not-italic">Psst…</span> wanna know a secret? 🤫
+                     <p className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-emerald-300/90 italic`}>
+                       <span className="text-emerald-200 font-semibold not-italic">{t('howItWorks.tip.psst')}</span> {t('howItWorks.tip.secret')} 🤫
                     </p>
                     <div className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} rounded-full border border-emerald-400/40 bg-emerald-500/20 flex items-center justify-center shrink-0`}>
                       <HelpCircle className={`${compact ? 'w-1.5 h-1.5' : 'w-2.5 h-2.5'} text-emerald-300`} />
@@ -516,18 +516,18 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       >
                         <div className={`${compact ? 'p-2.5 max-w-[200px]' : 'p-4 max-w-[260px]'} rounded-b-xl border border-t-0 border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl ml-auto`}>
                            <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
-                             Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                             {t('howItWorks.tip.boostDesc')}
                            </p>
                           <Link
                             to="/browse"
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 ${compact ? 'text-[9px]' : 'text-[11px]'} font-semibold hover:bg-emerald-500/30 transition-colors`}
                           >
-                            Boost Now
+                            {t('howItWorks.tip.boostNow')}
                             <ArrowRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                           </Link>
                           {referralCode && (
                             <div className={`${compact ? 'mt-1.5 pt-1' : 'mt-3 pt-2'} border-t border-emerald-500/20`}>
-                               <p className={`${compact ? 'text-[8px]' : 'text-[10px]'} text-emerald-300/70 mb-1`}>🎁 Your 5% discount code:</p>
+                               <p className={`${compact ? 'text-[8px]' : 'text-[10px]'} text-emerald-300/70 mb-1`}>🎁 {t('howItWorks.tip.discountCode')}</p>
                                <button
                                  onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
                                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
@@ -560,7 +560,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               to="/browse"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
             >
-              Find a Streamer & Submit
+              {t('howItWorks.cta')}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
