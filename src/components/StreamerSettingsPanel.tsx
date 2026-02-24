@@ -12,6 +12,9 @@ import {
   RefreshCw,
   AlertTriangle,
   Undo2,
+  Monitor,
+  Tablet,
+  Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,10 +273,19 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
   const [previewKey, setPreviewKey] = useState(0);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'phone'>('desktop');
 
   const refreshPreview = () => {
     setPreviewKey((k) => k + 1);
   };
+
+  const previewDimensions = {
+    desktop: { width: '133.33%', height: '133.33%', scale: 0.75 },
+    tablet: { width: '768px', height: '133.33%', scale: 0.65 },
+    phone: { width: '375px', height: '133.33%', scale: 0.55 },
+  };
+
+  const currentPreview = previewDimensions[previewDevice];
 
   const tabs = [
     { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
@@ -403,18 +415,43 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                 <Eye className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium text-muted-foreground">Live Preview</span>
               </div>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={refreshPreview}>
-                <RefreshCw className="w-3.5 h-3.5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {([
+                  { id: 'desktop' as const, icon: Monitor, label: 'Desktop' },
+                  { id: 'tablet' as const, icon: Tablet, label: 'Tablet' },
+                  { id: 'phone' as const, icon: Smartphone, label: 'Phone' },
+                ]).map(({ id, icon: DeviceIcon, label }) => (
+                  <Button
+                    key={id}
+                    variant="ghost"
+                    size="icon"
+                    className={`h-7 w-7 ${previewDevice === id ? 'bg-primary/20 text-primary' : 'text-muted-foreground'}`}
+                    onClick={() => setPreviewDevice(id)}
+                    title={label}
+                  >
+                    <DeviceIcon className="w-3.5 h-3.5" />
+                  </Button>
+                ))}
+                <div className="w-px h-4 bg-border/50 mx-1" />
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={refreshPreview}>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </Button>
+              </div>
             </div>
-            <div className="relative" style={{ height: 'calc(100vh - 200px)' }}>
+            <div className="relative flex justify-center bg-muted/10" style={{ height: 'calc(100vh - 200px)' }}>
               <iframe
                 ref={previewIframeRef}
-                key={previewKey}
-                src={`/${streamer.slug}/submit`}
-                className="w-full h-full border-0"
+                key={`${previewKey}-${previewDevice}`}
+                src={`/${streamer.slug}/submit?preview=true`}
+                className="border-0"
                 title="Live Preview"
-                style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%', height: '133.33%' }}
+                style={{
+                  transform: `scale(${currentPreview.scale})`,
+                  transformOrigin: 'top center',
+                  width: currentPreview.width,
+                  height: currentPreview.height,
+                  maxWidth: previewDevice === 'desktop' ? '133.33%' : undefined,
+                }}
               />
             </div>
           </div>

@@ -16,8 +16,11 @@ export function StreamerDashboardAccessButton({ streamerId, streamerUserId, stre
   const navigate = useNavigate();
   const [hasAccess, setHasAccess] = useState(false);
 
+  // Hide in preview mode
+  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
+
   useEffect(() => {
-    if (!user) return;
+    if (!user || isPreview) return;
 
     // Owner always has access
     if (user.id === streamerUserId) {
@@ -39,9 +42,9 @@ export function StreamerDashboardAccessButton({ streamerId, streamerUserId, stre
     };
 
     check();
-  }, [user, streamerId, streamerUserId]);
+  }, [user, streamerId, streamerUserId, isPreview]);
 
-  if (!hasAccess) return null;
+  if (!hasAccess || isPreview) return null;
 
   return (
     <Button
