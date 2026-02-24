@@ -688,7 +688,7 @@ const StreamerSettings = () => {
 
             {/* Pricing Tab */}
             <TabsContent value="pricing" className="space-y-6">
-              <PricingSettings streamerId={streamer.id} />
+              <PricingSettings ref={pricingRef} streamerId={streamer.id} />
             </TabsContent>
 
             {/* Language Tab */}
