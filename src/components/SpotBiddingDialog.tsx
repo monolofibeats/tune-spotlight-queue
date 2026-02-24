@@ -298,13 +298,13 @@ export function SpotBiddingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] rounded-xl p-4 sm:p-6">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
             Skip the Waiting List
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Choose your spot in the queue. Higher positions get reviewed first!
           </DialogDescription>
         </DialogHeader>
@@ -314,7 +314,7 @@ export function SpotBiddingDialog({
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="space-y-3 py-4">
+          <div className="space-y-2 sm:space-y-3 py-2 sm:py-4">
             {spots.map((spot, index) => {
               const Icon = SPOT_ICONS[index] || Award;
               const colorClass = SPOT_COLORS[index] || 'text-muted-foreground';
@@ -337,7 +337,7 @@ export function SpotBiddingDialog({
                     ${isProcessing && selectedSpot !== spot.position ? 'opacity-50' : ''}
                   `}
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${colorClass}`}>
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
