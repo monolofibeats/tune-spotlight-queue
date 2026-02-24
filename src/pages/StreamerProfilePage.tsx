@@ -8,6 +8,7 @@ import { StreamerProvider, useStreamer } from "@/hooks/useStreamer";
 import { StreamerThemeProvider } from "@/components/StreamerThemeProvider";
 import { StreamerDashboardAccessButton } from "@/components/StreamerDashboardAccessButton";
 import { useLanguage } from "@/hooks/useLanguage";
+import { sanitizeCSS } from "@/lib/sanitizeCSS";
 
 function StreamerProfilePageContent() {
   const { streamer, isLoading, error } = useStreamer();
@@ -107,7 +108,7 @@ function StreamerProfilePageContent() {
         <Footer />
 
         {/* Custom CSS */}
-        {streamer.custom_css && <style dangerouslySetInnerHTML={{ __html: streamer.custom_css }} />}
+        {streamer.custom_css && <style dangerouslySetInnerHTML={{ __html: sanitizeCSS(streamer.custom_css) }} />}
       </div>
     </StreamerThemeProvider>
   );

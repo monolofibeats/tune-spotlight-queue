@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,13 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limit: 10 requests per 300 seconds (admin email sending)
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rateLimitResult = await checkRateLimit(clientIp, "send-sales-info", 10, 300);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(corsHeaders, rateLimitResult.retryAfterSeconds);
+    }
+
     // Verify admin
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) throw new Error('Unauthorized');

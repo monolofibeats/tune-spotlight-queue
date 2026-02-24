@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,13 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limit: 10 requests per 60 seconds (costs money via AI gateway)
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rateLimitResult = await checkRateLimit(clientIp, "translate-ui", 10, 60);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(corsHeaders, rateLimitResult.retryAfterSeconds);
+    }
+
     const { strings, targetLanguage, targetLanguageLabel } = await req.json();
 
     if (!strings || !targetLanguage) {

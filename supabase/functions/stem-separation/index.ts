@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.25.76";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const stemSeparationSchema = z.object({
   action: z.enum(["start", "check", "minutes_left"]),
@@ -36,6 +37,13 @@ serve(async (req) => {
   );
 
   try {
+    // Rate limit: 3 requests per 60 seconds (expensive operation)
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const rateLimitResult = await checkRateLimit(clientIp, "stem-separation", 3, 60);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResponse(corsHeaders, rateLimitResult.retryAfterSeconds);
+    }
+
     const rawBody = await req.json();
     const parsed = stemSeparationSchema.safeParse(rawBody);
     if (!parsed.success) {
@@ -47,7 +55,6 @@ serve(async (req) => {
     const { action, submission_id, stem_types, job_id } = parsed.data;
 
     // ── ACTION: start ──
-    // Fetches the audio file, uploads to LALAL.AI, starts split tasks for each stem type
     if (action === "start") {
       if (!submission_id || !stem_types || stem_types.length === 0) {
         return new Response(JSON.stringify({ error: "submission_id and stem_types[] required" }), {
@@ -56,7 +63,6 @@ serve(async (req) => {
         });
       }
 
-      // Get submission's audio file
       const { data: submission, error: subErr } = await supabaseAdmin
         .from("submissions")
         .select("audio_file_url, artist_name, song_title")
@@ -70,7 +76,6 @@ serve(async (req) => {
         });
       }
 
-      // Download audio from Supabase storage
       let audioBuffer: ArrayBuffer;
       const filePath = submission.audio_file_url;
 
@@ -86,7 +91,6 @@ serve(async (req) => {
         audioBuffer = await fileData.arrayBuffer();
       }
 
-      // Upload to LALAL.AI
       const fileName = `${submission.artist_name} - ${submission.song_title}.mp3`;
       const uploadResp = await fetch(`${LALAL_BASE}/upload/`, {
         method: "POST",
@@ -110,11 +114,9 @@ serve(async (req) => {
       const uploadData = await uploadResp.json();
       const sourceId = uploadData.id;
 
-      // Start split tasks for each stem type
       const jobs: { id: string; stem_type: string; task_id: string }[] = [];
 
       for (const stemType of stem_types) {
-        // Create DB record first
         const { data: job, error: jobErr } = await supabaseAdmin
           .from("stem_separation_jobs")
           .insert({
@@ -131,7 +133,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Start split task on LALAL.AI
         const splitResp = await fetch(`${LALAL_BASE}/split/stem_separator/`, {
           method: "POST",
           headers: {
@@ -162,7 +163,6 @@ serve(async (req) => {
         const taskId = splitData.task_id;
         console.log(`Split started for ${stemType}, task_id:`, taskId);
 
-        // Update job with task ID
         await supabaseAdmin
           .from("stem_separation_jobs")
           .update({ lalal_task_id: taskId })
@@ -177,9 +177,7 @@ serve(async (req) => {
     }
 
     // ── ACTION: check ──
-    // Polls LALAL.AI for task status, updates DB, downloads completed stems to storage
     if (action === "check") {
-      // Get all processing jobs for this submission
       const { data: processingJobs, error: jobsErr } = await supabaseAdmin
         .from("stem_separation_jobs")
         .select("*")
@@ -202,7 +200,6 @@ serve(async (req) => {
         });
       }
 
-      // Check status on LALAL.AI
       const checkResp = await fetch(`${LALAL_BASE}/check/`, {
         method: "POST",
         headers: {
@@ -234,7 +231,6 @@ serve(async (req) => {
           const stemTrack = tracks.find((t: any) => t.type === "stem");
           const backTrack = tracks.find((t: any) => t.type === "back");
 
-          // Download stem and back tracks, upload to our storage
           let stemStorageUrl = null;
           let backStorageUrl = null;
 
@@ -302,7 +298,6 @@ serve(async (req) => {
         }
       }
 
-      // Return updated jobs
       const { data: updatedJobs } = await supabaseAdmin
         .from("stem_separation_jobs")
         .select("*")
