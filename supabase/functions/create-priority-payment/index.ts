@@ -65,6 +65,7 @@ serve(async (req) => {
     const minAmountCents = pricingConfig?.min_amount_cents ?? 50; // Default to €0.50
     const amountCents = Math.round(amount * 100);
     
+    // Validate pre-discount amount against minimum
     if (amountCents < minAmountCents) {
       throw new Error(`Minimum priority payment is €${(minAmountCents / 100).toFixed(2)}`);
     }
@@ -73,6 +74,7 @@ serve(async (req) => {
 
     // Validate referral/discount code if provided
     let validatedReferralCode: string | null = null;
+    let discountPercent = 0;
     if (referralCode) {
       const { data: codeData, error: codeError } = await supabase
         .from('referral_codes')
@@ -90,8 +92,16 @@ serve(async (req) => {
         throw new Error('Discount code has expired');
       }
       validatedReferralCode = codeData.code;
-      logStep("Discount code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
+      discountPercent = codeData.discount_percent;
+      logStep("Discount code validated", { code: validatedReferralCode, discount: discountPercent });
     }
+
+    // Apply discount server-side
+    const finalAmountCents = discountPercent > 0
+      ? Math.max(1, Math.round(amountCents * (1 - discountPercent / 100)))
+      : amountCents;
+
+    logStep("Final charge amount", { original: amountCents, discount: discountPercent, final: finalAmountCents });
 
     // Build the redirect URL - go back to streamer page if slug provided, else root
     const origin = req.headers.get("origin") || "";
@@ -107,9 +117,9 @@ serve(async (req) => {
             currency: "eur",
             product_data: {
               name: `Priority Submission: ${songTitle || 'Song'}`,
-              description: `Skip the watchlist for "${songTitle}" by ${artistName}`,
+              description: `Skip the watchlist for "${songTitle}" by ${artistName}${discountPercent > 0 ? ` (${discountPercent}% discount applied)` : ''}`,
             },
-            unit_amount: amountCents,
+            unit_amount: finalAmountCents,
           },
           quantity: 1,
         },

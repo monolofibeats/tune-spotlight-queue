@@ -258,15 +258,10 @@ export function SpotBiddingDialog({
         return;
       }
 
-      // Apply discount to amount
-      const finalAmount = discountPercent
-        ? spot.yourPrice * (1 - discountPercent / 100)
-        : spot.yourPrice;
-
-      // Regular users go through Stripe
+      // Send the pre-discount amount - server applies discount
       const { data, error } = await supabase.functions.invoke('create-priority-payment', {
         body: {
-          amount: finalAmount,
+          amount: spot.yourPrice,
           songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
