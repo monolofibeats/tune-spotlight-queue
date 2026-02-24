@@ -147,13 +147,13 @@ serve(async (req) => {
       },
     });
 
-    // Mark discount code as used after session creation
+    // Link session ID to the already-reserved discount code
     if (validatedReferralCode) {
       await supabase
         .from('referral_codes')
-        .update({ is_used: true, used_by_email: email || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .update({ used_on_session_id: session.id })
         .eq('code', validatedReferralCode);
-      logStep("Discount code marked as used", { code: validatedReferralCode });
+      logStep("Discount code linked to session", { code: validatedReferralCode });
     }
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

@@ -199,23 +199,14 @@ export function SpotBiddingDialog({
     setIsValidatingCode(true);
     try {
       const { data, error } = await supabase
-        .from('referral_codes')
-        .select('discount_percent, is_used, expires_at')
-        .eq('code', code.trim().toUpperCase())
-        .maybeSingle();
+        .rpc('validate_discount_code', { code_input: code.trim().toUpperCase() });
 
-      if (error || !data) {
+      if (error || !data || data.length === 0 || !data[0].is_valid) {
         setDiscountPercent(null);
         toast({ title: t('bidding.invalidCode'), description: t('bidding.invalidCodeDesc'), variant: 'destructive' });
-      } else if (data.is_used) {
-        setDiscountPercent(null);
-        toast({ title: t('bidding.codeUsed'), description: t('bidding.codeUsedDesc'), variant: 'destructive' });
-      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        setDiscountPercent(null);
-        toast({ title: t('bidding.codeExpired'), description: t('bidding.codeExpiredDesc'), variant: 'destructive' });
       } else {
-        setDiscountPercent(data.discount_percent);
-        toast({ title: t('bidding.discountAppliedToast').replace('{percent}', String(data.discount_percent)), description: t('bidding.discountAppliedToastDesc') });
+        setDiscountPercent(data[0].discount_percent);
+        toast({ title: t('bidding.discountAppliedToast').replace('{percent}', String(data[0].discount_percent)), description: t('bidding.discountAppliedToastDesc') });
       }
     } catch {
       setDiscountPercent(null);
