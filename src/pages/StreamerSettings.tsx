@@ -270,6 +270,8 @@ const StreamerSettings = () => {
     setInstagramUrl(s.instagram_url || '');
     setTwitterUrl(s.twitter_url || '');
     setPageLanguage(s.page_language || 'de');
+    pricingRef.current?.discard();
+    formFieldRef.current?.discard();
     toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
   }, [streamer]);
 
