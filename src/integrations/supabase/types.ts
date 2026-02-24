@@ -1556,6 +1556,13 @@ export type Database = {
         Args: { _streamer_id: string; _user_id: string }
         Returns: boolean
       }
+      validate_discount_code: {
+        Args: { code_input: string }
+        Returns: {
+          discount_percent: number
+          is_valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "streamer"
