@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion } from 'framer-motion';
-import { Tv2, Twitch, Youtube, Video, Link, Loader2, Save, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Tv2, Twitch, Youtube, Video, Link, Loader2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,19 +18,18 @@ interface StreamConfig {
   streamer_id: string | null;
 }
 
-const STREAM_TYPES: { id: StreamType; label: string; icon: React.ComponentType<{ className?: string }>; placeholder: string; description: string }[] = [
-  { id: 'none', label: 'None', icon: X, placeholder: '', description: 'No embed shown' },
-  { id: 'twitch', label: 'Twitch', icon: Twitch, placeholder: 'https://twitch.tv/yourchannel', description: 'Embed your Twitch live stream' },
-  { id: 'youtube', label: 'YouTube', icon: Youtube, placeholder: 'https://youtube.com/watch?v=...', description: 'Embed a YouTube live or video' },
-  { id: 'tiktok', label: 'TikTok', icon: Tv2, placeholder: 'https://tiktok.com/@username/live', description: 'Show a TikTok live link' },
-  { id: 'video', label: 'Looping Video', icon: Video, placeholder: 'https://...mp4 or storage URL', description: 'Loop a background/highlight video' },
-];
+export interface StreamEmbedConfigHandle {
+  save: () => Promise<void>;
+  discard: () => void;
+  hasChanges: boolean;
+}
 
 interface StreamEmbedConfigProps {
   streamerId: string;
+  onChangeStatus?: (hasChanges: boolean) => void;
 }
 
-export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
+export const StreamEmbedConfig = forwardRef<StreamEmbedConfigHandle, StreamEmbedConfigProps>(function StreamEmbedConfig({ streamerId, onChangeStatus }, ref) {
   const { t } = useLanguage();
   const [config, setConfig] = useState<StreamConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,10 +37,34 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
   const [selectedType, setSelectedType] = useState<StreamType>('none');
   const [streamUrl, setStreamUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  // Saved state for change detection
+  const [savedType, setSavedType] = useState<StreamType>('none');
+  const [savedStreamUrl, setSavedStreamUrl] = useState('');
+  const [savedVideoUrl, setSavedVideoUrl] = useState('');
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     if (streamerId) fetchConfig();
   }, [streamerId]);
+
+  // Track changes
+  useEffect(() => {
+    const changed = selectedType !== savedType || streamUrl !== savedStreamUrl || videoUrl !== savedVideoUrl;
+    setHasChanges(changed);
+    onChangeStatus?.(changed);
+  }, [selectedType, streamUrl, videoUrl, savedType, savedStreamUrl, savedVideoUrl, onChangeStatus]);
+
+  const syncFromConfig = (data: StreamConfig | null) => {
+    const type = (data?.stream_type as StreamType) || 'none';
+    const sUrl = data?.stream_url || '';
+    const vUrl = data?.video_url || '';
+    setSelectedType(type);
+    setStreamUrl(sUrl);
+    setVideoUrl(vUrl);
+    setSavedType(type);
+    setSavedStreamUrl(sUrl);
+    setSavedVideoUrl(vUrl);
+  };
 
   const fetchConfig = async () => {
     try {
@@ -54,18 +76,8 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
         .maybeSingle();
 
       if (error) throw error;
-
-      if (data) {
-        setConfig(data);
-        setSelectedType((data.stream_type as StreamType) || 'none');
-        setStreamUrl(data.stream_url || '');
-        setVideoUrl(data.video_url || '');
-      } else {
-        setConfig(null);
-        setSelectedType('none');
-        setStreamUrl('');
-        setVideoUrl('');
-      }
+      setConfig(data);
+      syncFromConfig(data);
     } catch (err) {
       console.error('Error fetching stream config:', err);
     } finally {
@@ -100,8 +112,12 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
         setConfig(data);
       }
 
+      // Update saved state
+      setSavedType(selectedType);
+      setSavedStreamUrl(streamUrl);
+      setSavedVideoUrl(videoUrl);
+
       toast({ title: t('streamEmbed.saved'), description: t('streamEmbed.savedDesc') });
-      fetchConfig();
     } catch (err: any) {
       console.error('Error saving stream config:', err);
       toast({ title: t('streamEmbed.saveFailed'), description: err.message, variant: 'destructive' });
@@ -109,6 +125,18 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
       setSaving(false);
     }
   };
+
+  const handleDiscard = () => {
+    setSelectedType(savedType);
+    setStreamUrl(savedStreamUrl);
+    setVideoUrl(savedVideoUrl);
+  };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+    discard: handleDiscard,
+    hasChanges,
+  }), [hasChanges, selectedType, streamUrl, videoUrl, savedType, savedStreamUrl, savedVideoUrl, config]);
 
   if (loading) {
     return (
@@ -203,12 +231,6 @@ export function StreamEmbedConfig({ streamerId }: StreamEmbedConfigProps) {
           {t('streamEmbed.noEmbed')}
         </p>
       )}
-
-      <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
-        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-        {t('streamEmbed.save')}
-      </Button>
     </motion.div>
   );
-}
-
+});

@@ -1,4 +1,5 @@
 export { FormFieldBuilder } from './FormFieldBuilder';
+export type { FormFieldBuilderHandle } from './FormFieldBuilder';
 export { DesignCustomizer } from './DesignCustomizer';
 export { BannerEditor } from './BannerEditor';
 export { PricingSettings } from './PricingSettings';

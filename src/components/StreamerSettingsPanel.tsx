@@ -28,9 +28,10 @@ import {
   DesignCustomizer, 
   PricingSettings,
 } from '@/components/streamer-settings';
-import type { PricingSettingsHandle } from '@/components/streamer-settings';
+import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
+import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
@@ -62,8 +63,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('form');
   const pricingRef = useRef<PricingSettingsHandle>(null);
+  const formFieldRef = useRef<FormFieldBuilderHandle>(null);
+  const streamEmbedRef = useRef<StreamEmbedConfigHandle>(null);
   const [isShaking, setIsShaking] = useState(false);
   const [pricingHasChanges, setPricingHasChanges] = useState(false);
+  const [formFieldHasChanges, setFormFieldHasChanges] = useState(false);
+  const [streamEmbedHasChanges, setStreamEmbedHasChanges] = useState(false);
 
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
@@ -140,7 +145,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     );
   }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss]);
 
-  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
   const triggerShake = useCallback(() => {
     setIsShaking(true);
@@ -150,6 +155,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const handleDiscard = useCallback(() => {
     syncFromStreamer(streamer);
     pricingRef.current?.discard();
+    formFieldRef.current?.discard();
+    streamEmbedRef.current?.discard();
     toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
   }, [streamer, syncFromStreamer]);
 
@@ -180,6 +187,24 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       }
     } catch (e) {
       console.error('Pricing save error:', e);
+    }
+
+    // Save form fields if changed
+    try {
+      if (formFieldRef.current?.hasChanges) {
+        await formFieldRef.current.save();
+      }
+    } catch (e) {
+      console.error('Form fields save error:', e);
+    }
+
+    // Save stream embed if changed
+    try {
+      if (streamEmbedRef.current?.hasChanges) {
+        await streamEmbedRef.current.save();
+      }
+    } catch (e) {
+      console.error('Stream embed save error:', e);
     }
 
     try {
@@ -319,7 +344,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             </ScrollArea>
 
             <TabsContent value="form" className="space-y-6">
-              <FormFieldBuilder streamerId={streamer.id} />
+              <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
             <TabsContent value="content" className="space-y-6">
@@ -365,7 +390,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
             <TabsContent value="stream" className="space-y-6">
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
-              <StreamEmbedConfig streamerId={initialStreamer.id} />
+              <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
           </Tabs>
         </div>
