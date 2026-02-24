@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Medal, Award } from 'lucide-react';
+import { Crown, Medal, Award, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
-import upstarStar from '@/assets/upstar-star.png';
 
 interface TopSongDisplay {
   position: number;
