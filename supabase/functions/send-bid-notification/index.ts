@@ -14,6 +14,82 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[SEND-BID-NOTIFICATION] ${step}${detailsStr}`);
 };
 
+const siteUrl = Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
+
+function buildOutbidEmail(songTitle: string, artistName: string, offerAmount: string, ctaUrl: string): string {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background-color: #000000; color: #ffffff; border-radius: 12px; overflow: hidden;">
+      <div style="padding: 32px 24px 0 24px; text-align: center;">
+        <div style="font-size: 28px; font-weight: 800; color: #EAB308; margin-bottom: 4px;">UpStar</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 24px;">Song Review Platform</div>
+      </div>
+      <div style="padding: 0 24px 32px 24px;">
+        <div style="background: linear-gradient(135deg, #1a1a1a, #111); border: 1px solid #333; border-radius: 10px; padding: 24px; margin-bottom: 24px;">
+          <div style="font-size: 13px; color: #EAB308; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">📈 You've Been Outbid</div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 12px 0;">Someone jumped ahead of you!</h2>
+          <p style="color: #ccc; font-size: 14px; line-height: 1.6; margin: 0;">
+            A higher bid was placed on your submission <strong style="color: #fff;">"${songTitle}"</strong> by <strong style="color: #fff;">${artistName}</strong>.
+          </p>
+        </div>
+
+        <div style="background: #111; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-bottom: 24px; text-align: center;">
+          <div style="font-size: 12px; color: #888; margin-bottom: 4px;">Suggested counter-bid</div>
+          <div style="font-size: 28px; font-weight: 800; color: #EAB308;">${offerAmount}</div>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">to reclaim your spot</div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+          <a href="${ctaUrl}" 
+             style="display: inline-block; background: #EAB308; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">
+            Reclaim Your Spot →
+          </a>
+        </div>
+
+        <p style="color: #666; font-size: 12px; text-align: center; margin: 0;">
+          Higher bids get reviewed first. Don't miss your chance!
+        </p>
+      </div>
+      <div style="border-top: 1px solid #222; padding: 16px 24px; text-align: center;">
+        <p style="color: #555; font-size: 11px; margin: 0;">
+          You received this email because you have a pending submission on UpStar.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function buildReviewingEmail(songTitle: string, artistName: string, ctaUrl: string): string {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background-color: #000000; color: #ffffff; border-radius: 12px; overflow: hidden;">
+      <div style="padding: 32px 24px 0 24px; text-align: center;">
+        <div style="font-size: 28px; font-weight: 800; color: #EAB308; margin-bottom: 4px;">UpStar</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 24px;">Song Review Platform</div>
+      </div>
+      <div style="padding: 0 24px 32px 24px;">
+        <div style="background: linear-gradient(135deg, #1a1a1a, #111); border: 1px solid #333; border-radius: 10px; padding: 24px; margin-bottom: 24px;">
+          <div style="font-size: 13px; color: #EAB308; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">🎵 Now Reviewing</div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 12px 0;">Your song is being reviewed!</h2>
+          <p style="color: #ccc; font-size: 14px; line-height: 1.6; margin: 0;">
+            Great news! <strong style="color: #fff;">"${songTitle}"</strong> by <strong style="color: #fff;">${artistName}</strong> is now being reviewed live.
+          </p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+          <a href="${ctaUrl}" 
+             style="display: inline-block; background: #EAB308; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">
+            View Your Songs →
+          </a>
+        </div>
+      </div>
+      <div style="border-top: 1px solid #222; padding: 16px 24px; text-align: center;">
+        <p style="color: #555; font-size: 11px; margin: 0;">
+          You received this email because you have a submission on UpStar.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -34,7 +110,8 @@ serve(async (req) => {
         *,
         submissions (
           song_title,
-          artist_name
+          artist_name,
+          streamer_id
         )
       `)
       .eq('is_email_sent', false)
@@ -60,50 +137,56 @@ serve(async (req) => {
       try {
         const songTitle = notification.submissions?.song_title || 'Your song';
         const artistName = notification.submissions?.artist_name || 'Unknown';
+        const streamerId = notification.submissions?.streamer_id;
         const offerAmount = notification.offer_amount_cents 
           ? `€${(notification.offer_amount_cents / 100).toFixed(2)}` 
           : 'a new amount';
+
+        // Look up streamer slug for redirect
+        let streamerSlug = '';
+        if (streamerId) {
+          const { data: streamer } = await supabaseAdmin
+            .from('streamers')
+            .select('slug')
+            .eq('id', streamerId)
+            .maybeSingle();
+          streamerSlug = streamer?.slug || '';
+        }
+
+        // Generate magic link for the user
+        let ctaUrl = `${siteUrl}/my-songs`;
+        try {
+          const redirectPath = notification.notification_type === 'outbid' && streamerSlug
+            ? `${siteUrl}/s/${streamerSlug}?outbid=${notification.submission_id}`
+            : `${siteUrl}/my-songs`;
+
+          const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email: notification.email,
+            options: {
+              redirectTo: redirectPath,
+            },
+          });
+
+          if (!linkError && linkData?.properties?.action_link) {
+            ctaUrl = linkData.properties.action_link;
+            logStep("Magic link generated", { email: notification.email });
+          } else {
+            logStep("Magic link failed, using direct link", { error: linkError?.message });
+          }
+        } catch (mlErr) {
+          logStep("Magic link error (non-fatal)", { error: String(mlErr) });
+        }
 
         let subject = '';
         let htmlContent = '';
 
         if (notification.notification_type === 'outbid') {
           subject = `Someone outbid you on "${songTitle}"! 📈`;
-          htmlContent = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: #6366f1;">You've Been Outbid!</h1>
-              <p>Hi there,</p>
-              <p>Someone has placed a higher bid on your submission "<strong>${songTitle}</strong>" by ${artistName}.</p>
-              <p>To reclaim your position in the queue, you can place a new bid of <strong>${offerAmount}</strong> or more.</p>
-              <div style="margin: 30px 0;">
-                <a href="${Deno.env.get("SITE_URL") || "https://upstargg.lovable.app"}/my-songs" 
-                   style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                  Place New Bid
-                </a>
-              </div>
-              <p style="color: #666;">Higher bids get reviewed first. Don't miss your chance!</p>
-              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-              <p style="color: #999; font-size: 12px;">You received this email because you have a pending submission on UpStar.</p>
-            </div>
-          `;
+          htmlContent = buildOutbidEmail(songTitle, artistName, offerAmount, ctaUrl);
         } else if (notification.notification_type === 'reviewing') {
           subject = `Your song "${songTitle}" is being reviewed! 🎵`;
-          htmlContent = `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: #6366f1;">Your Song Is Being Reviewed!</h1>
-              <p>Hi there,</p>
-              <p>Great news! Your submission "<strong>${songTitle}</strong>" by ${artistName} is now being reviewed.</p>
-              <p>You'll receive another notification once the review is complete.</p>
-              <div style="margin: 30px 0;">
-                <a href="${Deno.env.get("SITE_URL") || "https://upstargg.lovable.app"}/my-songs" 
-                   style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                  View Your Songs
-                </a>
-              </div>
-              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-              <p style="color: #999; font-size: 12px;">You received this email because you have a submission on UpStar.</p>
-            </div>
-          `;
+          htmlContent = buildReviewingEmail(songTitle, artistName, ctaUrl);
         }
 
         if (subject && htmlContent) {
