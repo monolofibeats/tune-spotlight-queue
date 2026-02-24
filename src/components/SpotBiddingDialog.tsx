@@ -57,6 +57,7 @@ export function SpotBiddingDialog({
   onSuccess,
 }: SpotBiddingDialogProps) {
   const { user, isAdmin } = useAuth();
+  const { t } = useLanguage();
   const [spots, setSpots] = useState<SpotPrice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
