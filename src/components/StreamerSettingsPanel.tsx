@@ -28,9 +28,10 @@ import {
   DesignCustomizer, 
   PricingSettings,
 } from '@/components/streamer-settings';
-import type { PricingSettingsHandle } from '@/components/streamer-settings';
+import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { SessionManager } from '@/components/SessionManager';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
+import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
 
 interface ExtendedStreamer extends Streamer {
