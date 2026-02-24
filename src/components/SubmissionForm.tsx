@@ -1348,7 +1348,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                   <div className="relative flex-1">
                     <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                     <Input
-                      placeholder="Referral code"
+                      placeholder="Discount code"
                       value={referralCode}
                       onChange={(e) => {
                         setReferralCode(e.target.value.toUpperCase());
