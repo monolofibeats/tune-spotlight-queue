@@ -94,6 +94,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
+  const [showTopSongs, setShowTopSongs] = useState(false);
+  const [showPublicQueue, setShowPublicQueue] = useState(true);
   const [customCss, setCustomCss] = useState('');
 
   const syncFromStreamer = useCallback((s: ExtendedStreamer) => {
