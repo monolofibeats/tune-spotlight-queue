@@ -1,0 +1,1 @@
+ALTER TABLE public.streamers ADD COLUMN show_public_queue boolean DEFAULT true;
