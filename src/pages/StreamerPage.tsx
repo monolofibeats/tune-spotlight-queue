@@ -176,29 +176,35 @@ function StreamerPageContent() {
       </section>
 
       {/* Top Songs Pedestal - below form when public */}
-      <section className="pb-4 px-4">
-        <div className="container mx-auto max-w-xl">
-          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={!!streamer.show_top_songs} topSongsMessage={streamer.top_songs_message} />
-        </div>
-      </section>
+      {!!streamer.show_top_songs && (
+        <section className="pb-4 px-4">
+          <div className="container mx-auto max-w-xl">
+            <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} topSongsMessage={streamer.top_songs_message} />
+          </div>
+        </section>
+      )}
 
       {/* Public Waiting List */}
-      <section className="pb-4 px-4">
-        <div className="container mx-auto max-w-xl">
-          <PublicQueueDisplay
-            streamerId={streamer.id}
-            streamerSlug={streamer.slug}
-            trackedSubmissions={currentSubmissions}
-          />
-        </div>
-      </section>
+      {(streamer as any).show_public_queue !== false && (
+        <section className="pb-4 px-4">
+          <div className="container mx-auto max-w-xl">
+            <PublicQueueDisplay
+              streamerId={streamer.id}
+              streamerSlug={streamer.slug}
+              trackedSubmissions={currentSubmissions}
+            />
+          </div>
+        </section>
+      )}
 
-      {/* Stream Embed (looping video, Twitch, YouTube etc.) - always shown if configured */}
-      <section className="pb-4 px-4">
-        <div className="container mx-auto max-w-3xl">
-          <StreamEmbed streamerId={streamer.id} />
-        </div>
-      </section>
+      {/* Stream Embed (looping video, Twitch, YouTube etc.) */}
+      {(streamer.show_stream_embed ?? true) && (
+        <section className="pb-4 px-4">
+          <div className="container mx-auto max-w-3xl">
+            <StreamEmbed streamerId={streamer.id} />
+          </div>
+        </section>
+      )}
 
       {/* Tracked Submissions - below the form */}
       {currentSubmissions.length > 0 && (

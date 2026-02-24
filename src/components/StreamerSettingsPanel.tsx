@@ -386,6 +386,42 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   </div>
                 </div>
               </div>
+
+              {/* Section Visibility Toggles */}
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">Section Visibility</h3>
+                <p className="text-sm text-muted-foreground">Choose which sections are visible on your submit page.</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>How It Works</Label>
+                      <p className="text-xs text-muted-foreground">Step-by-step guide for submitters</p>
+                    </div>
+                    <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Top Songs Pedestal</Label>
+                      <p className="text-xs text-muted-foreground">Showcase your top 3 favorite submissions</p>
+                    </div>
+                    <Switch checked={showTopSongs} onCheckedChange={setShowTopSongs} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Public Waiting List</Label>
+                      <p className="text-xs text-muted-foreground">Show pending submissions queue publicly</p>
+                    </div>
+                    <Switch checked={showPublicQueue} onCheckedChange={setShowPublicQueue} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Stream Embed</Label>
+                      <p className="text-xs text-muted-foreground">Show your live stream embed on the page</p>
+                    </div>
+                    <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="pricing" className="space-y-6">
