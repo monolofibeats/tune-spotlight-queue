@@ -73,7 +73,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
       if (error) throw error;
 
-      toast({ title: 'Referral codes generated!' });
+      toast({ title: 'Discount codes generated!' });
       await fetchCodes();
     } catch (e: any) {
       toast({ title: 'Failed to generate codes', description: e?.message, variant: 'destructive' });
