@@ -100,23 +100,26 @@ serve(async (req) => {
 
     let validatedReferralCode: string | null = null;
     if (referralCode) {
-      const { data: codeData, error: codeError } = await serviceClient
+      // Atomically reserve the code to prevent race conditions
+      const { data: reservedCodes, error: reserveError } = await serviceClient
         .from('referral_codes')
-        .select('id, code, discount_percent, is_used, expires_at')
+        .update({ is_used: true, used_at: new Date().toISOString(), used_by_email: email || null })
         .eq('code', referralCode)
-        .maybeSingle();
+        .eq('is_used', false)
+        .select('code, discount_percent, expires_at');
 
-      if (codeError || !codeData) {
-        throw new Error('Invalid referral code');
+      if (reserveError || !reservedCodes || reservedCodes.length === 0) {
+        throw new Error('Invalid or already used referral code');
       }
-      if (codeData.is_used) {
-        throw new Error('Referral code has already been used');
-      }
+
+      const codeData = reservedCodes[0];
       if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        // Un-reserve expired code
+        await serviceClient.from('referral_codes').update({ is_used: false, used_at: null, used_by_email: null }).eq('code', codeData.code);
         throw new Error('Referral code has expired');
       }
       validatedReferralCode = codeData.code;
-      logStep("Referral code validated", { code: validatedReferralCode, discount: codeData.discount_percent });
+      logStep("Referral code reserved", { code: validatedReferralCode, discount: codeData.discount_percent });
     }
 
     // Authenticate user (optional - allow guest checkout)
@@ -188,13 +191,13 @@ serve(async (req) => {
       },
     });
 
-    // Mark referral code as used after session creation
+    // Link session ID to the already-reserved referral code
     if (validatedReferralCode) {
       await serviceClient
         .from('referral_codes')
-        .update({ is_used: true, used_by_email: customerEmail || null, used_at: new Date().toISOString(), used_on_session_id: session.id })
+        .update({ used_on_session_id: session.id })
         .eq('code', validatedReferralCode);
-      logStep("Referral code marked as used", { code: validatedReferralCode });
+      logStep("Referral code linked to session", { code: validatedReferralCode });
     }
 
     logStep("Checkout session created", { sessionId: session.id });

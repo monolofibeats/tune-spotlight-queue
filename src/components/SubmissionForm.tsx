@@ -792,23 +792,14 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     setIsValidatingCode(true);
     try {
       const { data, error } = await supabase
-        .from('referral_codes')
-        .select('discount_percent, is_used, expires_at')
-        .eq('code', code.trim().toUpperCase())
-        .maybeSingle();
+        .rpc('validate_discount_code', { code_input: code.trim().toUpperCase() });
 
-      if (error || !data) {
+      if (error || !data || data.length === 0 || !data[0].is_valid) {
         setReferralDiscount(null);
-        toast({ title: 'Invalid code', description: 'This discount code does not exist.', variant: 'destructive' });
-      } else if (data.is_used) {
-        setReferralDiscount(null);
-        toast({ title: 'Code already used', description: 'This discount code has already been redeemed.', variant: 'destructive' });
-      } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        setReferralDiscount(null);
-        toast({ title: 'Code expired', description: 'This discount code has expired.', variant: 'destructive' });
+        toast({ title: 'Invalid code', description: 'This discount code is not valid.', variant: 'destructive' });
       } else {
-        setReferralDiscount(data.discount_percent);
-        toast({ title: `${data.discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
+        setReferralDiscount(data[0].discount_percent);
+        toast({ title: `${data[0].discount_percent}% discount applied!`, description: 'Your discount will be applied at checkout.' });
       }
     } catch {
       setReferralDiscount(null);
