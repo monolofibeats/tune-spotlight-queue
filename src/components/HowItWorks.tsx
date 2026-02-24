@@ -333,7 +333,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
                   transition={{ delay: index * 0.12, duration: 0.5 }}
-                  whileHover={{ y: compact ? -2 : -4 }}
+                  whileHover={{ y: compact ? -3 : -4, scale: compact ? 1.03 : 1 }}
                   onClick={compact ? undefined : () => window.location.href = '/browse'}
                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 h-full ${compact ? '' : 'cursor-pointer rounded-2xl'}`}
                 >
@@ -342,27 +342,29 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.step}
                     </div>
                   )}
-                  {!compact && (
+                  {compact ? (
+                    <div className="relative h-16 scale-75 origin-center pointer-events-none">
+                      {item.illustration}
+                    </div>
+                  ) : (
                     <div className="relative pt-2">
                       {item.illustration}
                     </div>
                   )}
-                  <div className={compact ? 'p-3' : 'p-5 pt-2'}>
+                  <div className={compact ? 'p-3 pt-0' : 'p-5 pt-2'}>
                     {compact && (
                       <span className="text-[10px] font-mono text-primary/60 font-bold">{item.step}</span>
                     )}
                     <h3 className={`font-display font-bold ${compact ? 'text-xs mb-0.5 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
                     <p className={`text-muted-foreground leading-relaxed ${compact ? 'text-[11px]' : 'text-sm'}`}>{item.description}</p>
                   </div>
-                  {!compact && (
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.4 }}
-                      style={{ transformOrigin: 'left', width: '100%' }}
-                    />
-                  )}
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.4 }}
+                    style={{ transformOrigin: 'left', width: '100%' }}
+                  />
                 </motion.div>
 
                 {/* Desktop PS tip - only on homepage */}
