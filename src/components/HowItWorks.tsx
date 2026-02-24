@@ -329,7 +329,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               {t('howItWorks.title')}
             </h2>
             <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-              Three steps. No sign-up needed. Just your music.
+              {t('howItWorks.noSignup')}
             </p>
           </motion.div>
         )}
