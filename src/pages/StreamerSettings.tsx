@@ -776,7 +776,7 @@ const StreamerSettings = () => {
             </TabsContent>
           </Tabs>
         </div>
-      </main>
+      </motion.main>
 
       {/* Floating unsaved changes bar */}
       <AnimatePresence>
