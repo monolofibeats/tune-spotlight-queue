@@ -162,6 +162,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
+  useEffect(() => {
+    onUnsavedChange?.(anyUnsaved);
+  }, [anyUnsaved, onUnsavedChange]);
+
   const triggerShake = useCallback(() => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 400);
