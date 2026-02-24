@@ -606,7 +606,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
     if ((requireEmail && !email.trim()) || (requireMessage && !message.trim())) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
+        title: "Missing information",
         description: "Please fill out the required fields.",
         variant: "destructive",
       });
