@@ -373,11 +373,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               </TabsList>
             </ScrollArea>
 
-            <TabsContent value="form" className="space-y-6">
+            <TabsContent value="form" forceMount className={`space-y-6 ${activeTab !== 'form' ? 'hidden' : ''}`}>
               <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
-            <TabsContent value="content" className="space-y-6">
+            <TabsContent value="content" forceMount className={`space-y-6 ${activeTab !== 'content' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
                 <p className="text-sm text-muted-foreground">{t('pageSettings.hero.desc')}</p>
@@ -434,11 +434,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               </div>
             </TabsContent>
 
-            <TabsContent value="pricing" className="space-y-6">
+            <TabsContent value="pricing" forceMount className={`space-y-6 ${activeTab !== 'pricing' ? 'hidden' : ''}`}>
               <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
-            <TabsContent value="design" className="space-y-6">
+            <TabsContent value="design" forceMount className={`space-y-6 ${activeTab !== 'design' ? 'hidden' : ''}`}>
               <DesignCustomizer
                 settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
                 onChange={(newSettings) => {
@@ -454,7 +454,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               />
             </TabsContent>
 
-            <TabsContent value="stream" className="space-y-6">
+            <TabsContent value="stream" forceMount className={`space-y-6 ${activeTab !== 'stream' ? 'hidden' : ''}`}>
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
