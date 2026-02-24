@@ -714,7 +714,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Pricing Tab */}
-            <TabsContent value="pricing" className="space-y-6">
+            <TabsContent value="pricing" forceMount className={`space-y-6 ${activeTab !== 'pricing' ? 'hidden' : ''}`}>
               <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
