@@ -228,16 +228,12 @@ function StreamerPageContent() {
                     <h3 className="font-bold text-sm mb-1">You've been outbid!</h3>
                     <p className="text-xs text-muted-foreground mb-3">
                       Someone placed a higher bid on <strong className="text-foreground">"{outbidInfo.songTitle}"</strong> by {outbidInfo.artistName}. 
-                      Bid <strong className="text-primary">{outbidInfo.suggestedAmount}</strong> or more to reclaim your spot.
+                      Bid <strong className="text-primary">€{(outbidInfo.suggestedAmountCents / 100).toFixed(2)}</strong> or more to reclaim your spot.
                     </p>
                     <Button
                       size="sm"
                       variant="hero"
-                      onClick={() => {
-                        setShowOutbidBanner(false);
-                        // Scroll to submission form
-                        document.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
+                      onClick={() => setShowOutbidDialog(true)}
                     >
                       Place Higher Bid →
                     </Button>
@@ -248,6 +244,19 @@ function StreamerPageContent() {
           </motion.section>
         )}
       </AnimatePresence>
+
+      {/* Outbid Counter Dialog */}
+      {outbidInfo && (
+        <OutbidCounterDialog
+          open={showOutbidDialog}
+          onOpenChange={setShowOutbidDialog}
+          submissionId={outbidInfo.submissionId}
+          songTitle={outbidInfo.songTitle}
+          artistName={outbidInfo.artistName}
+          suggestedAmountCents={outbidInfo.suggestedAmountCents}
+          streamerSlug={streamer?.slug}
+        />
+      )}
 
       {/* How It Works - between hero and form */}
       {(streamer.show_how_it_works ?? true) && (
