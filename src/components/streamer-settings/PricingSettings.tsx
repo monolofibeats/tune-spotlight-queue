@@ -115,8 +115,8 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
 
   const handleSave = async () => {
-    if (skipLine.min <= 0) {
-      toast({ title: t('pricing.invalidRange'), description: t('pricing.invalidRangeDesc'), variant: 'destructive' });
+    if (skipLine.min < 2.5) {
+      toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum must be at least €2.50', variant: 'destructive' });
       return;
     }
     setIsSaving(true);
