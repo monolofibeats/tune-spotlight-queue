@@ -1508,6 +1508,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           email={lastSubmittedSong.email}
           platform={lastSubmittedSong.platform}
           audioFileUrl={lastSubmittedSong.audioFileUrl}
+          originalSubmissionId={lastSubmittedSong.submissionId}
           streamerId={streamerId}
           streamerSlug={streamerSlug}
           onSuccess={() => {
