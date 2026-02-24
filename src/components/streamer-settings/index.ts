@@ -2,6 +2,7 @@ export { FormFieldBuilder } from './FormFieldBuilder';
 export { DesignCustomizer } from './DesignCustomizer';
 export { BannerEditor } from './BannerEditor';
 export { PricingSettings } from './PricingSettings';
+export type { PricingSettingsHandle } from './PricingSettings';
 export { LanguageSettings } from './LanguageSettings';
 export { PresetManager } from './PresetManager';
 export { TeamManager } from './TeamManager';

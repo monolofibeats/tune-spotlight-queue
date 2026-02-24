@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, 
   Save, 
@@ -15,7 +15,9 @@ import {
   DollarSign,
   Globe,
   Flag,
-  Sparkles
+  Sparkles,
+  Undo2,
+  AlertTriangle,
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -35,6 +37,7 @@ import {
   PricingSettings,
   LanguageSettings,
 } from '@/components/streamer-settings';
+import type { PricingSettingsHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import type { Streamer } from '@/types/streamer';
 
@@ -61,6 +64,8 @@ const StreamerSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const pricingRef = useRef<PricingSettingsHandle>(null);
+  const [shakeKey, setShakeKey] = useState(0);
 
   // Form state - Profile
   const [displayName, setDisplayName] = useState('');
@@ -187,6 +192,85 @@ const StreamerSettings = () => {
     fetchStreamer();
   }, [user, authLoading, navigate]);
 
+  // Detect unsaved changes across all settings fields
+  const hasUnsavedChanges = useMemo(() => {
+    if (!streamer) return false;
+    const s = streamer;
+    return (
+      displayName !== (s.display_name || '') ||
+      bio !== (s.bio || '') ||
+      avatarUrl !== (s.avatar_url || '') ||
+      bannerUrl !== (s.banner_url || '') ||
+      heroTitle !== (s.hero_title || '') ||
+      heroSubtitle !== (s.hero_subtitle || '') ||
+      welcomeMessage !== (s.welcome_message || '') ||
+      primaryColor !== (s.primary_color || '45 90% 50%') ||
+      accentColor !== (s.accent_color || '45 90% 50%') ||
+      fontFamily !== (s.font_family || 'system') ||
+      buttonStyle !== (s.button_style || 'rounded') ||
+      backgroundType !== (s.background_type || 'solid') ||
+      backgroundImageUrl !== (s.background_image_url || '') ||
+      backgroundGradient !== (s.background_gradient || '') ||
+      animationStyle !== (s.animation_style || 'subtle') ||
+      cardStyle !== (s.card_style || 'glass') ||
+      bannerEnabled !== (s.banner_enabled || false) ||
+      bannerText !== (s.banner_text || '') ||
+      bannerLink !== (s.banner_link || '') ||
+      bannerColor !== (s.banner_color || '45 90% 50%') ||
+      showHowItWorks !== (s.show_how_it_works ?? true) ||
+      showStreamEmbed !== (s.show_stream_embed ?? true) ||
+      customCss !== (s.custom_css || '') ||
+      twitchUrl !== (s.twitch_url || '') ||
+      youtubeUrl !== (s.youtube_url || '') ||
+      tiktokUrl !== (s.tiktok_url || '') ||
+      instagramUrl !== (s.instagram_url || '') ||
+      twitterUrl !== (s.twitter_url || '') ||
+      pageLanguage !== (s.page_language || 'de')
+    );
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
+
+  const pricingHasChanges = pricingRef.current?.hasChanges ?? false;
+  const anyUnsaved = hasUnsavedChanges || pricingHasChanges;
+
+  const triggerShake = useCallback(() => {
+    setShakeKey(k => k + 1);
+  }, []);
+
+  const handleDiscard = useCallback(() => {
+    if (!streamer) return;
+    const s = streamer as ExtendedStreamer;
+    setDisplayName(s.display_name || '');
+    setBio(s.bio || '');
+    setAvatarUrl(s.avatar_url || '');
+    setBannerUrl(s.banner_url || '');
+    setHeroTitle(s.hero_title || '');
+    setHeroSubtitle(s.hero_subtitle || '');
+    setWelcomeMessage(s.welcome_message || '');
+    setPrimaryColor(s.primary_color || '45 90% 50%');
+    setAccentColor(s.accent_color || '45 90% 50%');
+    setFontFamily(s.font_family || 'system');
+    setButtonStyle(s.button_style || 'rounded');
+    setBackgroundType(s.background_type || 'solid');
+    setBackgroundImageUrl(s.background_image_url || '');
+    setBackgroundGradient(s.background_gradient || '');
+    setAnimationStyle(s.animation_style || 'subtle');
+    setCardStyle(s.card_style || 'glass');
+    setBannerEnabled(s.banner_enabled || false);
+    setBannerText(s.banner_text || '');
+    setBannerLink(s.banner_link || '');
+    setBannerColor(s.banner_color || '45 90% 50%');
+    setShowHowItWorks(s.show_how_it_works ?? true);
+    setShowStreamEmbed(s.show_stream_embed ?? true);
+    setCustomCss(s.custom_css || '');
+    setTwitchUrl(s.twitch_url || '');
+    setYoutubeUrl(s.youtube_url || '');
+    setTiktokUrl(s.tiktok_url || '');
+    setInstagramUrl(s.instagram_url || '');
+    setTwitterUrl(s.twitter_url || '');
+    setPageLanguage(s.page_language || 'de');
+    toast({ title: 'Changes discarded', description: 'All changes have been reverted.' });
+  }, [streamer]);
+
   const logContentChange = async (fieldName: string, oldValue: string, newValue: string) => {
     if (!streamer || oldValue === newValue) return;
     
@@ -204,10 +288,19 @@ const StreamerSettings = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveAll = async () => {
     if (!streamer) return;
 
     setIsSaving(true);
+
+    // Save pricing settings if they have changes
+    try {
+      if (pricingRef.current?.hasChanges) {
+        await pricingRef.current.save();
+      }
+    } catch (e) {
+      console.error('Pricing save error:', e);
+    }
 
     // Log text content changes for admin review
     if (heroTitle !== streamer.hero_title) {
@@ -227,18 +320,13 @@ const StreamerSettings = () => {
       const { data, error } = await supabase
         .from('streamers')
         .update({
-          // Profile
           display_name: displayName,
           bio: bio || null,
           avatar_url: avatarUrl || null,
           banner_url: bannerUrl || null,
-          
-          // Content
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
           welcome_message: welcomeMessage || null,
-          
-          // Design
           primary_color: primaryColor || '45 90% 50%',
           accent_color: accentColor || '45 90% 50%',
           font_family: fontFamily,
@@ -248,26 +336,18 @@ const StreamerSettings = () => {
           background_gradient: backgroundGradient || null,
           animation_style: animationStyle,
           card_style: cardStyle,
-          
-          // Banner
           banner_enabled: bannerEnabled,
           banner_text: bannerText || null,
           banner_link: bannerLink || null,
           banner_color: bannerColor,
-          
-          // Layout
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
-          
-          // Social
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
           instagram_url: instagramUrl || null,
           twitter_url: twitterUrl || null,
-          
-          // Language
           page_language: pageLanguage,
         })
         .eq('id', streamer.id)
@@ -347,7 +427,7 @@ const StreamerSettings = () => {
                     Preview
                   </a>
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2">
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
@@ -359,7 +439,10 @@ const StreamerSettings = () => {
             </div>
           </motion.div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(tab) => {
+              if (anyUnsaved) triggerShake();
+              setActiveTab(tab);
+            }} className="space-y-6">
             <ScrollArea className="w-full">
               <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
@@ -608,7 +691,7 @@ const StreamerSettings = () => {
 
             {/* Pricing Tab */}
             <TabsContent value="pricing" className="space-y-6">
-              <PricingSettings streamerId={streamer.id} />
+              <PricingSettings ref={pricingRef} streamerId={streamer.id} />
             </TabsContent>
 
             {/* Language Tab */}
@@ -683,6 +766,52 @@ const StreamerSettings = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Floating unsaved changes bar */}
+      <AnimatePresence>
+        {anyUnsaved && (
+          <motion.div
+            key={`unsaved-bar-${shakeKey}`}
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ 
+              y: 0, 
+              opacity: 1,
+              x: shakeKey > 0 ? [0, -6, 6, -4, 4, -2, 2, 0] : 0,
+            }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ 
+              y: { type: 'spring', stiffness: 400, damping: 30 },
+              x: { duration: 0.4, ease: 'easeInOut' },
+            }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="flex items-center gap-3 px-5 py-3 rounded-xl bg-card border border-primary/30 shadow-lg shadow-primary/10 backdrop-blur-md">
+              <AlertTriangle className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm font-medium whitespace-nowrap">You have unsaved changes</span>
+              <div className="flex gap-2 ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDiscard}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <Undo2 className="w-3.5 h-3.5" />
+                  Discard
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveAll}
+                  disabled={isSaving}
+                  className="gap-1.5"
+                >
+                  {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Save
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

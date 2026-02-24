@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { 
   DollarSign, 
   Settings, 
@@ -40,11 +40,16 @@ interface PricingFormState {
   isActive: boolean;
 }
 
+export interface PricingSettingsHandle {
+  save: () => Promise<void>;
+  hasChanges: boolean;
+}
+
 interface PricingSettingsProps {
   streamerId: string;
 }
 
-export function PricingSettings({ streamerId }: PricingSettingsProps) {
+export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettingsProps>(function PricingSettings({ streamerId }, ref) {
   const { t } = useLanguage();
   const [configs, setConfigs] = useState<Record<string, PricingConfig>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +66,11 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
   const [submissionsOpen, setSubmissionsOpen] = useState(true);
   const [bidIncrementPercent, setBidIncrementPercent] = useState(10);
   const [bidIncrementActive, setBidIncrementActive] = useState(true);
+
+  useImperativeHandle(ref, () => ({
+    save: handleSave,
+    hasChanges,
+  }), [hasChanges]);
 
   useEffect(() => {
     fetchConfigs();
@@ -358,25 +368,6 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         </div>
       )}
 
-      <Button
-        onClick={handleSave}
-        disabled={isSaving || skipLine.min < 2.5}
-        className="w-full"
-        size="lg"
-      >
-        {isSaving ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {t('pricing.saving')}
-          </>
-        ) : (
-          <>
-            <Check className="w-4 h-4" />
-            {t('pricing.saveAll')}
-          </>
-        )}
-      </Button>
-
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
@@ -396,4 +387,4 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
       </p>
     </div>
   );
-}
+});
