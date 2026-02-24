@@ -427,7 +427,7 @@ const StreamerSettings = () => {
                     Preview
                   </a>
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving} className="gap-2">
+                <Button onClick={handleSaveAll} disabled={isSaving} className="gap-2">
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
