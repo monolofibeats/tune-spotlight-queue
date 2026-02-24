@@ -336,24 +336,32 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`grid ${compact ? 'grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-3 -mx-1 sm:mx-0' : 'grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
+        <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
             {steps.map((item, index) => {
-              // Compact mobile: alternate offsets & slight rotations for visual variety
-              const compactMobileStyles = compact ? {
-                x: index === 0 ? -6 : index === 1 ? 6 : -4,
-                rotate: index === 0 ? -1.2 : index === 1 ? 1 : -0.8,
+              // Compact mobile: stacked cards with alternating left/right offsets and overlap
+              const mobileCardStyles = compact ? {
+                marginTop: index === 0 ? 0 : -12,
+                marginLeft: index === 0 ? 'auto' : index === 1 ? 0 : 'auto',
+                marginRight: index === 0 ? 0 : index === 1 ? 'auto' : 0,
+                width: '85%',
+                maxWidth: 280,
+              } : {};
+
+              const compactMobileAnimate = compact ? {
+                x: index === 0 ? 20 : index === 1 ? -20 : 16,
+                rotate: index === 0 ? 2 : index === 1 ? -2.5 : 1.5,
               } : {};
 
               return (
-              <div key={item.step} className="relative" style={{ zIndex: index === 2 ? 10 : 1 }}>
+              <div key={item.step} className={`relative ${compact ? 'sm:!w-full sm:!max-w-none sm:!mx-0 sm:!mt-0' : ''}`} style={{ zIndex: compact ? 3 - index : (index === 2 ? 10 : 1), ...(compact ? mobileCardStyles : {}) }}>
                 <motion.div
-                  initial={{ opacity: 0, y: compact ? 10 : 24, ...(compact ? { x: 0, rotate: 0 } : {}) }}
-                  whileInView={{ opacity: 1, y: 0, ...compactMobileStyles }}
+                  initial={{ opacity: 0, y: compact ? 15 : 24, ...(compact ? { x: 0, rotate: 0 } : {}) }}
+                  whileInView={{ opacity: 1, y: 0, ...compactMobileAnimate }}
                   viewport={{ once: true, margin: '-20px' }}
-                  transition={{ delay: index * 0.1, duration: 0.4 }}
-                  whileHover={compact ? { y: -2, scale: 1.02 } : { y: -4 }}
+                  transition={{ delay: index * 0.12, duration: 0.45, type: 'spring', stiffness: 200, damping: 20 }}
+                  whileHover={compact ? { y: -3, scale: 1.03 } : { y: -4 }}
                    onClick={compact ? scrollToSubmissionForm : () => window.location.href = '/browse'}
-                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer ${compact ? 'sm:!transform-none sm:!rotate-0' : 'rounded-2xl'}`}
+                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer ${compact ? 'shadow-lg shadow-black/20 sm:!transform-none sm:!rotate-0 sm:shadow-none' : 'rounded-2xl'}`}
                 >
                   {!compact && (
                     <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
@@ -361,7 +369,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                     <div className="relative h-10 sm:h-14 scale-[0.5] sm:scale-[0.6] origin-center pointer-events-none">
+                     <div className="relative h-8 sm:h-14 scale-[0.45] sm:scale-[0.6] origin-center pointer-events-none">
                       {item.illustration}
                     </div>
                   ) : (
@@ -371,10 +379,10 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   )}
                    <div className={compact ? 'p-1.5 sm:p-2.5 pt-0' : 'p-5 pt-2'}>
                      {compact && (
-                       <span className="text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
+                       <span className="text-[7px] sm:text-[8px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
-                     <h3 className={`font-display font-bold ${compact ? 'text-[9px] sm:text-[11px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                     <p className={`text-muted-foreground ${compact ? 'text-[8px] sm:text-[10px] leading-tight line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                     <h3 className={`font-display font-bold ${compact ? 'text-[8px] sm:text-[11px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[7px] sm:text-[10px] leading-tight line-clamp-2' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
