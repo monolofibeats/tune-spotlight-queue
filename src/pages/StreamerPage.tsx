@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Sparkles, AlertCircle, TrendingUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { OutbidCounterDialog } from '@/components/OutbidCounterDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { StreamerProvider, useStreamer } from '@/hooks/useStreamer';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
@@ -37,8 +38,9 @@ function StreamerPageContent() {
 
   // Handle ?outbid= query param from email magic links
   const outbidSubmissionId = searchParams.get('outbid');
-  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmount: string } | null>(null);
+  const [outbidInfo, setOutbidInfo] = useState<{ songTitle: string; artistName: string; suggestedAmountCents: number; submissionId: string } | null>(null);
   const [showOutbidBanner, setShowOutbidBanner] = useState(false);
+  const [showOutbidDialog, setShowOutbidDialog] = useState(false);
 
   useEffect(() => {
     if (!outbidSubmissionId) return;
@@ -59,12 +61,12 @@ function StreamerPageContent() {
         .maybeSingle();
 
       if (sub) {
+        const amountCents = notif?.offer_amount_cents || 200;
         setOutbidInfo({
           songTitle: sub.song_title,
           artistName: sub.artist_name,
-          suggestedAmount: notif?.offer_amount_cents 
-            ? `€${(notif.offer_amount_cents / 100).toFixed(2)}` 
-            : '€2.00',
+          suggestedAmountCents: amountCents,
+          submissionId: outbidSubmissionId!,
         });
         setShowOutbidBanner(true);
       }
@@ -226,16 +228,12 @@ function StreamerPageContent() {
                     <h3 className="font-bold text-sm mb-1">You've been outbid!</h3>
                     <p className="text-xs text-muted-foreground mb-3">
                       Someone placed a higher bid on <strong className="text-foreground">"{outbidInfo.songTitle}"</strong> by {outbidInfo.artistName}. 
-                      Bid <strong className="text-primary">{outbidInfo.suggestedAmount}</strong> or more to reclaim your spot.
+                      Bid <strong className="text-primary">€{(outbidInfo.suggestedAmountCents / 100).toFixed(2)}</strong> or more to reclaim your spot.
                     </p>
                     <Button
                       size="sm"
                       variant="hero"
-                      onClick={() => {
-                        setShowOutbidBanner(false);
-                        // Scroll to submission form
-                        document.querySelector('form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
+                      onClick={() => setShowOutbidDialog(true)}
                     >
                       Place Higher Bid →
                     </Button>
@@ -246,6 +244,19 @@ function StreamerPageContent() {
           </motion.section>
         )}
       </AnimatePresence>
+
+      {/* Outbid Counter Dialog */}
+      {outbidInfo && (
+        <OutbidCounterDialog
+          open={showOutbidDialog}
+          onOpenChange={setShowOutbidDialog}
+          submissionId={outbidInfo.submissionId}
+          songTitle={outbidInfo.songTitle}
+          artistName={outbidInfo.artistName}
+          suggestedAmountCents={outbidInfo.suggestedAmountCents}
+          streamerSlug={streamer?.slug}
+        />
+      )}
 
       {/* How It Works - between hero and form */}
       {(streamer.show_how_it_works ?? true) && (
