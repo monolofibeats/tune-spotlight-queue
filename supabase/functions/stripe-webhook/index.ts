@@ -76,13 +76,167 @@ serve(async (req) => {
   // Determine payment type from metadata
   const isSubmissionPayment = metadata.type === "submission";
   const isPriorityPayment = !isSubmissionPayment && metadata.song_url;
+  const isBidPayment = metadata.type === "bid";
 
-  if (!isSubmissionPayment && !isPriorityPayment) {
-    logStep("Not a submission/priority payment, skipping", { metadata });
+  if (!isSubmissionPayment && !isPriorityPayment && !isBidPayment) {
+    logStep("Not a submission/priority/bid payment, skipping", { metadata });
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   }
 
   const sessionId = session.id;
+
+  // ─── BID PAYMENT PROCESSING ───
+  if (isBidPayment) {
+    try {
+      const submissionId = metadata.submission_id;
+      const bidAmountCents = parseInt(metadata.bid_amount_cents || '0');
+      const email = metadata.email;
+      const userId = metadata.user_id || null;
+      const streamerId = metadata.streamer_id;
+
+      logStep("Processing bid payment", { submissionId, bidAmountCents, email });
+
+      // Idempotency: check if already processed
+      const { data: alreadyProcessed } = await supabase
+        .from('submission_bids')
+        .select('id')
+        .eq('stripe_session_id', sessionId)
+        .maybeSingle();
+
+      if (alreadyProcessed) {
+        logStep("Bid already processed", { sessionId });
+        return new Response(JSON.stringify({ received: true, alreadyProcessed: true }), { status: 200 });
+      }
+
+      // Upsert bid record
+      const { data: existingBid } = await supabase
+        .from('submission_bids')
+        .select('*')
+        .eq('submission_id', submissionId)
+        .maybeSingle();
+
+      let newTotalCents: number;
+      if (existingBid) {
+        newTotalCents = existingBid.total_paid_cents + bidAmountCents;
+        await supabase
+          .from('submission_bids')
+          .update({
+            bid_amount_cents: bidAmountCents,
+            total_paid_cents: newTotalCents,
+            stripe_session_id: sessionId,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('submission_id', submissionId);
+        logStep("Bid updated", { newTotalCents });
+      } else {
+        newTotalCents = bidAmountCents;
+        await supabase
+          .from('submission_bids')
+          .insert({
+            submission_id: submissionId,
+            user_id: userId || null,
+            email,
+            bid_amount_cents: bidAmountCents,
+            total_paid_cents: newTotalCents,
+            stripe_session_id: sessionId,
+          });
+        logStep("Bid created", { newTotalCents });
+      }
+
+      // Update submission boost_amount so it sorts correctly in queue
+      await supabase
+        .from('submissions')
+        .update({
+          is_priority: true,
+          boost_amount: newTotalCents / 100,
+          amount_paid: newTotalCents / 100,
+        })
+        .eq('id', submissionId);
+
+      logStep("Submission boost updated", { submissionId, boostAmount: newTotalCents / 100 });
+
+      // Record earnings
+      if (streamerId) {
+        try {
+          await recordEarning({
+            stripeSessionId: sessionId,
+            streamerId,
+            submissionId,
+            paymentType: "bid",
+            customerEmail: email,
+          });
+          logStep("Bid earnings recorded");
+        } catch (e) {
+          logStep("Warning: Failed to record bid earnings", { error: String(e) });
+        }
+      }
+
+      // Outbid notifications for competing submissions
+      if (streamerId) {
+        try {
+          const { data: bidConfigs } = await supabase
+            .from('pricing_config')
+            .select('*')
+            .eq('config_type', 'bid_increment');
+          const bidConfig = bidConfigs?.find(r => r.streamer_id === streamerId) 
+            ?? bidConfigs?.find(r => r.streamer_id === null) 
+            ?? bidConfigs?.[0];
+          const incrementPercent = bidConfig?.min_amount_cents || 10;
+
+          const { data: competingBids } = await supabase
+            .from('submission_bids')
+            .select('*, submissions!inner(status, streamer_id)')
+            .neq('submission_id', submissionId)
+            .order('total_paid_cents', { ascending: false });
+
+          for (const bid of competingBids || []) {
+            if (
+              bid.submissions?.streamer_id === streamerId &&
+              bid.submissions?.status === 'pending' &&
+              bid.total_paid_cents > 0 &&
+              bid.total_paid_cents < newTotalCents &&
+              bid.email !== email
+            ) {
+              const suggestedBid = Math.ceil(newTotalCents * (1 + incrementPercent / 100));
+              await supabase
+                .from('bid_notifications')
+                .insert({
+                  submission_id: bid.submission_id,
+                  email: bid.email,
+                  user_id: bid.user_id || null,
+                  notification_type: 'outbid',
+                  offer_amount_cents: suggestedBid,
+                });
+              logStep("Outbid notification created", { email: bid.email, suggestedBid });
+            }
+          }
+
+          // Trigger email sending
+          await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-bid-notification`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({}),
+            }
+          ).catch(() => {});
+          logStep("Bid email notifications triggered");
+        } catch (notifErr) {
+          logStep("Outbid notification failed (non-fatal)", { error: String(notifErr) });
+        }
+      }
+
+      logStep("Bid webhook complete", { submissionId });
+      return new Response(JSON.stringify({ received: true, submissionId }), { status: 200 });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logStep("BID ERROR", { message: errorMessage });
+      return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+    }
+  }
 
   try {
     // Idempotency: check if already processed
