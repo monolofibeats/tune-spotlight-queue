@@ -240,12 +240,15 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
                   <Label className="text-sm">{t('pricing.skipLine.minPrice')}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">€</span>
-                    <Input type="number" min={0.5} max={500} step={0.5} value={skipLine.min}
-                      onChange={(e) => setSkipLine(s => ({ ...s, min: parseFloat(e.target.value) || 0.5 }))}
+                    <Input type="number" min={2.5} max={500} step={0.5} value={skipLine.min}
+                      onChange={(e) => {
+                        const val = Math.max(2.5, parseFloat(e.target.value) || 2.5);
+                        setSkipLine(s => ({ ...s, min: val }));
+                      }}
                       className="w-24 h-9 text-right" />
                   </div>
                 </div>
-                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={0.5} max={50} step={0.5} />
+                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={50} step={0.5} />
               </div>
 
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
