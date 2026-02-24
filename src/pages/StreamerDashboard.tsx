@@ -911,7 +911,18 @@ const StreamerDashboard = () => {
               </motion.div>
             )}
 
-            <Tabs defaultValue="submissions" className="space-y-6">
+            <motion.div
+              animate={dashboardShaking ? { x: [0, -4, 4, -3, 3, -1, 1, 0] } : { x: 0 }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+            >
+            <Tabs value={dashboardActiveTab} onValueChange={(tab) => {
+              if (settingsHasUnsaved && dashboardActiveTab === 'settings') {
+                setDashboardShaking(true);
+                setTimeout(() => setDashboardShaking(false), 400);
+                return;
+              }
+              setDashboardActiveTab(tab);
+            }} className="space-y-6">
               <TabsList className="glass p-1 rounded-xl">
                 <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
                   <Music className="w-4 h-4" />
@@ -956,7 +967,7 @@ const StreamerDashboard = () => {
 
               {canEdit && (
                 <TabsContent value="settings">
-                  <StreamerSettingsPanel streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} />
+                  <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
                 </TabsContent>
               )}
             </Tabs>
