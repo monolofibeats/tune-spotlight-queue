@@ -42,6 +42,7 @@ interface PricingFormState {
 
 export interface PricingSettingsHandle {
   save: () => Promise<void>;
+  discard: () => void;
   hasChanges: boolean;
 }
 
