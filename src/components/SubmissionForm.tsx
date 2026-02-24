@@ -140,6 +140,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
+  const [referralCode, setReferralCode] = useState('');
+  const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [showPriorityDialog, setShowPriorityDialog] = useState(false);
   const [showPostSubmitOffer, setShowPostSubmitOffer] = useState(false);
   const [lastSubmittedSong, setLastSubmittedSong] = useState<{
