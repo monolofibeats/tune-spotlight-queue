@@ -619,7 +619,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Form Builder Tab */}
-            <TabsContent value="form" className="space-y-6">
+            <TabsContent value="form" forceMount className={`space-y-6 ${activeTab !== 'form' ? 'hidden' : ''}`}>
               <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
