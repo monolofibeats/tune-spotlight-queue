@@ -66,6 +66,7 @@ const StreamerSettings = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const pricingRef = useRef<PricingSettingsHandle>(null);
   const [shakeKey, setShakeKey] = useState(0);
+  const [pricingHasChanges, setPricingHasChanges] = useState(false);
 
   // Form state - Profile
   const [displayName, setDisplayName] = useState('');

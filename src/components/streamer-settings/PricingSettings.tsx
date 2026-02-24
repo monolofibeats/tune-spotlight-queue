@@ -122,7 +122,9 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     const openChanged = so ? submissionsOpen !== so.is_active : false;
     const bidChanged = bi ? bidIncrementPercent !== bi.min_amount_cents || bidIncrementActive !== bi.is_active : false;
 
-    setHasChanges(skipChanged || subChanged || openChanged || bidChanged);
+    const changed = skipChanged || subChanged || openChanged || bidChanged;
+    setHasChanges(changed);
+    onChangeStatus?.(changed);
   }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
 
   const handleSave = async () => {
