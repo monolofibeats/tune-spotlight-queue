@@ -719,7 +719,7 @@ const StreamerSettings = () => {
             </TabsContent>
 
             {/* Language Tab */}
-            <TabsContent value="language" className="space-y-6">
+            <TabsContent value="language" forceMount className={`space-y-6 ${activeTab !== 'language' ? 'hidden' : ''}`}>
               <LanguageSettings
                 language={pageLanguage}
                 onChange={setPageLanguage}
