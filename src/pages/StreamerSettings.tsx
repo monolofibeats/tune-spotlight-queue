@@ -611,7 +611,7 @@ const StreamerSettings = () => {
 
             {/* Form Builder Tab */}
             <TabsContent value="form" className="space-y-6">
-              <FormFieldBuilder streamerId={streamer.id} />
+              <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
             {/* Design Tab */}
