@@ -261,7 +261,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
     if (!referralCode) return;
     navigator.clipboard.writeText(referralCode);
     setCodeCopied(true);
-    toast({ title: '10% discount code copied!', description: referralCode });
+    toast({ title: '5% discount code copied!', description: referralCode });
     setTimeout(() => setCodeCopied(false), 2000);
   };
 
