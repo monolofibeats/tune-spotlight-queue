@@ -36,7 +36,10 @@ const doneConfig = {
 export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerProps) {
   const [biddingSub, setBiddingSub] = useState<TrackedSubmission | null>(null);
 
-  if (submissions.length === 0) return null;
+  // Only show active (pending) submissions — reviewed/skipped/deleted ones are hidden
+  const activeSubmissions = submissions.filter(sub => !sub.doneStatus);
+
+  if (activeSubmissions.length === 0) return null;
 
   return (
     <>
@@ -44,7 +47,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
         <div className="flex items-center gap-2 mb-1">
           <Clock className="w-3.5 h-3.5 text-muted-foreground" />
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Your Submissions
+            Active Submissions
           </p>
         </div>
 
