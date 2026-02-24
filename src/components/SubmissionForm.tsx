@@ -727,9 +727,13 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       };
       localStorage.setItem('upstar_pending_paid_submission', JSON.stringify(pendingData));
       
+      const discountedAmount = referralDiscount 
+        ? submissionPrice * (1 - referralDiscount / 100)
+        : submissionPrice;
+
       const { data, error } = await supabase.functions.invoke('create-submission-payment', {
         body: {
-          amount: submissionPrice,
+          amount: discountedAmount,
           songUrl: songUrl || 'direct-upload',
           artistName: artistName || 'Unknown Artist',
           songTitle: songTitle || 'Untitled',
@@ -739,6 +743,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
           audioFileUrl, // Pass the uploaded file path
           streamerSlug: streamerSlug || null,
           streamerId: streamerId || null,
+          referralCode: referralDiscount ? referralCode.trim().toUpperCase() : undefined,
         },
       });
 
