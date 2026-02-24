@@ -616,7 +616,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     // Either song URL or audio file is required
     if ((showSongUrl && !songUrl && !audioFile) || (!showSongUrl && !audioFile)) {
       toast({
-        title: t('submission.missingInfo') || "Missing information",
+        title: "Missing information",
         description: showSongUrl
           ? "Please enter a song link or upload an audio file."
           : "Please upload an audio file.",
