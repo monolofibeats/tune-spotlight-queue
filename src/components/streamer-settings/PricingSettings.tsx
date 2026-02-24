@@ -382,6 +382,8 @@ export function PricingSettings({ streamerId }: PricingSettingsProps) {
         </CardContent>
       </Card>
 
+      <ReferralCodesPanel streamerId={streamerId} />
+
       <p className="text-xs text-center text-muted-foreground">
         {t('pricing.effectImmediately')}
       </p>
