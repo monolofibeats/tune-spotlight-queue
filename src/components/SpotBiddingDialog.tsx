@@ -414,7 +414,7 @@ export function SpotBiddingDialog({
                     disabled={!discountCode.trim() || isValidatingCode || discountPercent !== null}
                     onClick={() => validateDiscountCode(discountCode)}
                   >
-                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : 'Apply'}
+                    {isValidatingCode ? <Loader2 className="w-3 h-3 animate-spin" /> : discountPercent ? <Check className="w-3 h-3 text-emerald-400" /> : t('bidding.apply')}
                   </Button>
                 </div>
                 {discountPercent && (
