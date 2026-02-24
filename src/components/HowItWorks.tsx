@@ -506,10 +506,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         className="overflow-hidden"
                       >
                         <div className="mt-2 p-4 rounded-xl border border-emerald-500/25 bg-emerald-950/90 backdrop-blur-xl shadow-xl max-w-[260px] ml-auto">
-                          <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
-                            Pay a small boost fee to <span className="text-emerald-300 font-semibold">skip the queue</span>. 
-                            100% goes directly to the streamer!
-                          </p>
+                           <p className="text-xs text-emerald-200/90 leading-relaxed mb-3">
+                             Pay small fee to <span className="text-emerald-300 font-semibold">skip the queue</span> and support your favorite creator!
+                           </p>
                           <Link
                             to="/browse"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold hover:bg-emerald-500/30 transition-colors"
