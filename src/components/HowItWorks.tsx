@@ -560,7 +560,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               to="/browse"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm hover:brightness-110 transition-all hover:shadow-lg hover:shadow-primary/20"
             >
-              Find a Streamer & Submit
+              {t('howItWorks.cta')}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
