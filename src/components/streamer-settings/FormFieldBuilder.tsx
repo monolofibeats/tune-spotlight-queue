@@ -286,7 +286,7 @@ export const FormFieldBuilder = forwardRef<FormFieldBuilderHandle, FormFieldBuil
 
   return (
     <div className="space-y-6">
-      <Card className="bg-card/50 border-border/50">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg">{t('formBuilder.title')}</CardTitle>

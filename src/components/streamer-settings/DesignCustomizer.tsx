@@ -249,7 +249,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
         {/* Colors Tab */}
         <TabsContent value="colors" className="space-y-4">
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.colors.title')}</CardTitle>
               <CardDescription>{t('design.colors.desc')}</CardDescription>
@@ -286,7 +286,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
         {/* Typography Tab */}
         <TabsContent value="typography" className="space-y-4">
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.typography.fontTitle')}</CardTitle>
               <CardDescription>{t('design.typography.fontDesc')}</CardDescription>
@@ -315,7 +315,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
             </CardContent>
           </Card>
 
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.typography.buttonTitle')}</CardTitle>
               <CardDescription>{t('design.typography.buttonDesc')}</CardDescription>
@@ -343,7 +343,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
         {/* Background Tab */}
         <TabsContent value="background" className="space-y-4">
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.bg.title')}</CardTitle>
               <CardDescription>{t('design.bg.desc')}</CardDescription>
@@ -395,7 +395,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           </Card>
 
           {settings.backgroundType === 'gradient' && (
-            <Card className="bg-card/50 border-border/50">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-lg">{t('design.bg.gradientPresets')}</CardTitle>
               </CardHeader>
@@ -431,7 +431,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
           )}
 
           {settings.backgroundType === 'image' && (
-            <Card className="bg-card/50 border-border/50">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-lg">{t('design.bg.imageTitle')}</CardTitle>
                 <CardDescription>{t('design.bg.imageDesc')}</CardDescription>
@@ -449,7 +449,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
 
         {/* Effects Tab */}
         <TabsContent value="effects" className="space-y-4">
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.effects.animTitle')}</CardTitle>
               <CardDescription>{t('design.effects.animDesc')}</CardDescription>
@@ -481,7 +481,7 @@ export function DesignCustomizer({ settings, onChange }: DesignCustomizerProps) 
             </CardContent>
           </Card>
 
-          <Card className="bg-card/50 border-border/50">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg">{t('design.effects.cardTitle')}</CardTitle>
               <CardDescription>{t('design.effects.cardDesc')}</CardDescription>

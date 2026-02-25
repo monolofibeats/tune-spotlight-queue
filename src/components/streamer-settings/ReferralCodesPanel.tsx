@@ -100,7 +100,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
   }
 
   return (
-    <div className="bg-card/50 border border-border/50 rounded-xl p-5 space-y-4">
+    <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/20">

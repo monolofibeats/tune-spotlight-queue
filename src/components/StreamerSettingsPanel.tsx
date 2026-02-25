@@ -370,7 +370,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-primary/30 shadow-md backdrop-blur-md"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card/20 border border-primary/30 shadow-md backdrop-blur-md"
               >
                 <AlertTriangle className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-sm font-medium whitespace-nowrap">Unsaved changes</span>
@@ -407,7 +407,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             setActiveTab(tab);
           }} className="space-y-6">
             <ScrollArea className="w-full">
-              <TabsList className="glass p-1 rounded-xl inline-flex w-auto min-w-full">
+              <TabsList className="backdrop-blur-md bg-card/20 border border-border/30 p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
                   <TabsTrigger 
                     key={tab.id}
@@ -423,7 +423,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
             {/* Profile Tab */}
             <TabsContent value="profile" forceMount className={`space-y-6 ${activeTab !== 'profile' ? 'hidden' : ''}`}>
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg">{t('pageSettings.profile.title') || 'Basic Information'}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t('pageSettings.profile.desc') || 'Your public streamer profile information.'}
@@ -459,7 +459,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                 </div>
               </div>
 
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <Image className="w-5 h-5" />
                   {t('pageSettings.profile.images') || 'Images'}
@@ -489,7 +489,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
             {/* Content Tab */}
             <TabsContent value="content" forceMount className={`space-y-6 ${activeTab !== 'content' ? 'hidden' : ''}`}>
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
                 <p className="text-sm text-muted-foreground">{t('pageSettings.hero.desc')}</p>
                 <div className="space-y-4">
@@ -509,7 +509,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               </div>
 
               {/* Section Visibility Toggles */}
-              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg">Section Visibility</h3>
                 <p className="text-sm text-muted-foreground">Choose which sections are visible on your submit page.</p>
                 <div className="space-y-4">
@@ -585,8 +585,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
         {/* Right side: Live Preview */}
         <div className="hidden lg:block w-1/2 sticky top-24 self-start">
-          <div className="bg-card/50 border border-border/50 rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-border/50 bg-muted/30">
+          <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border/30 bg-card/10">
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium text-muted-foreground">Live Preview</span>
