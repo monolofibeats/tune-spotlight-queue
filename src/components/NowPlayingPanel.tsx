@@ -281,9 +281,9 @@ export function NowPlayingPanel({
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="mb-6 overflow-hidden"
         >
-          <div className="widget-now-playing glass-strong rounded-2xl border-2 border-primary/40 overflow-hidden shadow-lg shadow-primary/10">
+          <div className="widget-now-playing rounded-2xl border-2 border-primary/30 overflow-hidden shadow-lg shadow-primary/10 bg-card/30 backdrop-blur-xl">
             {/* Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-border/30">
+            <div className="px-6 py-4 bg-gradient-to-r from-amber-900/15 via-primary/8 to-transparent border-b border-primary/15">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                    <Music2 className="w-5 h-5 text-primary" />
@@ -354,7 +354,7 @@ export function NowPlayingPanel({
 
                   {/* Audio Player - for uploaded files */}
                   {submission.audio_file_url && (
-                    <div className="p-4 rounded-xl bg-card/50 border border-border/30 space-y-3">
+                    <div className="p-4 rounded-xl bg-card/30 border border-border/20 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Music2 className="w-4 h-4 text-primary" />
@@ -459,7 +459,7 @@ export function NowPlayingPanel({
 
                   {/* Message */}
                   {cfg.showMessage && submission.message && (
-                    <div className="p-4 rounded-xl bg-secondary/30 border border-border/30">
+                    <div className="p-4 rounded-xl bg-card/20 border border-border/20">
                       <p className="text-sm text-muted-foreground italic">
                         "{submission.message}"
                       </p>
