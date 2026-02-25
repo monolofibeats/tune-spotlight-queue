@@ -594,29 +594,7 @@ body[data-anim-style="elegant"] * {
   opacity: 1;
   transition: all 100ms ease;
 }
-/* Dashboard ambient grid — ultra-clean pulsing dot grid */
-.dashboard-ambient-glow {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: radial-gradient(circle, hsl(0 0% 100% / 0.035) 0.5px, transparent 0.5px);
-  background-size: 40px 40px;
-  animation: grid-pulse 6s ease-in-out infinite;
-  will-change: opacity;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 0%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 0%, transparent 100%);
-}
-
-@keyframes grid-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
-}
-
-/* Respect performance-light mode */
-.performance-light .dashboard-ambient-glow {
-  display: none;
-}
+/* Dashboard background — kept minimal */
 
 /* Editing mode: show grid dots background */
 .dashboard-grid.is-editing {

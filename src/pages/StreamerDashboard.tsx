@@ -868,9 +868,7 @@ const StreamerDashboard = () => {
 
   return (
     <StreamSessionProvider streamerId={streamer.id}>
-      <div className="min-h-screen bg-background bg-mesh noise relative transition-all">
-        {/* Ambient pulsing background glow — CSS-only, GPU-composited */}
-        <div className="dashboard-ambient-glow" aria-hidden="true" />
+      <div className="min-h-screen bg-background relative transition-all">
         {/* Collapsible Header */}
             {viewOptions.showHeader ? (
           <Header />
