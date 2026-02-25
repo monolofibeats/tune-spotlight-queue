@@ -1080,7 +1080,7 @@ const StreamerDashboard = () => {
                     submissions={submissions}
                     onAddToPedestal={handleAddToPedestal}
                   >
-                    <div className="glass rounded-2xl p-6 border border-border/30">
+                    <div className="rounded-2xl p-6 border border-border/20 bg-card/10 backdrop-blur-sm">
                       <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
                     </div>
                   </TopSongsDropZone>
