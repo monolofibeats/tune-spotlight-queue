@@ -336,7 +336,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6'}`}>
+        <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
             {steps.map((item, index) => {
               // Compact mobile: stacked cards with alternating left/right offsets and overlap
               const mobileCardStyles = compact ? {
@@ -353,7 +353,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               } : {};
 
               return (
-              <div key={item.step} className={`relative ${compact ? 'sm:!w-full sm:!max-w-none sm:!mx-0 sm:!mt-0' : ''}`} style={{ zIndex: compact ? 3 - index : (index === 2 ? 10 : 1), ...(compact ? mobileCardStyles : {}) }}>
+              <div key={item.step} className={`relative ${compact ? 'sm:!w-full sm:!max-w-none sm:!mx-0 sm:!mt-0' : 'h-full'}`} style={{ zIndex: compact ? 3 - index : (index === 2 ? 10 : 1), ...(compact ? mobileCardStyles : {}) }}>
                 <motion.div
                   initial={{ opacity: 0, y: compact ? 15 : 24, ...(compact ? { x: 0, rotate: 0 } : {}) }}
                   whileInView={{ opacity: 1, y: 0, ...compactMobileAnimate }}
