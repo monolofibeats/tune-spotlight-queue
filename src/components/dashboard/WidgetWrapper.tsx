@@ -22,7 +22,7 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
     <div className={`h-full flex flex-col overflow-hidden rounded-xl transition-all ${
       isEditing 
         ? 'ring-1 ring-primary/30 ring-dashed bg-card/30' 
-        : ''
+        : 'bg-card'
     } ${isPoppedOut && !isEditing ? 'opacity-50' : ''}`}>
       {/* Only show a label bar in edit mode */}
       {isEditing && (
