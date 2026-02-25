@@ -15,6 +15,9 @@ import {
   Monitor,
   Tablet,
   Smartphone,
+  User,
+  Globe,
+  Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +33,10 @@ import {
   FormFieldBuilder, 
   DesignCustomizer, 
   PricingSettings,
+  LanguageSettings,
 } from '@/components/streamer-settings';
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
+import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import { SessionManager } from '@/components/SessionManager';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
@@ -65,7 +70,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('form');
+  const [activeTab, setActiveTab] = useState('profile');
   const pricingRef = useRef<PricingSettingsHandle>(null);
   const formFieldRef = useRef<FormFieldBuilderHandle>(null);
   const streamEmbedRef = useRef<StreamEmbedConfigHandle>(null);
@@ -74,10 +79,18 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [formFieldHasChanges, setFormFieldHasChanges] = useState(false);
   const [streamEmbedHasChanges, setStreamEmbedHasChanges] = useState(false);
 
+  // Profile fields
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
+
+  // Content fields
   const [heroTitle, setHeroTitle] = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [welcomeMessage, setWelcomeMessage] = useState('');
   
+  // Design fields
   const [primaryColor, setPrimaryColor] = useState('');
   const [accentColor, setAccentColor] = useState('');
   const [fontFamily, setFontFamily] = useState('system');
@@ -99,7 +112,14 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [showPublicQueue, setShowPublicQueue] = useState(true);
   const [customCss, setCustomCss] = useState('');
 
+  // Language
+  const [pageLanguage, setPageLanguage] = useState('de');
+
   const syncFromStreamer = useCallback((s: ExtendedStreamer) => {
+    setDisplayName(s.display_name || '');
+    setBio(s.bio || '');
+    setAvatarUrl(s.avatar_url || '');
+    setBannerUrl(s.banner_url || '');
     setHeroTitle(s.hero_title || '');
     setHeroSubtitle(s.hero_subtitle || '');
     setWelcomeMessage(s.welcome_message || '');
@@ -121,9 +141,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setShowTopSongs(s.show_top_songs ?? false);
     setShowPublicQueue((s as any).show_public_queue ?? true);
     setCustomCss(s.custom_css || '');
+    setPageLanguage(s.page_language || 'de');
   }, []);
 
-  // Re-sync when the parent passes a different streamer (e.g. navigating between dashboards)
   useEffect(() => {
     setStreamer(initialStreamer as ExtendedStreamer);
   }, [initialStreamer]);
@@ -136,6 +156,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const hasUnsavedChanges = useMemo(() => {
     const s = streamer;
     return (
+      displayName !== (s.display_name || '') ||
+      bio !== (s.bio || '') ||
+      avatarUrl !== (s.avatar_url || '') ||
+      bannerUrl !== (s.banner_url || '') ||
       heroTitle !== (s.hero_title || '') ||
       heroSubtitle !== (s.hero_subtitle || '') ||
       welcomeMessage !== (s.welcome_message || '') ||
@@ -156,9 +180,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       showStreamEmbed !== (s.show_stream_embed ?? true) ||
       showTopSongs !== (s.show_top_songs ?? false) ||
       showPublicQueue !== ((s as any).show_public_queue ?? true) ||
-      customCss !== (s.custom_css || '')
+      customCss !== (s.custom_css || '') ||
+      pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
@@ -199,7 +224,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     if (!streamer) return;
     setIsSaving(true);
 
-    // Save pricing if it has changes
     try {
       if (pricingRef.current?.hasChanges) {
         await pricingRef.current.save();
@@ -208,7 +232,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       console.error('Pricing save error:', e);
     }
 
-    // Save form fields if changed
     try {
       if (formFieldRef.current?.hasChanges) {
         await formFieldRef.current.save();
@@ -217,7 +240,6 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       console.error('Form fields save error:', e);
     }
 
-    // Save stream embed if changed
     try {
       if (streamEmbedRef.current?.hasChanges) {
         await streamEmbedRef.current.save();
@@ -239,6 +261,10 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       const { data, error } = await supabase
         .from('streamers')
         .update({
+          display_name: displayName,
+          bio: bio || null,
+          avatar_url: avatarUrl || null,
+          banner_url: bannerUrl || null,
           hero_title: heroTitle || 'Submit Your Music',
           hero_subtitle: heroSubtitle || 'Get your tracks reviewed live on stream',
           welcome_message: welcomeMessage || null,
@@ -260,6 +286,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           show_top_songs: showTopSongs,
           show_public_queue: showPublicQueue,
           custom_css: customCss || null,
+          page_language: pageLanguage,
         })
         .eq('id', streamer.id)
         .select('*')
@@ -306,10 +333,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const currentPreview = previewDimensions[previewDevice];
 
   const tabs = [
+    { id: 'profile', label: t('pageSettings.tab.profile') || 'Profile', icon: User },
     { id: 'form', label: t('pageSettings.tab.form'), icon: Layout },
     { id: 'content', label: t('pageSettings.tab.content'), icon: FileText },
     { id: 'pricing', label: t('pageSettings.tab.pricing'), icon: DollarSign },
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
+    { id: 'language', label: t('pageSettings.tab.language') || 'Language', icon: Globe },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
   ];
 
@@ -392,10 +421,73 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               </TabsList>
             </ScrollArea>
 
+            {/* Profile Tab */}
+            <TabsContent value="profile" forceMount className={`space-y-6 ${activeTab !== 'profile' ? 'hidden' : ''}`}>
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">{t('pageSettings.profile.title') || 'Basic Information'}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t('pageSettings.profile.desc') || 'Your public streamer profile information.'}
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName">{t('pageSettings.profile.displayName') || 'Display Name'}</Label>
+                    <Input
+                      id="displayName"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder={t('pageSettings.profile.displayNamePlaceholder') || 'Your streamer name'}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('pageSettings.profile.profileUrl') || 'Profile URL'}</Label>
+                    <div className="flex items-center h-10 px-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                      upstar.gg/{streamer.slug}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bio">{t('pageSettings.profile.bio') || 'Bio'}</Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder={t('pageSettings.profile.bioPlaceholder') || 'Tell viewers about yourself...'}
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Image className="w-5 h-5" />
+                  {t('pageSettings.profile.images') || 'Images'}
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ImageUploadInput
+                    streamerId={streamer.id}
+                    variant="avatar"
+                    value={avatarUrl}
+                    onChange={setAvatarUrl}
+                  />
+                  <ImageUploadInput
+                    streamerId={streamer.id}
+                    variant="banner"
+                    value={bannerUrl}
+                    onChange={setBannerUrl}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Form Tab */}
             <TabsContent value="form" forceMount className={`space-y-6 ${activeTab !== 'form' ? 'hidden' : ''}`}>
               <FormFieldBuilder ref={formFieldRef} streamerId={streamer.id} onChangeStatus={setFormFieldHasChanges} />
             </TabsContent>
 
+            {/* Content Tab */}
             <TabsContent value="content" forceMount className={`space-y-6 ${activeTab !== 'content' ? 'hidden' : ''}`}>
               <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
                 <h3 className="font-semibold text-lg">{t('pageSettings.hero.title')}</h3>
@@ -453,10 +545,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               </div>
             </TabsContent>
 
+            {/* Pricing Tab */}
             <TabsContent value="pricing" forceMount className={`space-y-6 ${activeTab !== 'pricing' ? 'hidden' : ''}`}>
               <PricingSettings ref={pricingRef} streamerId={streamer.id} onChangeStatus={setPricingHasChanges} />
             </TabsContent>
 
+            {/* Design Tab */}
             <TabsContent value="design" forceMount className={`space-y-6 ${activeTab !== 'design' ? 'hidden' : ''}`}>
               <DesignCustomizer
                 settings={{ primaryColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, streamerId: streamer.id }}
@@ -473,6 +567,15 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               />
             </TabsContent>
 
+            {/* Language Tab */}
+            <TabsContent value="language" forceMount className={`space-y-6 ${activeTab !== 'language' ? 'hidden' : ''}`}>
+              <LanguageSettings
+                language={pageLanguage}
+                onChange={setPageLanguage}
+              />
+            </TabsContent>
+
+            {/* Stream Tab */}
             <TabsContent value="stream" forceMount className={`space-y-6 ${activeTab !== 'stream' ? 'hidden' : ''}`}>
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
