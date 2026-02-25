@@ -102,7 +102,7 @@ export function Header() {
   const hasMultipleStreamers = accessibleStreamers.length > 1;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/20 backdrop-blur-xl border-b border-border/30">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ export function Header() {
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border/30 p-3"
+          className="md:hidden bg-card/20 backdrop-blur-xl border-t border-border/30 p-3"
         >
           <nav className="flex flex-col gap-2">
             <div className="flex items-center justify-end pb-2 border-b border-border/30">

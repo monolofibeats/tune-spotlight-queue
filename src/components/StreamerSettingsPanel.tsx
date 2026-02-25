@@ -441,7 +441,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   </div>
                   <div className="space-y-2">
                     <Label>{t('pageSettings.profile.profileUrl') || 'Profile URL'}</Label>
-                    <div className="flex items-center h-10 px-3 bg-muted rounded-lg text-sm text-muted-foreground">
+                    <div className="flex items-center h-10 px-3 bg-card/20 backdrop-blur-md border border-border/30 rounded-lg text-sm text-muted-foreground">
                       upstar.gg/{streamer.slug}
                     </div>
                   </div>
@@ -614,7 +614,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                 </Button>
               </div>
             </div>
-            <div className="relative flex justify-center bg-muted/10" style={{ height: 'calc(100vh - 200px)' }}>
+            <div className="relative flex justify-center bg-card/10" style={{ height: 'calc(100vh - 200px)' }}>
               <iframe
                 ref={previewIframeRef}
                 key={`${previewKey}-${previewDevice}`}
