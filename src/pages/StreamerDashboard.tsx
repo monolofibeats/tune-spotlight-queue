@@ -645,7 +645,33 @@ const StreamerDashboard = () => {
         </div>
       ),
       now_playing: (
-        <div ref={nowPlayingRef}>
+        <div
+          ref={nowPlayingRef}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const subId = e.dataTransfer.getData('application/submission-id');
+            if (subId) {
+              const sub = submissions.find(s => s.id === subId);
+              if (sub) {
+                const idx = submissions.filter(s => s.status === 'pending').indexOf(sub);
+                // Trigger open in now playing
+                if (sub.audio_file_url) {
+                  getSignedAudioUrl(sub.audio_file_url).then(signedUrl => {
+                    handleOpenNowPlaying(sub, signedUrl, false, idx + 1);
+                  });
+                  handleOpenNowPlaying(sub, null, true, idx + 1);
+                } else {
+                  handleOpenNowPlaying(sub, null, false, idx + 1);
+                }
+              }
+            }
+          }}
+          className="h-full"
+        >
           <NowPlayingPanel
             submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
             isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
@@ -703,6 +729,7 @@ const StreamerDashboard = () => {
               onUpdate={canEdit ? handleUpdateSubmission : undefined}
               showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
+              draggable={statusFilter !== 'deleted'}
             />
           ))}
           {filteredSubmissions.length === 0 && (
