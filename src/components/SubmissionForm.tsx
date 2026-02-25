@@ -90,6 +90,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const getFieldOptions = (name: string) => fieldConfig.get(name)?.options?.values ?? [];
 
   const showSongUrl = getEnabled('song_url', true);
+  const showFileUpload = getEnabled('file_upload', true);
   const showArtist = getEnabled('artist_name', true);
   const showTitle = getEnabled('song_title', true);
   const showEmail = getEnabled('email', true);
@@ -118,7 +119,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const messagePlaceholder = getPlaceholder('message', t('submission.messagePlaceholder'));
 
   // Extra dynamic fields: any field_name NOT in the 5 hardcoded ones
-  const HARDCODED_FIELD_NAMES = new Set(['song_url', 'artist_name', 'song_title', 'email', 'message']);
+  const HARDCODED_FIELD_NAMES = new Set(['song_url', 'file_upload', 'artist_name', 'song_title', 'email', 'message']);
   const dynamicFields = useMemo(
     () => streamerFormFields.filter(f => !HARDCODED_FIELD_NAMES.has(f.field_name) && (f.is_enabled ?? true)),
     [streamerFormFields]
@@ -1025,13 +1026,15 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               {/* Input method toggle hint */}
               {!songUrl && !audioFile && (
                 <p className="text-xs text-muted-foreground text-center">
-                  {showSongUrl ? (
+                  {showSongUrl && showFileUpload ? (
                     <>
                       Provide a music link <span className="font-semibold">or</span> upload an audio file
                     </>
-                  ) : (
+                  ) : showSongUrl ? (
+                    <>Provide a music link</>
+                  ) : showFileUpload ? (
                     <>Upload an audio file</>
-                  )}
+                  ) : null}
                 </p>
               )}
 
@@ -1112,6 +1115,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               )}
 
               {/* Step 2: Audio File Upload - stays mounted (so glow rhythm stays globally in sync) */}
+              {showFileUpload && (
               <motion.div
                 initial={false}
                 animate={
@@ -1171,6 +1175,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                   )}
                 </div>
               </motion.div>
+              )}
 
 
               {/* Artist + Title */}
