@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
 import { 
-  LayoutDashboard, 
+   
   Music, 
   Search,
   Loader2,
@@ -1003,46 +1003,9 @@ const StreamerDashboard = () => {
           </div>
         )}
         
-        <main className={`${viewOptions.showHeader ? 'pt-24' : 'pt-4'} pb-12 px-4`}>
+        <main className={`${viewOptions.showHeader ? 'pt-20' : 'pt-2'} pb-12 px-4`}>
           <div className="w-full">
-            <div className="flex items-center justify-end gap-2 mb-4">
-              {canEdit && <DashboardBuilder {...builderProps} />}
-              <Button variant="outline" size="sm" asChild className="gap-1.5 text-xs">
-                <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-3 h-3" />
-                  {t('dashboard.viewPage')}
-                </a>
-              </Button>
-            </div>
-
-            {/* Collapsible Dashboard Header */}
-            {viewOptions.showDashboardTitle && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
-              >
-                <div className="flex items-center gap-3 flex-wrap">
-                  <LayoutDashboard className="w-8 h-8 text-primary" />
-                  <div>
-                    <h1 className="text-3xl font-display font-bold">{t('dashboard.streamerDashboard')}</h1>
-                    <p className="text-muted-foreground">
-                      {t('dashboard.managePageAt')} <span className="text-primary font-medium">upstar.gg/{streamer.slug}</span>
-                    </p>
-                  </div>
-                  {teamRole && (
-                    <span className={`ml-2 text-xs font-medium px-2.5 py-1 rounded-full border ${
-                      teamRole === 'viewer' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                      teamRole === 'editor' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                      'bg-red-500/10 text-red-400 border-red-500/30'
-                    }`}>
-                      {teamRole === 'viewer' ? '👁 Viewer' : teamRole === 'editor' ? '✏️ Editor' : '👑 Admin'}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
+            {/* Compact top bar: tabs + actions in one row */}
             <motion.div
               animate={dashboardShaking ? { x: [0, -4, 4, -3, 3, -1, 1, 0] } : { x: 0 }}
               transition={{ duration: 0.35, ease: 'easeInOut' }}
@@ -1054,25 +1017,47 @@ const StreamerDashboard = () => {
                 return;
               }
               setDashboardActiveTab(tab);
-            }} className="space-y-6">
-              <TabsList className="glass p-1 rounded-xl">
-                <TabsTrigger value="submissions" className="rounded-lg px-6 gap-2">
-                  <Music className="w-4 h-4" />
-                  {t('dashboard.submissions')}
-                </TabsTrigger>
-                {canEdit && (
-                  <TabsTrigger value="top-songs" className="rounded-lg px-6 gap-2">
-                    <Trophy className="w-4 h-4" />
-                    {t('topSongs.tab')}
+            }} className="space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <TabsList className="glass p-0.5 rounded-lg h-8">
+                  <TabsTrigger value="submissions" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                    <Music className="w-3.5 h-3.5" />
+                    {t('dashboard.submissions')}
                   </TabsTrigger>
+                  {canEdit && (
+                    <TabsTrigger value="top-songs" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                      <Trophy className="w-3.5 h-3.5" />
+                      {t('topSongs.tab')}
+                    </TabsTrigger>
+                  )}
+                  {canEdit && (
+                    <TabsTrigger value="settings" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                      <Settings className="w-3.5 h-3.5" />
+                      {t('dashboard.myPageSettings')}
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                <div className="flex items-center gap-1.5 ml-auto">
+                  {canEdit && <DashboardBuilder {...builderProps} />}
+                  <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
+                    <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-3 h-3" />
+                      {t('dashboard.viewPage')}
+                    </a>
+                  </Button>
+                </div>
+
+                {teamRole && (
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+                    teamRole === 'viewer' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                    teamRole === 'editor' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                    'bg-red-500/10 text-red-400 border-red-500/30'
+                  }`}>
+                    {teamRole === 'viewer' ? '👁 Viewer' : teamRole === 'editor' ? '✏️ Editor' : '👑 Admin'}
+                  </span>
                 )}
-                {canEdit && (
-                  <TabsTrigger value="settings" className="rounded-lg px-6 gap-2">
-                    <Settings className="w-4 h-4" />
-                    {t('dashboard.myPageSettings')}
-                  </TabsTrigger>
-                )}
-              </TabsList>
+              </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
                 <LiveAwareDashboardGrid
