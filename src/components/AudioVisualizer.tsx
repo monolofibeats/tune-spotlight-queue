@@ -422,7 +422,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       const rawDb = peak > 0 ? 20 * Math.log10(peak) : -60;
       const dbLerp = rawDb > smoothDb ? 0.5 : 0.08;
       smoothDb += (rawDb - smoothDb) * dbLerp;
-      const clampedDb = Math.max(-60, Math.min(0, smoothDb));
+      const clampedDb = Math.max(-60, Math.min(6, smoothDb));
 
       // ── Key detection ──
       if (hasAudio && data && analyser) {
@@ -1037,25 +1037,25 @@ function drawMeters(
     ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
     ctx.fill();
 
-    // Map dBFS to meter height: -60 dBFS → 0%, 0 dBFS → ~75% of meter.
-    // Only values above 0 (true clipping) push towards 100%.
-    // This gives normal loud tracks (-6 to 0 dB) comfortable headroom.
-    const dbLinear = (clampedDb + 60) / 60; // 0..1
-    const dbNorm = Math.min(dbLinear * 0.90 + Math.max(0, clampedDb) * 0.10, 1.0);
+    // Map dBFS to meter height: -60 dBFS → 0%, 0 dBFS → ~90% of meter.
+    // Values above 0 dB (clipping) push into the red zone up to +6 dB = 100%.
+    const dbLinear = (clampedDb + 60) / 66; // 0..1 over -60..+6 range
+    const dbNorm = Math.min(dbLinear, 1.0);
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-      // Bottom 70% → green/cyan (safe zone, up to ~-8 dBFS perceived)
+      // Bottom 75% → green/cyan (safe zone)
       grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
       grad2.addColorStop(0.4, 'hsla(160, 70%, 45%, 0.8)');
       grad2.addColorStop(0.7, 'hsla(120, 65%, 45%, 0.8)');
-      // 70-88% → yellow/orange warning zone
+      // 70-85% → yellow/orange warning zone
       grad2.addColorStop(0.78, 'hsla(80, 70%, 48%, 0.8)');
       grad2.addColorStop(0.85, 'hsla(45, 90%, 50%, 0.85)');
-      grad2.addColorStop(0.90, 'hsla(25, 90%, 50%, 0.85)');
-      // 88-100% → red clipping zone (only true peaks/clipping)
-      grad2.addColorStop(0.94, 'hsla(10, 85%, 50%, 0.9)');
-      grad2.addColorStop(1, 'hsla(0, 90%, 50%, 0.95)');
+      // 85-91% (0 dB) → orange
+      grad2.addColorStop(0.88, 'hsla(25, 90%, 50%, 0.85)');
+      // 91-100% (+1 to +6 dB) → red clipping zone
+      grad2.addColorStop(0.91, 'hsla(10, 85%, 50%, 0.9)');
+      grad2.addColorStop(1, 'hsla(0, 90%, 55%, 0.95)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
