@@ -1048,15 +1048,6 @@ const StreamerDashboard = () => {
                   </Button>
                 </div>
 
-                {teamRole && (
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-                    teamRole === 'viewer' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                    teamRole === 'editor' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                    'bg-red-500/10 text-red-400 border-red-500/30'
-                  }`}>
-                    {teamRole === 'viewer' ? '👁 Viewer' : teamRole === 'editor' ? '✏️ Editor' : '👑 Admin'}
-                  </span>
-                )}
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
