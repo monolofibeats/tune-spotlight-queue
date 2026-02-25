@@ -208,9 +208,13 @@ function LiveAwareDashboardGrid({
     });
   }, [isLive, phoneOptimized, dashboardLayout]);
 
+  // Force grid remount when phone-optimized mode toggles so WidthProvider re-measures
+  const gridKey = isLive && phoneOptimized ? 'phone' : 'normal';
+
   return (
     <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
       <DashboardGrid
+        key={gridKey}
         layout={effectiveLayout}
         isEditing={isBuilderEditing && canEdit}
         onLayoutChange={setDashboardLayout}
