@@ -15,6 +15,7 @@ interface AudioVisualizerProps {
   showLUFS?: boolean;
   showDBFS?: boolean;
   showKeyFinder?: boolean;
+  height?: number;
 }
 
 function parseHslTriplet(input: string) {
@@ -296,7 +297,7 @@ function keyDistance(key1: string, mode1: string, key2: string, mode2: string): 
 // ── Main Component ──
 // ═══════════════════════════════════════
 
-export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true, showKeyFinder: showKeyFinderProp = true }: AudioVisualizerProps) {
+export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true, showKeyFinder: showKeyFinderProp = true, height: heightProp = 320 }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizerMode>('spectrum');
@@ -634,7 +635,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       <canvas
         ref={canvasRef}
         className="w-full pointer-events-none"
-        style={{ height: 320 }}
+        style={{ height: heightProp }}
         aria-hidden="true"
       />
     </div>
