@@ -168,10 +168,15 @@ const StreamerDashboard = () => {
     position: 0,
   });
 
-  // Load saved layout from preset
-  const { presets, activePreset, updatePreset, deletePreset, refetch: refetchPresets } = useStreamerPresets(streamer?.id);
+  // Load saved layout from preset — poll every 10s for live remote updates
+  const { presets, activePreset, updatePreset, deletePreset, refetch: refetchPresets } = useStreamerPresets(
+    streamer?.id,
+    { pollingIntervalMs: isBuilderEditing ? undefined : 10_000 }
+  );
   
   useEffect(() => {
+    // Don't apply remote changes while actively editing
+    if (isBuilderEditing) return;
     if (activePreset?.dashboard_layout) {
       const saved = activePreset.dashboard_layout as unknown as {
         grid_layout?: Layout[];
@@ -197,7 +202,7 @@ const StreamerDashboard = () => {
         setPendingPopOuts(saved.popped_out_widgets);
       }
     }
-  }, [activePreset]);
+  }, [activePreset, isBuilderEditing]);
 
   useEffect(() => {
     if (authLoading || !user) return;
