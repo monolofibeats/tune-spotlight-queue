@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
 import { 
@@ -117,6 +117,7 @@ function LiveAwareDashboardGrid({
 
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { user, isAdmin: isGlobalAdmin, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<Streamer | null>(null);
@@ -201,39 +202,44 @@ const StreamerDashboard = () => {
   useEffect(() => {
     if (authLoading || !user) return;
 
-    const fetchStreamer = async () => {
-      let query = supabase.from('streamers').select('*');
-      if (slug) {
-        query = query.eq('slug', slug);
-      } else {
-        query = query.eq('user_id', user.id);
-      }
-      const { data, error } = await query.maybeSingle();
-      
-      // If no owned streamer profile, check team membership
-      if (!data && !slug) {
-        const { data: team } = await supabase
-          .from('streamer_team_members')
-          .select('streamer_id, role')
+    // If no slug provided, redirect to slug-based URL
+    if (!slug) {
+      const resolveSlug = async () => {
+        // Check own streamer
+        const { data: own } = await supabase
+          .from('streamers')
+          .select('slug')
           .eq('user_id', user.id)
-          .eq('invitation_status', 'accepted')
-          .limit(1)
           .maybeSingle();
-        if (team) {
+        if (own) {
+          navigate(`/streamer/${own.slug}/dashboard`, { replace: true });
+          return;
+        }
+        // Check team memberships
+        const { data: teams } = await supabase
+          .from('streamer_team_members')
+          .select('streamer_id')
+          .eq('user_id', user.id)
+          .eq('invitation_status', 'accepted');
+        if (teams && teams.length > 0) {
           const { data: teamStreamer } = await supabase
             .from('streamers')
-            .select('*')
-            .eq('id', team.streamer_id)
+            .select('slug')
+            .eq('id', teams[0].streamer_id)
             .single();
           if (teamStreamer) {
-            setStreamer(teamStreamer as Streamer);
-            setTeamRole(team.role as TeamRole);
-            return { streamer: teamStreamer, role: team.role as TeamRole };
+            navigate(`/streamer/${teamStreamer.slug}/dashboard`, { replace: true });
+            return;
           }
         }
         setIsLoading(false);
-        return null;
-      }
+      };
+      resolveSlug();
+      return;
+    }
+
+    const fetchStreamer = async () => {
+      const { data, error } = await supabase.from('streamers').select('*').eq('slug', slug).maybeSingle();
 
       // Slug-based access: check if owner or team member
       if (data) {

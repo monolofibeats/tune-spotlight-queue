@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, 
@@ -58,6 +58,7 @@ interface ExtendedStreamer extends Streamer {
 }
 
 const StreamerSettings = () => {
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const [streamer, setStreamer] = useState<ExtendedStreamer | null>(null);
@@ -122,11 +123,13 @@ const StreamerSettings = () => {
     }
 
     const fetchStreamer = async () => {
-      const { data, error } = await supabase
-        .from('streamers')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      let query = supabase.from('streamers').select('*');
+      if (slug) {
+        query = query.eq('slug', slug);
+      } else {
+        query = query.eq('user_id', user.id);
+      }
+      const { data, error } = await query.single();
 
       if (error) {
         if (error.code === 'PGRST116') {
