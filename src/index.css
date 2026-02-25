@@ -594,6 +594,57 @@ body[data-anim-style="elegant"] * {
   opacity: 1;
   transition: all 100ms ease;
 }
+/* Dashboard ambient pulsing glow — lightweight CSS-only */
+.dashboard-ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.dashboard-ambient-glow::before,
+.dashboard-ambient-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: opacity;
+}
+
+.dashboard-ambient-glow::before {
+  width: 60vw;
+  height: 50vh;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(ellipse at center, hsl(var(--primary) / 0.06) 0%, transparent 70%);
+  animation: ambient-pulse-a 8s ease-in-out infinite;
+}
+
+.dashboard-ambient-glow::after {
+  width: 50vw;
+  height: 45vh;
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(ellipse at center, hsl(var(--primary) / 0.04) 0%, transparent 70%);
+  animation: ambient-pulse-b 10s ease-in-out infinite;
+}
+
+@keyframes ambient-pulse-a {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes ambient-pulse-b {
+  0%, 100% { opacity: 0.3; transform: scale(1.05); }
+  50% { opacity: 0.9; transform: scale(0.95); }
+}
+
+/* Respect performance-light mode */
+.performance-light .dashboard-ambient-glow {
+  display: none;
+}
+
 /* Editing mode: show grid dots background */
 .dashboard-grid.is-editing {
   background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px);
