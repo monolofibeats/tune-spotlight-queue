@@ -1041,10 +1041,17 @@ function drawMeters(
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+      // -60 to -6 dBFS → green/cyan (bottom 90% of meter)
       grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
-      grad2.addColorStop(0.5, 'hsla(170, 80%, 50%, 0.8)');
-      grad2.addColorStop(0.85, 'hsla(30, 90%, 50%, 0.8)');
-      grad2.addColorStop(1, 'hsla(0, 80%, 50%, 0.9)');
+      grad2.addColorStop(0.5, 'hsla(160, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.85, 'hsla(120, 65%, 45%, 0.8)');
+      // -6 to -2 dBFS → orange warning zone
+      grad2.addColorStop(0.90, 'hsla(80, 70%, 48%, 0.8)');
+      grad2.addColorStop(0.93, 'hsla(45, 90%, 50%, 0.85)');
+      grad2.addColorStop(0.965, 'hsla(25, 90%, 50%, 0.85)');
+      // -2 to 0 dBFS → red clipping zone
+      grad2.addColorStop(0.98, 'hsla(10, 85%, 50%, 0.9)');
+      grad2.addColorStop(1, 'hsla(0, 90%, 50%, 0.95)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
