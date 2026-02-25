@@ -94,6 +94,14 @@ const App = () => (
                       }
                     />
                     <Route
+                      path="/streamer/:slug/settings"
+                      element={
+                        <ProtectedRoute>
+                          <StreamerSettings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path="/streamer/payments"
                       element={
                         <ProtectedRoute>
@@ -102,7 +110,23 @@ const App = () => (
                       }
                     />
                     <Route
+                      path="/streamer/:slug/payments"
+                      element={
+                        <ProtectedRoute>
+                          <StreamerPayments />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
                       path="/streamer/statistics"
+                      element={
+                        <ProtectedRoute>
+                          <StreamerStatistics />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/streamer/:slug/statistics"
                       element={
                         <ProtectedRoute>
                           <StreamerStatistics />

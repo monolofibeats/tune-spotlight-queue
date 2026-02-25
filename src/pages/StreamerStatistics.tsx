@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BarChart3, Loader2, Music, Eye, CheckCircle, DollarSign, TrendingUp, Users } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -20,6 +20,7 @@ interface SubmissionStats {
 }
 
 const StreamerStatistics = () => {
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
@@ -34,22 +35,28 @@ const StreamerStatistics = () => {
     if (!user) { navigate('/auth'); return; }
 
     const init = async () => {
-      // Try as owner first, then as team member
+      // Try by slug first, then as owner, then as team member
       let s: any = null;
-      const { data: ownStreamer } = await supabase.from('streamers').select('*').eq('user_id', user.id).maybeSingle();
-      if (ownStreamer) {
-        s = ownStreamer;
-      } else {
-        const { data: teamMember } = await supabase
-          .from('streamer_team_members')
-          .select('streamer_id')
-          .eq('user_id', user.id)
-          .eq('invitation_status', 'accepted')
-          .limit(1)
-          .maybeSingle();
-        if (teamMember) {
-          const { data: teamStreamer } = await supabase.from('streamers').select('*').eq('id', teamMember.streamer_id).single();
-          s = teamStreamer;
+      if (slug) {
+        const { data: slugStreamer } = await supabase.from('streamers').select('*').eq('slug', slug).maybeSingle();
+        if (slugStreamer) s = slugStreamer;
+      }
+      if (!s) {
+        const { data: ownStreamer } = await supabase.from('streamers').select('*').eq('user_id', user.id).maybeSingle();
+        if (ownStreamer) {
+          s = ownStreamer;
+        } else {
+          const { data: teamMember } = await supabase
+            .from('streamer_team_members')
+            .select('streamer_id')
+            .eq('user_id', user.id)
+            .eq('invitation_status', 'accepted')
+            .limit(1)
+            .maybeSingle();
+          if (teamMember) {
+            const { data: teamStreamer } = await supabase.from('streamers').select('*').eq('id', teamMember.streamer_id).single();
+            s = teamStreamer;
+          }
         }
       }
       if (!s) { navigate('/'); return; }
