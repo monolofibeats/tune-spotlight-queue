@@ -398,6 +398,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       // ── LUFS & dB ──
       let rms = 0;
       let peak = 0;
+      let clipCount = 0;
       if (analyser && tdData && hasAudio) {
         analyser.getFloatTimeDomainData(tdData as Float32Array<ArrayBuffer>);
         let sumSq = 0;
@@ -405,6 +406,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
           sumSq += tdData[i] * tdData[i];
           const abs = Math.abs(tdData[i]);
           if (abs > peak) peak = abs;
+          if (abs >= 0.99) clipCount++;
         }
         rms = Math.sqrt(sumSq / tdData.length);
       }
@@ -419,7 +421,11 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       }
       const clampedLufs = Math.max(-60, Math.min(0, integratedLufs));
 
-      const rawDb = peak > 0 ? 20 * Math.log10(peak) : -60;
+      // Detect clipping: Web Audio clips samples at ±1.0, so we estimate
+      // overshoot from the ratio of clipped samples to push dB above 0
+      const clipRatio = tdData ? clipCount / tdData.length : 0;
+      const clipBoost = clipRatio > 0.005 ? Math.min(clipRatio * 80, 6) : 0;
+      const rawDb = peak > 0 ? 20 * Math.log10(peak) + clipBoost : -60;
       const dbLerp = rawDb > smoothDb ? 0.5 : 0.08;
       smoothDb += (rawDb - smoothDb) * dbLerp;
       const clampedDb = Math.max(-60, Math.min(6, smoothDb));
