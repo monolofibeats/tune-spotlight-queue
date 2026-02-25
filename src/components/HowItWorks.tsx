@@ -443,10 +443,10 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.4, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-3 left-0 right-0`}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-4 -bottom-4 left-2 right-2`}
                         style={{ zIndex: -1 }}
                       >
-                        <div className="p-3 rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col">
+                        <div className="h-full rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col justify-center p-3">
                           <div className="flex items-center gap-1.5 mb-2">
                             <div className="w-5 h-5 rounded-md bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
                               <Zap className="w-3 h-3 text-emerald-400" />
