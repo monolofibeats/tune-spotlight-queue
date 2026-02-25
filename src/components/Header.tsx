@@ -238,7 +238,7 @@ export function Header() {
                       {t('nav.settings')}
                     </Link>
                   </DropdownMenuItem>
-                  {isAdmin && (
+                  {isAdmin && !isStreamer && (
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
                         <LayoutDashboard className="w-4 h-4" />
