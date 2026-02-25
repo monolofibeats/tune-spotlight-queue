@@ -11,8 +11,8 @@ const DOT_COUNT = 60;
 const CONNECTION_DIST = 140;
 const DOT_RADIUS = 1.8;
 const DOT_SPEED = 0.35;
-const DOT_COLOR = 'rgba(255,235,180,0.45)';
-const LINE_COLOR_BASE = [255, 240, 190];
+const DOT_COLOR = 'rgba(255,255,255,0.5)';
+const LINE_COLOR_BASE = [255, 255, 255];
 
 export function ConstellationBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,10 +76,10 @@ export function ConstellationBackground() {
           const dy = dots[i].y - dots[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < CONNECTION_DIST) {
-            const alpha = (1 - dist / CONNECTION_DIST) * 0.12;
+            const alpha = (1 - dist / CONNECTION_DIST) * 0.25;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(${LINE_COLOR_BASE[0]},${LINE_COLOR_BASE[1]},${LINE_COLOR_BASE[2]},${alpha})`;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.8;
             ctx.moveTo(dots[i].x, dots[i].y);
             ctx.lineTo(dots[j].x, dots[j].y);
             ctx.stroke();
