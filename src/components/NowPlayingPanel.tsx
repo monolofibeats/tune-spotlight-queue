@@ -378,9 +378,9 @@ export function NowPlayingPanel({
                         onAudioElement={handleAudioElement}
                       />
                       
-                      {/* Audio Visualizer */}
-                      {cfg.showVisualizer && (
-                        <AudioVisualizer key={audioUrl || ''} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} showKeyFinder={cfg.showKeyFinder} />
+                      {/* Audio Visualizer — only render once audio URL is loaded */}
+                      {cfg.showVisualizer && audioUrl && (
+                        <AudioVisualizer key={audioUrl} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} showKeyFinder={cfg.showKeyFinder} />
                       )}
                       
                       {/* Stem Separation */}
