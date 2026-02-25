@@ -1023,7 +1023,7 @@ const StreamerDashboard = () => {
               setDashboardActiveTab(tab);
             }} className="space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <TabsList className="glass p-0.5 rounded-lg h-8">
+                <TabsList className="p-0.5 rounded-lg h-8">
                   <TabsTrigger value="submissions" className="rounded-md px-3 gap-1.5 text-xs h-7">
                     <Music className="w-3.5 h-3.5" />
                     {t('dashboard.submissions')}
