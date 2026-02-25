@@ -1041,7 +1041,7 @@ function drawMeters(
     // Only values above 0 (true clipping) push towards 100%.
     // This gives normal loud tracks (-6 to 0 dB) comfortable headroom.
     const dbLinear = (clampedDb + 60) / 60; // 0..1
-    const dbNorm = Math.min(dbLinear * 0.75 + Math.max(0, clampedDb) * 0.25, 1.0);
+    const dbNorm = Math.min(dbLinear * 0.90 + Math.max(0, clampedDb) * 0.10, 1.0);
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
