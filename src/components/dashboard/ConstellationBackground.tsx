@@ -111,7 +111,13 @@ export function ConstellationBackground() {
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none z-0"
       aria-hidden="true"
-      style={{ opacity: 0.6 }}
+      style={{
+        opacity: 0.6,
+        willChange: 'transform',
+        imageRendering: 'auto',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)',
+      }}
     />
   );
 }

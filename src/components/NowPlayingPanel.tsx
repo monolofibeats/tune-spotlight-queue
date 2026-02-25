@@ -281,13 +281,13 @@ export function NowPlayingPanel({
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="mb-6 overflow-hidden"
         >
-          <div className="widget-now-playing rounded-2xl border-2 border-primary/30 overflow-hidden shadow-lg shadow-primary/10 bg-card/30 backdrop-blur-xl">
+          <div className="widget-now-playing rounded-2xl border-2 border-yellow-500/30 overflow-hidden shadow-lg shadow-yellow-500/20 bg-card/30 backdrop-blur-xl">
             {/* Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-amber-900/15 via-primary/8 to-transparent border-b border-primary/15">
+            <div className="px-6 py-4 bg-gradient-to-r from-yellow-500/15 via-amber-500/8 to-transparent border-b border-yellow-500/20">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                   <Music2 className="w-5 h-5 text-primary" />
-                   <span className="text-sm font-semibold text-primary">{t('nowPlaying.title')}</span>
+                   <Music2 className="w-5 h-5 text-yellow-500" />
+                   <span className="text-sm font-semibold text-yellow-500">{t('nowPlaying.title')}</span>
                  </div>
                 
                 <div className="flex-1" />
