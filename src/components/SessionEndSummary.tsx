@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Music2, Clock, Euro, Star, TrendingUp, Mic2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import shootingStar from '@/assets/upstar-shooting-star.png';
+import shootingStar from '@/assets/upstar-star-hires.png';
 
 interface SessionEndSummaryProps {
   open: boolean;
@@ -55,6 +55,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     totalSubmissions: number;
     prioritySubmissions: number;
     totalEarnings: number;
+    platformFees: number;
   } | null>(null);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
     const [subRes, earningsRes] = await Promise.all([
       supabase.from('submissions').select('id, is_priority').eq('streamer_id', streamerId)
         .gte('created_at', startedAt).lte('created_at', endedAt),
-      supabase.from('streamer_earnings').select('streamer_share_cents').eq('streamer_id', streamerId)
+      supabase.from('streamer_earnings').select('streamer_share_cents, platform_fee_cents, stripe_fee_cents').eq('streamer_id', streamerId)
         .gte('created_at', startedAt).lte('created_at', endedAt),
     ]);
     const subs = subRes.data || [];
@@ -80,6 +81,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
       totalSubmissions: subs.length,
       prioritySubmissions: subs.filter(s => s.is_priority).length,
       totalEarnings: earnings.reduce((sum, e) => sum + (e.streamer_share_cents || 0), 0) / 100,
+      platformFees: earnings.reduce((sum, e) => sum + (e.platform_fee_cents || 0) + (e.stripe_fee_cents || 0), 0) / 100,
     });
   };
 
@@ -186,7 +188,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                     { icon: Clock, label: 'Duration', value: <CountUp to={Math.floor(stats.durationSeconds / 60)} suffix="m" delay={(STATS_DELAY + 0.2) * 1000} /> },
                     { icon: Music2, label: 'Submissions', value: <CountUp to={stats.totalSubmissions} delay={(STATS_DELAY + 0.3) * 1000} /> },
                     { icon: Star, label: 'Priority', value: <CountUp to={stats.prioritySubmissions} delay={(STATS_DELAY + 0.4) * 1000} /> },
-                    { icon: Euro, label: 'Earnings', value: <CountUp to={stats.totalEarnings} decimals={2} prefix="€" delay={(STATS_DELAY + 0.5) * 1000} /> },
+                    { icon: Euro, label: 'Your Earnings', value: <CountUp to={stats.totalEarnings} decimals={2} prefix="€" delay={(STATS_DELAY + 0.5) * 1000} />, sub: `Platform: €${stats.platformFees.toFixed(2)}` },
                   ].map((item, i) => {
                     const Icon = item.icon;
                     return (
@@ -206,6 +208,9 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                         <Icon className="w-5 h-5 text-yellow-300 mb-1.5" />
                         <span className="text-xs text-white/60 uppercase tracking-wider font-bold mb-1">{item.label}</span>
                         <span className="text-3xl font-black text-white leading-none">{item.value}</span>
+                        {'sub' in item && item.sub && (
+                          <span className="text-[10px] text-white/40 mt-1">{item.sub}</span>
+                        )}
                       </motion.div>
                     );
                   })}
