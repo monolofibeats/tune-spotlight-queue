@@ -1037,10 +1037,11 @@ function drawMeters(
     ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
     ctx.fill();
 
-    // Non-linear mapping: compress upper range so normal songs (-12 to -3 dB)
-    // sit around 60-75% of the meter. Only true clipping reaches the top.
+    // Map dBFS to meter height: -60 dBFS → 0%, 0 dBFS → ~75% of meter.
+    // Only values above 0 (true clipping) push towards 100%.
+    // This gives normal loud tracks (-6 to 0 dB) comfortable headroom.
     const dbLinear = (clampedDb + 60) / 60; // 0..1
-    const dbNorm = Math.pow(dbLinear, 10.0);
+    const dbNorm = Math.min(dbLinear * 0.75 + Math.max(0, clampedDb) * 0.25, 1.0);
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
