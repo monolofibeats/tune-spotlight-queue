@@ -700,7 +700,7 @@ export function NowPlayingPanel({
                     <span className="text-xs text-muted-foreground mr-2">{t('nowPlaying.actions')}</span>
                     <Button
                       size="sm"
-                      className="h-8 text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                      className="h-8 text-xs gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
                       onClick={() => onStatusChange(submission.id, 'reviewed')}
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
@@ -708,7 +708,7 @@ export function NowPlayingPanel({
                     </Button>
                     <Button
                       size="sm"
-                      className="h-8 text-xs gap-1.5 bg-red-600/80 hover:bg-red-600 text-white border-0"
+                      className="h-8 text-xs gap-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
                       onClick={() => onStatusChange(submission.id, 'skipped')}
                     >
                       <SkipForward className="w-3.5 h-3.5" />
