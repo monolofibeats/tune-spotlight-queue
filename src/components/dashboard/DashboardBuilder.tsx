@@ -230,8 +230,9 @@ export function DashboardBuilder({
 
   if (!isEditing) {
     return (
-      <Button variant="ghost" size="icon" onClick={handleStartEditing} className="h-8 w-8" title={t('builder.editLayout')}>
-        <Pencil className="w-4 h-4" />
+      <Button variant="ghost" size="sm" onClick={handleStartEditing} className="h-7 gap-1.5 text-xs px-2" title={t('builder.editLayout')}>
+        Edit
+        <Pencil className="w-3.5 h-3.5" />
       </Button>
     );
   }
