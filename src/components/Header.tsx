@@ -297,7 +297,7 @@ export function Header() {
             </div>
             
             {/* Streamer Mobile Menu */}
-            {isStreamer && !isAdmin && (
+            {isStreamer && (
               <>
                 {accessibleStreamers.map(s => (
                   <Link key={s.id} to={getDashboardLink(s)} onClick={() => setMobileMenuOpen(false)}>
@@ -356,7 +356,7 @@ export function Header() {
               </>
             )}
             
-            {isAdmin ? (
+            {isAdmin && !isStreamer ? (
               <>
                 <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-sm">
