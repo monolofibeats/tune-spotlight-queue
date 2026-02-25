@@ -404,7 +404,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-8 -right-6`}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-7 right-3`}
                         style={{ zIndex: -1 }}
                       >
                         <motion.div
@@ -443,7 +443,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.4, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-4 -bottom-4 left-2 right-2`}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-3 -bottom-3 left-3 right-3`}
                         style={{ zIndex: -1 }}
                       >
                         <div className="h-full rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col justify-center p-3">
