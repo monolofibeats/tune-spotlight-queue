@@ -9,10 +9,10 @@ interface Dot {
 
 const DOT_COUNT = 60;
 const CONNECTION_DIST = 140;
-const DOT_RADIUS = 1.5;
-const DOT_SPEED = 0.25;
-const DOT_COLOR = 'rgba(255,255,255,0.35)';
-const LINE_COLOR_BASE = [255, 255, 255];
+const DOT_RADIUS = 1.8;
+const DOT_SPEED = 0.35;
+const DOT_COLOR = 'rgba(255,235,180,0.45)';
+const LINE_COLOR_BASE = [255, 240, 190];
 
 export function ConstellationBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
