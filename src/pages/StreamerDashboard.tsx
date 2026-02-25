@@ -868,7 +868,7 @@ const StreamerDashboard = () => {
 
   return (
     <StreamSessionProvider streamerId={streamer.id}>
-      <div className="min-h-screen bg-background relative transition-all" style={{ backgroundImage: 'radial-gradient(circle, hsl(0 0% 100% / 0.06) 1px, transparent 1px)', backgroundSize: '36px 36px' }}>
+      <div className="min-h-screen bg-background relative transition-all" style={{ backgroundImage: 'radial-gradient(circle, hsl(0 0% 100% / 0.12) 1.5px, transparent 1.5px)', backgroundSize: '36px 36px' }}>
         {/* Collapsible Header */}
             {viewOptions.showHeader ? (
           <Header />
