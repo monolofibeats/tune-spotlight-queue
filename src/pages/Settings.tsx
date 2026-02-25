@@ -11,18 +11,10 @@ import {
   ArrowLeft,
   Bell,
   Globe,
-  Moon,
-  Phone,
-  Mic,
-  Video,
-  Monitor,
-  Link as LinkIcon,
   Users,
-  Image,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,8 +27,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { LanguageSettings, TeamManager } from '@/components/streamer-settings';
-import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
+import { TeamManager } from '@/components/streamer-settings';
 import type { Streamer } from '@/types/streamer';
 
 interface Profile {
@@ -65,7 +56,6 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
 
-
   // Notifications
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
@@ -75,19 +65,9 @@ export default function Settings() {
   // Language
   const [language, setLanguage] = useState<string>(currentLanguage || 'de');
 
-  // Streamer-specific state
+  // Streamer-specific state (for team management only)
   const [streamerData, setStreamerData] = useState<Streamer | null>(null);
-  const [streamerTeamRole, setStreamerTeamRole] = useState<'viewer' | 'editor' | 'admin' | null>(null); // null = owner
-  const [streamerDisplayName, setStreamerDisplayName] = useState('');
-  const [streamerBio, setStreamerBio] = useState('');
-  const [streamerAvatarUrl, setStreamerAvatarUrl] = useState('');
-  const [streamerBannerUrl, setStreamerBannerUrl] = useState('');
-  const [pageLanguage, setPageLanguage] = useState('de');
-  const [twitchUrl, setTwitchUrl] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [twitterUrl, setTwitterUrl] = useState('');
+  const [streamerTeamRole, setStreamerTeamRole] = useState<'viewer' | 'editor' | 'admin' | null>(null);
 
   // Voice & Video
   const [selectedMicrophone, setSelectedMicrophone] = useState('default');
@@ -104,16 +84,13 @@ export default function Settings() {
     }
     if (user) {
       fetchProfile();
-      // Load streamer data for streamers, team members, AND admins
       if (isStreamer || isAdmin) fetchStreamerData();
     }
   }, [user, authLoading, navigate, isStreamer, isAdmin]);
 
   const fetchStreamerData = async () => {
     if (!user) return;
-    // Check if owner
     let { data } = await supabase.from('streamers').select('*').eq('user_id', user.id).maybeSingle();
-    // Check team membership
     if (!data) {
       const { data: team } = await supabase
         .from('streamer_team_members')
@@ -134,16 +111,6 @@ export default function Settings() {
     }
     if (data) {
       setStreamerData(data as Streamer);
-      setStreamerDisplayName(data.display_name || '');
-      setStreamerBio(data.bio || '');
-      setStreamerAvatarUrl(data.avatar_url || '');
-      setStreamerBannerUrl(data.banner_url || '');
-      setPageLanguage(data.page_language || 'de');
-      setTwitchUrl(data.twitch_url || '');
-      setYoutubeUrl(data.youtube_url || '');
-      setTiktokUrl(data.tiktok_url || '');
-      setInstagramUrl(data.instagram_url || '');
-      setTwitterUrl(data.twitter_url || '');
     }
   };
 
@@ -182,7 +149,6 @@ export default function Settings() {
       } catch {}
     }
   }, []);
-
 
   // Apply language changes immediately
   useEffect(() => {
@@ -251,26 +217,6 @@ export default function Settings() {
         phoneNumber,
       }));
 
-      // Save streamer data if applicable
-      if (streamerData) {
-        const { error: streamerError } = await supabase
-          .from('streamers')
-          .update({
-            display_name: streamerDisplayName,
-            bio: streamerBio || null,
-            avatar_url: streamerAvatarUrl || null,
-            banner_url: streamerBannerUrl || null,
-            page_language: pageLanguage,
-            twitch_url: twitchUrl || null,
-            youtube_url: youtubeUrl || null,
-            tiktok_url: tiktokUrl || null,
-            instagram_url: instagramUrl || null,
-            twitter_url: twitterUrl || null,
-          })
-          .eq('id', streamerData.id);
-        if (streamerError) throw streamerError;
-      }
-
       toast({ title: t('settings.saved'), description: t('settings.savedDesc') });
       fetchProfile();
     } catch (error) {
@@ -320,17 +266,13 @@ export default function Settings() {
   }
 
   const hasStreamerAccess = (isStreamer || isAdmin) && !!streamerData;
-  // Team management only for owners (streamerTeamRole === null) and team admins
   const canManageTeam = hasStreamerAccess && (streamerTeamRole === null || streamerTeamRole === 'admin' || isAdmin);
 
   const tabs = [
     { id: 'profile', label: t('settings.tab.profile'), icon: User },
     { id: 'notifications', label: t('settings.tab.notifications'), icon: Bell },
     { id: 'language', label: t('settings.tab.language'), icon: Globe },
-    ...(hasStreamerAccess ? [
-      { id: 'streamer-profile', label: t('settings.tab.streamerProfile'), icon: User },
-      ...(canManageTeam ? [{ id: 'team', label: t('settings.tab.team'), icon: Users }] : []),
-    ] : []),
+    ...(canManageTeam ? [{ id: 'team', label: t('settings.tab.team'), icon: Users }] : []),
   ];
 
   return (
@@ -467,70 +409,7 @@ export default function Settings() {
                   <p className="text-xs text-muted-foreground">{t('settings.language.platformDesc')}</p>
                 </div>
               </div>
-
-              {/* Page Language (streamer only) */}
-              {hasStreamerAccess && (
-                <LanguageSettings language={pageLanguage} onChange={setPageLanguage} />
-              )}
             </TabsContent>
-
-
-            {/* Streamer Profile Tab */}
-            {hasStreamerAccess && (
-              <TabsContent value="streamer-profile" className="space-y-6">
-                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">{t('settings.streamer.title')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.streamer.subtitle')} — upstar.gg/{streamerData.slug}
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="streamerDisplayName">{t('settings.streamer.displayName')}</Label>
-                      <Input
-                        id="streamerDisplayName"
-                        value={streamerDisplayName}
-                        onChange={(e) => setStreamerDisplayName(e.target.value)}
-                        placeholder={t('settings.streamer.displayNamePlaceholder')}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="streamerBio">{t('settings.streamer.bio')}</Label>
-                    <Textarea
-                      id="streamerBio"
-                      value={streamerBio}
-                      onChange={(e) => setStreamerBio(e.target.value)}
-                      placeholder={t('settings.streamer.bioPlaceholder')}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Image className="w-5 h-5" />
-                    {t('settings.streamer.images')}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ImageUploadInput
-                      streamerId={streamerData.id}
-                      variant="avatar"
-                      value={streamerAvatarUrl}
-                      onChange={setStreamerAvatarUrl}
-                    />
-                    <ImageUploadInput
-                      streamerId={streamerData.id}
-                      variant="banner"
-                      value={streamerBannerUrl}
-                      onChange={setStreamerBannerUrl}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-            )}
-
 
             {/* Team Tab */}
             {canManageTeam && (
