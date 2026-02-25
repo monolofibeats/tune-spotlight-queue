@@ -109,6 +109,7 @@ interface NowPlayingPanelProps {
   onDelete?: (id: string) => void;
   onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
+  compactVisualizer?: boolean;
 }
 
 // Social platform icons mapping
@@ -135,6 +136,7 @@ export function NowPlayingPanel({
   onDelete,
   onAddToPedestal,
   config,
+  compactVisualizer,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
   const cfg = {
@@ -356,7 +358,7 @@ export function NowPlayingPanel({
                     {/* Audio Visualizer — only when enabled & URL loaded */}
                     {cfg.showVisualizer && audioUrl && (
                       <div className="px-2 pb-2">
-                        <AudioVisualizer key={audioUrl} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} showKeyFinder={cfg.showKeyFinder} />
+                        <AudioVisualizer key={audioUrl} audioElement={audioEl} className="rounded-lg" showLUFS={cfg.showLUFS} showDBFS={cfg.showDBFS} showKeyFinder={cfg.showKeyFinder} height={compactVisualizer ? 160 : 320} />
                       </div>
                     )}
                     

@@ -772,6 +772,7 @@ const StreamerDashboard = () => {
             onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
             onAddToPedestal={handleAddToPedestal}
             config={npConfig}
+            compactVisualizer={phoneOptimized}
           />
         </NowPlayingDropZone>
       ),
