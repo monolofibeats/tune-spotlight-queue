@@ -654,35 +654,38 @@ export function NowPlayingPanel({
                     <SkipForward className="w-4 h-4 shrink-0" />
                     <span className="truncate">{t('nowPlaying.skip')}</span>
                   </Button>
+                </div>
+                <div className="flex items-center justify-center gap-1.5 mt-2">
+                  {onAddToPedestal && (
+                    <>
+                      <Trophy className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      {[1, 2, 3].map(pos => (
+                        <Button
+                          key={pos}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs gap-1 px-2.5"
+                          onClick={() => onAddToPedestal(submission.id, pos)}
+                          title={`Add to Spot #${pos}`}
+                        >
+                          {pos === 1 ? <Crown className="w-3.5 h-3.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-3.5 h-3.5 text-slate-300" /> : <Award className="w-3.5 h-3.5 text-amber-600" />}
+                          #{pos}
+                        </Button>
+                      ))}
+                    </>
+                  )}
+                  <div className="flex-1" />
                   {onDelete && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 text-xs gap-1.5 px-3 text-destructive hover:text-destructive shrink-0"
+                      className="h-8 text-xs gap-1.5 px-2.5 text-destructive hover:text-destructive shrink-0"
                       onClick={() => onDelete(submission.id)}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   )}
                 </div>
-                {onAddToPedestal && (
-                  <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <Trophy className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    {[1, 2, 3].map(pos => (
-                      <Button
-                        key={pos}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-xs gap-1 px-2.5"
-                        onClick={() => onAddToPedestal(submission.id, pos)}
-                        title={`Add to Spot #${pos}`}
-                      >
-                        {pos === 1 ? <Crown className="w-3.5 h-3.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-3.5 h-3.5 text-slate-300" /> : <Award className="w-3.5 h-3.5 text-amber-600" />}
-                        #{pos}
-                      </Button>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
