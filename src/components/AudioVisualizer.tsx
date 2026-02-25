@@ -1037,20 +1037,24 @@ function drawMeters(
     ctx.roundRect(dbX, meterTop, meterW, meterH, 4);
     ctx.fill();
 
-    const dbNorm = (clampedDb + 60) / 60;
+    // Non-linear mapping: compress upper range so normal songs (-12 to -3 dB)
+    // sit around 65-80% of the meter. Only true clipping reaches the top.
+    // Linear 0..1 from -60..0, then apply power curve to compress peaks.
+    const dbLinear = (clampedDb + 60) / 60; // 0..1
+    const dbNorm = Math.pow(dbLinear, 1.6); // compress: -6dB (linear 0.9) → ~0.84, -3dB (0.95) → ~0.93
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-      // -60 to -6 dBFS → green/cyan (bottom 90% of meter)
+      // Bottom 70% → green/cyan (safe zone, up to ~-8 dBFS perceived)
       grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
-      grad2.addColorStop(0.5, 'hsla(160, 70%, 45%, 0.8)');
-      grad2.addColorStop(0.85, 'hsla(120, 65%, 45%, 0.8)');
-      // -6 to -2 dBFS → orange warning zone
-      grad2.addColorStop(0.90, 'hsla(80, 70%, 48%, 0.8)');
-      grad2.addColorStop(0.93, 'hsla(45, 90%, 50%, 0.85)');
-      grad2.addColorStop(0.965, 'hsla(25, 90%, 50%, 0.85)');
-      // -2 to 0 dBFS → red clipping zone
-      grad2.addColorStop(0.98, 'hsla(10, 85%, 50%, 0.9)');
+      grad2.addColorStop(0.4, 'hsla(160, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.7, 'hsla(120, 65%, 45%, 0.8)');
+      // 70-88% → yellow/orange warning zone
+      grad2.addColorStop(0.78, 'hsla(80, 70%, 48%, 0.8)');
+      grad2.addColorStop(0.85, 'hsla(45, 90%, 50%, 0.85)');
+      grad2.addColorStop(0.90, 'hsla(25, 90%, 50%, 0.85)');
+      // 88-100% → red clipping zone (only true peaks/clipping)
+      grad2.addColorStop(0.94, 'hsla(10, 85%, 50%, 0.9)');
       grad2.addColorStop(1, 'hsla(0, 90%, 50%, 0.95)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
