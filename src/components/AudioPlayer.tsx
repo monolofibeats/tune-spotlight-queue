@@ -279,6 +279,8 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         onEnded?.();
       };
       const handleError = () => {
+        // Don't flag error when src is empty/null (still loading)
+        if (!src) return;
         setIsPlaying(false);
         setDuration(0);
         setCurrentTime(0);
