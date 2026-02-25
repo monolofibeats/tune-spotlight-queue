@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -84,6 +84,9 @@ export function useStreamerPresets(streamerId?: string, options?: { pollingInter
   const [activePreset, setActivePreset] = useState<StreamerPreset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Track last-seen JSON to avoid unnecessary re-renders during polling
+  const lastDataRef = useRef<string>('');
+
   const fetchPresets = useCallback(async () => {
     if (!streamerId) return;
     
@@ -94,6 +97,14 @@ export function useStreamerPresets(streamerId?: string, options?: { pollingInter
       .order('created_at');
 
     if (!error && data) {
+      const json = JSON.stringify(data);
+      // Skip state updates if data hasn't changed (prevents re-render cascade)
+      if (json === lastDataRef.current) {
+        setIsLoading(false);
+        return;
+      }
+      lastDataRef.current = json;
+
       const typed = data.map(p => ({
         ...p,
         theme_config: (p.theme_config || {}) as Record<string, unknown>,
