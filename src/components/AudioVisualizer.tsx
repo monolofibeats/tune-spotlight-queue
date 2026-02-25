@@ -1040,25 +1040,19 @@ function drawMeters(
     const dbNorm = (clampedDb + 60) / 60;
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
-      // Color based on actual dB value, not bar position
-      let fillColor: string;
-      if (clampedDb >= -1) {
-        // Clipping / near-clipping → red
-        fillColor = 'hsla(0, 85%, 50%, 0.9)';
-      } else if (clampedDb >= -3) {
-        // Hot → orange
-        fillColor = 'hsla(25, 90%, 50%, 0.85)';
-      } else if (clampedDb >= -6) {
-        // Warm → yellow-green
-        fillColor = 'hsla(55, 80%, 48%, 0.8)';
-      } else if (clampedDb >= -14) {
-        // Normal → green
-        fillColor = 'hsla(120, 65%, 45%, 0.8)';
-      } else {
-        // Quiet → cyan
-        fillColor = 'hsla(190, 70%, 45%, 0.8)';
-      }
-      ctx.fillStyle = fillColor;
+      const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
+      // -60 to -6 dBFS → green/cyan (bottom 90% of meter)
+      grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.5, 'hsla(160, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.85, 'hsla(120, 65%, 45%, 0.8)');
+      // -6 to -2 dBFS → orange warning zone
+      grad2.addColorStop(0.90, 'hsla(80, 70%, 48%, 0.8)');
+      grad2.addColorStop(0.93, 'hsla(45, 90%, 50%, 0.85)');
+      grad2.addColorStop(0.965, 'hsla(25, 90%, 50%, 0.85)');
+      // -2 to 0 dBFS → red clipping zone
+      grad2.addColorStop(0.98, 'hsla(10, 85%, 50%, 0.9)');
+      grad2.addColorStop(1, 'hsla(0, 90%, 50%, 0.95)');
+      ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.roundRect(dbX, meterBottom - dbFillH, meterW, dbFillH, 4);
       ctx.fill();
