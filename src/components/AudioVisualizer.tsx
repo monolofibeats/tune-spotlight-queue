@@ -616,7 +616,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
       {/* Mode selector */}
       <div className="absolute top-2 left-2 z-10">
         <Select value={mode} onValueChange={(v) => setMode(v as VisualizerMode)}>
