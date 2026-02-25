@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { ConstellationBackground } from '@/components/dashboard/ConstellationBackground';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { StreamSessionProvider, useStreamSession } from '@/hooks/useStreamSession';
 import { motion } from 'framer-motion';
@@ -868,7 +869,8 @@ const StreamerDashboard = () => {
 
   return (
     <StreamSessionProvider streamerId={streamer.id}>
-      <div className="min-h-screen bg-background relative transition-all" style={{ backgroundImage: 'radial-gradient(circle, hsl(0 0% 100% / 0.12) 1.5px, transparent 1.5px)', backgroundSize: '36px 36px' }}>
+      <div className="min-h-screen bg-background relative transition-all">
+        <ConstellationBackground />
         {/* Collapsible Header */}
             {viewOptions.showHeader ? (
           <Header />
