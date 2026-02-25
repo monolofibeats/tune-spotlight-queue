@@ -32,7 +32,7 @@ export function LanguageSettings({ language, onChange }: LanguageSettingsProps) 
 
   return (
     <div className="space-y-6">
-      <Card className="bg-card/50 border-border/50">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Globe className="w-5 h-5" />
@@ -77,7 +77,7 @@ export function LanguageSettings({ language, onChange }: LanguageSettingsProps) 
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30 border-border/50">
+      <Card>
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground">
             <strong>Note:</strong> {t('langSettings.note')}

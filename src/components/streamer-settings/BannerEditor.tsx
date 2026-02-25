@@ -38,7 +38,7 @@ export function BannerEditor({ settings, onChange }: BannerEditorProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-card/50 border-border/50">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

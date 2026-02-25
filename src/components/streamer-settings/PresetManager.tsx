@@ -59,7 +59,7 @@ export function PresetManager({ streamerId }: PresetManagerProps) {
       </div>
 
       {presets.length === 0 ? (
-        <Card className="bg-card/50 border-border/50">
+        <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
             <p>{t('presets.noPresets')}</p>
           </CardContent>

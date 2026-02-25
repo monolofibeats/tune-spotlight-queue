@@ -157,7 +157,7 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
   return (
     <div className="space-y-6">
       {/* Invite Section */}
-      <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+      <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <UserPlus className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-lg">{t('team.inviteTitle')}</h3>
@@ -211,7 +211,7 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
       </div>
 
       {/* Roles Explanation */}
-      <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+      <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-lg">{t('team.rolePermissions')}</h3>
@@ -237,7 +237,7 @@ export function TeamManager({ streamerId }: TeamManagerProps) {
       </div>
 
       {/* Team Members List */}
-      <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-4">
+      <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-lg">{t('team.membersTitle')}</h3>
