@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronDown, 
@@ -207,21 +207,23 @@ export function SubmissionListItem({
   const handleOpenNowPlaying = async () => {
     if (!onPlayAudio) return;
     
+    // Show immediately with loading state, fetch audio in background
     if (submission.audio_file_url) {
       if (audioUrl) {
         onPlayAudio(submission, audioUrl, false);
         return;
       }
       
-      setIsLoadingAudio(true);
+      // Show submission NOW, mark as loading
+      onPlayAudio(submission, null, true);
+      
       try {
         const signedUrl = await getSignedAudioUrl(submission.audio_file_url);
         setAudioUrl(signedUrl);
+        // Update with the actual URL once ready
         onPlayAudio(submission, signedUrl, false);
       } catch (error) {
         console.error('Failed to get audio URL:', error);
-      } finally {
-        setIsLoadingAudio(false);
       }
     } else {
       onPlayAudio(submission, null, false);
@@ -234,11 +236,40 @@ export function SubmissionListItem({
     return translated !== key ? translated : status;
   };
 
-  // Drag support for dropping into Now Playing
+  // Hold-to-drag on the selection dot
+  const [isDragReady, setIsDragReady] = useState(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleDragStart = (e: React.DragEvent) => {
+    if (!isDragReady) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData('application/submission-id', submission.id);
     e.dataTransfer.effectAllowed = 'move';
   };
+
+  const handleDotPointerDown = useCallback(() => {
+    // Start a 300ms hold timer to activate drag mode
+    holdTimerRef.current = setTimeout(() => {
+      setIsDragReady(true);
+    }, 300);
+  }, []);
+
+  const handleDotPointerUp = useCallback(() => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    // If drag wasn't activated, treat as a normal select toggle
+    if (!isDragReady) {
+      onToggleSelect?.(submission.id);
+    }
+  }, [isDragReady, onToggleSelect, submission.id]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragReady(false);
+  }, []);
 
   return (
     <div
@@ -246,9 +277,10 @@ export function SubmissionListItem({
         submission.is_priority 
           ? 'border-primary/40 bg-primary/5' 
           : 'border-border/50 bg-card/30'
-      } ${isExpanded ? 'bg-card/50' : 'hover:bg-card/40'}`}
-      draggable={draggable && !isTrashView}
+      } ${isExpanded ? 'bg-card/50' : 'hover:bg-card/40'} ${isDragReady ? 'ring-2 ring-primary/50 opacity-80 cursor-grab' : ''}`}
+      draggable={isDragReady}
       onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       {/* Compact Header Row */}
       <div 
@@ -264,20 +296,38 @@ export function SubmissionListItem({
           }
         }}
       >
-        {/* Selection dot */}
+        {/* Selection dot / Drag handle — hold to drag, click to select */}
         <button
-          className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all duration-200 flex items-center justify-center ${
-            isSelected 
-              ? 'bg-primary border-primary scale-110' 
-              : 'border-muted-foreground/30 hover:border-primary/60'
+          className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all duration-200 flex items-center justify-center relative ${
+            isDragReady
+              ? 'bg-primary border-primary scale-125 shadow-lg shadow-primary/40'
+              : isSelected 
+                ? 'bg-primary border-primary scale-110' 
+                : 'border-muted-foreground/30 hover:border-primary/60'
           }`}
-          onClick={(e) => {
+          onPointerDown={(e) => {
             e.stopPropagation();
-            onToggleSelect?.(submission.id);
+            handleDotPointerDown();
           }}
-          aria-label={isSelected ? t('submission.deselect') : t('submission.select')}
+          onPointerUp={(e) => {
+            e.stopPropagation();
+            handleDotPointerUp();
+          }}
+          onPointerLeave={() => {
+            // Cancel hold if pointer leaves the dot
+            if (holdTimerRef.current) {
+              clearTimeout(holdTimerRef.current);
+              holdTimerRef.current = null;
+            }
+          }}
+          onClick={(e) => e.stopPropagation()}
+          aria-label={isDragReady ? 'Drag to move' : isSelected ? t('submission.deselect') : t('submission.select')}
+          style={isDragReady ? { cursor: 'grab' } : undefined}
         >
-          {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+          {isSelected && !isDragReady && <Check className="w-3 h-3 text-primary-foreground" />}
+          {isDragReady && (
+            <span className="absolute inset-0 rounded-full animate-ping bg-primary/30" />
+          )}
         </button>
         {/* Position number - Star overlay for #1 */}
         {position && (
