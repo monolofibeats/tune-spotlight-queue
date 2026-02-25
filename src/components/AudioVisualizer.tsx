@@ -1040,7 +1040,7 @@ function drawMeters(
     // Non-linear mapping: compress upper range so normal songs (-12 to -3 dB)
     // sit around 60-75% of the meter. Only true clipping reaches the top.
     const dbLinear = (clampedDb + 60) / 60; // 0..1
-    const dbNorm = Math.pow(dbLinear, 2.4); // compress harder: -6dB (0.9) → 0.78, -3dB (0.95) → 0.88
+    const dbNorm = Math.pow(dbLinear, 3.2); // compress harder: -6dB (0.9) → 0.72, -3dB (0.95) → 0.85
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
