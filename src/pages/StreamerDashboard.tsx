@@ -1084,7 +1084,9 @@ const StreamerDashboard = () => {
 
               {canEdit && (
                 <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
-                  <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
+                  <div className="relative z-10 bg-background rounded-xl">
+                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
+                  </div>
                 </TabsContent>
               )}
             </Tabs>
