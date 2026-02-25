@@ -433,61 +433,60 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     )}
                   </AnimatePresence>
                 )}
+
+                {/* Expanded tip — tucked behind card 3 only */}
+                {index === 2 && (
+                  <AnimatePresence>
+                    {tipExpanded && showTip && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-3 left-0 right-0`}
+                        style={{ zIndex: -1 }}
+                      >
+                        <div className="p-3 rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col">
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <div className="w-5 h-5 rounded-md bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                              <Zap className="w-3 h-3 text-emerald-400" />
+                            </div>
+                            <h3 className="font-display font-bold text-[10px] text-emerald-200">{t('howItWorks.tip.boostTitle')}</h3>
+                          </div>
+                          <p className="text-[9px] text-emerald-200/80 leading-relaxed mb-2.5">
+                            {t('howItWorks.tip.boostDesc')}
+                          </p>
+                          <Link
+                            to="/browse"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold hover:bg-emerald-500/30 transition-colors mb-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {t('howItWorks.tip.boostNow')}
+                            <ArrowRight className="w-2.5 h-2.5" />
+                          </Link>
+                          {referralCode && (
+                            <div className="mt-1.5 pt-1.5 border-t border-emerald-500/20">
+                              <p className="text-[8px] text-emerald-300/70 mb-1">🎁 {t('howItWorks.tip.discountCode')}</p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
+                                className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
+                              >
+                                <code className="text-[9px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
+                                {codeCopied ? <Check className="w-2.5 h-2.5 text-emerald-300 ml-auto" /> : <Copy className="w-2.5 h-2.5 text-emerald-400/60 ml-auto" />}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
               </div>
               );
             })}
           </div>
 
-          {/* Expanded tip — small, tucked behind card 3 */}
-          {(
-            <AnimatePresence>
-              {tipExpanded && showTip && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                  className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-3 right-0`}
-                  style={{ width: 180, zIndex: 0 }}
-                >
-                  <div className="p-3 rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className="w-5 h-5 rounded-md bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
-                        <Zap className="w-3 h-3 text-emerald-400" />
-                      </div>
-                      <h3 className="font-display font-bold text-[10px] text-emerald-200">{t('howItWorks.tip.boostTitle')}</h3>
-                    </div>
-                     <p className="text-[9px] text-emerald-200/80 leading-relaxed mb-2.5">
-                       {t('howItWorks.tip.boostDesc')}
-                     </p>
-                    <Link
-                      to="/browse"
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold hover:bg-emerald-500/30 transition-colors mb-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                       {t('howItWorks.tip.boostNow')}
-                      <ArrowRight className="w-2.5 h-2.5" />
-                    </Link>
-                    {referralCode && (
-                      <div className="mt-1.5 pt-1.5 border-t border-emerald-500/20">
-                       <p className="text-[8px] text-emerald-300/70 mb-1">🎁 {t('howItWorks.tip.discountCode')}</p>
-                         <button
-                           onClick={(e) => { e.stopPropagation(); copyReferralCode(); }}
-                           className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-colors w-full"
-                         >
-                           <code className="text-[9px] font-mono font-bold text-emerald-200 tracking-wider">{referralCode}</code>
-                          {codeCopied ? <Check className="w-2.5 h-2.5 text-emerald-300 ml-auto" /> : <Copy className="w-2.5 h-2.5 text-emerald-400/60 ml-auto" />}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
-        </div>
-
-        {/* Mobile PS tip - single expanding box */}
+          {/* Mobile PS tip - single expanding box */}
         {(
           <AnimatePresence>
             {showTip && (
@@ -557,6 +556,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
             )}
           </AnimatePresence>
         )}
+        </div>
 
         {/* CTA - only on homepage */}
         {!compact && (
