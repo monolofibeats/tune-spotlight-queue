@@ -639,7 +639,7 @@ const StreamerDashboard = () => {
 
   const handleOpenNowPlaying = (submission: Submission, audioUrl: string | null, isLoadingAudio: boolean, position: number) => {
     setNowPlaying({ submission, audioUrl, isLoading: isLoadingAudio, position });
-    setTimeout(() => { nowPlayingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+    // Don't scroll — keep user's viewport position unchanged
   };
 
   const handleCloseNowPlaying = () => { setNowPlaying(prev => ({ ...prev, submission: null })); };

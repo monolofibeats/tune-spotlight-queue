@@ -636,37 +636,37 @@ export function NowPlayingPanel({
 
             {/* Review Actions — compact bar */}
             {cfg.showActionButtons && onStatusChange && submission && (
-              <div className="px-3 py-2 border-t border-border/10 bg-card/10">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="px-4 py-3 border-t border-border/10 bg-card/10">
+                <div className="flex items-center justify-center gap-3 flex-wrap">
                   <Button
-                    size="sm"
-                    className="h-9 text-xs gap-1.5 px-4 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
+                    size="default"
+                    className="h-11 text-sm gap-2 px-6 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
                     onClick={() => onStatusChange(submission.id, 'reviewed')}
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-5 h-5" />
                     {t('nowPlaying.done')}
                   </Button>
                   <Button
-                    size="sm"
-                    className="h-9 text-xs gap-1.5 px-4 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
+                    size="default"
+                    className="h-11 text-sm gap-2 px-6 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
                     onClick={() => onStatusChange(submission.id, 'skipped')}
                   >
-                    <SkipForward className="w-4 h-4" />
+                    <SkipForward className="w-5 h-5" />
                     {t('nowPlaying.skip')}
                   </Button>
                   {onAddToPedestal && (
-                    <div className="flex items-center gap-1 ml-1">
-                      <Trophy className="w-3.5 h-3.5 text-muted-foreground" />
+                    <div className="flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-muted-foreground" />
                       {[1, 2, 3].map(pos => (
                         <Button
                           key={pos}
                           variant="outline"
-                          size="sm"
-                          className="h-9 text-xs gap-1 px-2.5"
+                          size="default"
+                          className="h-11 text-sm gap-1 px-3"
                           onClick={() => onAddToPedestal(submission.id, pos)}
                           title={`Add to Spot #${pos}`}
                         >
-                          {pos === 1 ? <Crown className="w-3.5 h-3.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-3.5 h-3.5 text-slate-300" /> : <Award className="w-3.5 h-3.5 text-amber-600" />}
+                          {pos === 1 ? <Crown className="w-4 h-4 text-yellow-400" /> : pos === 2 ? <Medal className="w-4 h-4 text-slate-300" /> : <Award className="w-4 h-4 text-amber-600" />}
                           #{pos}
                         </Button>
                       ))}
@@ -675,11 +675,11 @@ export function NowPlayingPanel({
                   {onDelete && (
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-9 text-xs gap-1.5 text-destructive hover:text-destructive ml-auto"
+                      size="default"
+                      className="h-11 text-sm gap-2 text-destructive hover:text-destructive"
                       onClick={() => onDelete(submission.id)}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                       {t('nowPlaying.trash')}
                     </Button>
                   )}
