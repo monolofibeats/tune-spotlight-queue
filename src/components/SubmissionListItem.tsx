@@ -111,6 +111,8 @@ interface SubmissionListItemProps {
   }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
   showPriorityBadge?: boolean;
+  /** Submission ID for drag-and-drop identification */
+  draggable?: boolean;
 }
 
 export function SubmissionListItem({ 
@@ -127,6 +129,7 @@ export function SubmissionListItem({
   onUpdate,
   onPlayAudio,
   showPriorityBadge = true,
+  draggable = false,
 }: SubmissionListItemProps) {
   const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -231,16 +234,21 @@ export function SubmissionListItem({
     return translated !== key ? translated : status;
   };
 
+  // Drag support for dropping into Now Playing
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/submission-id', submission.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className={`rounded-lg border transition-all duration-300 ${styles.container} ${
         submission.is_priority 
           ? 'border-primary/40 bg-primary/5' 
           : 'border-border/50 bg-card/30'
       } ${isExpanded ? 'bg-card/50' : 'hover:bg-card/40'}`}
+      draggable={draggable && !isTrashView}
+      onDragStart={handleDragStart}
     >
       {/* Compact Header Row */}
       <div 
@@ -248,6 +256,9 @@ export function SubmissionListItem({
         onClick={() => {
           if (isSelectionMode) {
             onToggleSelect?.(submission.id);
+          } else if (onPlayAudio && !isTrashView) {
+            // Directly open in Now Playing
+            handleOpenNowPlaying();
           } else {
             setIsExpanded(!isExpanded);
           }
@@ -302,12 +313,21 @@ export function SubmissionListItem({
           {getStatusLabel(submission.status)}
         </Badge>
 
-        {/* Expand Icon */}
-        {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
-        ) : (
-          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-        )}
+        {/* Expand/Collapse toggle */}
+        <button
+          className="p-1 rounded hover:bg-muted/50 transition-colors shrink-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsExpanded(!isExpanded);
+          }}
+          aria-label={isExpanded ? 'Collapse' : 'Expand details'}
+        >
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          )}
+        </button>
       </div>
 
       {/* Expanded Content */}
@@ -571,6 +591,6 @@ export function SubmissionListItem({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
