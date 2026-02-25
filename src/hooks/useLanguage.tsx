@@ -1338,7 +1338,7 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.legal': 'Rechtliches',
     'footer.about': 'Über uns',
     'footer.socials': 'Socials',
-    'footer.privacyPolicy': 'Datenschutzerklärung',
+    'footer.privacyPolicy': 'Datenschutz',
     'footer.termsOfService': 'Nutzungsbedingungen',
     'footer.cookiePolicy': 'Cookie-Richtlinie',
     'footer.imprint': 'Impressum',
