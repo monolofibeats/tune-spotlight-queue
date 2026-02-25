@@ -25,14 +25,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 
-const CORE_FIELD_NAMES = new Set(['song_url', 'artist_name', 'song_title', 'email', 'message']);
+const CORE_FIELD_NAMES = new Set(['song_url', 'file_upload', 'artist_name', 'song_title', 'email', 'message']);
 const CORE_FIELD_TYPE_MAP: Record<string, string> = {
   song_url: 'url',
+  file_upload: 'file',
   artist_name: 'text',
   song_title: 'text',
   email: 'email',
   message: 'textarea',
 };
+
+// Default core fields to auto-seed if missing from DB
+const CORE_FIELD_DEFAULTS: { field_name: string; field_label: string; field_type: string; is_required: boolean; is_enabled: boolean; field_order: number }[] = [
+  { field_name: 'song_url', field_label: 'Song Link', field_type: 'url', is_required: true, is_enabled: true, field_order: 0 },
+  { field_name: 'file_upload', field_label: 'Upload File', field_type: 'file', is_required: false, is_enabled: true, field_order: 1 },
+  { field_name: 'artist_name', field_label: 'Artist Name', field_type: 'text', is_required: false, is_enabled: true, field_order: 2 },
+  { field_name: 'song_title', field_label: 'Song Title', field_type: 'text', is_required: false, is_enabled: true, field_order: 3 },
+  { field_name: 'email', field_label: 'Email', field_type: 'email', is_required: false, is_enabled: true, field_order: 4 },
+  { field_name: 'message', field_label: 'Message', field_type: 'textarea', is_required: false, is_enabled: true, field_order: 5 },
+];
 
 interface FormField {
   id: string;
@@ -65,6 +76,7 @@ const FIELD_TYPES = [
   { value: 'textarea', label: 'Long Text', icon: FileText },
   { value: 'select', label: 'Dropdown', icon: List },
   { value: 'toggle', label: 'Yes/No', icon: ToggleLeft },
+  { value: 'file', label: 'File Upload', icon: FileText },
 ];
 
 function fieldsEqual(a: FormField[], b: FormField[]): boolean {
@@ -109,8 +121,41 @@ export const FormFieldBuilder = forwardRef<FormFieldBuilderHandle, FormFieldBuil
 
     if (!error && data) {
       const parsed = parseFields(data);
-      setFields(parsed);
-      setSavedFields(parsed);
+
+      // Auto-seed any missing core fields
+      const existingNames = new Set(parsed.map(f => f.field_name));
+      const missingDefaults = CORE_FIELD_DEFAULTS.filter(d => !existingNames.has(d.field_name));
+
+      if (missingDefaults.length > 0) {
+        const maxOrder = parsed.length > 0 ? Math.max(...parsed.map(f => f.field_order)) + 1 : 0;
+        const toInsert = missingDefaults.map((d, i) => ({
+          streamer_id: streamerId,
+          field_name: d.field_name,
+          field_label: d.field_label,
+          field_type: d.field_type,
+          placeholder: '',
+          is_required: d.is_required,
+          is_enabled: d.is_enabled,
+          field_order: maxOrder + i,
+        }));
+
+        const { data: inserted, error: insertError } = await supabase
+          .from('streamer_form_fields')
+          .insert(toInsert)
+          .select();
+
+        if (!insertError && inserted) {
+          const allParsed = [...parsed, ...parseFields(inserted)].sort((a, b) => a.field_order - b.field_order);
+          setFields(allParsed);
+          setSavedFields(allParsed);
+        } else {
+          setFields(parsed);
+          setSavedFields(parsed);
+        }
+      } else {
+        setFields(parsed);
+        setSavedFields(parsed);
+      }
     }
     setIsLoading(false);
   }, [streamerId]);
