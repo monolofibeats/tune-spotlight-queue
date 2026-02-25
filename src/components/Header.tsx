@@ -152,14 +152,7 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            {isAdmin && !isStreamer && (
-              <Link to="/dashboard">
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                  <LayoutDashboard className="w-3.5 h-3.5" />
-                  {t('nav.dashboard')}
-                </Button>
-              </Link>
-            )}
+            {/* Admin-only dashboard link removed — accessible via /dashboard URL */}
             {user && !isAdmin && !isStreamer && (
               <Link to="/user/dashboard">
                 <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
@@ -238,14 +231,6 @@ export function Header() {
                       {t('nav.settings')}
                     </Link>
                   </DropdownMenuItem>
-                  {isAdmin && !isStreamer && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                        <LayoutDashboard className="w-4 h-4" />
-                        {t('nav.adminPanel')}
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/support" className="flex items-center gap-2 cursor-pointer">
