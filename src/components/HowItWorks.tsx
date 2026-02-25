@@ -361,7 +361,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   transition={{ delay: index * 0.12, duration: 0.45, type: 'spring', stiffness: 200, damping: 20 }}
                   whileHover={compact ? { y: -3, scale: 1.03 } : { y: -4 }}
                    onClick={compact ? scrollToSubmissionForm : () => window.location.href = '/browse'}
-                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer ${compact ? 'shadow-lg shadow-black/20 sm:!transform-none sm:!rotate-0 sm:shadow-none' : 'rounded-2xl'}`}
+                   className={`group relative rounded-xl border border-border/40 bg-card overflow-hidden transition-shadow duration-300 hover:shadow-md hover:shadow-primary/5 hover:border-primary/30 h-full cursor-pointer flex flex-col ${compact ? 'shadow-lg shadow-black/20 sm:!transform-none sm:!rotate-0 sm:shadow-none' : 'rounded-2xl'}`}
                 >
                   {!compact && (
                     <div className="absolute top-3 right-3 text-[40px] font-display font-bold text-muted/20 leading-none select-none">
@@ -379,7 +379,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0.5' : 'p-5 pt-2'}>
+                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0.5' : 'p-5 pt-2 flex-1'}>
                      {compact && (
                        <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
