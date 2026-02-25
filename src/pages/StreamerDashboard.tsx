@@ -13,7 +13,8 @@ import {
   Settings,
   ExternalLink,
   ChevronDown,
-  Trophy
+  Trophy,
+  Play
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,115 @@ interface Submission {
 // Team role type: null = owner/platform-admin (full access), 'admin' | 'editor' | 'viewer' = team member
 type TeamRole = 'admin' | 'editor' | 'viewer' | null;
 
-// Inner component that can access StreamSession context
+// Drop zone wrapper for Now Playing widget with visual drag-over feedback
+function NowPlayingDropZone({ 
+  nowPlayingRef, 
+  submissions, 
+  onOpenNowPlaying, 
+  hasSubmission, 
+  children 
+}: { 
+  nowPlayingRef: React.RefObject<HTMLDivElement | null>;
+  submissions: Submission[];
+  onOpenNowPlaying: (sub: Submission, audioUrl: string | null, isLoading: boolean, position: number) => void;
+  hasSubmission: boolean;
+  children: React.ReactNode;
+}) {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  return (
+    <div
+      ref={nowPlayingRef}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const subId = e.dataTransfer.getData('application/submission-id');
+        if (subId) {
+          const sub = submissions.find(s => s.id === subId);
+          if (sub) {
+            const idx = submissions.filter(s => s.status === 'pending').indexOf(sub);
+            if (sub.audio_file_url) {
+              onOpenNowPlaying(sub, null, true, idx + 1);
+              getSignedAudioUrl(sub.audio_file_url).then(signedUrl => {
+                onOpenNowPlaying(sub, signedUrl, false, idx + 1);
+              });
+            } else {
+              onOpenNowPlaying(sub, null, false, idx + 1);
+            }
+          }
+        }
+      }}
+      className={`h-full relative transition-all duration-200 rounded-xl ${
+        isDragOver ? 'ring-2 ring-primary ring-dashed bg-primary/10' : ''
+      }`}
+    >
+      {children}
+      {isDragOver && !hasSubmission && (
+        <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-xl pointer-events-none">
+          <div className="flex items-center gap-2 text-primary font-medium text-sm">
+            <Play className="w-5 h-5" />
+            Drop here to play
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Drop zone wrapper for Top Songs pedestal — drop a submission to add to spot #1
+function TopSongsDropZone({
+  submissions,
+  onAddToPedestal,
+  children,
+}: {
+  submissions: Submission[];
+  onAddToPedestal: (submissionId: string, position: number) => void;
+  children: React.ReactNode;
+}) {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const subId = e.dataTransfer.getData('application/submission-id');
+        if (subId) {
+          const sub = submissions.find(s => s.id === subId);
+          if (sub) {
+            onAddToPedestal(subId, 1);
+          }
+        }
+      }}
+      className={`relative transition-all duration-200 rounded-xl ${
+        isDragOver ? 'ring-2 ring-amber-500 ring-dashed bg-amber-500/10' : ''
+      }`}
+    >
+      {children}
+      {isDragOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-500/5 rounded-xl pointer-events-none z-10">
+          <div className="flex items-center gap-2 text-amber-500 font-medium text-sm">
+            <Trophy className="w-5 h-5" />
+            Drop to add to Top Songs #1
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LiveAwareDashboardGrid({
   dashboardLayout,
   isBuilderEditing,
@@ -645,32 +754,11 @@ const StreamerDashboard = () => {
         </div>
       ),
       now_playing: (
-        <div
-          ref={nowPlayingRef}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            const subId = e.dataTransfer.getData('application/submission-id');
-            if (subId) {
-              const sub = submissions.find(s => s.id === subId);
-              if (sub) {
-                const idx = submissions.filter(s => s.status === 'pending').indexOf(sub);
-                // Trigger open in now playing
-                if (sub.audio_file_url) {
-                  getSignedAudioUrl(sub.audio_file_url).then(signedUrl => {
-                    handleOpenNowPlaying(sub, signedUrl, false, idx + 1);
-                  });
-                  handleOpenNowPlaying(sub, null, true, idx + 1);
-                } else {
-                  handleOpenNowPlaying(sub, null, false, idx + 1);
-                }
-              }
-            }
-          }}
-          className="h-full"
+        <NowPlayingDropZone
+          nowPlayingRef={nowPlayingRef}
+          submissions={submissions}
+          onOpenNowPlaying={handleOpenNowPlaying}
+          hasSubmission={!!nowPlaying.submission}
         >
           <NowPlayingPanel
             submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
@@ -681,7 +769,7 @@ const StreamerDashboard = () => {
             onAddToPedestal={handleAddToPedestal}
             config={npConfig}
           />
-        </div>
+        </NowPlayingDropZone>
       ),
       search_filters: (
         <div className="widget-search-filters flex flex-col sm:flex-row gap-3">
@@ -1003,9 +1091,14 @@ const StreamerDashboard = () => {
 
               {canEdit && (
                 <TabsContent value="top-songs" forceMount className={dashboardActiveTab !== 'top-songs' ? 'hidden' : ''}>
-                  <div className="glass rounded-2xl p-6 border border-border/30">
-                    <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
-                  </div>
+                  <TopSongsDropZone
+                    submissions={submissions}
+                    onAddToPedestal={handleAddToPedestal}
+                  >
+                    <div className="glass rounded-2xl p-6 border border-border/30">
+                      <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
+                    </div>
+                  </TopSongsDropZone>
                 </TabsContent>
               )}
 
