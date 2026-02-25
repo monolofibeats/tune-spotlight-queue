@@ -374,6 +374,13 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     resize();
     window.addEventListener('resize', resize);
 
+    // Also observe container resize (e.g. phone-optimized mode changes width)
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => resize());
+      resizeObserver.observe(canvas);
+    }
+
     const draw = () => {
       time += 1 / 60;
       const { width: totalW, height: totalH } = canvas.getBoundingClientRect();
@@ -601,6 +608,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', resize);
+      if (resizeObserver) resizeObserver.disconnect();
     };
   }, []);
 
