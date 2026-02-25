@@ -699,18 +699,16 @@ export function NowPlayingPanel({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs text-muted-foreground mr-2">{t('nowPlaying.actions')}</span>
                     <Button
-                      variant="default"
                       size="sm"
-                      className="h-8 text-xs gap-1.5"
+                      className="h-8 text-xs gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white border-0"
                       onClick={() => onStatusChange(submission.id, 'reviewed')}
                     >
                       <CheckCircle className="w-3.5 h-3.5" />
                       {t('nowPlaying.done')}
                     </Button>
                     <Button
-                      variant="ghost"
                       size="sm"
-                      className="h-8 text-xs gap-1.5"
+                      className="h-8 text-xs gap-1.5 bg-red-600/80 hover:bg-red-600 text-white border-0"
                       onClick={() => onStatusChange(submission.id, 'skipped')}
                     >
                       <SkipForward className="w-3.5 h-3.5" />

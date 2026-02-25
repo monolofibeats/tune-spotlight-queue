@@ -123,7 +123,7 @@ const StreamerDashboard = () => {
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [isLoading, setIsLoading] = useState(true);
   const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -663,16 +663,20 @@ const StreamerDashboard = () => {
           {searchConfig.showStatusFilters !== false && (
             <div className="flex gap-1.5 flex-wrap">
               {[
-                { key: 'all', label: t('dashboard.filterAll') },
                 { key: 'pending', label: t('dashboard.filterPending') },
                 { key: 'reviewed', label: t('dashboard.filterDone') },
                 { key: 'skipped', label: t('dashboard.filterSkipped') },
                 ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
               ].map(({ key, label }) => (
-                <Button key={key} variant={statusFilter === key ? 'default' : 'outline'}
-                  size="sm" className="h-7 text-xs px-2.5" onClick={() => setStatusFilter(key)}>
+                <button key={key}
+                  className={`h-7 text-xs px-3 rounded-full font-medium transition-all ${
+                    statusFilter === key
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                  }`}
+                  onClick={() => setStatusFilter(key)}>
                   {label}
-                </Button>
+                </button>
               ))}
             </div>
           )}
