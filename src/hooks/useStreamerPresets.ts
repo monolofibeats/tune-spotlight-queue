@@ -79,7 +79,7 @@ const PLATFORM_TEMPLATES: Record<string, Partial<StreamerPreset>> = {
 
 export { PLATFORM_TEMPLATES, DEFAULT_WIDGETS };
 
-export function useStreamerPresets(streamerId?: string) {
+export function useStreamerPresets(streamerId?: string, options?: { pollingIntervalMs?: number }) {
   const [presets, setPresets] = useState<StreamerPreset[]>([]);
   const [activePreset, setActivePreset] = useState<StreamerPreset | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,6 +109,14 @@ export function useStreamerPresets(streamerId?: string) {
   useEffect(() => {
     fetchPresets();
   }, [fetchPresets]);
+
+  // Optional polling for live updates (e.g. team admin changing layout remotely)
+  useEffect(() => {
+    const interval = options?.pollingIntervalMs;
+    if (!interval || !streamerId) return;
+    const id = setInterval(fetchPresets, interval);
+    return () => clearInterval(id);
+  }, [options?.pollingIntervalMs, streamerId, fetchPresets]);
 
   const createPreset = async (templateKey?: string) => {
     if (!streamerId) return;
