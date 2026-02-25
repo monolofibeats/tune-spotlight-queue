@@ -278,9 +278,9 @@ export function NowPlayingPanel({
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="mb-4 overflow-hidden"
         >
-          <div className="widget-now-playing rounded-xl border border-yellow-500/30 overflow-hidden shadow-md shadow-yellow-500/10 bg-card/30 backdrop-blur-xl">
+          <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
             {/* Compact Header */}
-            <div className="px-3 py-2 bg-gradient-to-r from-yellow-500/15 via-amber-500/8 to-transparent border-b border-yellow-500/20 flex items-center gap-2">
+            <div className="px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border-b border-border/10 flex items-center gap-2">
               <Music2 className="w-3.5 h-3.5 text-yellow-500" />
               <span className="text-xs font-semibold text-yellow-500">{t('nowPlaying.title')}</span>
               <div className="flex-1" />
@@ -335,7 +335,7 @@ export function NowPlayingPanel({
 
                 {/* Audio Player — compact wrapper */}
                 {submission.audio_file_url && (
-                  <div className="rounded-lg bg-card/30 border border-border/20 overflow-hidden">
+                  <div className="rounded-lg bg-card/10 overflow-hidden">
                     <div className="p-2">
                       {cfg.showDownload && (
                         <div className="flex justify-end mb-1">
@@ -636,37 +636,37 @@ export function NowPlayingPanel({
 
             {/* Review Actions — compact bar */}
             {cfg.showActionButtons && onStatusChange && submission && (
-              <div className="px-3 py-2 border-t border-border/30 bg-card/30">
-                <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="px-3 py-2 border-t border-border/10 bg-card/10">
+              <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     size="sm"
-                    className="h-7 text-[10px] gap-1 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
+                    className="h-9 text-xs gap-1.5 px-4 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
                     onClick={() => onStatusChange(submission.id, 'reviewed')}
                   >
-                    <CheckCircle className="w-3 h-3" />
+                    <CheckCircle className="w-4 h-4" />
                     {t('nowPlaying.done')}
                   </Button>
                   <Button
                     size="sm"
-                    className="h-7 text-[10px] gap-1 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
+                    className="h-9 text-xs gap-1.5 px-4 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
                     onClick={() => onStatusChange(submission.id, 'skipped')}
                   >
-                    <SkipForward className="w-3 h-3" />
+                    <SkipForward className="w-4 h-4" />
                     {t('nowPlaying.skip')}
                   </Button>
                   {onAddToPedestal && (
-                    <div className="flex items-center gap-0.5 ml-1">
-                      <Trophy className="w-3 h-3 text-muted-foreground" />
+                    <div className="flex items-center gap-1 ml-1">
+                      <Trophy className="w-3.5 h-3.5 text-muted-foreground" />
                       {[1, 2, 3].map(pos => (
                         <Button
                           key={pos}
                           variant="outline"
                           size="sm"
-                          className="h-7 text-[10px] gap-0.5 px-1.5"
+                          className="h-9 text-xs gap-1 px-2.5"
                           onClick={() => onAddToPedestal(submission.id, pos)}
                           title={`Add to Spot #${pos}`}
                         >
-                          {pos === 1 ? <Crown className="w-2.5 h-2.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-2.5 h-2.5 text-slate-300" /> : <Award className="w-2.5 h-2.5 text-amber-600" />}
+                          {pos === 1 ? <Crown className="w-3.5 h-3.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-3.5 h-3.5 text-slate-300" /> : <Award className="w-3.5 h-3.5 text-amber-600" />}
                           #{pos}
                         </Button>
                       ))}
@@ -676,10 +676,10 @@ export function NowPlayingPanel({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-[10px] gap-1 text-destructive hover:text-destructive ml-auto"
+                      className="h-9 text-xs gap-1.5 text-destructive hover:text-destructive ml-auto"
                       onClick={() => onDelete(submission.id)}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                       {t('nowPlaying.trash')}
                     </Button>
                   )}
@@ -687,8 +687,6 @@ export function NowPlayingPanel({
               </div>
             )}
 
-            {/* Thin accent bar */}
-            <div className="h-0.5 bg-gradient-to-r from-primary via-primary/50 to-transparent" />
           </div>
         </motion.div>
       )}
