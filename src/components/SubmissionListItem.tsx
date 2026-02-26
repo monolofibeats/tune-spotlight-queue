@@ -39,10 +39,21 @@ import { PositionBadge } from '@/components/queue/PositionBadge';
 import { SubmissionEditForm } from '@/components/submission/SubmissionEditForm';
 import { useLanguage } from '@/hooks/useLanguage';
 
-// Check if URL is a playable embed (Spotify, SoundCloud)
+// Check if URL is a playable embed (SoundCloud works inline)
 const isPlayableEmbed = (url: string) => {
   const lowerUrl = url.toLowerCase();
-  return lowerUrl.includes('spotify.com') || lowerUrl.includes('soundcloud.com');
+  return lowerUrl.includes('soundcloud.com');
+};
+
+// Platforms that should open in a new tab because embeds don't provide full playback
+const shouldOpenExternally = (url: string) => {
+  const lowerUrl = url.toLowerCase();
+  return (
+    lowerUrl.includes('spotify.com') ||
+    lowerUrl.includes('youtube.com') ||
+    lowerUrl.includes('youtu.be') ||
+    lowerUrl.includes('music.apple.com')
+  );
 };
 
 interface Submission {
@@ -206,6 +217,11 @@ export function SubmissionListItem({
 
   const handleOpenNowPlaying = async () => {
     if (!onPlayAudio) return;
+
+    // For platforms that don't play well inline, open the link in a new tab
+    if (submission.song_url && submission.song_url !== 'direct-upload' && shouldOpenExternally(submission.song_url)) {
+      window.open(submission.song_url, '_blank', 'noopener,noreferrer');
+    }
     
     // Show immediately with loading state, fetch audio in background
     if (submission.audio_file_url) {
