@@ -518,9 +518,11 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                 className={`${compact ? 'sm:hidden' : 'md:hidden'} -mt-3 flex justify-end pr-2`}
                 style={{ zIndex: 0 }}
               >
-                <div
+                <motion.div
                   onClick={() => { if (!tipExpanded) handleTipExpand(); }}
                   className={`cursor-pointer rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-1' : 'px-3.5 py-1.5'} ${tipExpanded ? (compact ? 'max-w-[200px]' : 'max-w-[260px]') : ''}`}
+                  animate={!tipExpanded ? { scale: [1, 1.08, 1, 1.05, 1], boxShadow: ['0 0 0px rgba(16,185,129,0)', '0 0 12px rgba(16,185,129,0.4)', '0 0 0px rgba(16,185,129,0)', '0 0 8px rgba(16,185,129,0.3)', '0 0 0px rgba(16,185,129,0)'] } : {}}
+                  transition={!tipExpanded ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' } : {}}
                 >
                   {/* Header row */}
                   <div className="flex items-center gap-1.5">
