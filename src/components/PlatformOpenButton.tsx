@@ -115,7 +115,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
       >
         {/* Edge glow — tracks cursor from anywhere, hugs the outline */}
         <span
-          className="absolute pointer-events-none rounded-lg transition-opacity duration-200"
+          className="absolute pointer-events-none rounded-lg transition-opacity duration-500 ease-out"
           style={{
             inset: -2,
             opacity: edgeGlowOpacity,
@@ -130,9 +130,18 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
           }}
         />
 
+        {/* Inner proximity glow — soft bleed into button interior when cursor is near */}
+        <span
+          className="absolute inset-0 pointer-events-none rounded-lg transition-opacity duration-700 ease-out"
+          style={{
+            opacity: isHovered ? 0 : proximity * 0.35,
+            background: `radial-gradient(circle ${edgeGlowSize * 0.8}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}25, transparent 60%)`,
+          }}
+        />
+
         {/* Interior hover glow — fills button when hovered */}
         <span
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out"
           style={{
             opacity: isHovered ? 1 : 0,
             background: `radial-gradient(circle 300px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}35, transparent 70%)`,
