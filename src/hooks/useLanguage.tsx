@@ -316,7 +316,6 @@ const translations: Record<Language, Record<string, string>> = {
     'nowPlaying.copiedDesc': 'Contact email copied to clipboard',
     'nowPlaying.empty': 'No track loaded',
     'nowPlaying.dragOrClick': 'Click a track or drag it here to start playing',
-    'nowPlaying.openLink': 'Click here to open',
 
     // Bulk Action Bar
     'bulk.selected': 'selected',
