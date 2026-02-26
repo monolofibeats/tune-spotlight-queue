@@ -218,7 +218,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
         <div className="absolute inset-x-0 h-1.5 bg-secondary/40 rounded-full overflow-hidden">
           {/* Volume fill */}
           <div 
-            className="absolute h-full bg-amber-500/70 transition-all duration-75"
+            className="absolute h-full bg-amber-400/80 transition-all duration-75"
             style={{ width: `${displayVolume * 100}%` }}
           />
         </div>
