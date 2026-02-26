@@ -787,6 +787,7 @@ const StreamerDashboard = () => {
             onAddToPedestal={handleAddToPedestal}
             config={npConfig}
             compactVisualizer={phoneOptimized}
+            onEmptyExpandChange={setNowPlayingEmptyExpanded}
           />
         </NowPlayingDropZone>
       ),
