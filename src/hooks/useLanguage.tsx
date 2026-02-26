@@ -53,6 +53,7 @@ const translations: Record<Language, Record<string, string>> = {
     'howItWorks.tip.boostNow': 'Boost Now',
     'howItWorks.tip.discountCode': 'Your 5% discount code:',
     'howItWorks.cta': 'Find a Streamer & Submit',
+    'howItWorks.needHelp': 'Need help?',
     
     // Pre-Stream Spots
     'spots.title': 'Pre-Stream Priority Spots',
@@ -978,6 +979,7 @@ const translations: Record<Language, Record<string, string>> = {
     'howItWorks.tip.boostNow': 'Jetzt boosten',
     'howItWorks.tip.discountCode': 'Dein 5% Rabattcode:',
     'howItWorks.cta': 'Streamer finden & einreichen',
+    'howItWorks.needHelp': 'Brauchst du Hilfe?',
     
     // Pre-Stream Spots
     'spots.title': 'Pre-Stream Prioritätsplätze',

@@ -225,6 +225,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
   const [tipExpanded, setTipExpanded] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [mobileCardsExpanded, setMobileCardsExpanded] = useState(false);
   const referralCreatedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -336,7 +337,27 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
         {/* 3-step grid */}
         <div className="relative">
-        <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
+
+        {/* Mobile "Need help?" toggle — compact (submit page) only */}
+        {compact && (
+          <div className="sm:hidden mb-3 flex justify-center">
+            <button
+              onClick={() => setMobileCardsExpanded(!mobileCardsExpanded)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/30 bg-card/80 backdrop-blur-sm text-sm font-medium text-foreground hover:border-primary/50 transition-colors"
+            >
+              <HelpCircle className="w-4 h-4 text-primary" />
+              {mobileCardsExpanded ? t('howItWorks.title') : (t('howItWorks.needHelp') || 'Need help?')}
+              <motion.div
+                animate={{ rotate: mobileCardsExpanded ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </motion.div>
+            </button>
+          </div>
+        )}
+
+        <div className={`${compact ? `flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch ${!mobileCardsExpanded ? 'max-sm:hidden' : ''}` : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
             {steps.map((item, index) => {
               // Compact mobile: stacked cards with alternating left/right offsets and overlap
               const mobileCardStyles = compact ? {
@@ -497,9 +518,11 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                 className={`${compact ? 'sm:hidden' : 'md:hidden'} -mt-3 flex justify-end pr-2`}
                 style={{ zIndex: 0 }}
               >
-                <div
+                <motion.div
                   onClick={() => { if (!tipExpanded) handleTipExpand(); }}
                   className={`cursor-pointer rounded-lg border border-emerald-500/30 bg-emerald-950/80 backdrop-blur-md ${compact ? 'px-2 py-1' : 'px-3.5 py-1.5'} ${tipExpanded ? (compact ? 'max-w-[200px]' : 'max-w-[260px]') : ''}`}
+                  animate={!tipExpanded ? { scale: [1, 1.08, 1, 1.05, 1], boxShadow: ['0 0 0px rgba(16,185,129,0)', '0 0 12px rgba(16,185,129,0.4)', '0 0 0px rgba(16,185,129,0)', '0 0 8px rgba(16,185,129,0.3)', '0 0 0px rgba(16,185,129,0)'] } : {}}
+                  transition={!tipExpanded ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' } : {}}
                 >
                   {/* Header row */}
                   <div className="flex items-center gap-1.5">
@@ -551,7 +574,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
