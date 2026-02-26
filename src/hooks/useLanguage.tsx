@@ -1241,7 +1241,6 @@ const translations: Record<Language, Record<string, string>> = {
     'nowPlaying.copiedDesc': 'Kontakt-E-Mail in Zwischenablage kopiert',
     'nowPlaying.empty': 'Kein Track geladen',
     'nowPlaying.dragOrClick': 'Klicke auf einen Track oder ziehe ihn hierher',
-    'nowPlaying.openLink': 'Hier klicken zum Öffnen',
 
     // Bulk Action Bar
     'bulk.selected': 'ausgewählt',
