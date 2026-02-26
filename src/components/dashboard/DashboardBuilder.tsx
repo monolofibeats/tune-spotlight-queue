@@ -520,6 +520,81 @@ export function DashboardBuilder({
   );
 }
 
+/* ── SizeField — slider + typed input with deferred validation ── */
+
+interface SizeFieldProps {
+  label: string;
+  unit: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}
+
+function SizeField({ label, unit, value, min, max, onChange }: SizeFieldProps) {
+  const [localValue, setLocalValue] = useState(String(value));
+
+  // Sync from parent when value changes externally (e.g. slider, template apply)
+  useEffect(() => {
+    setLocalValue(String(value));
+  }, [value]);
+
+  const numericLocal = parseFloat(localValue);
+  const isBelowMin = !isNaN(numericLocal) && numericLocal < min;
+  const isAboveMax = !isNaN(numericLocal) && numericLocal > max;
+  const hasError = isBelowMin || isAboveMax || isNaN(numericLocal) || localValue.trim() === '';
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setLocalValue(raw);
+    const num = parseFloat(raw);
+    if (!isNaN(num) && num > 0) {
+      onChange(num);
+    }
+  };
+
+  const handleSliderChange = (val: number) => {
+    setLocalValue(String(val));
+    onChange(val);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[10px] text-muted-foreground font-medium">{label}</label>
+        <div className="flex items-center gap-1">
+          <Input
+            type="number"
+            value={localValue}
+            step="1"
+            onChange={handleInputChange}
+            className={`h-5 w-14 text-[10px] text-center p-0 font-mono ${hasError ? 'border-destructive ring-destructive/30 ring-1' : ''}`}
+          />
+          <span className="text-[10px] text-muted-foreground">{unit}</span>
+        </div>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={Math.max(min, Math.min(max, value))}
+        onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
+        className="w-full h-1.5 accent-primary cursor-pointer"
+      />
+      <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
+        <span>{min}</span>
+        {hasError && (
+          <span className="text-destructive font-medium">
+            {isBelowMin ? `min ${min}` : isAboveMax ? `max ${max}` : 'invalid'}
+          </span>
+        )}
+        <span>{max}</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Widgets tab extracted ── */
 
 interface WidgetsTabProps {
