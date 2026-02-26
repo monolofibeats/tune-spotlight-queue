@@ -226,7 +226,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
         {/* Thumb */}
         <div 
           className={cn(
-            "absolute h-3 w-3 bg-amber-400/90 border-2 border-amber-600/50 rounded-full shadow transform -translate-x-1/2 transition-transform",
+            "absolute h-3 w-3 bg-amber-300/95 border-2 border-amber-500/50 rounded-full shadow transform -translate-x-1/2 transition-transform",
             "group-hover:scale-110",
             isDragging && "scale-125"
           )}
