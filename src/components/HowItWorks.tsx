@@ -335,8 +335,33 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           </motion.div>
         )}
 
-        {/* 3-step grid */}
-        <div className="relative">
+        {/* Mobile "Need help?" toggle — compact (submit page) only */}
+        {compact && (
+          <div className="sm:hidden mb-3 flex justify-center">
+            <button
+              onClick={() => setMobileCardsExpanded(!mobileCardsExpanded)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/30 bg-card/80 backdrop-blur-sm text-sm font-medium text-foreground hover:border-primary/50 transition-colors"
+            >
+              <HelpCircle className="w-4 h-4 text-primary" />
+              {mobileCardsExpanded ? t('howItWorks.title') : (t('howItWorks.needHelp') || 'Need help?')}
+              <motion.div
+                animate={{ rotate: mobileCardsExpanded ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </motion.div>
+            </button>
+          </div>
+        )}
+
+        <AnimatePresence>
+        {(!compact || mobileCardsExpanded || false) && (
+        <motion.div
+          initial={compact ? { opacity: 0, height: 0 } : false}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={compact ? { opacity: 0, height: 0 } : undefined}
+          className={`${compact ? 'overflow-hidden sm:!h-auto sm:!opacity-100' : ''}`}
+        >
         <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
             {steps.map((item, index) => {
               // Compact mobile: stacked cards with alternating left/right offsets and overlap
