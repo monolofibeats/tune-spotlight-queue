@@ -1158,6 +1158,8 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.title': 'Dashboard',
     'dashboard.subtitle': 'Verwalte Einreichungen, Stream-Einstellungen und Events.',
     'dashboard.submissions': 'Einreichungen',
+    'dashboard.submissionsShort': 'Queue',
+    'dashboard.settingsShort': 'Einst.',
     'dashboard.stream': 'Stream',
     'dashboard.events': 'Events',
     'dashboard.total': 'Gesamt',
