@@ -1024,31 +1024,39 @@ const StreamerDashboard = () => {
               setDashboardActiveTab(tab);
             }} className="space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <TabsList className="p-0.5 rounded-lg h-8">
-                  <TabsTrigger value="submissions" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                <TabsList className="p-0.5 rounded-lg h-8 max-w-full overflow-x-auto">
+                  <TabsTrigger value="submissions" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 shrink-0">
                     <Music className="w-3.5 h-3.5" />
-                    {t('dashboard.submissions')}
+                    <span className="hidden xs:inline">{t('dashboard.submissions')}</span>
+                    <span className="xs:hidden">Queue</span>
                   </TabsTrigger>
                   {canEdit && (
-                    <TabsTrigger value="top-songs" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                    <TabsTrigger value="top-songs" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 shrink-0">
                       <Trophy className="w-3.5 h-3.5" />
-                      {t('topSongs.tab')}
+                      <span className="hidden xs:inline">{t('topSongs.tab')}</span>
+                      <span className="xs:hidden">Top</span>
                     </TabsTrigger>
                   )}
                   {canEdit && (
-                    <TabsTrigger value="settings" className="rounded-md px-3 gap-1.5 text-xs h-7">
+                    <TabsTrigger value="settings" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 shrink-0">
                       <Settings className="w-3.5 h-3.5" />
-                      {t('dashboard.myPageSettings')}
+                      <span className="hidden xs:inline">{t('dashboard.myPageSettings')}</span>
+                      <span className="xs:hidden">Settings</span>
                     </TabsTrigger>
                   )}
                 </TabsList>
 
-                <div className="flex items-center gap-1.5 ml-auto">
+                <div className="flex items-center gap-1.5 ml-auto shrink-0">
                   {canEdit && <DashboardBuilder {...builderProps} />}
-                  <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
+                  <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2 hidden sm:inline-flex">
                     <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3 h-3" />
                       {t('dashboard.viewPage')}
+                    </a>
+                  </Button>
+                  <Button variant="outline" size="icon" asChild className="h-7 w-7 sm:hidden">
+                    <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   </Button>
                 </div>
