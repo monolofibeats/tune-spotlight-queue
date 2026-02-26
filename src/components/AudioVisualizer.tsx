@@ -1,11 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 export type VisualizerMode = 'spectrum' | 'polar-sample' | 'polar-level' | 'lissajous';
 
