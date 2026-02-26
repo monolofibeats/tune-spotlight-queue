@@ -181,8 +181,6 @@ function LiveAwareDashboardGrid({
   handlePopOut,
   widgetConfigs,
   phoneOptimized,
-  nowPlayingActive,
-  nowPlayingEmptyExpanded,
 }: {
   dashboardLayout: Layout[];
   isBuilderEditing: boolean;
@@ -194,39 +192,24 @@ function LiveAwareDashboardGrid({
   handlePopOut: (widgetId: string) => void;
   widgetConfigs: WidgetConfigs;
   phoneOptimized: boolean;
-  nowPlayingActive: boolean;
-  nowPlayingEmptyExpanded: boolean;
 }) {
   const { isLive } = useStreamSession();
 
-  // Dynamically shrink now_playing widget when no song is loaded (not in edit mode)
-  const adjustedLayout = useMemo(() => {
-    if (isBuilderEditing) return dashboardLayout;
-    return dashboardLayout.map(item => {
-      if (item.i === 'now_playing' && !nowPlayingActive) {
-        // Collapsed bar = h:1, expanded empty = h:3
-        const emptyH = nowPlayingEmptyExpanded ? 3 : 1;
-        return { ...item, h: emptyH, minH: 1 };
-      }
-      return item;
-    });
-  }, [dashboardLayout, nowPlayingActive, nowPlayingEmptyExpanded, isBuilderEditing]);
-
   // When live AND phone-optimized, force a single-column phone-optimized layout
   const effectiveLayout = useMemo(() => {
-    if (!isLive || !phoneOptimized) return adjustedLayout;
+    if (!isLive || !phoneOptimized) return dashboardLayout;
     // Stack all widgets in a single column, full width
     let yOffset = 0;
-    return adjustedLayout.map(item => {
+    return dashboardLayout.map(item => {
       const newItem = { ...item, x: 0, w: 12, minW: 4 };
       newItem.y = yOffset;
       yOffset += item.h;
       return newItem;
     });
-  }, [isLive, phoneOptimized, adjustedLayout]);
+  }, [isLive, phoneOptimized, dashboardLayout]);
 
   // Force grid remount when phone-optimized mode toggles so WidthProvider re-measures
-  const gridKey = `${isLive && phoneOptimized ? 'phone' : 'normal'}-${nowPlayingActive ? 'np' : 'no-np'}-${nowPlayingEmptyExpanded ? 'exp' : 'col'}`;
+  const gridKey = isLive && phoneOptimized ? 'phone' : 'normal';
 
   return (
     <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
@@ -284,7 +267,6 @@ const StreamerDashboard = () => {
 
   // Dashboard layout state
   const [dashboardLayout, setDashboardLayout] = useState<Layout[]>(getDefaultLayout());
-  const [nowPlayingEmptyExpanded, setNowPlayingEmptyExpanded] = useState(false);
   
   const nowPlayingRef = useRef<HTMLDivElement>(null);
   
@@ -791,7 +773,6 @@ const StreamerDashboard = () => {
             onAddToPedestal={handleAddToPedestal}
             config={npConfig}
             compactVisualizer={phoneOptimized}
-            onEmptyExpandChange={setNowPlayingEmptyExpanded}
           />
         </NowPlayingDropZone>
       ),
@@ -1088,8 +1069,6 @@ const StreamerDashboard = () => {
                   handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
                   phoneOptimized={phoneOptimized}
-                  nowPlayingActive={!!nowPlaying.submission}
-                  nowPlayingEmptyExpanded={nowPlayingEmptyExpanded}
                 />
               </TabsContent>
 
