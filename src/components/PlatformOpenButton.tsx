@@ -32,7 +32,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
   const [isHovered, setIsHovered] = useState(false);
   const [proximity, setProximity] = useState(0); // 0 = far, 1 = at button
-  const rafRef = useRef<number | null>(null);
+  const smoothedProximityRef = useRef(0);
 
   const cfg = platformConfigs[platform] || {
     color: '#ffffff', label: t('nowPlaying.openLink'),
@@ -40,28 +40,52 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   };
 
   // Global cursor tracking — glow follows cursor from anywhere on page
+  // Uses lerp for smooth, delayed movement
+  const targetPos = useRef({ x: 50, y: 50 });
+  const currentPos = useRef({ x: 50, y: 50 });
+  const targetProximity = useRef(0);
+  const currentProximity = useRef(0);
+  const animating = useRef(false);
+
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
-        const rect = btnRef.current?.getBoundingClientRect();
-        if (!rect) return;
+      const rect = btnRef.current?.getBoundingClientRect();
+      if (!rect) return;
 
-        // Clamp cursor position to nearest point on button edge
-        const nearX = Math.max(rect.left, Math.min(e.clientX, rect.right));
-        const nearY = Math.max(rect.top, Math.min(e.clientY, rect.bottom));
-        const dist = Math.hypot(e.clientX - nearX, e.clientY - nearY);
+      const nearX = Math.max(rect.left, Math.min(e.clientX, rect.right));
+      const nearY = Math.max(rect.top, Math.min(e.clientY, rect.bottom));
+      const dist = Math.hypot(e.clientX - nearX, e.clientY - nearY);
 
-        const maxDist = 600;
-        const p = Math.max(0, 1 - dist / maxDist);
-        setProximity(p);
+      const maxDist = 600;
+      targetProximity.current = Math.max(0, 1 - dist / maxDist);
 
-        // Convert nearest-edge point to percentage within button
-        const px = ((nearX - rect.left) / rect.width) * 100;
-        const py = ((nearY - rect.top) / rect.height) * 100;
-        setGlowPos({ x: px, y: py });
-      });
+      const px = ((nearX - rect.left) / rect.width) * 100;
+      const py = ((nearY - rect.top) / rect.height) * 100;
+      targetPos.current = { x: px, y: py };
+
+      if (!animating.current) {
+        animating.current = true;
+        const tick = () => {
+          const lerpFactor = 0.06; // slow, smooth interpolation
+          currentPos.current.x += (targetPos.current.x - currentPos.current.x) * lerpFactor;
+          currentPos.current.y += (targetPos.current.y - currentPos.current.y) * lerpFactor;
+          currentProximity.current += (targetProximity.current - currentProximity.current) * lerpFactor;
+
+          setGlowPos({ x: currentPos.current.x, y: currentPos.current.y });
+          setProximity(currentProximity.current);
+
+          const dx = Math.abs(targetPos.current.x - currentPos.current.x);
+          const dy = Math.abs(targetPos.current.y - currentPos.current.y);
+          const dp = Math.abs(targetProximity.current - currentProximity.current);
+
+          if (dx > 0.1 || dy > 0.1 || dp > 0.005) {
+            requestAnimationFrame(tick);
+          } else {
+            animating.current = false;
+          }
+        };
+        requestAnimationFrame(tick);
+      }
     };
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
@@ -91,7 +115,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
       >
         {/* Edge glow — tracks cursor from anywhere, hugs the outline */}
         <span
-          className="absolute pointer-events-none rounded-lg transition-opacity duration-200"
+          className="absolute pointer-events-none rounded-lg transition-opacity duration-500 ease-out"
           style={{
             inset: -2,
             opacity: edgeGlowOpacity,
@@ -106,9 +130,18 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
           }}
         />
 
+        {/* Inner proximity glow — soft bleed into button interior when cursor is near */}
+        <span
+          className="absolute inset-0 pointer-events-none rounded-lg transition-opacity duration-700 ease-out"
+          style={{
+            opacity: isHovered ? 0 : proximity * 0.35,
+            background: `radial-gradient(circle ${edgeGlowSize * 0.8}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}25, transparent 60%)`,
+          }}
+        />
+
         {/* Interior hover glow — fills button when hovered */}
         <span
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-500 ease-out"
           style={{
             opacity: isHovered ? 1 : 0,
             background: `radial-gradient(circle 300px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}35, transparent 70%)`,
