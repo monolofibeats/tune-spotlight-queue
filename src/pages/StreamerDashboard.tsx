@@ -1039,6 +1039,23 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
+                <NowPlayingDropZone
+                  nowPlayingRef={nowPlayingRef}
+                  submissions={submissions}
+                  onOpenNowPlaying={handleOpenNowPlaying}
+                  hasSubmission={!!nowPlaying.submission}
+                >
+                  <NowPlayingPanel
+                    submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
+                    isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
+                    onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
+                    onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
+                    onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
+                    onAddToPedestal={handleAddToPedestal}
+                    config={npConfig}
+                    compactVisualizer={phoneOptimized}
+                  />
+                </NowPlayingDropZone>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
