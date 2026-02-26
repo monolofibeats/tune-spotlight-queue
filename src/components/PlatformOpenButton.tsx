@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -31,7 +31,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
   const [isHovered, setIsHovered] = useState(false);
-  const [isNear, setIsNear] = useState(false);
+  const [proximity, setProximity] = useState(0); // 0 = far, 1 = at button
   const rafRef = useRef<number | null>(null);
 
   const cfg = platformConfigs[platform] || {
@@ -39,67 +39,81 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
     icon: <ExternalLink className="w-5 h-5 text-foreground" />,
   };
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      const rect = btnRef.current?.getBoundingClientRect();
-      if (!rect) { rafRef.current = null; return; }
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      setGlowPos({ x, y });
-      rafRef.current = null;
-    });
+  // Global cursor tracking — glow follows cursor from anywhere on page
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        const rect = btnRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        // Clamp cursor position to nearest point on button edge
+        const nearX = Math.max(rect.left, Math.min(e.clientX, rect.right));
+        const nearY = Math.max(rect.top, Math.min(e.clientY, rect.bottom));
+        const dist = Math.hypot(e.clientX - nearX, e.clientY - nearY);
+
+        const maxDist = 600;
+        const p = Math.max(0, 1 - dist / maxDist);
+        setProximity(p);
+
+        // Convert nearest-edge point to percentage within button
+        const px = ((nearX - rect.left) / rect.width) * 100;
+        const py = ((nearY - rect.top) / rect.height) * 100;
+        setGlowPos({ x: px, y: py });
+      });
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  // Track cursor proximity even outside the button via parent
-  const handleParentMove = useCallback((e: React.MouseEvent) => {
-    const rect = btnRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-    const threshold = 200;
-    setIsNear(dist < threshold);
-    
-    // Update glow position even when nearby
-    if (dist < threshold) {
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      setGlowPos({ x: Math.max(-20, Math.min(120, x)), y: Math.max(-20, Math.min(120, y)) });
-    }
-  }, []);
+  const edgeGlowOpacity = isHovered ? 0 : proximity * 0.6;
+  const edgeGlowSize = 60 + proximity * 80; // 60-140px
 
   return (
-    <div onMouseMove={handleParentMove} onMouseLeave={() => setIsNear(false)} className="w-full py-1">
+    <div className="w-full py-1">
       <button
         ref={btnRef}
         onClick={() => window.open(url, 'upstar-song-tab', 'noopener,noreferrer')}
-        onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="relative flex items-center justify-center gap-2.5 rounded-lg border backdrop-blur-md transition-all duration-300 py-3 px-5 cursor-pointer w-full overflow-hidden group"
         style={{
           borderColor: isHovered
             ? `${cfg.color}88`
-            : isNear
-              ? `${cfg.color}40`
+            : proximity > 0.3
+              ? `${cfg.color}${Math.round(25 + proximity * 40).toString(16).padStart(2, '0')}`
               : `${cfg.color}25`,
           background: isHovered
             ? `${cfg.color}20`
             : `${cfg.color}08`,
         }}
       >
-        {/* Cursor-tracking radial glow */}
+        {/* Edge glow — tracks cursor from anywhere, hugs the outline */}
         <span
-          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          className="absolute pointer-events-none rounded-lg transition-opacity duration-200"
           style={{
-            opacity: isHovered ? 1 : isNear ? 0.4 : 0,
-            background: `radial-gradient(circle ${isHovered ? '300px' : '120px'} at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}${isHovered ? '35' : '18'}, transparent 70%)`,
-            transition: 'opacity 0.3s ease, background 0.15s ease',
+            inset: -2,
+            opacity: edgeGlowOpacity,
+            background: `radial-gradient(circle ${edgeGlowSize}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}50, ${cfg.color}15 40%, transparent 70%)`,
+            maskImage: `linear-gradient(#fff, #fff), linear-gradient(#fff, #fff)`,
+            maskComposite: 'exclude',
+            WebkitMaskComposite: 'xor',
+            maskClip: 'border-box, content-box',
+            WebkitMaskClip: 'border-box, content-box',
+            padding: 6,
+            borderRadius: 'inherit',
           }}
         />
 
-        {/* Full fill glow on hover */}
+        {/* Interior hover glow — fills button when hovered */}
+        <span
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            background: `radial-gradient(circle 300px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}35, transparent 70%)`,
+          }}
+        />
         <span
           className="absolute inset-0 pointer-events-none transition-opacity duration-500"
           style={{
