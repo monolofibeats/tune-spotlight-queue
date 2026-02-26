@@ -110,6 +110,8 @@ interface NowPlayingPanelProps {
   onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
   compactVisualizer?: boolean;
+  /** Called when the empty-state expand/collapse changes */
+  onEmptyExpandChange?: (expanded: boolean) => void;
 }
 
 // Social platform icons mapping
@@ -137,6 +139,7 @@ export function NowPlayingPanel({
   onAddToPedestal,
   config,
   compactVisualizer,
+  onEmptyExpandChange,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
   const cfg = {
@@ -285,7 +288,11 @@ export function NowPlayingPanel({
     return (
       <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
         <button
-          onClick={() => setManuallyCollapsed(prev => !prev)}
+          onClick={() => {
+            const next = !manuallyCollapsed;
+            setManuallyCollapsed(next);
+            onEmptyExpandChange?.(!next);
+          }}
           className="w-full px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent flex items-center gap-2 hover:bg-card/20 transition-colors cursor-pointer"
         >
           <Music2 className="w-3.5 h-3.5 text-yellow-500/50" />
@@ -612,11 +619,11 @@ export function NowPlayingPanel({
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {onStatusChange && submission.status === 'pending' && (
                     <>
-                      <Button size="sm" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'reviewed')}>
+                      <Button size="sm" className="h-11 px-5 gap-1.5 bg-green-600 hover:bg-green-700 text-white" onClick={() => onStatusChange(submission.id, 'reviewed')}>
                         <CheckCircle className="w-4 h-4" />
                         {t('nowPlaying.done')}
                       </Button>
-                      <Button size="sm" variant="secondary" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'skipped')}>
+                      <Button size="sm" className="h-11 px-5 gap-1.5 bg-red-600 hover:bg-red-700 text-white" onClick={() => onStatusChange(submission.id, 'skipped')}>
                         <SkipForward className="w-4 h-4" />
                         {t('nowPlaying.skip')}
                       </Button>
