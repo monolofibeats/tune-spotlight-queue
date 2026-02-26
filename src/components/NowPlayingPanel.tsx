@@ -292,7 +292,7 @@ export function NowPlayingPanel({
           <Music2 className="w-3.5 h-3.5 text-yellow-500" />
           <span className="text-xs font-semibold text-yellow-500">{t('nowPlaying.title')}</span>
           {!submission && (
-            <span className="text-[10px] text-muted-foreground ml-1">{t('nowPlaying.empty') || 'No track loaded'}</span>
+            <span className="text-[10px] text-muted-foreground ml-1">{t('nowPlaying.empty')}</span>
           )}
           <div className="flex-1" />
           {!submission ? (
