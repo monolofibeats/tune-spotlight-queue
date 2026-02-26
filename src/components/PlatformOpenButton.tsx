@@ -67,8 +67,8 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  const edgeGlowOpacity = isHovered ? 0 : proximity * 0.6;
-  const edgeGlowSize = 60 + proximity * 80; // 60-140px
+  const edgeGlowOpacity = isHovered ? 0 : proximity * 0.9;
+  const edgeGlowSize = 80 + proximity * 140; // 80-220px
 
   return (
     <div className="w-full py-1">
@@ -95,7 +95,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
           style={{
             inset: -2,
             opacity: edgeGlowOpacity,
-            background: `radial-gradient(circle ${edgeGlowSize}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}50, ${cfg.color}15 40%, transparent 70%)`,
+            background: `radial-gradient(circle ${edgeGlowSize}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}80, ${cfg.color}30 40%, transparent 70%)`,
             maskImage: `linear-gradient(#fff, #fff), linear-gradient(#fff, #fff)`,
             maskComposite: 'exclude',
             WebkitMaskComposite: 'xor',
