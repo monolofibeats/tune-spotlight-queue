@@ -121,14 +121,14 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
         <div className="absolute inset-x-0 h-2 bg-secondary/40 rounded-full overflow-hidden">
           {/* Progress fill */}
           <div 
-            className="absolute h-full bg-amber-500/70 transition-all duration-75"
+            className="absolute h-full bg-amber-400/80 transition-all duration-75"
             style={{ width: `${progress}%` }}
           />
           
           {/* Hover preview */}
           {hoverTime !== null && !disabled && (
             <div 
-              className="absolute h-full bg-amber-500/15"
+              className="absolute h-full bg-amber-400/20"
               style={{ width: `${(hoverTime / duration) * 100}%` }}
             />
           )}
@@ -137,7 +137,7 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
         {/* Thumb/scrubber */}
         <div 
           className={cn(
-            "absolute h-4 w-4 bg-amber-400/90 border-2 border-amber-600/50 rounded-full shadow-md transform -translate-x-1/2 transition-transform",
+            "absolute h-4 w-4 bg-amber-300/95 border-2 border-amber-500/50 rounded-full shadow-md transform -translate-x-1/2 transition-transform",
             "group-hover:scale-110",
             isDragging && "scale-125"
           )}
@@ -218,7 +218,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
         <div className="absolute inset-x-0 h-1.5 bg-secondary/40 rounded-full overflow-hidden">
           {/* Volume fill */}
           <div 
-            className="absolute h-full bg-amber-500/70 transition-all duration-75"
+            className="absolute h-full bg-amber-400/80 transition-all duration-75"
             style={{ width: `${displayVolume * 100}%` }}
           />
         </div>
@@ -226,7 +226,7 @@ function VolumeSlider({ volume, isMuted, onChange, disabled }: VolumeSliderProps
         {/* Thumb */}
         <div 
           className={cn(
-            "absolute h-3 w-3 bg-amber-400/90 border-2 border-amber-600/50 rounded-full shadow transform -translate-x-1/2 transition-transform",
+            "absolute h-3 w-3 bg-amber-300/95 border-2 border-amber-500/50 rounded-full shadow transform -translate-x-1/2 transition-transform",
             "group-hover:scale-110",
             isDragging && "scale-125"
           )}
