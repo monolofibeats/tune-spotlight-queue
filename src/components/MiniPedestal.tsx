@@ -23,7 +23,7 @@ const POSITION_CONFIG = [
     pos: 2,
     label: 'Silver',
     Icon: Medal,
-    height: 'h-7',
+    height: 'h-5',
     iconColor: 'text-slate-300',
     bgGradient: 'from-slate-400/25 via-slate-300/10 to-transparent',
     borderColor: 'border-slate-400/40',
