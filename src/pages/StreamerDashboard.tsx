@@ -1082,6 +1082,7 @@ const StreamerDashboard = () => {
                   handlePopOut={handlePopOut}
                   widgetConfigs={widgetConfigs}
                   phoneOptimized={phoneOptimized}
+                  nowPlayingActive={!!nowPlaying.submission}
                 />
               </TabsContent>
 
