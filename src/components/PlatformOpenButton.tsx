@@ -67,8 +67,8 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  const edgeGlowOpacity = isHovered ? 0 : proximity * 0.6;
-  const edgeGlowSize = 60 + proximity * 80; // 60-140px
+  const edgeGlowOpacity = isHovered ? 0 : proximity * 0.9;
+  const edgeGlowSize = 80 + proximity * 140; // 80-220px
 
   return (
     <div className="w-full py-1">
