@@ -587,29 +587,23 @@ function WidgetsTab({
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                     <div className="p-3 ml-6 mr-1 mt-1 mb-1 rounded-lg bg-muted/20 border border-border/50 space-y-3">
                       {/* Width */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.width')}</label>
-                          <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.w} min={widget.minSize.w} step="0.1"
-                              onChange={(e) => updateWidgetSize(widget.id, 'w', parseFloat(e.target.value) || widget.minSize.w)}
-                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
-                            <span className="text-[10px] text-muted-foreground">cols</span>
-                          </div>
-                        </div>
-                      </div>
+                      <SizeField
+                        label={t('builder.width')}
+                        unit="cols"
+                        value={layoutItem.w}
+                        min={widget.minSize.w}
+                        max={widget.maxSize?.w ?? 12}
+                        onChange={(v) => updateWidgetSize(widget.id, 'w', v)}
+                      />
                       {/* Height */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.height')}</label>
-                          <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.h} min={widget.minSize.h} step="0.1"
-                              onChange={(e) => updateWidgetSize(widget.id, 'h', parseFloat(e.target.value) || widget.minSize.h)}
-                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
-                            <span className="text-[10px] text-muted-foreground">rows</span>
-                          </div>
-                        </div>
-                      </div>
+                      <SizeField
+                        label={t('builder.height')}
+                        unit="rows"
+                        value={layoutItem.h}
+                        min={widget.minSize.h}
+                        max={widget.maxSize?.h ?? 20}
+                        onChange={(v) => updateWidgetSize(widget.id, 'h', v)}
+                      />
 
                       {/* Text Size */}
                       <div>
