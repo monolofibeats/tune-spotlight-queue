@@ -728,7 +728,6 @@ const StreamerDashboard = () => {
   const widgetRenderers = useMemo(() => {
     if (!streamer) return {};
 
-    const npConfig = getWidgetConfig('now_playing');
     const statsConfig = getWidgetConfig('stats');
     const searchConfig = getWidgetConfig('search_filters');
     const queueConfig = getWidgetConfig('queue');
@@ -756,25 +755,6 @@ const StreamerDashboard = () => {
             </div>
           )}
         </div>
-      ),
-      now_playing: (
-        <NowPlayingDropZone
-          nowPlayingRef={nowPlayingRef}
-          submissions={submissions}
-          onOpenNowPlaying={handleOpenNowPlaying}
-          hasSubmission={!!nowPlaying.submission}
-        >
-          <NowPlayingPanel
-            submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-            isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-            onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-            onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
-            onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
-            onAddToPedestal={handleAddToPedestal}
-            config={npConfig}
-            compactVisualizer={phoneOptimized}
-          />
-        </NowPlayingDropZone>
       ),
       search_filters: (
         <div className="widget-search-filters flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -1058,6 +1038,23 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
+                <NowPlayingDropZone
+                  nowPlayingRef={nowPlayingRef}
+                  submissions={submissions}
+                  onOpenNowPlaying={handleOpenNowPlaying}
+                  hasSubmission={!!nowPlaying.submission}
+                >
+                  <NowPlayingPanel
+                    submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
+                    isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
+                    onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
+                    onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
+                    onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
+                    onAddToPedestal={handleAddToPedestal}
+                    config={getWidgetConfig('now_playing')}
+                    compactVisualizer={phoneOptimized}
+                  />
+                </NowPlayingDropZone>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
