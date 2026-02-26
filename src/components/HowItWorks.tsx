@@ -225,6 +225,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
   const [tipExpanded, setTipExpanded] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [mobileCardsExpanded, setMobileCardsExpanded] = useState(false);
   const referralCreatedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
