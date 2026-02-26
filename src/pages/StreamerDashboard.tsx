@@ -280,6 +280,7 @@ const StreamerDashboard = () => {
 
   // Dashboard layout state
   const [dashboardLayout, setDashboardLayout] = useState<Layout[]>(getDefaultLayout());
+  const [nowPlayingEmptyExpanded, setNowPlayingEmptyExpanded] = useState(false);
   
   const nowPlayingRef = useRef<HTMLDivElement>(null);
   
