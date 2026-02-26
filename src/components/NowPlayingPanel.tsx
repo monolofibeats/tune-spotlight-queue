@@ -714,22 +714,7 @@ export function NowPlayingPanel({
                 </div>
                 <div className="flex items-center justify-center gap-1.5 mt-2">
                   {onAddToPedestal && (
-                    <>
-                      <Trophy className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      {[1, 2, 3].map(pos => (
-                        <Button
-                          key={pos}
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs gap-1 px-2.5"
-                          onClick={() => onAddToPedestal(submission.id, pos)}
-                          title={`Add to Spot #${pos}`}
-                        >
-                          {pos === 1 ? <Crown className="w-3.5 h-3.5 text-yellow-400" /> : pos === 2 ? <Medal className="w-3.5 h-3.5 text-slate-300" /> : <Award className="w-3.5 h-3.5 text-amber-600" />}
-                          #{pos}
-                        </Button>
-                      ))}
-                    </>
+                    <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
                   )}
                   <div className="flex-1" />
                   {onDelete && (
