@@ -1008,7 +1008,7 @@ const StreamerDashboard = () => {
           </div>
         )}
         
-        <main className={`${viewOptions.showHeader ? 'pt-20' : 'pt-2'} pb-12 px-4`}>
+        <main className={`${viewOptions.showHeader ? 'pt-20' : 'pt-2'} pb-12 px-2 sm:px-4`}>
           <div className="w-full">
             {/* Compact top bar: tabs + actions in one row */}
             <motion.div
