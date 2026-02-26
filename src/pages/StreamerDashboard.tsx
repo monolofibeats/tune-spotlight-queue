@@ -229,6 +229,16 @@ function LiveAwareDashboardGrid({
   );
 }
 
+/** Applies the same phone-optimized constraint (max-w-[480px] centered) to the Now Playing panel when live */
+function PhoneAwareSubmissionsLayout({ phoneOptimized, children }: { phoneOptimized: boolean; children: React.ReactNode }) {
+  const { isLive } = useStreamSession();
+  return (
+    <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
+      {children}
+    </div>
+  );
+}
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
