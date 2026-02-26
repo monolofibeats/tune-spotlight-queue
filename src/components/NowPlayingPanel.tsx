@@ -466,7 +466,8 @@ export function NowPlayingPanel({
                       {t('nowPlaying.openLink')}
                     </span>
                   </a>
-                )
+                )}
+
                 {cfg.showMessage && submission.message && (
                   <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20">
                     <p className="text-xs text-muted-foreground italic line-clamp-2">
