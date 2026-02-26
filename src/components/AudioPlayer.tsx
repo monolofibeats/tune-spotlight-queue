@@ -118,10 +118,10 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
         onMouseLeave={handleTrackLeave}
       >
         {/* Track background */}
-        <div className="absolute inset-x-0 h-2 bg-secondary rounded-full overflow-hidden">
+        <div className="absolute inset-x-0 h-2 bg-secondary/40 rounded-full overflow-hidden">
           {/* Progress fill */}
           <div 
-            className="absolute h-full bg-primary transition-all duration-75"
+            className="absolute h-full bg-foreground/80 transition-all duration-75"
             style={{ width: `${progress}%` }}
           />
           
