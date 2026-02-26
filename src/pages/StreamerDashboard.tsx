@@ -1038,6 +1038,7 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
+                <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
                 <NowPlayingDropZone
                   nowPlayingRef={nowPlayingRef}
                   submissions={submissions}
@@ -1058,6 +1059,7 @@ const StreamerDashboard = () => {
                     heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
                   />
                 </NowPlayingDropZone>
+                </PhoneAwareSubmissionsLayout>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
