@@ -181,12 +181,23 @@ export function DashboardBuilder({
   }, [currentLayout, onLayoutChange, expandedWidget]);
 
   const updateWidgetSize = useCallback((id: string, field: 'w' | 'h', value: number) => {
-    const def = WIDGET_REGISTRY.find(w => w.id === id);
-    if (!def) return;
-    const min = field === 'w' ? def.minSize.w : def.minSize.h;
-    const clamped = Math.max(min, value);
-    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: parseFloat(clamped.toFixed(1)) } : l));
+    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: parseFloat(value.toFixed(1)) } : l));
   }, [currentLayout, onLayoutChange]);
+
+  const validateLayout = useCallback((layout: Layout[]): string[] => {
+    const errors: string[] = [];
+    for (const item of layout) {
+      const def = WIDGET_REGISTRY.find(w => w.id === item.i);
+      if (!def) continue;
+      if (item.w < def.minSize.w) errors.push(`${def.label}: width must be at least ${def.minSize.w}`);
+      if (item.h < def.minSize.h) errors.push(`${def.label}: height must be at least ${def.minSize.h}`);
+      if (def.maxSize) {
+        if (item.w > def.maxSize.w) errors.push(`${def.label}: width must be at most ${def.maxSize.w}`);
+        if (item.h > def.maxSize.h) errors.push(`${def.label}: height must be at most ${def.maxSize.h}`);
+      }
+    }
+    return errors;
+  }, []);
 
   const toggleWidgetConfig = useCallback((widgetId: string, key: string, value: boolean) => {
     const current = widgetConfigs[widgetId] || getDefaultWidgetConfig(widgetId);
