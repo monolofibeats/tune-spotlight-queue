@@ -511,6 +511,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
               );
             })}
           </div>
+        </motion.div>
+        )}
+        </AnimatePresence>
 
           {/* Mobile PS tip - single expanding box */}
         {(
