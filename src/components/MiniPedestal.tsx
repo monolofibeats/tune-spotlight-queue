@@ -194,7 +194,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
             key={pos}
             onClick={() => handleClick(pos)}
             className={`relative flex flex-col items-center ${
-              pos === 1 ? 'w-10' : 'w-8'
+              pos === 1 ? 'w-16' : 'w-14'
             } cursor-pointer group`}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
