@@ -1239,6 +1239,8 @@ const translations: Record<Language, Record<string, string>> = {
     'nowPlaying.skip': 'Überspringen',
     'nowPlaying.trash': 'Papierkorb',
     'nowPlaying.copiedDesc': 'Kontakt-E-Mail in Zwischenablage kopiert',
+    'nowPlaying.empty': 'Kein Track geladen',
+    'nowPlaying.dragOrClick': 'Klicke auf einen Track oder ziehe ihn hierher',
 
     // Bulk Action Bar
     'bulk.selected': 'ausgewählt',
