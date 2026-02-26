@@ -7,10 +7,10 @@ interface Dot {
   vy: number;
 }
 
-const DOT_COUNT = 35;
-const CONNECTION_DIST = 120;
+const DOT_COUNT = 60;
+const CONNECTION_DIST = 140;
 const DOT_RADIUS = 1.8;
-const DOT_SPEED = 0.3;
+const DOT_SPEED = 0.35;
 const DOT_COLOR = 'rgba(255,255,255,0.5)';
 const LINE_COLOR_BASE = [255, 255, 255];
 
@@ -52,16 +52,7 @@ export function ConstellationBackground() {
     };
     window.addEventListener('resize', onResize);
 
-    let lastFrame = 0;
-    const FRAME_INTERVAL = 33; // ~30fps cap
-
-    const draw = (timestamp: number) => {
-      if (timestamp - lastFrame < FRAME_INTERVAL) {
-        rafRef.current = requestAnimationFrame(draw);
-        return;
-      }
-      lastFrame = timestamp;
-
+    const draw = () => {
       const w = canvas.offsetWidth;
       const h = canvas.offsetHeight;
       const dots = dotsRef.current;
@@ -83,9 +74,9 @@ export function ConstellationBackground() {
         for (let j = i + 1; j < dots.length; j++) {
           const dx = dots[i].x - dots[j].x;
           const dy = dots[i].y - dots[j].y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < CONNECTION_DIST * CONNECTION_DIST) {
-            const alpha = (1 - Math.sqrt(distSq) / CONNECTION_DIST) * 0.25;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECTION_DIST) {
+            const alpha = (1 - dist / CONNECTION_DIST) * 0.25;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(${LINE_COLOR_BASE[0]},${LINE_COLOR_BASE[1]},${LINE_COLOR_BASE[2]},${alpha})`;
             ctx.lineWidth = 0.8;
