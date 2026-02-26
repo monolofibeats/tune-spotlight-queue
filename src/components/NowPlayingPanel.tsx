@@ -270,7 +270,7 @@ export function NowPlayingPanel({
     return textarea.value;
   };
 
-  const [manuallyCollapsed, setManuallyCollapsed] = useState(false);
+  const [manuallyCollapsed, setManuallyCollapsed] = useState(true);
   const isExpanded = !!submission;
 
   // Auto-expand when a song is loaded (reset manual collapse)
