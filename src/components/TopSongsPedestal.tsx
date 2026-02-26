@@ -263,12 +263,12 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Trophy className="w-6 h-6 text-primary" />
           <h2 className="text-xl font-display font-bold">{t('topSongs.title')}</h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Public toggle */}
           <div className="flex items-center gap-2">
             {showPublicly ? (
