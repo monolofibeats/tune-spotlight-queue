@@ -49,7 +49,7 @@ export function DashboardGrid({
 
   return (
     <ResponsiveGridLayout
-      className={`dashboard-grid ${isEditing ? 'is-editing' : ''}`}
+      className={`dashboard-grid ${isEditing ? 'is-editing' : 'merged-grid'}`}
       layouts={layouts}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480 }}
       cols={{ lg: 12, md: 10, sm: 6, xs: 4 }}
