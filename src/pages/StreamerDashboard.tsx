@@ -226,7 +226,7 @@ function LiveAwareDashboardGrid({
   }, [isLive, phoneOptimized, adjustedLayout]);
 
   // Force grid remount when phone-optimized mode toggles so WidthProvider re-measures
-  const gridKey = `${isLive && phoneOptimized ? 'phone' : 'normal'}-${nowPlayingActive ? 'np' : 'no-np'}`;
+  const gridKey = `${isLive && phoneOptimized ? 'phone' : 'normal'}-${nowPlayingActive ? 'np' : 'no-np'}-${nowPlayingEmptyExpanded ? 'exp' : 'col'}`;
 
   return (
     <div className={`transition-all duration-500 ${isLive && phoneOptimized ? 'max-w-[480px] mx-auto' : ''}`}>
