@@ -1085,6 +1085,7 @@ const StreamerDashboard = () => {
                   widgetConfigs={widgetConfigs}
                   phoneOptimized={phoneOptimized}
                   nowPlayingActive={!!nowPlaying.submission}
+                  nowPlayingEmptyExpanded={nowPlayingEmptyExpanded}
                 />
               </TabsContent>
 
