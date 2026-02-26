@@ -99,8 +99,8 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
       {/* Hover time tooltip */}
       {hoverTime !== null && !disabled && (
         <div 
-          className="absolute -top-8 transform -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1 rounded shadow-lg z-10 pointer-events-none"
-          style={{ left: hoverPosition }}
+          className="absolute -top-6 transform -translate-x-1/2 bg-popover text-popover-foreground px-1.5 py-0.5 rounded shadow-lg z-10 pointer-events-none"
+          style={{ left: hoverPosition, fontSize: '10px', lineHeight: '14px' }}
         >
           {formatTime(hoverTime)}
         </div>
