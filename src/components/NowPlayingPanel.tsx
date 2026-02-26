@@ -291,7 +291,7 @@ export function NowPlayingPanel({
           <Music2 className="w-3.5 h-3.5 text-yellow-500/50" />
           <span className="text-xs font-semibold text-yellow-500/50">{t('nowPlaying.title')}</span>
           <div className="flex-1" />
-          <span className="text-[10px] text-muted-foreground">{t('nowPlaying.noTrack') || 'No track loaded'}</span>
+          <span className="text-[10px] text-muted-foreground">{(() => { const v = t('nowPlaying.noTrack'); return v === 'nowPlaying.noTrack' ? 'No track loaded' : v; })()}</span>
           {manuallyCollapsed ? (
             <ChevronDown className="w-3 h-3 text-muted-foreground" />
           ) : (
@@ -312,7 +312,7 @@ export function NowPlayingPanel({
                   <Play className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t('nowPlaying.clickToPlay') || 'Click a submission to start playing'}
+                  {(() => { const v = t('nowPlaying.clickToPlay'); return v === 'nowPlaying.clickToPlay' ? 'Click a submission to start playing' : v; })()}
                 </p>
               </div>
             </motion.div>
