@@ -111,6 +111,7 @@ interface NowPlayingPanelProps {
   onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
   compactVisualizer?: boolean;
+  textScale?: number;
 }
 
 // Social platform icons mapping
