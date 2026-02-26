@@ -105,6 +105,6 @@ export function PositionBadge({
           {position ?? "—"}
         </span>
       </div>
-    </motion.div>
+    </div>
   );
 }
