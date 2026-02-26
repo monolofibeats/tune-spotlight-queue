@@ -1041,7 +1041,7 @@ const StreamerDashboard = () => {
                     <TabsTrigger value="settings" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 shrink-0">
                       <Settings className="w-3.5 h-3.5" />
                       <span className="hidden xs:inline">{t('dashboard.myPageSettings')}</span>
-                      <span className="xs:hidden">Settings</span>
+                      <span className="xs:hidden">{t('dashboard.settingsShort')}</span>
                     </TabsTrigger>
                   )}
                 </TabsList>
