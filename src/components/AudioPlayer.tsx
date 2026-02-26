@@ -128,7 +128,7 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
           {/* Hover preview */}
           {hoverTime !== null && !disabled && (
             <div 
-              className="absolute h-full bg-primary/30"
+              className="absolute h-full bg-foreground/20"
               style={{ width: `${(hoverTime / duration) * 100}%` }}
             />
           )}
