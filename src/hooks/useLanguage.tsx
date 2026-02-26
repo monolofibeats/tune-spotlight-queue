@@ -233,6 +233,8 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.title': 'Dashboard',
     'dashboard.subtitle': 'Manage submissions, stream settings, and special events.',
     'dashboard.submissions': 'Submissions',
+    'dashboard.submissionsShort': 'Queue',
+    'dashboard.settingsShort': 'Settings',
     'dashboard.stream': 'Stream',
     'dashboard.events': 'Events',
     'dashboard.total': 'Total',
