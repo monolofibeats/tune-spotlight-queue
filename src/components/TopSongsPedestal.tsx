@@ -71,6 +71,21 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
 
   useEffect(() => { fetchTopSongs(); }, [fetchTopSongs]);
 
+  // Realtime: auto-refresh when top songs change (e.g. added from Now Playing)
+  useEffect(() => {
+    const channel = supabase
+      .channel(`top_songs_${streamer.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'streamer_top_songs',
+        filter: `streamer_id=eq.${streamer.id}`,
+      }, () => fetchTopSongs())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [streamer.id, fetchTopSongs]);
+
   const handleTogglePublic = async (checked: boolean) => {
     setShowPublicly(checked);
     const { error } = await supabase
