@@ -1049,10 +1049,10 @@ const StreamerDashboard = () => {
                     submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
                     isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
                     onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-                    onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
-                    onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
+                    onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
+                    onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
                     onAddToPedestal={handleAddToPedestal}
-                    config={npConfig}
+                    config={getWidgetConfig('now_playing')}
                     compactVisualizer={phoneOptimized}
                   />
                 </NowPlayingDropZone>
