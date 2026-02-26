@@ -182,6 +182,7 @@ function LiveAwareDashboardGrid({
   widgetConfigs,
   phoneOptimized,
   nowPlayingActive,
+  nowPlayingEmptyExpanded,
 }: {
   dashboardLayout: Layout[];
   isBuilderEditing: boolean;
@@ -194,6 +195,7 @@ function LiveAwareDashboardGrid({
   widgetConfigs: WidgetConfigs;
   phoneOptimized: boolean;
   nowPlayingActive: boolean;
+  nowPlayingEmptyExpanded: boolean;
 }) {
   const { isLive } = useStreamSession();
 
@@ -202,11 +204,13 @@ function LiveAwareDashboardGrid({
     if (isBuilderEditing) return dashboardLayout;
     return dashboardLayout.map(item => {
       if (item.i === 'now_playing' && !nowPlayingActive) {
-        return { ...item, h: 1, minH: 1 };
+        // Collapsed bar = h:1, expanded empty = h:3
+        const emptyH = nowPlayingEmptyExpanded ? 3 : 1;
+        return { ...item, h: emptyH, minH: 1 };
       }
       return item;
     });
-  }, [dashboardLayout, nowPlayingActive, isBuilderEditing]);
+  }, [dashboardLayout, nowPlayingActive, nowPlayingEmptyExpanded, isBuilderEditing]);
 
   // When live AND phone-optimized, force a single-column phone-optimized layout
   const effectiveLayout = useMemo(() => {
