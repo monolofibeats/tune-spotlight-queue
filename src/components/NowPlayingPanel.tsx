@@ -730,14 +730,34 @@ export function NowPlayingPanel({
                     </div>
                   )}
                   {onDelete && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-xs gap-1.5 px-2.5 text-destructive hover:text-destructive shrink-0"
-                      onClick={() => onDelete(submission.id)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs gap-1.5 px-2.5 text-destructive hover:text-destructive shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="glass-strong">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Move to Trash?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will move "{submission.artist_name} – {submission.song_title}" to the trash. You can restore it within 7 days.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => onDelete(submission.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Move to Trash
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>
