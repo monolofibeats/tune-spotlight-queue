@@ -144,6 +144,8 @@ export function NowPlayingPanel({
   config,
   compactVisualizer,
   textScale = 100,
+  widthCols,
+  heightRows,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
   const cfg = {
