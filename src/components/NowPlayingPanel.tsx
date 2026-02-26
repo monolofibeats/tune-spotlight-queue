@@ -139,6 +139,7 @@ export function NowPlayingPanel({
   onAddToPedestal,
   config,
   compactVisualizer,
+  textScale = 100,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
   const cfg = {
