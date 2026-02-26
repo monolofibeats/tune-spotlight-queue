@@ -618,19 +618,21 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
-      {/* Mode selector */}
-      <div className="absolute top-2 left-2 z-10">
-        <Select value={mode} onValueChange={(v) => setMode(v as VisualizerMode)}>
-          <SelectTrigger className="h-7 w-[140px] text-[11px] bg-background/80 border-border/50 backdrop-blur-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent container={containerRef.current}>
-            <SelectItem value="spectrum">Spectrum</SelectItem>
-            <SelectItem value="polar-sample">Polar Sample</SelectItem>
-            <SelectItem value="polar-level">Polar Level</SelectItem>
-            <SelectItem value="lissajous">Lissajous</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Mode selector — icon button + skip to cycle */}
+      <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            const modes: VisualizerMode[] = ['spectrum', 'polar-sample', 'polar-level', 'lissajous'];
+            const next = (modes.indexOf(mode) + 1) % modes.length;
+            setMode(modes[next]);
+          }}
+          className="flex items-center gap-1 h-7 px-2 rounded-md text-[11px] bg-background/80 border border-border/50 backdrop-blur-sm text-foreground hover:bg-background/90 transition-colors"
+          title="Switch visualizer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
       </div>
       <canvas
         ref={canvasRef}
