@@ -717,8 +717,10 @@ export function NowPlayingPanel({
             )}
 
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
