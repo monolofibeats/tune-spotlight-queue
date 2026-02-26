@@ -723,9 +723,9 @@ export function NowPlayingPanel({
                     <span className="truncate">{t('nowPlaying.skip')}</span>
                   </Button>
                 </div>
-                <div className="relative flex items-center mt-2">
+                <div className="relative flex items-center justify-center mt-2">
                   {onAddToPedestal && (
-                    <div className="flex-1 flex justify-center">
+                    <div className="flex justify-center">
                       <div className="scale-110 origin-center">
                         <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
                       </div>
@@ -737,7 +737,7 @@ export function NowPlayingPanel({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-xs gap-1.5 px-2.5 text-destructive hover:text-destructive shrink-0"
+                          className="absolute right-0 top-1/2 -translate-y-1/2 h-8 text-xs gap-1.5 px-2.5 text-destructive hover:text-destructive shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
