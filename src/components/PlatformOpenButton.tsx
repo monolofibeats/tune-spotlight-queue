@@ -32,7 +32,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
   const [isHovered, setIsHovered] = useState(false);
   const [proximity, setProximity] = useState(0); // 0 = far, 1 = at button
-  const rafRef = useRef<number | null>(null);
+  const smoothedProximityRef = useRef(0);
 
   const cfg = platformConfigs[platform] || {
     color: '#ffffff', label: t('nowPlaying.openLink'),
