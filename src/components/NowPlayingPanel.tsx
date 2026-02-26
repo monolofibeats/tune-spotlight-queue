@@ -21,11 +21,8 @@ import {
   XCircle,
   Trash2,
   SkipForward,
-  Trophy,
-  Crown,
-  Medal,
-  Award
 } from 'lucide-react';
+import { MiniPedestal } from '@/components/MiniPedestal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AudioPlayer } from '@/components/AudioPlayer';
