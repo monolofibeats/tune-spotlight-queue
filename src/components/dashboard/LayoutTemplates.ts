@@ -14,9 +14,8 @@ export const DASHBOARD_TEMPLATES: DashboardTemplate[] = [
     name: 'Compact',
     description: 'Now playing + queue — tight and efficient',
     layout: [
-      { i: 'now_playing', x: 0, y: 0, w: 12, h: 9.3, minW: 6, minH: 3 },
-      { i: 'search_filters', x: 0, y: 9.3, w: 12, h: 1.4, minW: 6, minH: 1 },
-      { i: 'queue', x: 0, y: 10.7, w: 12, h: 20, minW: 4, minH: 6 },
+      { i: 'search_filters', x: 0, y: 0, w: 12, h: 1.4, minW: 6, minH: 1 },
+      { i: 'queue', x: 0, y: 1.4, w: 12, h: 20, minW: 4, minH: 6 },
     ],
   },
   {
