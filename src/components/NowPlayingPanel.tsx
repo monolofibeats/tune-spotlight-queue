@@ -291,8 +291,13 @@ export function NowPlayingPanel({
   }, [submission]);
 
   return (
-    <div className="mb-4" style={textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined}>
-      <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
+    <div className="mb-4" style={{
+      ...(textScale !== 100 ? { zoom: textScale / 100 } : {}),
+      ...(widthCols && widthCols < 12 ? { maxWidth: `${(widthCols / 12) * 100}%` } : {}),
+    } as React.CSSProperties}>
+      <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl" style={{
+        ...(heightRows ? { maxHeight: `${heightRows * 40}px`, overflowY: 'auto' as const } : {}),
+      }}>
         {/* Header — always visible, clickable to expand/collapse when empty */}
         <div
           className={`px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border-b border-border/10 flex items-center gap-2 ${!submission ? 'cursor-pointer hover:bg-yellow-500/5 transition-colors' : ''}`}

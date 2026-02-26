@@ -1054,6 +1054,8 @@ const StreamerDashboard = () => {
                     config={getWidgetConfig('now_playing')}
                     compactVisualizer={phoneOptimized}
                     textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
+                    widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
+                    heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
                   />
                 </NowPlayingDropZone>
                 <LiveAwareDashboardGrid
