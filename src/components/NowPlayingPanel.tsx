@@ -506,6 +506,159 @@ export function NowPlayingPanel({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                           {/* Spotify Artist Card */}
                           {submission?.platform === 'spotify' && (
-                            <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
+            <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20">
                               <h3 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
                                 <Disc3 className="w-3.5 h-3.5 text-green-400" />
+                                {t('nowPlaying.spotifyArtist')}
+                              </h3>
+                              {isLoadingSpotify ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-green-400" />
+                              ) : spotifyMeta ? (
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    {spotifyMeta.artistImage && (
+                                      <img src={spotifyMeta.artistImage} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                    )}
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-xs font-medium truncate">{spotifyMeta.artistName}</p>
+                                      {spotifyMeta.monthlyListeners && (
+                                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                          <Users className="w-2.5 h-2.5" />
+                                          {spotifyMeta.monthlyListeners}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {spotifyMeta.artistUrl && (
+                                      <a href={spotifyMeta.artistUrl} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:text-green-300">
+                                        <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    )}
+                                  </div>
+                                  {spotifyMeta.artistBio && (
+                                    <p className="text-[10px] text-muted-foreground line-clamp-3">{decodeHtmlEntities(spotifyMeta.artistBio)}</p>
+                                  )}
+                                  {spotifyMeta.artistTopTracks && spotifyMeta.artistTopTracks.length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] font-semibold text-muted-foreground mb-1">{t('nowPlaying.topTracks')}</p>
+                                      <div className="space-y-0.5">
+                                        {spotifyMeta.artistTopTracks.slice(0, 3).map((track, i) => (
+                                          <a key={i} href={track.url} target="_blank" rel="noopener noreferrer" className="block text-[10px] text-foreground/70 hover:text-primary truncate">
+                                            {i + 1}. {track.name}
+                                          </a>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {spotifyMeta.artistSocialLinks && spotifyMeta.artistSocialLinks.length > 0 && (
+                                    <div className="flex gap-1.5 flex-wrap">
+                                      {spotifyMeta.artistSocialLinks.map((link, i) => (
+                                        <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="text-xs hover:scale-110 transition-transform" title={link.platform}>
+                                          {getSocialIcon(link.platform)}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-[10px] text-muted-foreground">{t('nowPlaying.noSpotifyData')}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Contact & Stats Card */}
+                          <div className="p-3 rounded-lg bg-muted/10 border border-border/20">
+                            <h3 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                              <Send className="w-3.5 h-3.5 text-muted-foreground" />
+                              {t('nowPlaying.contactStats')}
+                            </h3>
+                            <div className="space-y-1.5">
+                              {submission?.email && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-muted-foreground truncate flex-1">{submission.email}</span>
+                                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={handleCopyContact}>
+                                    {copiedContact ? <Check className="w-2.5 h-2.5 text-green-400" /> : <Copy className="w-2.5 h-2.5" />}
+                                  </Button>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <Calendar className="w-2.5 h-2.5" />
+                                {t('nowPlaying.submittedOn')} {formatDate(submission.created_at)}
+                              </div>
+                              {submission.amount_paid > 0 && (
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                  <Zap className="w-2.5 h-2.5 text-primary" />
+                                  €{(submission.amount_paid / 100).toFixed(2)} {t('nowPlaying.paid')}
+                                </div>
+                              )}
+                              {submitterStats && (
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                  <Users className="w-2.5 h-2.5" />
+                                  {submitterStats.total_submissions} {t('nowPlaying.totalSubmissions')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            {cfg.showActionButtons && (onStatusChange || onDelete) && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {onStatusChange && submission.status === 'pending' && (
+                    <>
+                      <Button size="sm" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'reviewed')}>
+                        <CheckCircle className="w-4 h-4" />
+                        {t('nowPlaying.done')}
+                      </Button>
+                      <Button size="sm" variant="secondary" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'skipped')}>
+                        <SkipForward className="w-4 h-4" />
+                        {t('nowPlaying.skip')}
+                      </Button>
+                    </>
+                  )}
+                  {onStatusChange && submission.status !== 'pending' && (
+                    <Button size="sm" variant="outline" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'pending')}>
+                      <Eye className="w-4 h-4" />
+                      {t('nowPlaying.backToPending')}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {onDelete && (
+                    <Button size="sm" variant="ghost" className="h-11 px-3 gap-1.5 text-destructive hover:text-destructive" onClick={() => onDelete(submission.id)}>
+                      <Trash2 className="w-4 h-4" />
+                      {t('nowPlaying.trash')}
+                    </Button>
+                  )}
+                  {onAddToPedestal && (
+                    <>
+                      <Button size="sm" variant="ghost" className="h-11 px-3 gap-1.5 text-yellow-500 hover:text-yellow-400" onClick={() => onAddToPedestal(submission.id, 1)}>
+                        <Crown className="w-4 h-4" />
+                        #1
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-11 px-3 gap-1.5 text-gray-400 hover:text-gray-300" onClick={() => onAddToPedestal(submission.id, 2)}>
+                        <Medal className="w-4 h-4" />
+                        #2
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-11 px-3 gap-1.5 text-amber-600 hover:text-amber-500" onClick={() => onAddToPedestal(submission.id, 3)}>
+                        <Award className="w-4 h-4" />
+                        #3
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
