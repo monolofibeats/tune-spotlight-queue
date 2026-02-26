@@ -112,6 +112,10 @@ interface NowPlayingPanelProps {
   config?: NowPlayingConfig;
   compactVisualizer?: boolean;
   textScale?: number;
+  /** Grid width in columns (out of 12). Controls max-width. */
+  widthCols?: number;
+  /** Grid height in rows (rowHeight=40px). Controls max-height with overflow scroll. */
+  heightRows?: number;
 }
 
 // Social platform icons mapping
