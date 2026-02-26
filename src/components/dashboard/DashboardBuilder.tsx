@@ -226,6 +226,11 @@ export function DashboardBuilder({
   }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
+    const errors = validateLayout(currentLayout);
+    if (errors.length > 0) {
+      toast({ title: t('builder.validationError') || 'Invalid sizes', description: errors.join(', '), variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
     try {
       await onSave(currentLayout);
