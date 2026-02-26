@@ -285,7 +285,7 @@ export function NowPlayingPanel({
   }, [submission]);
 
   return (
-    <div className="mb-4">
+    <div className="mb-4" style={textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined}>
       <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
         {/* Header — always visible, clickable to expand/collapse when empty */}
         <div

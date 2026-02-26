@@ -1053,6 +1053,7 @@ const StreamerDashboard = () => {
                     onAddToPedestal={handleAddToPedestal}
                     config={getWidgetConfig('now_playing')}
                     compactVisualizer={phoneOptimized}
+                    textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
                   />
                 </NowPlayingDropZone>
                 <LiveAwareDashboardGrid
