@@ -263,12 +263,12 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Trophy className="w-6 h-6 text-primary" />
           <h2 className="text-xl font-display font-bold">{t('topSongs.title')}</h2>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Public toggle */}
           <div className="flex items-center gap-2">
             {showPublicly ? (
@@ -303,29 +303,31 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
       </div>
 
       {/* Public message */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <label className="text-sm text-muted-foreground whitespace-nowrap">{t('topSongs.messageLabel')}</label>
-        <input
-          type="text"
-          value={topSongsMessage}
-          onChange={(e) => setTopSongsMessage(e.target.value)}
-          placeholder={t('topSongs.messagePlaceholder')}
-          maxLength={120}
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-        <Button variant="outline" size="sm" onClick={handleMessageSave} className="gap-1.5">
-          <AnimatePresence mode="wait">
-            {messageSaved ? (
-              <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <Check className="w-3.5 h-3.5 text-green-500" />
-              </motion.span>
-            ) : (
-              <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                {t('topSongs.saveMessage')}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </Button>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <input
+            type="text"
+            value={topSongsMessage}
+            onChange={(e) => setTopSongsMessage(e.target.value)}
+            placeholder={t('topSongs.messagePlaceholder')}
+            maxLength={120}
+            className="flex-1 min-w-0 px-3 py-2 text-sm rounded-lg border border-border/30 bg-card/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <Button variant="outline" size="sm" onClick={handleMessageSave} className="gap-1.5 shrink-0">
+            <AnimatePresence mode="wait">
+              {messageSaved ? (
+                <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                  <Check className="w-3.5 h-3.5 text-green-500" />
+                </motion.span>
+              ) : (
+                <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  {t('topSongs.saveMessage')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Button>
+        </div>
       </div>
 
       {/* Pedestal - Olympic podium: #2 left, #1 center (tallest), #3 right */}
