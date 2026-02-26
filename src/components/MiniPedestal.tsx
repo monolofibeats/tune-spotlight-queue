@@ -36,7 +36,7 @@ const POSITION_CONFIG = [
     pos: 1,
     label: 'Gold',
     Icon: Crown,
-    height: 'h-10',
+    height: 'h-7',
     iconColor: 'text-yellow-400',
     bgGradient: 'from-yellow-600/30 via-yellow-500/15 to-transparent',
     borderColor: 'border-yellow-500/40',
