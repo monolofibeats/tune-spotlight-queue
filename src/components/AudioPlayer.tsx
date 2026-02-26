@@ -121,7 +121,7 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
         <div className="absolute inset-x-0 h-2 bg-secondary/40 rounded-full overflow-hidden">
           {/* Progress fill */}
           <div 
-            className="absolute h-full bg-amber-500/70 transition-all duration-75"
+            className="absolute h-full bg-amber-400/80 transition-all duration-75"
             style={{ width: `${progress}%` }}
           />
           
