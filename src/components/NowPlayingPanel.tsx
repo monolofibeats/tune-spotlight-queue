@@ -619,11 +619,11 @@ export function NowPlayingPanel({
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {onStatusChange && submission.status === 'pending' && (
                     <>
-                      <Button size="sm" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'reviewed')}>
+                      <Button size="sm" className="h-11 px-5 gap-1.5 bg-green-600 hover:bg-green-700 text-white" onClick={() => onStatusChange(submission.id, 'reviewed')}>
                         <CheckCircle className="w-4 h-4" />
                         {t('nowPlaying.done')}
                       </Button>
-                      <Button size="sm" variant="secondary" className="h-11 px-5 gap-1.5" onClick={() => onStatusChange(submission.id, 'skipped')}>
+                      <Button size="sm" className="h-11 px-5 gap-1.5 bg-red-600 hover:bg-red-700 text-white" onClick={() => onStatusChange(submission.id, 'skipped')}>
                         <SkipForward className="w-4 h-4" />
                         {t('nowPlaying.skip')}
                       </Button>
