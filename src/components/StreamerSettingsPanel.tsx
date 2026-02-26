@@ -406,7 +406,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             }
             setActiveTab(tab);
           }} className="space-y-6">
-            <ScrollArea className="w-full">
+            <div className="w-full overflow-x-auto scrollbar-hide">
               <TabsList className="backdrop-blur-md bg-card/20 border border-border/30 p-1 rounded-xl inline-flex w-auto min-w-full">
                 {tabs.map((tab) => (
                   <TabsTrigger 
@@ -419,7 +419,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   </TabsTrigger>
                 ))}
               </TabsList>
-            </ScrollArea>
+            </div>
 
             {/* Profile Tab */}
             <TabsContent value="profile" forceMount className={`space-y-6 ${activeTab !== 'profile' ? 'hidden' : ''}`}>
