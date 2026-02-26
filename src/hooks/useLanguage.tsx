@@ -1175,7 +1175,7 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.streamerDashboard': 'Streamer Dashboard',
     'dashboard.managePageAt': 'Verwalte deine Seite auf',
     'dashboard.viewPage': 'Seite ansehen',
-    'dashboard.myPageSettings': 'Meine Seiteneinstellungen',
+    'dashboard.myPageSettings': 'Seiteneinstellungen',
     'dashboard.noProfileFound': 'Kein Streamer-Profil gefunden',
     'dashboard.noProfileDesc': 'Du hast noch kein Streamer-Profil. Bitte bewirb dich als Streamer.',
     'dashboard.applyNow': 'Jetzt bewerben',
