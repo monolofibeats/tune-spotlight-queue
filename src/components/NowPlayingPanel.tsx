@@ -110,6 +110,8 @@ interface NowPlayingPanelProps {
   onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
   compactVisualizer?: boolean;
+  /** Called when the empty-state expand/collapse changes */
+  onEmptyExpandChange?: (expanded: boolean) => void;
 }
 
 // Social platform icons mapping
