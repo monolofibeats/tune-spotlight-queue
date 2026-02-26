@@ -451,21 +451,17 @@ export function NowPlayingPanel({
                   </div>
                 )}
 
-                {/* Big Open Link button for non-embeddable platforms */}
-                {submission.song_url && submission.song_url !== 'direct-upload' && 
-                 submission.platform !== 'soundcloud' && 
-                 !(cfg.showSpotifyEmbed && submission.platform === 'spotify') && (
-                  <a
-                    href={submission.song_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all py-6 px-4 group"
+                {/* Big Open Link button — all platforms with a valid URL */}
+                {submission.song_url && submission.song_url !== 'direct-upload' && (
+                  <button
+                    onClick={() => window.open(submission.song_url, 'upstar-song-tab', 'noopener,noreferrer')}
+                    className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all py-6 px-4 group cursor-pointer w-full"
                   >
                     <ExternalLink className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                     <span className="text-sm font-semibold text-primary">
                       {t('nowPlaying.openLink')}
                     </span>
-                  </a>
+                  </button>
                 )}
 
                 {cfg.showMessage && submission.message && (
