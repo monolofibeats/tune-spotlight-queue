@@ -126,6 +126,22 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
         throw error;
       }
       await fetchActiveSession();
+
+      // Notify team members (fire-and-forget)
+      const { data: streamerData } = await supabase
+        .from('streamers')
+        .select('display_name, slug')
+        .eq('id', sid)
+        .single();
+      if (streamerData) {
+        sendNotification({
+          type: 'session_started',
+          streamer_id: sid,
+          streamer_name: streamerData.display_name,
+          session_title: title || 'Live Stream',
+          slug: streamerData.slug,
+        });
+      }
     } catch (error) {
       console.error('Error starting session:', error);
       throw error;
