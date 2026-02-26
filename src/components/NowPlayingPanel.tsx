@@ -307,6 +307,21 @@ export function NowPlayingPanel({
         </div>
 
         <AnimatePresence>
+          {!collapsed && !submission && (
+            <motion.div
+              key="empty"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="overflow-hidden"
+            >
+              <div className="p-6 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <Disc3 className="w-8 h-8 opacity-30 animate-pulse-slow" />
+                <p className="text-xs">{t('nowPlaying.dragOrClick') || 'Click a track or drag it here to start playing'}</p>
+              </div>
+            </motion.div>
+          )}
           {!collapsed && submission && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
