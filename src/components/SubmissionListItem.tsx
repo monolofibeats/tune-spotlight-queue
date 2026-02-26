@@ -39,10 +39,21 @@ import { PositionBadge } from '@/components/queue/PositionBadge';
 import { SubmissionEditForm } from '@/components/submission/SubmissionEditForm';
 import { useLanguage } from '@/hooks/useLanguage';
 
-// Check if URL is a playable embed (Spotify, SoundCloud)
+// Check if URL is a playable embed (SoundCloud works inline)
 const isPlayableEmbed = (url: string) => {
   const lowerUrl = url.toLowerCase();
-  return lowerUrl.includes('spotify.com') || lowerUrl.includes('soundcloud.com');
+  return lowerUrl.includes('soundcloud.com');
+};
+
+// Platforms that should open in a new tab because embeds don't provide full playback
+const shouldOpenExternally = (url: string) => {
+  const lowerUrl = url.toLowerCase();
+  return (
+    lowerUrl.includes('spotify.com') ||
+    lowerUrl.includes('youtube.com') ||
+    lowerUrl.includes('youtu.be') ||
+    lowerUrl.includes('music.apple.com')
+  );
 };
 
 interface Submission {
