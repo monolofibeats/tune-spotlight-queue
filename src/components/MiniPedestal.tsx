@@ -23,7 +23,7 @@ const POSITION_CONFIG = [
     pos: 2,
     label: 'Silver',
     Icon: Medal,
-    height: 'h-7',
+    height: 'h-5',
     iconColor: 'text-slate-300',
     bgGradient: 'from-slate-400/25 via-slate-300/10 to-transparent',
     borderColor: 'border-slate-400/40',
@@ -36,7 +36,7 @@ const POSITION_CONFIG = [
     pos: 1,
     label: 'Gold',
     Icon: Crown,
-    height: 'h-10',
+    height: 'h-7',
     iconColor: 'text-yellow-400',
     bgGradient: 'from-yellow-600/30 via-yellow-500/15 to-transparent',
     borderColor: 'border-yellow-500/40',
@@ -49,7 +49,7 @@ const POSITION_CONFIG = [
     pos: 3,
     label: 'Bronze',
     Icon: Award,
-    height: 'h-5',
+    height: 'h-4',
     iconColor: 'text-amber-600',
     bgGradient: 'from-amber-700/25 via-amber-600/10 to-transparent',
     borderColor: 'border-amber-700/40',
@@ -194,7 +194,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
             key={pos}
             onClick={() => handleClick(pos)}
             className={`relative flex flex-col items-center ${
-              pos === 1 ? 'w-12' : 'w-10'
+              pos === 1 ? 'w-10' : 'w-8'
             } cursor-pointer group`}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
@@ -210,7 +210,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
             {/* Icon */}
             <motion.div
               className={`flex items-center justify-center rounded-full mb-0.5 z-10 ${iconBg} ${
-                pos === 1 ? 'w-7 h-7' : 'w-6 h-6'
+                pos === 1 ? 'w-5 h-5' : 'w-4 h-4'
               }`}
               animate={isAnimating ? {
                 scale: [1, 1.8, 1.3, 1],
@@ -218,7 +218,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
               } : { scale: 1 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <Icon className={`${pos === 1 ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconColor}`} />
+              <Icon className={`${pos === 1 ? 'w-3 h-3' : 'w-2.5 h-2.5'} ${iconColor}`} />
             </motion.div>
 
             {/* Podium block */}
