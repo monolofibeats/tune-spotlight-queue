@@ -306,28 +306,29 @@ export function NowPlayingPanel({
           )}
         </div>
 
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {!collapsed && !submission && (
             <motion.div
               key="empty"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
               <div className="p-6 flex flex-col items-center justify-center gap-2 text-muted-foreground">
                 <Disc3 className="w-8 h-8 opacity-30 animate-pulse-slow" />
-                <p className="text-xs">{t('nowPlaying.dragOrClick') || 'Click a track or drag it here to start playing'}</p>
+                <p className="text-xs">{t('nowPlaying.dragOrClick')}</p>
               </div>
             </motion.div>
           )}
           {!collapsed && submission && (
             <motion.div
+              key="content"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
             {/* Main Content — compact */}
