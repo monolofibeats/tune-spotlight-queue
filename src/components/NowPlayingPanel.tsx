@@ -451,7 +451,22 @@ export function NowPlayingPanel({
                   </div>
                 )}
 
-                {/* Message — compact */}
+                {/* Big Open Link button for non-embeddable platforms */}
+                {submission.song_url && submission.song_url !== 'direct-upload' && 
+                 submission.platform !== 'soundcloud' && 
+                 !(cfg.showSpotifyEmbed && submission.platform === 'spotify') && (
+                  <a
+                    href={submission.song_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all py-6 px-4 group"
+                  >
+                    <ExternalLink className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-semibold text-primary">
+                      {t('nowPlaying.openLink')}
+                    </span>
+                  </a>
+                )
                 {cfg.showMessage && submission.message && (
                   <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20">
                     <p className="text-xs text-muted-foreground italic line-clamp-2">
