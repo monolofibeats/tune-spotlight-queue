@@ -79,6 +79,7 @@ export function DashboardGrid({
       margin={isEditing ? [8, 8] : [0, 0]}
       containerPadding={[0, 0]}
       useCSSTransforms={true}
+      transformScale={1}
     >
       {visibleLayout.map(item => {
         const content = widgetRenderers[item.i];
