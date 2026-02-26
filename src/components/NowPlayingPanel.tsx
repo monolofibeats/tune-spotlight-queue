@@ -306,8 +306,18 @@ export function NowPlayingPanel({
           )}
         </div>
 
+        <AnimatePresence>
+          {!collapsed && submission && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="overflow-hidden"
+            >
             {/* Main Content — compact */}
             <div className="p-3">
+              <div className="np-main-content flex flex-col gap-3">
               <div className="np-main-content flex flex-col gap-3">
                 {/* Song Header — compact single row */}
                 <div className="flex items-center gap-3">
