@@ -242,15 +242,6 @@ html:not(:has(body[data-streamer-theme="active"])) .stream-inactive {
   }
 }
 
-/* Hide scrollbar utility */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
