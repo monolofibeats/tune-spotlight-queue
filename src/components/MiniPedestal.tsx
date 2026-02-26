@@ -210,7 +210,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
             {/* Icon */}
             <motion.div
               className={`flex items-center justify-center rounded-full mb-0.5 z-10 ${iconBg} ${
-                pos === 1 ? 'w-7 h-7' : 'w-6 h-6'
+                pos === 1 ? 'w-5 h-5' : 'w-4 h-4'
               }`}
               animate={isAnimating ? {
                 scale: [1, 1.8, 1.3, 1],
