@@ -318,7 +318,6 @@ export function NowPlayingPanel({
             {/* Main Content — compact */}
             <div className="p-3">
               <div className="np-main-content flex flex-col gap-3">
-              <div className="np-main-content flex flex-col gap-3">
                 {/* Song Header — compact single row */}
                 <div className="flex items-center gap-3">
                   <div className="shrink-0 w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center">
