@@ -49,7 +49,7 @@ const POSITION_CONFIG = [
     pos: 3,
     label: 'Bronze',
     Icon: Award,
-    height: 'h-8',
+    height: 'h-5',
     iconColor: 'text-amber-600',
     bgGradient: 'from-amber-700/25 via-amber-600/10 to-transparent',
     borderColor: 'border-amber-700/40',

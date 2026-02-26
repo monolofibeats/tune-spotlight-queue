@@ -714,9 +714,10 @@ export function NowPlayingPanel({
                 </div>
                 <div className="flex items-center justify-center gap-1.5 mt-2">
                   {onAddToPedestal && (
-                    <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
+                    <div className="flex-1 flex justify-center">
+                      <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
+                    </div>
                   )}
-                  <div className="flex-1" />
                   {onDelete && (
                     <Button
                       variant="ghost"
