@@ -451,13 +451,13 @@ export function NowPlayingPanel({
                   </div>
                 )}
 
-                {/* Big Open Link button — all platforms with a valid URL */}
+                {/* Open Link button */}
                 {submission.song_url && submission.song_url !== 'direct-upload' && (
                   <button
                     onClick={() => window.open(submission.song_url, 'upstar-song-tab', 'noopener,noreferrer')}
-                    className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all py-6 px-4 group cursor-pointer w-full"
+                    className="flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary/50 transition-all py-3 px-5 group cursor-pointer w-full animate-[pulse_3s_ease-in-out_infinite]"
                   >
-                    <ExternalLink className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                    <ExternalLink className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                     <span className="text-sm font-semibold text-primary">
                       {t('nowPlaying.openLink')}
                     </span>
