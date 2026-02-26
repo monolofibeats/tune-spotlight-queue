@@ -312,7 +312,7 @@ export function NowPlayingPanel({
                   <Play className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t('nowPlaying.clickToPlay') || 'Click a submission to start playing'}
+                  {(() => { const v = t('nowPlaying.clickToPlay'); return v === 'nowPlaying.clickToPlay' ? 'Click a submission to start playing' : v; })()}
                 </p>
               </div>
             </motion.div>
