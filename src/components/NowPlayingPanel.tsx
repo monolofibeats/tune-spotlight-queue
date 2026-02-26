@@ -723,10 +723,12 @@ export function NowPlayingPanel({
                     <span className="truncate">{t('nowPlaying.skip')}</span>
                   </Button>
                 </div>
-                <div className="relative flex flex-col items-center mt-2">
+                <div className="relative flex items-center mt-2">
                   {onAddToPedestal && (
-                    <div className="w-full flex justify-center">
-                      <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
+                    <div className="flex-1 flex justify-center">
+                      <div className="scale-110 origin-center">
+                        <MiniPedestal onSelect={(pos) => onAddToPedestal(submission.id, pos)} />
+                      </div>
                     </div>
                   )}
                   {onDelete && (
