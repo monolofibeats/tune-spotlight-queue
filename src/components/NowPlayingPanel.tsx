@@ -451,18 +451,29 @@ export function NowPlayingPanel({
                   </div>
                 )}
 
-                {/* Open Link button */}
-                {submission.song_url && submission.song_url !== 'direct-upload' && (
-                  <button
-                    onClick={() => window.open(submission.song_url, 'upstar-song-tab', 'noopener,noreferrer')}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary/50 transition-all py-3 px-5 group cursor-pointer w-full animate-[pulse_3s_ease-in-out_infinite]"
-                  >
-                    <ExternalLink className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-semibold text-primary">
-                      {t('nowPlaying.openLink')}
-                    </span>
-                  </button>
-                )}
+                {/* Open Link button — platform-colored */}
+                {submission.song_url && submission.song_url !== 'direct-upload' && (() => {
+                  const platformStyles: Record<string, { bg: string; hover: string; border: string; text: string; label: string }> = {
+                    spotify:      { bg: 'bg-[#1DB954]/15', hover: 'hover:bg-[#1DB954]/25', border: 'border-[#1DB954]/40 hover:border-[#1DB954]/60', text: 'text-[#1DB954]', label: 'Open in Spotify' },
+                    soundcloud:   { bg: 'bg-[#FF5500]/15', hover: 'hover:bg-[#FF5500]/25', border: 'border-[#FF5500]/40 hover:border-[#FF5500]/60', text: 'text-[#FF5500]', label: 'Open in SoundCloud' },
+                    youtube:      { bg: 'bg-[#FF0000]/15', hover: 'hover:bg-[#FF0000]/25', border: 'border-[#FF0000]/40 hover:border-[#FF0000]/60', text: 'text-[#FF0000]', label: 'Open on YouTube' },
+                    'apple-music':{ bg: 'bg-[#FC3C44]/15', hover: 'hover:bg-[#FC3C44]/25', border: 'border-[#FC3C44]/40 hover:border-[#FC3C44]/60', text: 'text-[#FC3C44]', label: 'Open in Apple Music' },
+                  };
+                  const s = platformStyles[submission.platform] || {
+                    bg: 'bg-foreground/10', hover: 'hover:bg-foreground/20', border: 'border-foreground/30 hover:border-foreground/50', text: 'text-foreground', label: t('nowPlaying.openLink'),
+                  };
+                  return (
+                    <button
+                      onClick={() => window.open(submission.song_url, 'upstar-song-tab', 'noopener,noreferrer')}
+                      className={`flex items-center justify-center gap-2 rounded-lg border ${s.border} ${s.bg} ${s.hover} backdrop-blur-md transition-all py-3 px-5 group cursor-pointer w-full animate-[pulse_3s_ease-in-out_infinite]`}
+                    >
+                      <ExternalLink className={`w-4 h-4 ${s.text} group-hover:scale-110 transition-transform`} />
+                      <span className={`text-sm font-semibold ${s.text}`}>
+                        {s.label}
+                      </span>
+                    </button>
+                  );
+                })()}
 
                 {cfg.showMessage && submission.message && (
                   <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20">
