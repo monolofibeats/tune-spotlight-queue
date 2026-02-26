@@ -728,7 +728,6 @@ const StreamerDashboard = () => {
   const widgetRenderers = useMemo(() => {
     if (!streamer) return {};
 
-    const npConfig = getWidgetConfig('now_playing');
     const statsConfig = getWidgetConfig('stats');
     const searchConfig = getWidgetConfig('search_filters');
     const queueConfig = getWidgetConfig('queue');
