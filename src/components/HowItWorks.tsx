@@ -236,13 +236,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
     if (referralCreatedRef.current) return;
     referralCreatedRef.current = true;
 
-    // Check localStorage to avoid duplicate codes per browser
-    const stored = localStorage.getItem('upstar_tip_referral');
-    if (stored) {
-      setReferralCode(stored);
-      return;
-    }
-
+    // Generate a fresh code every session (no localStorage persistence)
     const code = generateReferralCode();
     const { error } = await supabase.from('referral_codes').insert({
       code,
@@ -254,7 +248,6 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
 
     if (!error) {
       setReferralCode(code);
-      localStorage.setItem('upstar_tip_referral', code);
     }
   }, []);
 
