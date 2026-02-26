@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import {
   Pencil,
@@ -181,12 +181,23 @@ export function DashboardBuilder({
   }, [currentLayout, onLayoutChange, expandedWidget]);
 
   const updateWidgetSize = useCallback((id: string, field: 'w' | 'h', value: number) => {
-    const def = WIDGET_REGISTRY.find(w => w.id === id);
-    if (!def) return;
-    const min = field === 'w' ? def.minSize.w : def.minSize.h;
-    const clamped = Math.max(min, value);
-    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: parseFloat(clamped.toFixed(1)) } : l));
+    onLayoutChange(currentLayout.map(l => l.i === id ? { ...l, [field]: parseFloat(value.toFixed(1)) } : l));
   }, [currentLayout, onLayoutChange]);
+
+  const validateLayout = useCallback((layout: Layout[]): string[] => {
+    const errors: string[] = [];
+    for (const item of layout) {
+      const def = WIDGET_REGISTRY.find(w => w.id === item.i);
+      if (!def) continue;
+      if (item.w < def.minSize.w) errors.push(`${def.label}: width must be at least ${def.minSize.w}`);
+      if (item.h < def.minSize.h) errors.push(`${def.label}: height must be at least ${def.minSize.h}`);
+      if (def.maxSize) {
+        if (item.w > def.maxSize.w) errors.push(`${def.label}: width must be at most ${def.maxSize.w}`);
+        if (item.h > def.maxSize.h) errors.push(`${def.label}: height must be at most ${def.maxSize.h}`);
+      }
+    }
+    return errors;
+  }, []);
 
   const toggleWidgetConfig = useCallback((widgetId: string, key: string, value: boolean) => {
     const current = widgetConfigs[widgetId] || getDefaultWidgetConfig(widgetId);
@@ -215,6 +226,11 @@ export function DashboardBuilder({
   }, [onLayoutChange, onPoppedOutWidgetsChange]);
 
   const handleSave = async () => {
+    const errors = validateLayout(currentLayout);
+    if (errors.length > 0) {
+      toast({ title: t('builder.validationError') || 'Invalid sizes', description: errors.join(', '), variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
     try {
       await onSave(currentLayout);
@@ -504,6 +520,81 @@ export function DashboardBuilder({
   );
 }
 
+/* ── SizeField — slider + typed input with deferred validation ── */
+
+interface SizeFieldProps {
+  label: string;
+  unit: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+}
+
+function SizeField({ label, unit, value, min, max, onChange }: SizeFieldProps) {
+  const [localValue, setLocalValue] = useState(String(value));
+
+  // Sync from parent when value changes externally (e.g. slider, template apply)
+  useEffect(() => {
+    setLocalValue(String(value));
+  }, [value]);
+
+  const numericLocal = parseFloat(localValue);
+  const isBelowMin = !isNaN(numericLocal) && numericLocal < min;
+  const isAboveMax = !isNaN(numericLocal) && numericLocal > max;
+  const hasError = isBelowMin || isAboveMax || isNaN(numericLocal) || localValue.trim() === '';
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setLocalValue(raw);
+    const num = parseFloat(raw);
+    if (!isNaN(num) && num > 0) {
+      onChange(num);
+    }
+  };
+
+  const handleSliderChange = (val: number) => {
+    setLocalValue(String(val));
+    onChange(val);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[10px] text-muted-foreground font-medium">{label}</label>
+        <div className="flex items-center gap-1">
+          <Input
+            type="number"
+            value={localValue}
+            step="1"
+            onChange={handleInputChange}
+            className={`h-5 w-14 text-[10px] text-center p-0 font-mono ${hasError ? 'border-destructive ring-destructive/30 ring-1' : ''}`}
+          />
+          <span className="text-[10px] text-muted-foreground">{unit}</span>
+        </div>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={Math.max(min, Math.min(max, value))}
+        onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
+        className="w-full h-1.5 accent-primary cursor-pointer"
+      />
+      <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
+        <span>{min}</span>
+        {hasError && (
+          <span className="text-destructive font-medium">
+            {isBelowMin ? `min ${min}` : isAboveMax ? `max ${max}` : 'invalid'}
+          </span>
+        )}
+        <span>{max}</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Widgets tab extracted ── */
 
 interface WidgetsTabProps {
@@ -571,29 +662,23 @@ function WidgetsTab({
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                     <div className="p-3 ml-6 mr-1 mt-1 mb-1 rounded-lg bg-muted/20 border border-border/50 space-y-3">
                       {/* Width */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.width')}</label>
-                          <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.w} min={widget.minSize.w} step="0.1"
-                              onChange={(e) => updateWidgetSize(widget.id, 'w', parseFloat(e.target.value) || widget.minSize.w)}
-                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
-                            <span className="text-[10px] text-muted-foreground">cols</span>
-                          </div>
-                        </div>
-                      </div>
+                      <SizeField
+                        label={t('builder.width')}
+                        unit="cols"
+                        value={layoutItem.w}
+                        min={widget.minSize.w}
+                        max={widget.maxSize?.w ?? 12}
+                        onChange={(v) => updateWidgetSize(widget.id, 'w', v)}
+                      />
                       {/* Height */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[10px] text-muted-foreground font-medium">{t('builder.height')}</label>
-                          <div className="flex items-center gap-1">
-                            <Input type="number" value={layoutItem.h} min={widget.minSize.h} step="0.1"
-                              onChange={(e) => updateWidgetSize(widget.id, 'h', parseFloat(e.target.value) || widget.minSize.h)}
-                              className="h-5 w-14 text-[10px] text-center p-0 font-mono" />
-                            <span className="text-[10px] text-muted-foreground">rows</span>
-                          </div>
-                        </div>
-                      </div>
+                      <SizeField
+                        label={t('builder.height')}
+                        unit="rows"
+                        value={layoutItem.h}
+                        min={widget.minSize.h}
+                        max={widget.maxSize?.h ?? 20}
+                        onChange={(v) => updateWidgetSize(widget.id, 'h', v)}
+                      />
 
                       {/* Text Size */}
                       <div>
