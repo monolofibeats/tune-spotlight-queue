@@ -111,6 +111,7 @@ interface NowPlayingPanelProps {
   onAddToPedestal?: (submissionId: string, position: number) => void;
   config?: NowPlayingConfig;
   compactVisualizer?: boolean;
+  textScale?: number;
 }
 
 // Social platform icons mapping
@@ -138,6 +139,7 @@ export function NowPlayingPanel({
   onAddToPedestal,
   config,
   compactVisualizer,
+  textScale = 100,
 }: NowPlayingPanelProps) {
   const { t } = useLanguage();
   const cfg = {
@@ -283,7 +285,7 @@ export function NowPlayingPanel({
   }, [submission]);
 
   return (
-    <div className="mb-4">
+    <div className="mb-4" style={textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined}>
       <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
         {/* Header — always visible, clickable to expand/collapse when empty */}
         <div
