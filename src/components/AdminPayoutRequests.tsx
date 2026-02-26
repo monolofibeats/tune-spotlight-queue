@@ -92,6 +92,20 @@ export function AdminPayoutRequests() {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Notify the streamer about status change
+      const req = requests.find(r => r.id === id);
+      if (req?.streamer && (status === 'approved' || status === 'completed' || status === 'rejected')) {
+        const { sendNotification } = await import('@/lib/notifications');
+        sendNotification({
+          type: status === 'rejected' ? 'payout_rejected' : 'payout_approved',
+          streamer_email: req.streamer.email,
+          streamer_name: req.streamer.display_name,
+          amount: formatCurrency(req.amount_cents, req.currency),
+          admin_notes: adminNotes[id] || null,
+        });
+      }
+
       toast({ title: `Payout ${status}` });
       fetchRequests();
     } catch (error: any) {
