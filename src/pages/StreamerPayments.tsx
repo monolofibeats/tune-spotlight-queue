@@ -310,6 +310,18 @@ export default function StreamerPayments() {
       });
 
       if (error) throw error;
+
+      // Notify admins about the payout request
+      const { sendNotification } = await import('@/lib/notifications');
+      const { data: streamerData } = await supabase.from('streamers').select('display_name').eq('id', streamerId).single();
+      sendNotification({
+        type: 'payout_requested',
+        streamer_name: streamerData?.display_name || 'Unknown',
+        amount: formatCurrency(balance),
+        currency: primaryWallet.currency,
+        payout_method: primaryWallet.payout_method,
+      });
+
       toast({ title: 'Payout requested! 💸', description: `${formatCurrency(balance)} will be transferred to your ${primaryWallet.payout_method === 'paypal' ? 'PayPal' : 'bank account'}.` });
       loadData();
     } catch (error: any) {

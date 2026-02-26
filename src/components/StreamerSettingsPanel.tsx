@@ -215,6 +215,20 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           old_value: oldValue,
           new_value: newValue,
         });
+
+      // Send email notification for important field changes
+      const notifiableFields = ['display_name', 'email', 'slug'];
+      if (notifiableFields.includes(fieldName)) {
+        const { sendNotification } = await import('@/lib/notifications');
+        sendNotification({
+          type: 'profile_change',
+          streamer_email: streamer.email,
+          streamer_name: streamer.display_name,
+          field_name: fieldName,
+          old_value: oldValue,
+          new_value: newValue,
+        });
+      }
     } catch (e) {
       console.log('Failed to log content change:', e);
     }

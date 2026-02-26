@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { sendNotification } from '@/lib/notifications';
 
 interface StreamSession {
   id: string;
@@ -125,6 +126,22 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
         throw error;
       }
       await fetchActiveSession();
+
+      // Notify team members (fire-and-forget)
+      const { data: streamerData } = await supabase
+        .from('streamers')
+        .select('display_name, slug')
+        .eq('id', sid)
+        .single();
+      if (streamerData) {
+        sendNotification({
+          type: 'session_started',
+          streamer_id: sid,
+          streamer_name: streamerData.display_name,
+          session_title: title || 'Live Stream',
+          slug: streamerData.slug,
+        });
+      }
     } catch (error) {
       console.error('Error starting session:', error);
       throw error;
@@ -144,6 +161,24 @@ export function StreamSessionProvider({ children, streamerId }: StreamSessionPro
         .eq('id', currentSession.id);
 
       if (error) throw error;
+
+      // Notify team members (fire-and-forget)
+      if (currentSession.streamer_id) {
+        const { data: streamerData } = await supabase
+          .from('streamers')
+          .select('display_name, slug')
+          .eq('id', currentSession.streamer_id)
+          .single();
+        if (streamerData) {
+          sendNotification({
+            type: 'session_ended',
+            streamer_id: currentSession.streamer_id,
+            streamer_name: streamerData.display_name,
+            slug: streamerData.slug,
+          });
+        }
+      }
+
       setCurrentSession(null);
     } catch (error) {
       console.error('Error ending session:', error);

@@ -116,14 +116,36 @@ export function AdminChatPanel() {
     if (!newMessage.trim() || !user || !selectedStreamer) return;
 
     setIsSending(true);
+    const messageText = newMessage.trim();
     await supabase
       .from('admin_streamer_chat')
       .insert({
         streamer_id: selectedStreamer.id,
         sender_id: user.id,
         sender_role: 'admin',
-        message: newMessage.trim(),
+        message: messageText,
       });
+
+    // Notify streamer via email about admin message
+    try {
+      const { data: streamerData } = await supabase
+        .from('streamers')
+        .select('email, display_name')
+        .eq('id', selectedStreamer.id)
+        .single();
+      if (streamerData?.email) {
+        const { sendNotification } = await import('@/lib/notifications');
+        sendNotification({
+          type: 'support_reply',
+          email: streamerData.email,
+          reply_message: messageText,
+          original_message: '',
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to send chat notification email:', e);
+    }
+
     setNewMessage('');
     setIsSending(false);
   };
