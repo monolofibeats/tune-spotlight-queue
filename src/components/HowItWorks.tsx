@@ -574,7 +574,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
