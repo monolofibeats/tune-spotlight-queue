@@ -383,8 +383,8 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                     </div>
                   )}
                   {compact ? (
-                     <div className="relative flex items-center justify-center" style={{ height: 56 }}>
-                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ transform: 'scale(0.42)', transformOrigin: 'center center' }}>
+                     <div className="relative flex items-center justify-center" style={{ height: 44 }}>
+                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ transform: 'scale(0.36)', transformOrigin: 'center center' }}>
                         {item.illustration}
                        </div>
                      </div>
@@ -393,12 +393,12 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       {item.illustration}
                     </div>
                   )}
-                   <div className={compact ? 'px-1.5 pb-1.5 sm:px-2.5 sm:pb-2 pt-0.5 sm:flex-1' : 'p-5 pt-2 flex-1'}>
+                   <div className={compact ? 'px-2.5 pb-2 sm:px-2.5 sm:pb-2 pt-1 sm:flex-1' : 'p-5 pt-2 flex-1'}>
                      {compact && (
-                       <span className="text-[6px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
+                       <span className="text-[8px] sm:text-[7px] font-mono text-primary/60 font-bold">{item.step}</span>
                      )}
-                     <h3 className={`font-display font-bold ${compact ? 'text-[7px] sm:text-[9px] mb-0 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
-                     <p className={`text-muted-foreground ${compact ? 'text-[5.5px] sm:text-[8px] leading-snug' : 'text-sm leading-relaxed'}`}>{item.description}</p>
+                     <h3 className={`font-display font-bold ${compact ? 'text-[10px] sm:text-[9px] mb-0.5 leading-tight' : 'text-base mb-1.5'}`}>{item.title}</h3>
+                     <p className={`text-muted-foreground ${compact ? 'text-[8px] sm:text-[8px] leading-snug' : 'text-sm leading-relaxed'}`}>{item.description}</p>
                   </div>
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary/80 to-primary/20"
