@@ -1023,32 +1023,34 @@ const StreamerDashboard = () => {
               }
               setDashboardActiveTab(tab);
             }} className="space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <TabsList className="p-0.5 rounded-lg h-8">
-                  <TabsTrigger value="submissions" className="rounded-md px-3 gap-1.5 text-xs h-7">
-                    <Music className="w-3.5 h-3.5" />
-                    {t('dashboard.submissions')}
+              {/* Mobile: stack tabs above actions; Desktop: single row */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <TabsList className="p-0.5 rounded-lg h-8 w-full sm:w-auto overflow-x-auto no-scrollbar">
+                  <TabsTrigger value="submissions" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 min-w-0">
+                    <Music className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{t('dashboard.submissions')}</span>
                   </TabsTrigger>
                   {canEdit && (
-                    <TabsTrigger value="top-songs" className="rounded-md px-3 gap-1.5 text-xs h-7">
-                      <Trophy className="w-3.5 h-3.5" />
-                      {t('topSongs.tab')}
+                    <TabsTrigger value="top-songs" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 min-w-0">
+                      <Trophy className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">{t('topSongs.tab')}</span>
                     </TabsTrigger>
                   )}
                   {canEdit && (
-                    <TabsTrigger value="settings" className="rounded-md px-3 gap-1.5 text-xs h-7">
-                      <Settings className="w-3.5 h-3.5" />
-                      {t('dashboard.myPageSettings')}
+                    <TabsTrigger value="settings" className="rounded-md px-2 sm:px-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs h-7 min-w-0">
+                      <Settings className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">{t('dashboard.myPageSettings')}</span>
                     </TabsTrigger>
                   )}
                 </TabsList>
 
-                <div className="flex items-center gap-1.5 ml-auto">
+                <div className="flex items-center gap-1.5 sm:ml-auto">
                   {canEdit && <DashboardBuilder {...builderProps} />}
                   <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
                     <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3 h-3" />
-                      {t('dashboard.viewPage')}
+                      <span className="hidden sm:inline">{t('dashboard.viewPage')}</span>
+                      <span className="sm:hidden">Page</span>
                     </a>
                   </Button>
                 </div>
