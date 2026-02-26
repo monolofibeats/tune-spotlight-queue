@@ -54,12 +54,7 @@ export function PositionBadge({
   const isPodium = position !== null && position !== undefined && position <= 3;
 
   return (
-    <motion.div 
-      className="relative shrink-0"
-      initial={false}
-      animate={showGlow && position === 1 ? { scale: [1, 1.02, 1] } : {}}
-      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-    >
+    <div className="relative shrink-0">
       {/* Glow effect for #1 */}
       {position === 1 && (
         <div className="absolute inset-0 rounded-lg bg-yellow-400/30 blur-md animate-pulse" />
