@@ -736,23 +736,23 @@ const StreamerDashboard = () => {
 
     return {
       stats: (
-        <div className="widget-stats-grid grid grid-cols-3 gap-3 h-full">
+        <div className="widget-stats-grid grid grid-cols-3 gap-2 sm:gap-3 h-full">
           {statsConfig.showTotal !== false && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-              <div className="p-2 rounded-lg bg-primary/20"><Music className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.total}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.total')}</p></div>
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/20">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20"><Music className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-primary" /></div>
+              <div><p className="text-lg sm:text-xl font-display font-bold scalable-text">{stats.total}</p><p className="text-[9px] sm:text-[10px] text-muted-foreground scalable-text">{t('dashboard.total')}</p></div>
             </div>
           )}
           {statsConfig.showPending !== false && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-              <div className="p-2 rounded-lg bg-primary/20"><Eye className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.pending}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.pending')}</p></div>
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/20">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20"><Eye className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-primary" /></div>
+              <div><p className="text-lg sm:text-xl font-display font-bold scalable-text">{stats.pending}</p><p className="text-[9px] sm:text-[10px] text-muted-foreground scalable-text">{t('dashboard.pending')}</p></div>
             </div>
           )}
           {statsConfig.showReviewed !== false && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-              <div className="p-2 rounded-lg bg-primary/20"><CheckCircle className="w-4 h-4 text-primary" /></div>
-              <div><p className="text-xl font-display font-bold scalable-text">{stats.reviewed}</p><p className="text-[10px] text-muted-foreground scalable-text">{t('dashboard.reviewed')}</p></div>
+            <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/20">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary/20"><CheckCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-primary" /></div>
+              <div><p className="text-lg sm:text-xl font-display font-bold scalable-text">{stats.reviewed}</p><p className="text-[9px] sm:text-[10px] text-muted-foreground scalable-text">{t('dashboard.reviewed')}</p></div>
             </div>
           )}
         </div>
