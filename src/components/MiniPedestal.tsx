@@ -218,7 +218,7 @@ export function MiniPedestal({ onSelect }: MiniPedestalProps) {
               } : { scale: 1 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <Icon className={`${pos === 1 ? 'w-4 h-4' : 'w-3.5 h-3.5'} ${iconColor}`} />
+              <Icon className={`${pos === 1 ? 'w-3 h-3' : 'w-2.5 h-2.5'} ${iconColor}`} />
             </motion.div>
 
             {/* Podium block */}
