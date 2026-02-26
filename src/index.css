@@ -604,3 +604,11 @@ body[data-anim-style="elegant"] * {
   padding: 4px;
   min-height: 400px;
 }
+
+/* Merged mode: seamless shared borders */
+.dashboard-grid.merged-grid {
+  border-top: 1px solid hsl(var(--border) / 0.3);
+  border-left: 1px solid hsl(var(--border) / 0.3);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
