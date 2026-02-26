@@ -7,10 +7,10 @@ interface Dot {
   vy: number;
 }
 
-const DOT_COUNT = 35;
-const CONNECTION_DIST = 120;
+const DOT_COUNT = 60;
+const CONNECTION_DIST = 140;
 const DOT_RADIUS = 1.8;
-const DOT_SPEED = 0.3;
+const DOT_SPEED = 0.35;
 const DOT_COLOR = 'rgba(255,255,255,0.5)';
 const LINE_COLOR_BASE = [255, 255, 255];
 
