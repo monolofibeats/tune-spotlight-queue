@@ -95,7 +95,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
           style={{
             inset: -2,
             opacity: edgeGlowOpacity,
-            background: `radial-gradient(circle ${edgeGlowSize}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}50, ${cfg.color}15 40%, transparent 70%)`,
+            background: `radial-gradient(circle ${edgeGlowSize}px at ${glowPos.x}% ${glowPos.y}%, ${cfg.color}80, ${cfg.color}30 40%, transparent 70%)`,
             maskImage: `linear-gradient(#fff, #fff), linear-gradient(#fff, #fff)`,
             maskComposite: 'exclude',
             WebkitMaskComposite: 'xor',
