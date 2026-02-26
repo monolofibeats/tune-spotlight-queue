@@ -270,27 +270,51 @@ export function NowPlayingPanel({
     return textarea.value;
   };
 
-  return (
-    <AnimatePresence>
-      {submission && (
-        <motion.div
-          initial={{ opacity: 0, y: -10, height: 0 }}
-          animate={{ opacity: 1, y: 0, height: 'auto' }}
-          exit={{ opacity: 0, y: -10, height: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="mb-4 overflow-hidden"
-        >
-          <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
-            {/* Compact Header */}
-            <div className="px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border-b border-border/10 flex items-center gap-2">
-              <Music2 className="w-3.5 h-3.5 text-yellow-500" />
-              <span className="text-xs font-semibold text-yellow-500">{t('nowPlaying.title')}</span>
-              <div className="flex-1" />
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={onClose}>
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
+  const [collapsed, setCollapsed] = useState(!submission);
 
+  // Auto-expand when a song is loaded, collapse when cleared
+  useEffect(() => {
+    if (submission) {
+      setCollapsed(false);
+    } else {
+      setCollapsed(true);
+    }
+  }, [submission]);
+
+  return (
+    <div className="mb-4">
+      <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
+        {/* Header — always visible, clickable to expand/collapse when empty */}
+        <div
+          className={`px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border-b border-border/10 flex items-center gap-2 ${!submission ? 'cursor-pointer hover:bg-yellow-500/5 transition-colors' : ''}`}
+          onClick={() => { if (!submission) setCollapsed(c => !c); }}
+        >
+          <Music2 className="w-3.5 h-3.5 text-yellow-500" />
+          <span className="text-xs font-semibold text-yellow-500">{t('nowPlaying.title')}</span>
+          {!submission && (
+            <span className="text-[10px] text-muted-foreground ml-1">{t('nowPlaying.empty') || 'No track loaded'}</span>
+          )}
+          <div className="flex-1" />
+          {!submission ? (
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}>
+              {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={onClose}>
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
+
+        <AnimatePresence>
+          {!collapsed && submission && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="overflow-hidden"
+            >
             {/* Main Content — compact */}
             <div className="p-3">
               <div className="np-main-content flex flex-col gap-3">
@@ -691,9 +715,10 @@ export function NowPlayingPanel({
               </div>
             )}
 
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
