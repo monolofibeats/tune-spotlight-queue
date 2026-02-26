@@ -19,10 +19,10 @@ export function WidgetWrapper({ widgetId, isEditing, children, onRemove, isPoppe
   const zoomStyle = textScale !== 100 ? { zoom: textScale / 100 } as React.CSSProperties : undefined;
 
   return (
-    <div className={`h-full flex flex-col overflow-hidden rounded-xl transition-all ${
+    <div className={`h-full flex flex-col overflow-hidden transition-all ${
       isEditing 
-        ? 'ring-1 ring-primary/30 ring-dashed bg-card/20 backdrop-blur-md border border-border/30' 
-        : 'bg-card/20 backdrop-blur-md border border-border/30'
+        ? 'rounded-xl ring-1 ring-primary/30 ring-dashed bg-card/20 backdrop-blur-md border border-border/30' 
+        : 'rounded-none bg-card/20 backdrop-blur-md border-r border-b border-border/30'
     } ${isPoppedOut && !isEditing ? 'opacity-50' : ''}`}>
       {/* Only show a label bar in edit mode */}
       {isEditing && (

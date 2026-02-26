@@ -76,7 +76,7 @@ export function DashboardGrid({
         }
       }}
       compactType="vertical"
-      margin={isEditing ? [8, 8] : [4, 4]}
+      margin={isEditing ? [8, 8] : [0, 0]}
       containerPadding={[0, 0]}
       useCSSTransforms={true}
     >
