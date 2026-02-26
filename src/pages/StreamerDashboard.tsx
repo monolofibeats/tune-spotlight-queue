@@ -757,25 +757,6 @@ const StreamerDashboard = () => {
           )}
         </div>
       ),
-      now_playing: (
-        <NowPlayingDropZone
-          nowPlayingRef={nowPlayingRef}
-          submissions={submissions}
-          onOpenNowPlaying={handleOpenNowPlaying}
-          hasSubmission={!!nowPlaying.submission}
-        >
-          <NowPlayingPanel
-            submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-            isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-            onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-            onStatusChange={npConfig.showActionButtons !== false ? handleStatusChange : undefined}
-            onDelete={npConfig.showActionButtons !== false ? handleDeleteSubmission : undefined}
-            onAddToPedestal={handleAddToPedestal}
-            config={npConfig}
-            compactVisualizer={phoneOptimized}
-          />
-        </NowPlayingDropZone>
-      ),
       search_filters: (
         <div className="widget-search-filters flex flex-col sm:flex-row gap-2 sm:gap-3">
           {searchConfig.showSearchBar !== false && (
