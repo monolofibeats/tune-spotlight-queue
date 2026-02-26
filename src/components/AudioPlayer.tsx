@@ -137,7 +137,7 @@ function SeekBar({ currentTime, duration, onSeek, disabled }: SeekBarProps) {
         {/* Thumb/scrubber */}
         <div 
           className={cn(
-            "absolute h-4 w-4 bg-foreground border-2 border-foreground/60 rounded-full shadow-md transform -translate-x-1/2 transition-transform",
+            "absolute h-4 w-4 bg-amber-400/90 border-2 border-amber-600/50 rounded-full shadow-md transform -translate-x-1/2 transition-transform",
             "group-hover:scale-110",
             isDragging && "scale-125"
           )}
