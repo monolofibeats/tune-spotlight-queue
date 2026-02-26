@@ -335,6 +335,9 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           </motion.div>
         )}
 
+        {/* 3-step grid */}
+        <div className="relative">
+
         {/* Mobile "Need help?" toggle — compact (submit page) only */}
         {compact && (
           <div className="sm:hidden mb-3 flex justify-center">
@@ -354,15 +357,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           </div>
         )}
 
-        <AnimatePresence>
-        {(!compact || mobileCardsExpanded || false) && (
-        <motion.div
-          initial={compact ? { opacity: 0, height: 0 } : false}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={compact ? { opacity: 0, height: 0 } : undefined}
-          className={`${compact ? 'overflow-hidden sm:!h-auto sm:!opacity-100' : ''}`}
-        >
-        <div className={`${compact ? 'flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch' : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
+        <div className={`${compact ? `flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch ${!mobileCardsExpanded ? 'max-sm:hidden' : ''}` : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
             {steps.map((item, index) => {
               // Compact mobile: stacked cards with alternating left/right offsets and overlap
               const mobileCardStyles = compact ? {
