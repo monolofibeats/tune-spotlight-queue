@@ -217,6 +217,11 @@ export function SubmissionListItem({
 
   const handleOpenNowPlaying = async () => {
     if (!onPlayAudio) return;
+
+    // For platforms that don't play well inline, open the link in a new tab
+    if (submission.song_url && submission.song_url !== 'direct-upload' && shouldOpenExternally(submission.song_url)) {
+      window.open(submission.song_url, '_blank', 'noopener,noreferrer');
+    }
     
     // Show immediately with loading state, fetch audio in background
     if (submission.audio_file_url) {
