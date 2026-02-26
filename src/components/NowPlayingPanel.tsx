@@ -288,7 +288,11 @@ export function NowPlayingPanel({
     return (
       <div className="widget-now-playing rounded-xl overflow-hidden bg-card/15 backdrop-blur-xl">
         <button
-          onClick={() => setManuallyCollapsed(prev => !prev)}
+          onClick={() => {
+            const next = !manuallyCollapsed;
+            setManuallyCollapsed(next);
+            onEmptyExpandChange?.(!next);
+          }}
           className="w-full px-3 py-2 bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent flex items-center gap-2 hover:bg-card/20 transition-colors cursor-pointer"
         >
           <Music2 className="w-3.5 h-3.5 text-yellow-500/50" />
