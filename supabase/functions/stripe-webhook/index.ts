@@ -75,8 +75,16 @@ serve(async (req) => {
 
   // Determine payment type from metadata
   const isSubmissionPayment = metadata.type === "submission";
-  const isPriorityPayment = !isSubmissionPayment && metadata.song_url;
   const isBidPayment = metadata.type === "bid";
+  const isSpotPayment = metadata.type === "spot";
+  // Priority: has song_url but is NOT a submission, bid, or spot payment
+  const isPriorityPayment = !isSubmissionPayment && !isBidPayment && !isSpotPayment && !!metadata.song_url;
+
+  if (isSpotPayment) {
+    // Spot payments are handled by verify-spot-payment — skip to avoid duplicates
+    logStep("Spot payment, skipping (handled by verify-spot-payment)", { metadata });
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
 
   if (!isSubmissionPayment && !isPriorityPayment && !isBidPayment) {
     logStep("Not a submission/priority/bid payment, skipping", { metadata });

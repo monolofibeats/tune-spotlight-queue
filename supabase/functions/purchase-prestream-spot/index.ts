@@ -77,7 +77,7 @@ serve(async (req) => {
     
     logStep("User context", { email: userEmail, authenticated: !!userId });
 
-    // Verify spot is still available and get current price
+    // Verify spot is still available and get current price + streamer_id
     const { data: spot, error: spotError } = await supabaseClient
       .from('pre_stream_spots')
       .select('*')
@@ -91,7 +91,8 @@ serve(async (req) => {
     
     // Use the price from the database (authoritative source)
     const actualPriceCents = spot.price_cents;
-    logStep("Spot verified available", { spotId, priceCents: actualPriceCents });
+    const spotStreamerId = spot.streamer_id || null;
+    logStep("Spot verified available", { spotId, priceCents: actualPriceCents, streamerId: spotStreamerId });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -128,17 +129,19 @@ serve(async (req) => {
       success_url: `${origin}/?spot_payment=success&spot_id=${spotId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?spot_payment=cancelled`,
       metadata: {
+        type: "spot",
         spot_id: spotId,
         spot_number: spotNumber.toString(),
         user_id: userId || "",
-        email: userEmail,
-        song_url: songUrl,
-        artist_name: artistName || "Unknown Artist",
-        song_title: songTitle || "Untitled",
-        message: message || "",
-        audio_file_url: audioFileUrl || "",
+        email: (userEmail || "").slice(0, 250),
+        song_url: (songUrl || "").slice(0, 490),
+        artist_name: (artistName || "Unknown Artist").slice(0, 200),
+        song_title: (songTitle || "Untitled").slice(0, 200),
+        message: (message || "").slice(0, 490),
+        audio_file_url: (audioFileUrl || "").slice(0, 490),
         platform: platform || "other",
         price_cents: actualPriceCents.toString(),
+        streamer_id: spotStreamerId || "",
       },
     });
 
