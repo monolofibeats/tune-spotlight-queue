@@ -44,6 +44,25 @@ serve(async (req) => {
     const { sessionId, spotId } = parsed.data;
     logStep("Request data", { sessionId, spotId });
 
+    // Idempotency: check if this session was already processed
+    const { data: existingSub } = await supabaseAdmin
+      .from("submissions")
+      .select("id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (existingSub?.id) {
+      logStep("Already processed", { submissionId: existingSub.id });
+      return new Response(JSON.stringify({
+        success: true,
+        message: "This spot purchase has already been processed.",
+        alreadyProcessed: true,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -60,28 +79,43 @@ serve(async (req) => {
       throw new Error("Invalid session metadata");
     }
 
-    const amountPaid = metadata.price_cents 
-      ? Math.round(parseInt(metadata.price_cents) / 100) 
-      : Math.round((session.amount_total || 0) / 100);
+    // Use Stripe's authoritative amount
+    const amountPaid = Math.round(session.amount_total || 0) / 100;
+    const resolvedUserId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : null;
+    const resolvedStreamerId = (metadata.streamer_id && metadata.streamer_id.length > 0) ? metadata.streamer_id : null;
 
     const { data: submission, error: submissionError } = await supabaseAdmin
       .from('submissions')
       .insert({
         song_url: metadata.song_url,
-        platform: metadata.platform,
-        artist_name: metadata.artist_name,
-        song_title: metadata.song_title,
+        platform: metadata.platform || 'other',
+        artist_name: metadata.artist_name || 'Unknown Artist',
+        song_title: metadata.song_title || 'Untitled',
         message: metadata.message || null,
+        email: session.customer_details?.email || metadata.email || null,
         amount_paid: amountPaid,
         is_priority: true,
-        user_id: metadata.user_id,
+        user_id: resolvedUserId,
         audio_file_url: metadata.audio_file_url || null,
-        streamer_id: metadata.streamer_id || null,
+        streamer_id: resolvedStreamerId,
+        stripe_session_id: sessionId,
       })
       .select()
       .single();
 
     if (submissionError) {
+      // Duplicate key = already processed (race condition safety net)
+      if (submissionError.code === '23505') {
+        logStep("Duplicate insert detected, returning success");
+        return new Response(JSON.stringify({
+          success: true,
+          message: `Pre-stream Spot #${metadata.spot_number} purchased successfully!`,
+          alreadyProcessed: true,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       logStep("Error creating submission", { error: submissionError.message });
       throw new Error("Failed to create submission");
     }
@@ -91,7 +125,7 @@ serve(async (req) => {
       .from('pre_stream_spots')
       .update({
         is_available: false,
-        purchased_by: metadata.user_id,
+        purchased_by: resolvedUserId,
         purchased_at: new Date().toISOString(),
         submission_id: submission.id,
       })
@@ -105,11 +139,11 @@ serve(async (req) => {
     }
 
     // Record earnings for the streamer
-    if (metadata.streamer_id) {
+    if (resolvedStreamerId) {
       try {
         await recordEarning({
           stripeSessionId: sessionId,
-          streamerId: metadata.streamer_id,
+          streamerId: resolvedStreamerId,
           submissionId: submission.id,
           paymentType: "pre_stream_spot",
           customerEmail: session.customer_details?.email || null,

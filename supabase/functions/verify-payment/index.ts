@@ -49,8 +49,17 @@ serve(async (req) => {
       .eq("stripe_session_id", sessionId)
       .maybeSingle();
 
-    if (existingEarning?.submission_id) {
-      logStep("Already processed, generating login link", { submissionId: existingEarning.submission_id });
+    // Also check submissions table directly (earnings may have failed to record)
+    const { data: existingSub } = await supabase
+      .from("submissions")
+      .select("id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    const alreadyProcessedId = existingEarning?.submission_id || existingSub?.id;
+
+    if (alreadyProcessedId) {
+      logStep("Already processed, generating login link", { submissionId: alreadyProcessedId });
 
       // Still generate a magic link so the user can auto-login
       let actionLink: string | null = null;
@@ -75,7 +84,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         success: true,
         message: "Your priority submission has been added to the queue!",
-        submissionId: existingEarning.submission_id,
+        submissionId: alreadyProcessedId,
         actionLink,
         hashedToken,
       }), {
@@ -125,7 +134,7 @@ serve(async (req) => {
       redirectPath,
     );
 
-    const finalUserId = metadata.user_id || autoUserId || null;
+    const finalUserId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : (autoUserId || null);
 
     logStep("Creating submission", { metadata, amountPaid, accountCreated });
 
