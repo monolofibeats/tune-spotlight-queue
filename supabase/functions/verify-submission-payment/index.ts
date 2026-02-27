@@ -166,6 +166,7 @@ serve(async (req) => {
       message: `Your song "${session.metadata.song_title}" has been submitted!${accountMessage}`,
       submissionId: submission.id,
       accountCreated,
+      actionLink: actionLink || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

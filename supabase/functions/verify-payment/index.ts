@@ -179,6 +179,7 @@ serve(async (req) => {
       submission,
       message: `Your priority submission has been added to the queue!${accountMessage}`,
       accountCreated,
+      actionLink: actionLink || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
