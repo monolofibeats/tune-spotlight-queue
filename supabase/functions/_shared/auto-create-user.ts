@@ -68,7 +68,7 @@ export async function autoCreateUserFromPayment(
       type: 'magiclink',
       email,
       options: {
-        redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}`,
+        redirectTo: `${siteUrl}${redirectPath || '/user/dashboard'}`,
       },
     });
 

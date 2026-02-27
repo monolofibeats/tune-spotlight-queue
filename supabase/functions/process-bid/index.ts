@@ -107,10 +107,10 @@ serve(async (req) => {
     const slug = streamerSlug || '';
     const successUrl = slug
       ? `${siteUrl}/${slug}/submit?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`
-      : `${siteUrl}/my-dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`;
+      : `${siteUrl}/user/dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = slug
       ? `${siteUrl}/${slug}/submit?bid_payment=cancelled`
-      : `${siteUrl}/my-dashboard?bid_payment=cancelled`;
+      : `${siteUrl}/user/dashboard?bid_payment=cancelled`;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
