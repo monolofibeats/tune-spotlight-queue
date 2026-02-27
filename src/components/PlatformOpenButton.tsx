@@ -45,8 +45,10 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const [proximity, setProximity] = useState(0); // 0 = far, 1 = at button
   const smoothedProximityRef = useRef(0);
 
+  const platformName = extractPlatformName(url);
   const cfg = platformConfigs[platform] || {
-    color: '#ffffff', label: t('nowPlaying.openLink'),
+    color: '#ffffff',
+    label: `Open Link (${platformName})`,
     icon: <ExternalLink className="w-5 h-5 text-foreground" />,
   };
 
