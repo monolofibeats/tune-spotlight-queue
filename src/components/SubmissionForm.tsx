@@ -140,6 +140,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
