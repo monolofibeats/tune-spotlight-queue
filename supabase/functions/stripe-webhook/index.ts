@@ -99,8 +99,8 @@ serve(async (req) => {
       const submissionId = metadata.submission_id;
       const bidAmountCents = parseInt(metadata.bid_amount_cents || '0');
       const email = metadata.email;
-      const userId = metadata.user_id || null;
-      const streamerId = metadata.streamer_id;
+      const userId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : null;
+      const streamerId = (metadata.streamer_id && metadata.streamer_id.length > 0) ? metadata.streamer_id : null;
 
       logStep("Processing bid payment", { submissionId, bidAmountCents, email });
 
