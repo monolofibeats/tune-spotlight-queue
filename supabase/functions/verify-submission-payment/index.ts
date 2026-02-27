@@ -87,9 +87,19 @@ serve(async (req) => {
     logStep("Stripe email", { stripeEmail });
 
     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
+
+    // Look up streamer slug for magic-link redirect
+    let redirectPath = '/my-dashboard';
+    if (session.metadata?.streamer_id) {
+      const { data: streamerRow } = await supabaseClient
+        .from("streamers").select("slug").eq("id", session.metadata.streamer_id).maybeSingle();
+      if (streamerRow?.slug) redirectPath = `/${streamerRow.slug}/submit`;
+    }
+
     const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
+      redirectPath,
     );
 
     const finalUserId = session.metadata?.user_id || autoUserId || null;

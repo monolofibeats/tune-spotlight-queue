@@ -14,6 +14,7 @@ const logStep = (prefix: string, step: string, details?: unknown) => {
 export async function autoCreateUserFromPayment(
   email: string | null | undefined,
   siteUrl: string,
+  redirectPath?: string,
 ): Promise<{ userId: string | null; created: boolean }> {
   if (!email) {
     logStep('AUTO-ACCOUNT', 'No email provided, skipping');
@@ -63,7 +64,7 @@ export async function autoCreateUserFromPayment(
       type: 'magiclink',
       email,
       options: {
-        redirectTo: `${siteUrl}/my-dashboard`,
+        redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}`,
       },
     });
 
