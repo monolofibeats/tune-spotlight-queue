@@ -273,6 +273,17 @@ export function SpotBiddingDialog({
       if (error) throw error;
       if (!data?.url) throw new Error('Failed to create checkout session');
 
+      // Save submission data so it can be tracked after payment redirect
+      localStorage.setItem('upstar_pending_priority_submission', JSON.stringify({
+        songTitle,
+        artistName,
+        songUrl,
+        platform,
+        audioFileUrl: audioFileUrl || null,
+        streamerId: streamerId || null,
+        streamerSlug: streamerSlug || null,
+      }));
+
       window.location.href = data.url;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to process';

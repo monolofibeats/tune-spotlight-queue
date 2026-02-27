@@ -355,6 +355,25 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               description: data.message,
             });
             watchlistRef?.current?.refreshList();
+
+            // Track the priority submission in localStorage (same as free/paid submissions)
+            const pendingRaw = localStorage.getItem('upstar_pending_priority_submission');
+            if (pendingRaw) {
+              try {
+                const pending = JSON.parse(pendingRaw);
+                onSubmissionTracked?.({
+                  submissionId: data.submissionId || undefined,
+                  songTitle: pending.songTitle,
+                  artistName: pending.artistName,
+                  songUrl: pending.songUrl,
+                  platform: pending.platform,
+                  audioFileUrl: pending.audioFileUrl,
+                  streamerId: pending.streamerId,
+                  streamerSlug: pending.streamerSlug,
+                });
+              } catch {}
+              localStorage.removeItem('upstar_pending_priority_submission');
+            }
           } else if (data && !data.success) {
             toast({
               title: "Payment pending",
