@@ -240,6 +240,15 @@ export function SpotBiddingDialog({
 
         if (error) throw error;
 
+        // Soft-delete the original free submission to prevent duplicates
+        if (originalSubmissionId) {
+          await supabase
+            .from('submissions')
+            .update({ status: 'deleted' })
+            .eq('id', originalSubmissionId)
+            .eq('status', 'pending');
+        }
+
         toast({
           title: t('bidding.adminBypass'),
           description: t('bidding.adminBypassDesc').replace('{position}', String(spotPosition)),
