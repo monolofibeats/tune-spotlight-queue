@@ -15,10 +15,10 @@ export async function autoCreateUserFromPayment(
   email: string | null | undefined,
   siteUrl: string,
   redirectPath?: string,
-): Promise<{ userId: string | null; created: boolean; actionLink: string | null }> {
+): Promise<{ userId: string | null; created: boolean; actionLink: string | null; hashedToken: string | null }> {
   if (!email) {
     logStep('AUTO-ACCOUNT', 'No email provided, skipping');
-    return { userId: null, created: false, actionLink: null };
+    return { userId: null, created: false, actionLink: null, hashedToken: null };
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -47,13 +47,18 @@ export async function autoCreateUserFromPayment(
           options: { redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}` },
         });
         if (probeData?.user?.id) {
-          return { userId: probeData.user.id, created: false, actionLink: probeData.properties?.action_link || null };
+          return {
+            userId: probeData.user.id,
+            created: false,
+            actionLink: probeData.properties?.action_link || null,
+            hashedToken: probeData.properties?.hashed_token || null,
+          };
         }
 
-        return { userId: null, created: false, actionLink: null };
+        return { userId: null, created: false, actionLink: null, hashedToken: null };
       }
       logStep('AUTO-ACCOUNT', 'Failed to create user', { error: createError.message });
-      return { userId: null, created: false, actionLink: null };
+      return { userId: null, created: false, actionLink: null, hashedToken: null };
     }
 
     logStep('AUTO-ACCOUNT', 'User created', { userId: newUser.user.id, email });
@@ -102,9 +107,9 @@ export async function autoCreateUserFromPayment(
       role: 'user',
     });
 
-    return { userId: newUser.user.id, created: true, actionLink: linkData?.properties?.action_link || null };
+    return { userId: newUser.user.id, created: true, actionLink: linkData?.properties?.action_link || null, hashedToken: linkData?.properties?.hashed_token || null };
   } catch (err) {
     logStep('AUTO-ACCOUNT', 'Error in auto-create', { error: String(err) });
-    return { userId: null, created: false, actionLink: null };
+    return { userId: null, created: false, actionLink: null, hashedToken: null };
   }
 }

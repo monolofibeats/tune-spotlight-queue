@@ -51,11 +51,34 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingSubmission?.id) {
-      logStep("Already processed", { submissionId: existingSubmission.id });
+      logStep("Already processed, generating login link", { submissionId: existingSubmission.id });
+
+      // Still generate a magic link so the user can auto-login
+      let actionLink: string | null = null;
+      let hashedToken: string | null = null;
+      try {
+        const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        const stripeEmail = session.customer_details?.email || session.metadata?.email || null;
+        if (stripeEmail) {
+          const { data: linkData } = await supabaseClient.auth.admin.generateLink({
+            type: 'magiclink',
+            email: stripeEmail,
+            options: { redirectTo: req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app" },
+          });
+          actionLink = linkData?.properties?.action_link || null;
+          hashedToken = linkData?.properties?.hashed_token || null;
+        }
+      } catch (e) {
+        logStep("Warning: failed to generate login link for idempotent return", { error: String(e) });
+      }
+
       return new Response(JSON.stringify({
         success: true,
         message: "Submission already processed",
         submissionId: existingSubmission.id,
+        actionLink,
+        hashedToken,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -96,7 +119,7 @@ serve(async (req) => {
       if (streamerRow?.slug) redirectPath = `/${streamerRow.slug}/submit`;
     }
 
-    const { userId: autoUserId, created: accountCreated, actionLink } = await autoCreateUserFromPayment(
+    const { userId: autoUserId, created: accountCreated, actionLink, hashedToken } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
       redirectPath,
@@ -167,6 +190,7 @@ serve(async (req) => {
       submissionId: submission.id,
       accountCreated,
       actionLink: actionLink || null,
+      hashedToken: hashedToken || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
