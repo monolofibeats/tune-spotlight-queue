@@ -96,7 +96,7 @@ serve(async (req) => {
       if (streamerRow?.slug) redirectPath = `/${streamerRow.slug}/submit`;
     }
 
-    const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
+    const { userId: autoUserId, created: accountCreated, actionLink } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
       redirectPath,
