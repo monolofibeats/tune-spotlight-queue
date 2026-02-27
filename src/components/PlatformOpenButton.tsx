@@ -47,6 +47,17 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const currentProximity = useRef(0);
   const animating = useRef(false);
 
+  // Reset state when platform changes to prevent stale glow colors
+  useEffect(() => {
+    currentPos.current = { x: 50, y: 50 };
+    targetPos.current = { x: 50, y: 50 };
+    currentProximity.current = 0;
+    targetProximity.current = 0;
+    animating.current = false;
+    setGlowPos({ x: 50, y: 50 });
+    setProximity(0);
+  }, [platform]);
+
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       const rect = btnRef.current?.getBoundingClientRect();
