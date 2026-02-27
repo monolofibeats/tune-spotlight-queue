@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type ImageVariant = "avatar" | "banner";
 
@@ -22,9 +23,10 @@ const MAX_SIZE_MB: Record<ImageVariant, number> = {
 export function ImageUploadInput({ streamerId, variant, value, onChange }: ImageUploadInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useLanguage();
 
-  const label = variant === "avatar" ? "Avatar" : "Banner";
-  const help = variant === "avatar" ? "Square image (max 2MB)" : "Wide image (max 6MB)";
+  const label = variant === "avatar" ? t('imageUpload.avatar') : t('imageUpload.banner');
+  const help = variant === "avatar" ? t('imageUpload.avatarHelp') : t('imageUpload.bannerHelp');
 
   const handlePick = () => inputRef.current?.click();
 
@@ -58,10 +60,10 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
       const { data: urlData } = supabase.storage.from("stream-media").getPublicUrl(filePath);
       onChange(urlData.publicUrl);
 
-      toast({ title: `${label} uploaded`, description: "Click Save Changes to make it live." });
+      toast({ title: t('imageUpload.uploaded'), description: t('imageUpload.uploadedDesc') });
     } catch (e) {
       console.error("Image upload failed:", e);
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
+      toast({ title: t('imageUpload.failed'), description: t('imageUpload.failedDesc'), variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
@@ -80,13 +82,13 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
             disabled={isUploading}
           >
             <Trash2 className="w-4 h-4" />
-            Remove
+            {t('imageUpload.remove')}
           </Button>
         ) : (
           <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handlePick} disabled={isUploading}
           >
             <Camera className="w-4 h-4" />
-            Upload
+            {t('imageUpload.upload')}
           </Button>
         )}
       </div>
@@ -135,9 +137,9 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
             ) : (
               <div className="w-full h-28 md:h-32 rounded-lg border border-border flex items-center justify-center text-muted-foreground">
                 <div className="flex items-center gap-2 text-sm">
-                  <ImageIcon className="w-5 h-5" />
-                  Click to upload banner
-                </div>
+                   <ImageIcon className="w-5 h-5" />
+                   {t('imageUpload.clickBanner')}
+                 </div>
               </div>
             )}
           </div>
@@ -147,7 +149,7 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
           <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex items-center justify-center">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Uploading...
+              {t('imageUpload.uploading')}
             </div>
           </div>
         )}

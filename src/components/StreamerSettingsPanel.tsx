@@ -524,34 +524,34 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
 
               {/* Section Visibility Toggles */}
               <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
-                <h3 className="font-semibold text-lg">Section Visibility</h3>
-                <p className="text-sm text-muted-foreground">Choose which sections are visible on your submit page.</p>
+                <h3 className="font-semibold text-lg">{t('pageSettings.sectionVisibility.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('pageSettings.sectionVisibility.desc')}</p>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>How It Works</Label>
-                      <p className="text-xs text-muted-foreground">Step-by-step guide for submitters</p>
+                      <Label>{t('pageSettings.sectionVisibility.howItWorks')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('pageSettings.sectionVisibility.howItWorksDesc')}</p>
                     </div>
                     <Switch checked={showHowItWorks} onCheckedChange={setShowHowItWorks} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Top Songs Pedestal</Label>
-                      <p className="text-xs text-muted-foreground">Showcase your top 3 favorite submissions</p>
+                      <Label>{t('pageSettings.sectionVisibility.topSongs')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('pageSettings.sectionVisibility.topSongsDesc')}</p>
                     </div>
                     <Switch checked={showTopSongs} onCheckedChange={setShowTopSongs} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Public Waiting List</Label>
-                      <p className="text-xs text-muted-foreground">Show pending submissions queue publicly</p>
+                      <Label>{t('pageSettings.sectionVisibility.publicQueue')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('pageSettings.sectionVisibility.publicQueueDesc')}</p>
                     </div>
                     <Switch checked={showPublicQueue} onCheckedChange={setShowPublicQueue} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label>Stream Embed</Label>
-                      <p className="text-xs text-muted-foreground">Show your live stream embed on the page</p>
+                      <Label>{t('pageSettings.sectionVisibility.streamEmbed')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('pageSettings.sectionVisibility.streamEmbedDesc')}</p>
                     </div>
                     <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
                   </div>
