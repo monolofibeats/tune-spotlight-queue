@@ -125,6 +125,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
         onClick={() => window.open(url, 'upstar-song-tab', 'noopener,noreferrer')}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        title={url}
         className="relative flex items-center justify-center gap-2.5 rounded-lg border backdrop-blur-md transition-all duration-300 py-3 px-5 cursor-pointer w-full overflow-hidden group"
         style={{
           borderColor: isHovered
