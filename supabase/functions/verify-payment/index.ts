@@ -134,7 +134,7 @@ serve(async (req) => {
       redirectPath,
     );
 
-    const finalUserId = metadata.user_id || autoUserId || null;
+    const finalUserId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : (autoUserId || null);
 
     logStep("Creating submission", { metadata, amountPaid, accountCreated });
 

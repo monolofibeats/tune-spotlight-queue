@@ -288,7 +288,7 @@ serve(async (req) => {
       redirectPath,
     );
 
-    const finalUserId = metadata.user_id || autoUserId || null;
+    const finalUserId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : (autoUserId || null);
     const amountPaid = Math.round((session.amount_total || 0)) / 100;
     const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 

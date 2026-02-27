@@ -125,7 +125,7 @@ serve(async (req) => {
       redirectPath,
     );
 
-    const finalUserId = session.metadata?.user_id || autoUserId || null;
+    const finalUserId = (session.metadata?.user_id && session.metadata.user_id.length > 0) ? session.metadata.user_id : (autoUserId || null);
 
     const { data: submission, error: insertError } = await supabaseClient
       .from('submissions')
