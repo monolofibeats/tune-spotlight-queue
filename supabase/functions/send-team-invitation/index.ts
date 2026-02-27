@@ -1,7 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { wrapEmail } from "../_shared/email-wrapper.ts";
 
 const teamInvitationSchema = z.object({
   email: z.string().email().max(320),
@@ -149,6 +150,7 @@ serve(async (req) => {
       };
 
       try {
+        const siteUrl = Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -159,23 +161,14 @@ serve(async (req) => {
             from: "UpStar <noreply@upstar.gg>",
             to: [email],
             subject: `You've been invited to join ${streamer.display_name}'s team on UpStar`,
-            html: `
-              <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h1 style="color: #f5a623;">🌟 UpStar Team Invitation</h1>
-                <p>Hey there!</p>
-                <p><strong>${streamer.display_name}</strong> has invited you to join their team on UpStar as a <strong>${roleLabels[role] || role}</strong>.</p>
-                <p>As a team member, you'll be able to help manage their streamer dashboard.</p>
-                <div style="margin: 30px 0;">
-                  <a href="${Deno.env.get("SITE_URL") || "https://upstargg.lovable.app"}/auth" 
-                     style="background: #f5a623; color: #000; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-                    Accept Invitation
-                  </a>
-                </div>
-                <p style="color: #888; font-size: 14px;">
-                  Sign in or create an account with this email address (${email}) to accept the invitation.
-                </p>
-              </div>
-            `,
+            html: wrapEmail(
+              "🌟 Team Invitation",
+              `<p><strong>${streamer.display_name}</strong> has invited you to join their team on UpStar as a <strong>${roleLabels[role] || role}</strong>.</p>
+               <p>As a team member, you'll be able to help manage their streamer dashboard.</p>
+               <p style="color:#888;font-size:13px;margin-top:16px;">Sign in or create an account with this email address (${email}) to accept the invitation.</p>`,
+              `${siteUrl}/auth`,
+              "Accept Invitation",
+            ),
           }),
         });
       } catch (emailError) {
