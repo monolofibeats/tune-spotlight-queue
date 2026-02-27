@@ -190,6 +190,7 @@ serve(async (req) => {
       submissionId: submission.id,
       accountCreated,
       actionLink: actionLink || null,
+      hashedToken: hashedToken || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
