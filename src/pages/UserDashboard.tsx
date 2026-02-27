@@ -58,7 +58,7 @@ const UserDashboard = () => {
 
           if (error) throw error;
 
-          if (data.success) {
+          if (data?.success) {
             play('success');
             toast({
               title: "Bid placed! 🎉",

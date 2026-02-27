@@ -109,7 +109,7 @@ export function BidNotificationBell() {
   const handleViewOffer = (notification: BidNotification) => {
     markAsRead(notification.id);
     setOpen(false);
-    navigate('/my-songs');
+    navigate('/user/dashboard');
   };
 
   const unreadCount = notifications.length;
