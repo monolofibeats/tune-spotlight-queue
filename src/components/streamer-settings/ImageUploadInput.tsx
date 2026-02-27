@@ -149,7 +149,7 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
           <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex items-center justify-center">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Uploading...
+              {t('imageUpload.uploading')}
             </div>
           </div>
         )}
