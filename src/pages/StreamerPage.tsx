@@ -78,6 +78,14 @@ function StreamerPageContent() {
       searchParams.delete('bid_payment');
       searchParams.delete('session_id');
       setSearchParams(searchParams, { replace: true });
+    } else if (bidPaymentStatus === 'cancelled') {
+      toast({
+        title: 'Bid cancelled',
+        description: 'Your bid was not placed.',
+        variant: 'destructive',
+      });
+      searchParams.delete('bid_payment');
+      setSearchParams(searchParams, { replace: true });
     }
   }, [bidPaymentStatus]);
 
