@@ -783,9 +783,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       return;
     }
 
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
-
-    try {
       // Upload audio file FIRST before redirecting to Stripe
       const audioFileUrl = await uploadAudioFile();
 
