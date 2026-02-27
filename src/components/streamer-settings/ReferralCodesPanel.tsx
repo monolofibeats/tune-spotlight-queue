@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ReferralCode {
   id: string;
@@ -36,6 +37,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const { t } = useLanguage();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -61,7 +63,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
   const generateCodes = async () => {
     if (codes.length >= MONTHLY_LIMIT) {
-      toast({ title: 'Monthly limit reached', description: `You can create ${MONTHLY_LIMIT} codes per month.`, variant: 'destructive' });
+      toast({ title: t('referral.limitReached'), description: t('referral.limitReachedDesc').replace('{limit}', String(MONTHLY_LIMIT)), variant: 'destructive' });
       return;
     }
 
@@ -73,10 +75,10 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
 
       if (error) throw error;
 
-      toast({ title: 'Discount codes generated!' });
+      toast({ title: t('referral.generated') });
       await fetchCodes();
     } catch (e: any) {
-      toast({ title: 'Failed to generate codes', description: e?.message, variant: 'destructive' });
+      toast({ title: t('referral.generateFailed'), description: e?.message, variant: 'destructive' });
     }
     setIsGenerating(false);
   };
@@ -84,7 +86,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
   const copyCode = (id: string, code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
-    toast({ title: 'Code copied!' });
+    toast({ title: t('referral.copied') });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -107,26 +109,26 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
             <Gift className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm">Discount Codes</h4>
+            <h4 className="font-semibold text-sm">{t('referral.title')}</h4>
             <p className="text-xs text-muted-foreground">
-              {codes.length}/{MONTHLY_LIMIT} codes this month · {availableCount} available · {usedCount} used
+              {codes.length}/{MONTHLY_LIMIT} {t('referral.thisMonth')} · {availableCount} {t('referral.available')} · {usedCount} {t('referral.used')}
             </p>
           </div>
         </div>
         {codes.length < MONTHLY_LIMIT && (
           <Button size="sm" variant="outline" onClick={generateCodes} disabled={isGenerating} className="gap-1.5">
             {isGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-            Generate
+            {t('referral.generate')}
           </Button>
         )}
       </div>
 
       {codes.length === 0 ? (
         <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground mb-3">No discount codes generated yet this month.</p>
+          <p className="text-sm text-muted-foreground mb-3">{t('referral.empty')}</p>
           <Button size="sm" onClick={generateCodes} disabled={isGenerating} className="gap-1.5">
             <Gift className="w-3.5 h-3.5" />
-            Generate {MONTHLY_LIMIT} Codes
+            {t('referral.generateCount').replace('{count}', String(MONTHLY_LIMIT))}
           </Button>
         </div>
       ) : (
@@ -147,7 +149,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
                     {c.code}
                   </code>
                   <Badge variant={c.is_used ? 'secondary' : 'default'} className="text-[10px]">
-                    {c.is_used ? 'Used' : '10% OFF'}
+                    {c.is_used ? t('referral.usedBadge') : '10% OFF'}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1">
@@ -170,7 +172,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
                             return next;
                           });
                         }}
-                        title={isRevealed ? 'Hide code' : 'Reveal code'}
+                        title={isRevealed ? t('referral.hide') : t('referral.reveal')}
                       >
                         {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </Button>
@@ -196,7 +198,7 @@ export function ReferralCodesPanel({ streamerId }: ReferralCodesPanelProps) {
       )}
 
       <p className="text-[10px] text-muted-foreground text-center">
-        Each code gives 10% off on a paid submission. Codes expire at the end of the month. Not stackable.
+        {t('referral.footer')}
       </p>
     </div>
   );
