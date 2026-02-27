@@ -137,9 +137,9 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
             ) : (
               <div className="w-full h-28 md:h-32 rounded-lg border border-border flex items-center justify-center text-muted-foreground">
                 <div className="flex items-center gap-2 text-sm">
-                  <ImageIcon className="w-5 h-5" />
-                   Click to upload banner
-                </div>
+                   <ImageIcon className="w-5 h-5" />
+                   {t('imageUpload.clickBanner')}
+                 </div>
               </div>
             )}
           </div>
