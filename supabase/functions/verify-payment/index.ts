@@ -144,6 +144,7 @@ serve(async (req) => {
         audio_file_url: audioFileUrl || null,
         streamer_id: metadata.streamer_id || null,
         user_id: finalUserId,
+        stripe_session_id: sessionId,
       })
       .select()
       .single();
