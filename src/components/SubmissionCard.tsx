@@ -43,7 +43,7 @@ export function SubmissionCard({ submission, onFeedback }: SubmissionCardProps) 
   const [feedback, setFeedback] = useState(submission.feedback || '');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-  const status = statusConfig[submission.status];
+  const status = statusConfig[submission.status] || statusConfig.pending;
   const StatusIcon = status.icon;
 
   const handleSubmitFeedback = async () => {
