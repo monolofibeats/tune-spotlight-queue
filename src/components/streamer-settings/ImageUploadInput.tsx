@@ -23,9 +23,10 @@ const MAX_SIZE_MB: Record<ImageVariant, number> = {
 export function ImageUploadInput({ streamerId, variant, value, onChange }: ImageUploadInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { t } = useLanguage();
 
-  const label = variant === "avatar" ? "Avatar" : "Banner";
-  const help = variant === "avatar" ? "Square image (max 2MB)" : "Wide image (max 6MB)";
+  const label = variant === "avatar" ? t('imageUpload.avatar') : t('imageUpload.banner');
+  const help = variant === "avatar" ? t('imageUpload.avatarHelp') : t('imageUpload.bannerHelp');
 
   const handlePick = () => inputRef.current?.click();
 
