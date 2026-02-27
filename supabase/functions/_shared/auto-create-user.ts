@@ -44,7 +44,7 @@ export async function autoCreateUserFromPayment(
         const { data: probeData } = await supabase.auth.admin.generateLink({
           type: 'magiclink',
           email,
-          options: { redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}` },
+          options: { redirectTo: `${siteUrl}${redirectPath || '/user/dashboard'}` },
         });
         if (probeData?.user?.id) {
           return {
@@ -68,7 +68,7 @@ export async function autoCreateUserFromPayment(
       type: 'magiclink',
       email,
       options: {
-        redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}`,
+        redirectTo: `${siteUrl}${redirectPath || '/user/dashboard'}`,
       },
     });
 

@@ -112,7 +112,7 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app";
 
     // Look up streamer slug for magic-link redirect
-    let redirectPath = '/my-dashboard';
+    let redirectPath = '/user/dashboard';
     if (session.metadata?.streamer_id) {
       const { data: streamerRow } = await supabaseClient
         .from("streamers").select("slug").eq("id", session.metadata.streamer_id).maybeSingle();

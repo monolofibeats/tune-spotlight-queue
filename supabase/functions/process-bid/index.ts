@@ -106,10 +106,10 @@ serve(async (req) => {
     const siteUrl = Deno.env.get("SITE_URL") || req.headers.get("origin") || "https://upstargg.lovable.app";
     const slug = streamerSlug || '';
     const successUrl = slug
-      ? `${siteUrl}/${slug}?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`
+      ? `${siteUrl}/${slug}/submit?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`
       : `${siteUrl}/user/dashboard?bid_payment=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = slug
-      ? `${siteUrl}/${slug}?bid_payment=cancelled`
+      ? `${siteUrl}/${slug}/submit?bid_payment=cancelled`
       : `${siteUrl}/user/dashboard?bid_payment=cancelled`;
 
     const session = await stripe.checkout.sessions.create({
@@ -135,7 +135,7 @@ serve(async (req) => {
         type: "bid",
         submission_id: submissionId,
         user_id: user?.id || "",
-        email: customerEmail,
+        email: (customerEmail || "").slice(0, 250),
         bid_amount_cents: bidAmountCents.toString(),
         streamer_id: submission.streamer_id || "",
         streamer_slug: slug,
