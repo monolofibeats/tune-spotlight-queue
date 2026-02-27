@@ -60,10 +60,10 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
       const { data: urlData } = supabase.storage.from("stream-media").getPublicUrl(filePath);
       onChange(urlData.publicUrl);
 
-      toast({ title: `${label} uploaded`, description: "Click Save Changes to make it live." });
+      toast({ title: t('imageUpload.uploaded'), description: t('imageUpload.uploadedDesc') });
     } catch (e) {
       console.error("Image upload failed:", e);
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
+      toast({ title: t('imageUpload.failed'), description: t('imageUpload.failedDesc'), variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
