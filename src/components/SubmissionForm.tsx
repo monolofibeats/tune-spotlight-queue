@@ -939,11 +939,22 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       });
       return;
     }
+    // Email format validation (if provided)
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (submissionPaid && !isAdmin) {
       await handlePaidSubmit();
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
