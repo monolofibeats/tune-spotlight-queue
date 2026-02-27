@@ -15,10 +15,10 @@ export async function autoCreateUserFromPayment(
   email: string | null | undefined,
   siteUrl: string,
   redirectPath?: string,
-): Promise<{ userId: string | null; created: boolean; actionLink: string | null }> {
+): Promise<{ userId: string | null; created: boolean; actionLink: string | null; hashedToken: string | null }> {
   if (!email) {
     logStep('AUTO-ACCOUNT', 'No email provided, skipping');
-    return { userId: null, created: false, actionLink: null };
+    return { userId: null, created: false, actionLink: null, hashedToken: null };
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
