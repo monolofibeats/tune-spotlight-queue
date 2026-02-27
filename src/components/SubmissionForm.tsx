@@ -416,6 +416,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
         window.history.replaceState({}, '', currentPath);
       } else if (paymentStatus === 'cancelled') {
+        localStorage.removeItem('upstar_pending_priority_submission');
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
