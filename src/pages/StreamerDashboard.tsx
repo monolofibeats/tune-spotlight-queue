@@ -355,7 +355,7 @@ const StreamerDashboard = () => {
             .from('streamers')
             .select('slug')
             .eq('id', teams[0].streamer_id)
-            .single();
+            .maybeSingle();
           if (teamStreamer) {
             navigate(`/streamer/${teamStreamer.slug}/dashboard`, { replace: true });
             return;
