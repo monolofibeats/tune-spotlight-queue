@@ -7,6 +7,17 @@ interface PlatformOpenButtonProps {
   platform: string;
 }
 
+function extractPlatformName(url: string): string {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    // Take the main domain name (e.g. "dropbox.com" → "Dropbox")
+    const name = hostname.split('.')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    return 'Link';
+  }
+}
+
 const platformConfigs: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
   spotify: {
     color: '#1DB954', label: 'Open in Spotify',
