@@ -7,6 +7,17 @@ interface PlatformOpenButtonProps {
   platform: string;
 }
 
+function extractPlatformName(url: string): string {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '');
+    // Take the main domain name (e.g. "dropbox.com" → "Dropbox")
+    const name = hostname.split('.')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    return 'Link';
+  }
+}
+
 const platformConfigs: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
   spotify: {
     color: '#1DB954', label: 'Open in Spotify',
@@ -34,8 +45,10 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
   const [proximity, setProximity] = useState(0); // 0 = far, 1 = at button
   const smoothedProximityRef = useRef(0);
 
+  const platformName = extractPlatformName(url);
   const cfg = platformConfigs[platform] || {
-    color: '#ffffff', label: t('nowPlaying.openLink'),
+    color: '#ffffff',
+    label: `Open Link (${platformName})`,
     icon: <ExternalLink className="w-5 h-5 text-foreground" />,
   };
 
@@ -112,6 +125,7 @@ export function PlatformOpenButton({ url, platform }: PlatformOpenButtonProps) {
         onClick={() => window.open(url, 'upstar-song-tab', 'noopener,noreferrer')}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        title={url}
         className="relative flex items-center justify-center gap-2.5 rounded-lg border backdrop-blur-md transition-all duration-300 py-3 px-5 cursor-pointer w-full overflow-hidden group"
         style={{
           borderColor: isHovered
