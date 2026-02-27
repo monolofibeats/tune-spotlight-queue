@@ -1,7 +1,8 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://esm.sh/zod@3.25.76";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { wrapEmail } from "../_shared/email-wrapper.ts";
 
 const teamInvitationSchema = z.object({
   email: z.string().email().max(320),
