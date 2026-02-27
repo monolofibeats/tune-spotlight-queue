@@ -882,6 +882,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Double-submit guard
+    if (isSubmittingRef.current) return;
+
     if (!submissionsOpen && !isAdmin) {
       toast({
         title: "Submissions Closed",
