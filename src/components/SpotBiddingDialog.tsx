@@ -110,8 +110,7 @@ export function SpotBiddingDialog({
         console.warn('Failed to load skip_line config, using default:', skipError);
       }
 
-
-      const loadedMinBid = skipConfig.min_amount_cents / 100;
+      const loadedMinBid = skipConfig ? skipConfig.min_amount_cents / 100 : 2.50;
       setMinBidAmount(loadedMinBid);
 
       // Get all pending priority submissions with their bids

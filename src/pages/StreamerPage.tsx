@@ -48,10 +48,33 @@ function StreamerPageContent() {
   // Handle bid payment success redirect
   useEffect(() => {
     if (bidPaymentStatus === 'success') {
-      toast({
-        title: '🎉 Bid successful!',
-        description: 'Your song has been boosted in the queue.',
-      });
+      const bidSessionId = searchParams.get('session_id');
+      
+      // Verify the bid payment
+      if (bidSessionId) {
+        supabase.functions.invoke('verify-bid-payment', {
+          body: { sessionId: bidSessionId },
+        }).then(({ data }) => {
+          if (data?.success) {
+            toast({
+              title: '🎉 Bid successful!',
+              description: data.message || 'Your song has been boosted in the queue.',
+            });
+          }
+        }).catch(() => {
+          // Webhook will handle it as fallback
+          toast({
+            title: '🎉 Bid successful!',
+            description: 'Your song has been boosted in the queue.',
+          });
+        });
+      } else {
+        toast({
+          title: '🎉 Bid successful!',
+          description: 'Your song has been boosted in the queue.',
+        });
+      }
+      
       searchParams.delete('bid_payment');
       searchParams.delete('session_id');
       setSearchParams(searchParams, { replace: true });

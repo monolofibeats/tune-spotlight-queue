@@ -135,7 +135,7 @@ serve(async (req) => {
         type: "bid",
         submission_id: submissionId,
         user_id: user?.id || "",
-        email: customerEmail,
+        email: (customerEmail || "").slice(0, 250),
         bid_amount_cents: bidAmountCents.toString(),
         streamer_id: submission.streamer_id || "",
         streamer_slug: slug,
