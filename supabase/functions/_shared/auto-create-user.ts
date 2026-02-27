@@ -107,9 +107,9 @@ export async function autoCreateUserFromPayment(
       role: 'user',
     });
 
-    return { userId: newUser.user.id, created: true, actionLink: linkData?.properties?.action_link || null };
+    return { userId: newUser.user.id, created: true, actionLink: linkData?.properties?.action_link || null, hashedToken: linkData?.properties?.hashed_token || null };
   } catch (err) {
     logStep('AUTO-ACCOUNT', 'Error in auto-create', { error: String(err) });
-    return { userId: null, created: false, actionLink: null };
+    return { userId: null, created: false, actionLink: null, hashedToken: null };
   }
 }
