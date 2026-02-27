@@ -375,14 +375,17 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               localStorage.removeItem('upstar_pending_priority_submission');
             }
 
-            // Auto-login: use the magic link token to sign the user in
-            if (data.actionLink) {
+            // Auto-login: use the hashed token or action link to sign the user in
+            if (data.hashedToken || data.actionLink) {
               try {
-                const linkUrl = new URL(data.actionLink);
-                const token_hash = linkUrl.searchParams.get('token') || linkUrl.hash?.match(/token=([^&]+)/)?.[1];
-                if (token_hash) {
+                let tokenHash = data.hashedToken;
+                if (!tokenHash && data.actionLink) {
+                  const linkUrl = new URL(data.actionLink);
+                  tokenHash = linkUrl.searchParams.get('token') || linkUrl.hash?.match(/token=([^&]+)/)?.[1] || null;
+                }
+                if (tokenHash) {
                   const { error: otpError } = await supabase.auth.verifyOtp({
-                    token_hash,
+                    token_hash: tokenHash,
                     type: 'magiclink',
                   });
                   if (!otpError) {
