@@ -35,10 +35,11 @@ export async function autoCreateUserFromPayment(
     });
 
     if (createError) {
-      // User already exists — look them up by creating a dummy query
+      // User already exists — look them up
       if (createError.message?.includes('already') || createError.message?.includes('duplicate')) {
         logStep('AUTO-ACCOUNT', 'User already exists', { email });
-        // Use profiles table or a targeted list to find the user ID
+
+        // Primary lookup: profiles table
         const { data: profileData } = await supabase
           .from('profiles')
           .select('user_id')
@@ -49,10 +50,26 @@ export async function autoCreateUserFromPayment(
           return { userId: profileData.user_id, created: false };
         }
 
-        // Fallback: small listUsers call (the user was just confirmed to exist)
-        const { data: userList } = await supabase.auth.admin.listUsers({ page: 1, perPage: 50 });
-        const found = userList?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-        return { userId: found?.id || null, created: false };
+        // Secondary lookup: user_roles table (all paying users get a role)
+        const { data: roleUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .limit(500);
+
+        if (roleUsers?.length) {
+          // Check each user_id against auth — but more efficient: use admin API with email filter
+          // The admin.listUsers doesn't support email filter, so we use generateLink as a probe
+          const { data: probeData } = await supabase.auth.admin.generateLink({
+            type: 'magiclink',
+            email,
+            options: { redirectTo: siteUrl },
+          });
+          if (probeData?.user?.id) {
+            return { userId: probeData.user.id, created: false };
+          }
+        }
+
+        return { userId: null, created: false };
       }
       logStep('AUTO-ACCOUNT', 'Failed to create user', { error: createError.message });
       return { userId: null, created: false };
