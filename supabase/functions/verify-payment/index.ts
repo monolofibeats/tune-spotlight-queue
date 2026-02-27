@@ -54,6 +54,7 @@ serve(async (req) => {
 
       // Still generate a magic link so the user can auto-login
       let actionLink: string | null = null;
+      let hashedToken: string | null = null;
       try {
         const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
         const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -65,6 +66,7 @@ serve(async (req) => {
             options: { redirectTo: req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://upstargg.lovable.app" },
           });
           actionLink = linkData?.properties?.action_link || null;
+          hashedToken = linkData?.properties?.hashed_token || null;
         }
       } catch (e) {
         logStep("Warning: failed to generate login link for idempotent return", { error: String(e) });
@@ -75,6 +77,7 @@ serve(async (req) => {
         message: "Your priority submission has been added to the queue!",
         submissionId: existingEarning.submission_id,
         actionLink,
+        hashedToken,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
