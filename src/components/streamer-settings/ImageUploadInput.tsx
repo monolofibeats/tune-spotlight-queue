@@ -82,13 +82,13 @@ export function ImageUploadInput({ streamerId, variant, value, onChange }: Image
             disabled={isUploading}
           >
             <Trash2 className="w-4 h-4" />
-            Remove
+            {t('imageUpload.remove')}
           </Button>
         ) : (
           <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handlePick} disabled={isUploading}
           >
             <Camera className="w-4 h-4" />
-            Upload
+            {t('imageUpload.upload')}
           </Button>
         )}
       </div>
