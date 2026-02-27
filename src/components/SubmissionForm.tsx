@@ -140,6 +140,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const [flyingCard, setFlyingCard] = useState<FlyingCard | null>(null);
   const [referralCode, setReferralCode] = useState('');
   const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
@@ -415,6 +416,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
         window.history.replaceState({}, '', currentPath);
       } else if (paymentStatus === 'cancelled') {
+        localStorage.removeItem('upstar_pending_priority_submission');
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
@@ -444,6 +446,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               try {
                 const pending = JSON.parse(pendingRaw);
                 onSubmissionTracked?.({
+                  submissionId: data.submissionId || undefined,
                   songTitle: pending.songTitle,
                   artistName: pending.artistName,
                   songUrl: pending.songUrl,
@@ -497,6 +500,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
         window.history.replaceState({}, '', currentPath);
       } else if (submissionPayment === 'cancelled') {
         localStorage.removeItem('upstar_pending_paid_submission');
+        localStorage.removeItem('upstar_pending_priority_submission');
         toast({
           title: "Payment cancelled",
           description: "Your submission was not processed.",
@@ -779,6 +783,8 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       return;
     }
 
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -832,6 +838,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
@@ -877,6 +884,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Double-submit guard
+    if (isSubmittingRef.current) return;
 
     if (!submissionsOpen && !isAdmin) {
       toast({
@@ -932,11 +942,22 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       });
       return;
     }
+    // Email format validation (if provided)
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (submissionPaid && !isAdmin) {
       await handlePaidSubmit();
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -1023,6 +1044,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
