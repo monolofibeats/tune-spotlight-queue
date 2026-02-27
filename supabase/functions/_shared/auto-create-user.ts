@@ -47,13 +47,18 @@ export async function autoCreateUserFromPayment(
           options: { redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}` },
         });
         if (probeData?.user?.id) {
-          return { userId: probeData.user.id, created: false, actionLink: probeData.properties?.action_link || null };
+          return {
+            userId: probeData.user.id,
+            created: false,
+            actionLink: probeData.properties?.action_link || null,
+            hashedToken: probeData.properties?.hashed_token || null,
+          };
         }
 
-        return { userId: null, created: false, actionLink: null };
+        return { userId: null, created: false, actionLink: null, hashedToken: null };
       }
       logStep('AUTO-ACCOUNT', 'Failed to create user', { error: createError.message });
-      return { userId: null, created: false, actionLink: null };
+      return { userId: null, created: false, actionLink: null, hashedToken: null };
     }
 
     logStep('AUTO-ACCOUNT', 'User created', { userId: newUser.user.id, email });
