@@ -96,7 +96,7 @@ serve(async (req) => {
       if (streamerRow?.slug) redirectPath = `/${streamerRow.slug}/submit`;
     }
 
-    const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
+    const { userId: autoUserId, created: accountCreated, actionLink } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
       redirectPath,
@@ -179,6 +179,7 @@ serve(async (req) => {
       submission,
       message: `Your priority submission has been added to the queue!${accountMessage}`,
       accountCreated,
+      actionLink: actionLink || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

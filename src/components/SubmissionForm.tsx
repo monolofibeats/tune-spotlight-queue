@@ -374,6 +374,27 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               } catch {}
               localStorage.removeItem('upstar_pending_priority_submission');
             }
+
+            // Auto-login: use the magic link token to sign the user in
+            if (data.actionLink) {
+              try {
+                const linkUrl = new URL(data.actionLink);
+                const token_hash = linkUrl.searchParams.get('token') || linkUrl.hash?.match(/token=([^&]+)/)?.[1];
+                if (token_hash) {
+                  const { error: otpError } = await supabase.auth.verifyOtp({
+                    token_hash,
+                    type: 'magiclink',
+                  });
+                  if (!otpError) {
+                    console.log('[AUTO-LOGIN] User signed in after payment');
+                  } else {
+                    console.warn('[AUTO-LOGIN] OTP verification failed', otpError.message);
+                  }
+                }
+              } catch (loginErr) {
+                console.warn('[AUTO-LOGIN] Failed to auto-login', loginErr);
+              }
+            }
           } else if (data && !data.success) {
             toast({
               title: "Payment pending",
@@ -430,6 +451,27 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                 });
               } catch {}
               localStorage.removeItem('upstar_pending_paid_submission');
+            }
+
+            // Auto-login: use the magic link token to sign the user in
+            if (data.actionLink) {
+              try {
+                const linkUrl = new URL(data.actionLink);
+                const token_hash = linkUrl.searchParams.get('token') || linkUrl.hash?.match(/token=([^&]+)/)?.[1];
+                if (token_hash) {
+                  const { error: otpError } = await supabase.auth.verifyOtp({
+                    token_hash,
+                    type: 'magiclink',
+                  });
+                  if (!otpError) {
+                    console.log('[AUTO-LOGIN] User signed in after submission payment');
+                  } else {
+                    console.warn('[AUTO-LOGIN] OTP verification failed', otpError.message);
+                  }
+                }
+              } catch (loginErr) {
+                console.warn('[AUTO-LOGIN] Failed to auto-login', loginErr);
+              }
             }
           } else if (data && !data.success) {
             toast({

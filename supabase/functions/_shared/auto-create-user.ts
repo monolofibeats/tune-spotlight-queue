@@ -15,10 +15,10 @@ export async function autoCreateUserFromPayment(
   email: string | null | undefined,
   siteUrl: string,
   redirectPath?: string,
-): Promise<{ userId: string | null; created: boolean }> {
+): Promise<{ userId: string | null; created: boolean; actionLink: string | null }> {
   if (!email) {
     logStep('AUTO-ACCOUNT', 'No email provided, skipping');
-    return { userId: null, created: false };
+    return { userId: null, created: false, actionLink: null };
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -37,24 +37,23 @@ export async function autoCreateUserFromPayment(
     });
 
     if (createError) {
-      // User already exists — look them up
+      // User already exists — look them up and generate a magic link for auto-login
       if (createError.message?.includes('already') || createError.message?.includes('duplicate')) {
-        logStep('AUTO-ACCOUNT', 'User already exists', { email });
+        logStep('AUTO-ACCOUNT', 'User already exists, generating login link', { email });
 
-        // Use generateLink as a reliable probe to get the user ID by email
         const { data: probeData } = await supabase.auth.admin.generateLink({
           type: 'magiclink',
           email,
-          options: { redirectTo: siteUrl },
+          options: { redirectTo: `${siteUrl}${redirectPath || '/my-dashboard'}` },
         });
         if (probeData?.user?.id) {
-          return { userId: probeData.user.id, created: false };
+          return { userId: probeData.user.id, created: false, actionLink: probeData.properties?.action_link || null };
         }
 
-        return { userId: null, created: false };
+        return { userId: null, created: false, actionLink: null };
       }
       logStep('AUTO-ACCOUNT', 'Failed to create user', { error: createError.message });
-      return { userId: null, created: false };
+      return { userId: null, created: false, actionLink: null };
     }
 
     logStep('AUTO-ACCOUNT', 'User created', { userId: newUser.user.id, email });
@@ -103,9 +102,9 @@ export async function autoCreateUserFromPayment(
       role: 'user',
     });
 
-    return { userId: newUser.user.id, created: true };
+    return { userId: newUser.user.id, created: true, actionLink: linkData?.properties?.action_link || null };
   } catch (err) {
     logStep('AUTO-ACCOUNT', 'Error in auto-create', { error: String(err) });
-    return { userId: null, created: false };
+    return { userId: null, created: false, actionLink: null };
   }
 }

@@ -96,7 +96,7 @@ serve(async (req) => {
       if (streamerRow?.slug) redirectPath = `/${streamerRow.slug}/submit`;
     }
 
-    const { userId: autoUserId, created: accountCreated } = await autoCreateUserFromPayment(
+    const { userId: autoUserId, created: accountCreated, actionLink } = await autoCreateUserFromPayment(
       stripeEmail,
       origin,
       redirectPath,
@@ -166,6 +166,7 @@ serve(async (req) => {
       message: `Your song "${session.metadata.song_title}" has been submitted!${accountMessage}`,
       submissionId: submission.id,
       accountCreated,
+      actionLink: actionLink || null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
