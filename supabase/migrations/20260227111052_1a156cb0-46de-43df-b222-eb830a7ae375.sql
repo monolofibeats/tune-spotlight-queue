@@ -1,0 +1,1 @@
+UPDATE public.submissions SET status = 'deleted' WHERE id = '21bd4d2f-cdc9-4b94-95b1-f169d5a5273d' AND status = 'pending';
