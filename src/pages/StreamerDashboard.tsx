@@ -424,24 +424,31 @@ const StreamerDashboard = () => {
       }
     };
 
+    let submissionsChannel: ReturnType<typeof supabase.channel> | null = null;
+
     const init = async () => {
       const result = await fetchStreamer();
       if (result) {
         const streamerData = result.streamer;
         await fetchSubmissions(streamerData.id);
-        const submissionsChannel = supabase
-          .channel('streamer_submissions')
+        submissionsChannel = supabase
+          .channel(`streamer_submissions_${streamerData.id}`)
           .on('postgres_changes', { 
             event: '*', schema: 'public', table: 'submissions',
             filter: `streamer_id=eq.${streamerData.id}`
           }, () => fetchSubmissions(streamerData.id))
           .subscribe();
-        return () => { supabase.removeChannel(submissionsChannel); };
       }
       setIsLoading(false);
     };
 
-    init().then(() => setIsLoading(false));
+    init();
+
+    return () => {
+      if (submissionsChannel) {
+        supabase.removeChannel(submissionsChannel);
+      }
+    };
   }, [user, authLoading, slug]);
 
   // Permission flags based on team role
