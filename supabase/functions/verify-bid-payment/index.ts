@@ -86,7 +86,7 @@ serve(async (req) => {
       .from('submission_bids')
       .select('*')
       .eq('submission_id', submissionId)
-      .single();
+      .maybeSingle();
 
     if (existingBid) {
       const newTotal = existingBid.total_paid_cents + bidAmountCents;
