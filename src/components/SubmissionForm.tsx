@@ -838,6 +838,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
   };
 
