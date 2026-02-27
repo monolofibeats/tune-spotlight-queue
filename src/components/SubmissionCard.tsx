@@ -30,10 +30,12 @@ const formatTimeAgo = (date: Date): string => {
   return `${hours}h ago`;
 };
 
-const statusConfig = {
-  pending: { label: 'Pending', variant: 'queue' as const, icon: Clock },
-  reviewing: { label: 'Reviewing', variant: 'warning' as const, icon: Play },
-  reviewed: { label: 'Reviewed', variant: 'success' as const, icon: CheckCircle2 },
+const statusConfig: Record<string, { label: string; variant: 'queue' | 'warning' | 'success' | 'secondary' | 'destructive'; icon: typeof Clock }> = {
+  pending: { label: 'Pending', variant: 'queue', icon: Clock },
+  reviewing: { label: 'Reviewing', variant: 'warning', icon: Play },
+  reviewed: { label: 'Reviewed', variant: 'success', icon: CheckCircle2 },
+  skipped: { label: 'Skipped', variant: 'secondary', icon: Clock },
+  deleted: { label: 'Deleted', variant: 'destructive', icon: Clock },
 };
 
 export function SubmissionCard({ submission, onFeedback }: SubmissionCardProps) {
