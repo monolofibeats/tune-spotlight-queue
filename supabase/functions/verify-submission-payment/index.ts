@@ -136,7 +136,7 @@ serve(async (req) => {
         song_title: session.metadata.song_title || 'Untitled',
         message: session.metadata.message || null,
         email: stripeEmail,
-        amount_paid: Math.round((session.amount_total || 0) / 100),
+        amount_paid: Math.round((session.amount_total || 0)) / 100,
         is_priority: false,
         user_id: finalUserId,
         status: 'pending',
