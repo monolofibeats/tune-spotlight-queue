@@ -445,6 +445,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
               try {
                 const pending = JSON.parse(pendingRaw);
                 onSubmissionTracked?.({
+                  submissionId: data.submissionId || undefined,
                   songTitle: pending.songTitle,
                   artistName: pending.artistName,
                   songUrl: pending.songUrl,
