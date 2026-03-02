@@ -244,7 +244,7 @@ function SessionDetailView({ session, streamerId, onClickSubmission }: {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                onClick={() => onClickSubmission?.(sub)}
+                onClick={() => onClickSubmission?.(session, sub)}
                 className="w-full text-left flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 hover:bg-card/40 hover:border-border/50 transition-all group"
               >
                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-muted/30 group-hover:bg-primary/20 transition-colors shrink-0">
