@@ -72,6 +72,12 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
   const [bidIncrementPercent, setBidIncrementPercent] = useState(10);
   const [bidIncrementActive, setBidIncrementActive] = useState(true);
 
+  // Pre-stream spot prices (in euros)
+  const DEFAULT_SPOT_PRICES = { 1: 100, 2: 75, 3: 50 };
+  const [spotPrices, setSpotPrices] = useState<Record<number, number>>(DEFAULT_SPOT_PRICES);
+  const [savedSpotPrices, setSavedSpotPrices] = useState<Record<number, number>>(DEFAULT_SPOT_PRICES);
+  const [spotIds, setSpotIds] = useState<Record<number, string>>({});
+
   const handleDiscard = () => {
     syncFormState(configs);
     setHasChanges(false);
