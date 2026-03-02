@@ -280,6 +280,16 @@ export function DropboxPlayerEmbed({ url, compact }: DropboxPlayerEmbedProps) {
           )}
         </button>
 
+        {/* Volume slider */}
+        <VolumeFader
+          volume={volume}
+          isMuted={isMuted}
+          onChange={(v) => {
+            setVolume(v);
+            if (v > 0 && isMuted) setIsMuted(false);
+          }}
+        />
+
         {/* Spacer */}
         <div className="flex-1" />
 
