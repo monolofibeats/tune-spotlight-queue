@@ -164,7 +164,7 @@ export function SpotBiddingDialog({
 
       // Calculate spot prices with sequential fill logic:
       // - Spots fill from #1 upward
-      // - Only the NEXT empty spot is claimable
+      // - Only the NEXT empty spot is claimable, others greyed out
       // - Occupied spots can be outbid (pushing occupant down)
       const calculatedSpots: SpotPrice[] = [];
       const percent = bidConfig?.min_amount_cents || 10;
@@ -175,12 +175,11 @@ export function SpotBiddingDialog({
         const basePrice = configuredSpotPrices[spotNum] ?? loadedMinBid;
         const submission = pendingSubmissions?.[i];
         if (submission) {
-          // Occupied spot — show as outbiddable
+          // Occupied spot — outbiddable
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;
-          const yourPrice = Math.max(
-            basePrice,
-            Math.ceil(totalPaid * (1 + percent / 100) * 100) / 100
-          );
+          // Use the higher of basePrice or totalPaid as reference, then apply increment
+          const reference = Math.max(basePrice, totalPaid);
+          const yourPrice = Math.ceil(reference * (1 + percent / 100) * 100) / 100;
           
           calculatedSpots.push({
             position: spotNum,
@@ -189,16 +188,16 @@ export function SpotBiddingDialog({
             songTitle: submission.song_title || undefined,
             artistName: submission.artist_name || undefined,
           });
-        } else if (!firstEmptyFound) {
-          // First empty spot — claimable
-          firstEmptyFound = true;
+        } else {
+          // Empty spot
           calculatedSpots.push({
             position: spotNum,
             currentPrice: 0,
             yourPrice: basePrice,
+            // Mark whether this is the first (claimable) empty spot
+            ...(firstEmptyFound ? { locked: true } : {}),
           });
-          // Don't show any further empty spots
-          break;
+          firstEmptyFound = true;
         }
       }
 
