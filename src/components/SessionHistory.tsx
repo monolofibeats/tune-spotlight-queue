@@ -44,6 +44,7 @@ interface SessionSubmission {
 
 interface SessionHistoryProps {
   streamerId: string;
+  onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
 
 interface SessionLoadPickerProps {
