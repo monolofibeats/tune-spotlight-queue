@@ -509,6 +509,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
           </div>
         </TabsContent>
 
+        <TabsContent value="bidding" className="space-y-4 mt-4">
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
             <div>
               <p className="text-sm font-medium">{t('pricing.bidding.enable')}</p>
