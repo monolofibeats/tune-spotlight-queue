@@ -503,7 +503,7 @@ export function NowPlayingPanel({
                     <iframe
                       src={submission.song_url.replace(/([?&])dl=[01]/, '$1raw=1') + (submission.song_url.includes('raw=1') ? '' : (submission.song_url.includes('?') ? '&raw=1' : '?raw=1'))}
                       width="100%"
-                      height="160"
+                      height="420"
                       frameBorder="0"
                       allow="autoplay"
                       loading="lazy"
