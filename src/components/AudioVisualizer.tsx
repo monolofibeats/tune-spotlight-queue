@@ -1061,10 +1061,10 @@ function drawMeters(
     const dbFillH = dbNorm * meterH;
     if (dbFillH > 0) {
       const grad2 = ctx.createLinearGradient(0, meterBottom, 0, meterTop);
-      // Bottom 75% → green/cyan (safe zone)
-      grad2.addColorStop(0, 'hsla(200, 70%, 45%, 0.8)');
-      grad2.addColorStop(0.4, 'hsla(160, 70%, 45%, 0.8)');
-      grad2.addColorStop(0.7, 'hsla(120, 65%, 45%, 0.8)');
+      // Bottom 75% → green (safe zone)
+      grad2.addColorStop(0, 'hsla(120, 70%, 45%, 0.8)');
+      grad2.addColorStop(0.4, 'hsla(120, 65%, 45%, 0.8)');
+      grad2.addColorStop(0.7, 'hsla(100, 65%, 45%, 0.8)');
       // 70-85% → yellow/orange warning zone
       grad2.addColorStop(0.78, 'hsla(80, 70%, 48%, 0.8)');
       grad2.addColorStop(0.85, 'hsla(45, 90%, 50%, 0.85)');
