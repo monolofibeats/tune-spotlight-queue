@@ -39,6 +39,7 @@ import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
+import { SessionLoadPicker, type SessionFilter } from '@/components/SessionHistory';
 import type { Layout } from 'react-grid-layout';
 import type { Streamer } from '@/types/streamer';
 
