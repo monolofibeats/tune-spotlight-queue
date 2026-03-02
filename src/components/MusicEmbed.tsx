@@ -67,6 +67,36 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
           />
         );
       }
+      case 'youtube': {
+        const videoId = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+        if (!videoId) return null;
+        return (
+          <iframe
+            width="100%"
+            height="152"
+            src={`https://www.youtube.com/embed/${videoId}`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
+            onLoad={() => setIsLoaded(true)}
+            className="rounded-xl"
+          />
+        );
+      }
+      case 'dropbox': {
+        // Convert Dropbox share link to direct embeddable link
+        const directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '');
+        return (
+          <audio
+            controls
+            src={directUrl}
+            className="w-full rounded-xl"
+            onLoadedData={() => setIsLoaded(true)}
+            preload="metadata"
+          />
+        );
+      }
       default:
         return (
           <div className="flex flex-col items-center justify-center h-32 glass rounded-xl">

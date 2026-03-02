@@ -63,6 +63,8 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
       { key: 'showSubmitterInsights', label: 'Submitter Insights', defaultValue: false },
       { key: 'showSpotifyEmbed', label: 'Spotify Embed Player', defaultValue: true },
       { key: 'showSoundCloudEmbed', label: 'SoundCloud Embed', defaultValue: true },
+      { key: 'showYouTubeEmbed', label: 'YouTube Embed Player', defaultValue: true },
+      { key: 'showDropboxEmbed', label: 'Dropbox Audio Player', defaultValue: true },
       { key: 'showMessage', label: 'Submitter Message', defaultValue: true },
       { key: 'showDownload', label: 'Download Button', defaultValue: true },
     ],

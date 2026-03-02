@@ -477,6 +477,38 @@ export function NowPlayingPanel({
                   </div>
                 )}
 
+                {/* YouTube Embed — compact */}
+                {cfg.showYouTubeEmbed && submission.platform === 'youtube' && submission.song_url && (() => {
+                  const videoId = submission.song_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+                  if (!videoId) return null;
+                  return (
+                    <div className="rounded-lg overflow-hidden border border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
+                      <iframe
+                        width="100%"
+                        height="152"
+                        src={`https://www.youtube.com/embed/${videoId}`}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        loading="lazy"
+                        className="rounded-lg"
+                      />
+                    </div>
+                  );
+                })()}
+
+                {/* Dropbox Audio Embed */}
+                {cfg.showDropboxEmbed && submission.platform === 'dropbox' && submission.song_url && (
+                  <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-3">
+                    <audio
+                      controls
+                      src={submission.song_url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '')}
+                      className="w-full"
+                      preload="metadata"
+                    />
+                  </div>
+                )}
+
                 {/* Open Link button — platform-colored with cursor-tracking glow */}
                 {submission.song_url && submission.song_url !== 'direct-upload' && (
                   <PlatformOpenButton url={submission.song_url} platform={submission.platform} />

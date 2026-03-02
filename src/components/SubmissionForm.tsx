@@ -172,7 +172,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   }, [showSongUrl, songUrl]);
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
-  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud' || platform === 'youtube' || platform === 'dropbox');
 
   const autofillFromSpotify = async (url: string) => {
     // Browser fetch to Spotify pages is often blocked by CORS; use backend function instead.

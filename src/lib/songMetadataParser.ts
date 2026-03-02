@@ -237,6 +237,7 @@ export const detectPlatformFromUrl = (url: string): string => {
   if (lowerUrl.includes('bandcamp.com')) return 'Bandcamp';
   if (lowerUrl.includes('tidal.com')) return 'Tidal';
   if (lowerUrl.includes('deezer.com')) return 'Deezer';
+  if (lowerUrl.includes('dropbox.com')) return 'dropbox';
   
   return 'other';
 };
