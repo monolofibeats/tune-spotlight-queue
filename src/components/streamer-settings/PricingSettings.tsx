@@ -219,6 +219,33 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
 
       if (error) throw new Error(error.message);
 
+      // Save spot prices
+      const spotsChanged = [1, 2, 3].some(n => spotPrices[n] !== savedSpotPrices[n]);
+      if (spotsChanged) {
+        for (const spotNum of [1, 2, 3]) {
+          const priceCents = Math.round(spotPrices[spotNum] * 100);
+          if (spotIds[spotNum]) {
+            // Update existing spot
+            await (supabase
+              .from('pre_stream_spots' as any)
+              .update({ price_cents: priceCents })
+              .eq('id', spotIds[spotNum])) as any;
+          } else {
+            // Create new spot
+            await (supabase
+              .from('pre_stream_spots' as any)
+              .insert({
+                spot_number: spotNum,
+                price_cents: priceCents,
+                is_available: true,
+                streamer_id: streamerId,
+                session_id: null,
+              })) as any;
+          }
+        }
+        await fetchSpotPrices();
+      }
+
       toast({
         title: t('pricing.updated'),
         description: !submissionsOpen
