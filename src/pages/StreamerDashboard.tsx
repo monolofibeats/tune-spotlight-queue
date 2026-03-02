@@ -36,6 +36,7 @@ import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { EarningsWidget } from '@/components/dashboard/widgets/EarningsWidget';
 import { QuickSettingsWidget } from '@/components/dashboard/widgets/QuickSettingsWidget';
 import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
+import { PhoneSidePanels } from '@/components/dashboard/PhoneSidePanels';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
