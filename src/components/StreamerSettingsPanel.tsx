@@ -65,6 +65,8 @@ interface StreamerSettingsPanelProps {
   onUpdate: (streamer: Streamer) => void;
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
+  showSidePanels?: boolean;
+  onShowSidePanelsChange?: (value: boolean) => void;
   onUnsavedChange?: (hasUnsaved: boolean) => void;
   onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
