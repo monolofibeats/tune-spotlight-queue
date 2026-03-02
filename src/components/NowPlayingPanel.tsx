@@ -478,7 +478,7 @@ export function NowPlayingPanel({
                 )}
 
                 {/* YouTube Embed — compact */}
-                {cfg.showYouTubeEmbed && submission.platform === 'youtube' && submission.song_url && (() => {
+                {cfg.showYouTubeEmbed && (submission.platform === 'youtube' || (submission.platform === 'other' && submission.song_url && (submission.song_url.includes('youtube.com') || submission.song_url.includes('youtu.be')))) && submission.song_url && (() => {
                   const videoId = submission.song_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
                   if (!videoId) return null;
                   return (
