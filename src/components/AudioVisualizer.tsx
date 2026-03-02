@@ -9,6 +9,8 @@ interface AudioVisualizerProps {
   showDBFS?: boolean;
   showKeyFinder?: boolean;
   height?: number;
+  /** Override the primary color with a custom HSL triplet, e.g. "210 60% 60%" */
+  colorHsl?: string;
 }
 
 function parseHslTriplet(input: string) {
