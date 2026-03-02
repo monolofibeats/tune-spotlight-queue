@@ -240,6 +240,19 @@ function PhoneAwareSubmissionsLayout({ phoneOptimized, children }: { phoneOptimi
   );
 }
 
+/** When phone-optimized + live, moves Now Playing panel up (negative margin to overlap with header area) */
+function PhoneOptimizedNowPlaying({ phoneOptimized, children }: { phoneOptimized: boolean; children: React.ReactNode }) {
+  const { isLive } = useStreamSession();
+  if (isLive && phoneOptimized) {
+    return (
+      <div className="transition-all duration-500 -mt-14 mb-2 relative z-30">
+        {children}
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
