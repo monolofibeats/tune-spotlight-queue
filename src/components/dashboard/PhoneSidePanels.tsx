@@ -304,12 +304,12 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
           {rightOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 260, opacity: 1 }}
+              animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden h-full"
             >
-              <div className="w-[260px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
                 <RightPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
               </div>
             </motion.div>
