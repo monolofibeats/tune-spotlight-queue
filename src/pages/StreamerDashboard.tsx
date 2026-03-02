@@ -39,7 +39,7 @@ import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
-import { SessionLoadPicker, type SessionFilter } from '@/components/SessionHistory';
+import { SessionLoadPicker, type SessionFilter, type SessionSubmission } from '@/components/SessionHistory';
 import type { Layout } from 'react-grid-layout';
 import type { Streamer } from '@/types/streamer';
 
@@ -827,13 +827,6 @@ const StreamerDashboard = () => {
               </div>
             )}
           </div>
-          {/* Session loader */}
-          <SessionLoadPicker
-            streamerId={streamer.id}
-            activeSessionFilter={sessionFilter}
-            onLoadSession={setSessionFilter}
-            onClearSession={() => setSessionFilter(null)}
-          />
         </div>
       ),
       queue: (
@@ -1074,6 +1067,12 @@ const StreamerDashboard = () => {
                 </TabsList>
 
                 <div className="flex items-center gap-1.5 sm:ml-auto">
+                  <SessionLoadPicker
+                    streamerId={streamer.id}
+                    activeSessionFilter={sessionFilter}
+                    onLoadSession={setSessionFilter}
+                    onClearSession={() => setSessionFilter(null)}
+                  />
                   {canEdit && <DashboardBuilder {...builderProps} />}
                   <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
                     <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
@@ -1139,7 +1138,36 @@ const StreamerDashboard = () => {
               {canEdit && (
                 <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
                   <div className="relative z-10">
-                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} />
+                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
+                      // Load the session filter
+                      setSessionFilter(filter);
+                      // Switch to submissions tab
+                      setDashboardActiveTab('submissions');
+                      // Open the track in now playing
+                      const dashSub: Submission = {
+                        id: sub.id,
+                        song_url: '',
+                        platform: sub.platform,
+                        artist_name: sub.artist_name,
+                        song_title: sub.song_title,
+                        message: null,
+                        email: null,
+                        amount_paid: sub.amount_paid,
+                        is_priority: sub.is_priority,
+                        status: sub.status,
+                        feedback: null,
+                        created_at: sub.created_at,
+                        audio_file_url: sub.audio_file_url,
+                      };
+                      if (sub.audio_file_url) {
+                        handleOpenNowPlaying(dashSub, null, true, 1);
+                        getSignedAudioUrl(sub.audio_file_url).then(signedUrl => {
+                          setNowPlaying(prev => prev.submission?.id === sub.id ? { ...prev, audioUrl: signedUrl, isLoading: false } : prev);
+                        });
+                      } else {
+                        handleOpenNowPlaying(dashSub, null, false, 1);
+                      }
+                    }} />
                   </div>
                 </TabsContent>
               )}

@@ -38,7 +38,8 @@ import {
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import { SessionManager } from '@/components/SessionManager';
-import { SessionHistory } from '@/components/SessionHistory';
+import { SessionHistory, type SessionFilter } from '@/components/SessionHistory';
+import type { SessionSubmission } from '@/components/SessionHistory';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
@@ -65,9 +66,10 @@ interface StreamerSettingsPanelProps {
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
   onUnsavedChange?: (hasUnsaved: boolean) => void;
+  onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
 
-export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange }: StreamerSettingsPanelProps) {
+export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange, onLoadSessionWithTrack }: StreamerSettingsPanelProps) {
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
@@ -593,7 +595,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             {/* Stream Tab */}
             <TabsContent value="stream" forceMount className={`space-y-6 ${activeTab !== 'stream' ? 'hidden' : ''}`}>
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
-              <SessionHistory streamerId={initialStreamer.id} />
+              <SessionHistory streamerId={initialStreamer.id} onLoadSessionWithTrack={onLoadSessionWithTrack} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
           </Tabs>

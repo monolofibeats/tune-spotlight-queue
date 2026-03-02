@@ -29,7 +29,7 @@ interface SessionStats {
   totalEarnings: number;
 }
 
-interface SessionSubmission {
+export interface SessionSubmission {
   id: string;
   artist_name: string;
   song_title: string;
@@ -44,6 +44,7 @@ interface SessionSubmission {
 
 interface SessionHistoryProps {
   streamerId: string;
+  onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
 
 interface SessionLoadPickerProps {
@@ -151,7 +152,7 @@ function SessionCard({ session, streamerId, onClick }: {
 }
 
 function SessionDetailView({ session, streamerId, onClickSubmission }: {
-  session: Session; streamerId: string; onClickSubmission?: (sub: SessionSubmission) => void;
+  session: Session; streamerId: string; onClickSubmission?: (session: Session, sub: SessionSubmission) => void;
 }) {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [submissions, setSubmissions] = useState<SessionSubmission[]>([]);
@@ -243,7 +244,7 @@ function SessionDetailView({ session, streamerId, onClickSubmission }: {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                onClick={() => onClickSubmission?.(sub)}
+                onClick={() => onClickSubmission?.(session, sub)}
                 className="w-full text-left flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 hover:bg-card/40 hover:border-border/50 transition-all group"
               >
                 <div className="flex items-center justify-center w-7 h-7 rounded-md bg-muted/30 group-hover:bg-primary/20 transition-colors shrink-0">
@@ -273,7 +274,7 @@ function SessionDetailView({ session, streamerId, onClickSubmission }: {
 }
 
 // ─── Stream settings: recent sessions list ───
-export function SessionHistory({ streamerId }: SessionHistoryProps) {
+export function SessionHistory({ streamerId, onLoadSessionWithTrack }: SessionHistoryProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllDialog, setShowAllDialog] = useState(false);
@@ -344,7 +345,7 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
 
       {/* All Sessions Dialog */}
       <Dialog open={showAllDialog} onOpenChange={setShowAllDialog}>
-        <DialogContent className="max-w-lg max-h-[80vh]">
+        <DialogContent className="max-w-2xl max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
@@ -368,7 +369,7 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
 
       {/* Session Detail Dialog — only the dialog's built-in X button */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="sr-only">Session Details</DialogTitle>
           </DialogHeader>
@@ -376,6 +377,15 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
             <SessionDetailView
               session={selectedSession}
               streamerId={streamerId}
+              onClickSubmission={(sess, sub) => {
+                if (onLoadSessionWithTrack && sess.ended_at) {
+                  onLoadSessionWithTrack(
+                    { sessionId: sess.id, title: sess.title, startedAt: sess.started_at, endedAt: sess.ended_at },
+                    sub
+                  );
+                  setDetailDialogOpen(false);
+                }
+              }}
             />
           )}
         </DialogContent>
