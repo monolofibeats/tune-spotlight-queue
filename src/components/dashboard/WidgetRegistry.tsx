@@ -38,6 +38,7 @@ export const WIDGET_REGISTRY: WidgetDefinition[] = [
     icon: ListMusic,
     defaultSize: { w: 8, h: 10 },
     minSize: { w: 3, h: 4 },
+    maxSize: { w: 12, h: 50 },
     category: 'core',
     configOptions: [
       { key: 'showPosition', label: 'Position Numbers', defaultValue: true },
