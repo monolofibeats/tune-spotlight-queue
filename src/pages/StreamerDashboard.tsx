@@ -1117,42 +1117,44 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
-                <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
-                  <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
-                    <NowPlayingDropZone
-                      nowPlayingRef={nowPlayingRef}
-                      submissions={submissions}
-                      onOpenNowPlaying={handleOpenNowPlaying}
-                      hasSubmission={!!nowPlaying.submission}
-                    >
-                      <NowPlayingPanel
-                        submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-                        isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-                        onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-                        onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
-                        onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
-                        onAddToPedestal={handleAddToPedestal}
-                        config={getWidgetConfig('now_playing')}
-                        compactVisualizer={phoneOptimized}
-                        textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
-                        widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
-                        heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
-                      />
-                    </NowPlayingDropZone>
-                  </PhoneAwareSubmissionsLayout>
-                </PhoneOptimizedNowPlaying>
-                <LiveAwareDashboardGrid
-                  dashboardLayout={dashboardLayout}
-                  isBuilderEditing={isBuilderEditing}
-                  canEdit={canEdit}
-                  setDashboardLayout={setDashboardLayout}
-                  widgetRenderers={widgetRenderers}
-                  poppedOutWidgets={poppedOutWidgets}
-                  popOutOptions={popOutOptions}
-                  handlePopOut={handlePopOut}
-                  widgetConfigs={widgetConfigs}
-                  phoneOptimized={phoneOptimized}
-                />
+                <SidePanelsWrapper streamer={streamer} phoneOptimized={phoneOptimized} showSidePanels={showSidePanels} onStreamerUpdate={setStreamer}>
+                  <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
+                    <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
+                      <NowPlayingDropZone
+                        nowPlayingRef={nowPlayingRef}
+                        submissions={submissions}
+                        onOpenNowPlaying={handleOpenNowPlaying}
+                        hasSubmission={!!nowPlaying.submission}
+                      >
+                        <NowPlayingPanel
+                          submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
+                          isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
+                          onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
+                          onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
+                          onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
+                          onAddToPedestal={handleAddToPedestal}
+                          config={getWidgetConfig('now_playing')}
+                          compactVisualizer={phoneOptimized}
+                          textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
+                          widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
+                          heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
+                        />
+                      </NowPlayingDropZone>
+                    </PhoneAwareSubmissionsLayout>
+                  </PhoneOptimizedNowPlaying>
+                  <LiveAwareDashboardGrid
+                    dashboardLayout={dashboardLayout}
+                    isBuilderEditing={isBuilderEditing}
+                    canEdit={canEdit}
+                    setDashboardLayout={setDashboardLayout}
+                    widgetRenderers={widgetRenderers}
+                    poppedOutWidgets={poppedOutWidgets}
+                    popOutOptions={popOutOptions}
+                    handlePopOut={handlePopOut}
+                    widgetConfigs={widgetConfigs}
+                    phoneOptimized={phoneOptimized}
+                  />
+                </SidePanelsWrapper>
               </TabsContent>
 
               {canEdit && (
