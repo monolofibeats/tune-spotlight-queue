@@ -620,3 +620,8 @@ body[data-anim-style="elegant"] * {
   border-radius: 0.75rem;
   overflow: hidden;
 }
+
+/* Fix native audio player rendering on dark backgrounds */
+audio {
+  color-scheme: dark;
+}
