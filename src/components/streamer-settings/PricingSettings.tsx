@@ -93,7 +93,29 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
 
   useEffect(() => {
     fetchConfigs();
+    fetchSpotPrices();
   }, [streamerId]);
+
+  const fetchSpotPrices = async () => {
+    const { data } = await (supabase
+      .from('pre_stream_spots' as any)
+      .select('*')
+      .eq('streamer_id', streamerId)
+      .is('session_id', null)
+      .order('spot_number', { ascending: true })) as any;
+
+    if (data && data.length > 0) {
+      const prices: Record<number, number> = {};
+      const ids: Record<number, string> = {};
+      data.forEach((s: any) => {
+        prices[s.spot_number] = s.price_cents / 100;
+        ids[s.spot_number] = s.id;
+      });
+      setSpotPrices(prices);
+      setSavedSpotPrices(prices);
+      setSpotIds(ids);
+    }
+  };
 
   const fetchConfigs = async () => {
     const { data, error } = await supabase
