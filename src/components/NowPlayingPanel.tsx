@@ -498,7 +498,7 @@ export function NowPlayingPanel({
                 })()}
 
                 {/* Dropbox Audio Embed */}
-                {cfg.showDropboxEmbed && submission.platform === 'dropbox' && submission.song_url && (
+                {cfg.showDropboxEmbed && (submission.platform === 'dropbox' || (submission.platform === 'other' && submission.song_url && submission.song_url.includes('dropbox.com'))) && submission.song_url && (
                   <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-3">
                     <audio
                       controls
