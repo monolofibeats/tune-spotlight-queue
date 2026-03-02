@@ -354,6 +354,7 @@ export function SpotBiddingDialog({
               const Icon = SPOT_ICONS[index] || Award;
               const colorClass = SPOT_COLORS[index] || 'text-muted-foreground';
               const isAvailable = spot.currentPrice === 0;
+              const isLocked = !!spot.locked;
               
               return (
                 <motion.button
@@ -361,27 +362,32 @@ export function SpotBiddingDialog({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => handleSelectSpot(spot.position)}
-                  disabled={isProcessing}
+                  onClick={() => !isLocked && handleSelectSpot(spot.position)}
+                  disabled={isProcessing || isLocked}
                   className={`
                     w-full p-3 sm:p-4 rounded-xl border transition-all text-left overflow-hidden
-                    ${selectedSpot === spot.position 
-                      ? 'border-primary bg-primary/10' 
-                      : 'border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card'
+                    ${isLocked
+                      ? 'border-border/30 bg-muted/30 opacity-40 cursor-not-allowed'
+                      : selectedSpot === spot.position 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border/50 bg-card/50 hover:border-primary/50 hover:bg-card'
                     }
                     ${isProcessing && selectedSpot !== spot.position ? 'opacity-50' : ''}
                   `}
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${colorClass}`}>
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${isLocked ? 'text-muted-foreground' : colorClass}`}>
                       <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     
                     <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold text-sm sm:text-base">#{spot.position}</span>
-                        {isAvailable && (
+                        {isAvailable && !isLocked && (
                           <Badge variant="secondary" className="text-[10px] sm:text-xs">{t('bidding.available')}</Badge>
+                        )}
+                        {isLocked && (
+                          <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground">{t('bidding.locked') || 'Locked'}</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
@@ -397,7 +403,7 @@ export function SpotBiddingDialog({
                     </div>
 
                     <div className="text-right shrink-0">
-                      {discountPercent ? (
+                      {!isLocked && discountPercent ? (
                         <div className="flex items-center gap-1.5 justify-end">
                           <p className="text-xs sm:text-sm text-muted-foreground line-through">
                             €{spot.yourPrice.toFixed(2)}
@@ -407,16 +413,16 @@ export function SpotBiddingDialog({
                           </Badge>
                         </div>
                       ) : null}
-                      <p className="text-base sm:text-lg font-bold text-primary">
-                        €{(discountPercent ? spot.yourPrice * (1 - discountPercent / 100) : spot.yourPrice).toFixed(2)}
+                      <p className={`text-base sm:text-lg font-bold ${isLocked ? 'text-muted-foreground' : 'text-primary'}`}>
+                        €{(discountPercent && !isLocked ? spot.yourPrice * (1 - discountPercent / 100) : spot.yourPrice).toFixed(2)}
                       </p>
                       {selectedSpot === spot.position && isProcessing ? (
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
-                      ) : (
+                      ) : !isLocked ? (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
                           {isAvailable ? t('bidding.toClaim') : t('bidding.toOutbid') || 'to outbid'}
                         </p>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 </motion.button>
