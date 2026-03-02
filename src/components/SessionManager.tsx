@@ -16,6 +16,8 @@ interface SessionManagerProps {
   streamerId?: string;
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
+  showSidePanels?: boolean;
+  onShowSidePanelsChange?: (value: boolean) => void;
 }
 
 export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange }: SessionManagerProps) {
