@@ -89,7 +89,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     save: handleSave,
     discard: handleDiscard,
     hasChanges,
-  }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, streamerId]);
+  }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, streamerId]);
 
   useEffect(() => {
     fetchConfigs();
