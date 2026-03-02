@@ -292,13 +292,21 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                     <span className="text-sm text-muted-foreground">€</span>
                     <Input type="number" min={2.5} max={1000} step={0.5} value={skipLine.min}
                       onChange={(e) => {
-                        const val = Math.max(2.5, parseFloat(e.target.value) || 2.5);
-                        setSkipLine(s => ({ ...s, min: val }));
+                        const raw = e.target.value;
+                        if (raw === '') { setSkipLine(s => ({ ...s, min: 0 })); return; }
+                        const val = parseFloat(raw);
+                        if (!isNaN(val)) setSkipLine(s => ({ ...s, min: val }));
                       }}
-                      className="w-24 h-9 text-right" />
+                      className={`w-24 h-9 text-right ${skipLine.min < 2.5 || skipLine.min > 1000 ? 'border-destructive' : ''}`} />
                   </div>
                 </div>
-                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={1000} step={0.5} />
+                {(skipLine.min < 2.5 || skipLine.min > 1000) && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {skipLine.min < 2.5 ? 'Minimum €2.50 required' : 'Maximum €1,000 allowed'}
+                  </p>
+                )}
+                <Slider value={[Math.min(100, Math.max(2.5, skipLine.min))]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={100} step={0.5} />
               </div>
 
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
