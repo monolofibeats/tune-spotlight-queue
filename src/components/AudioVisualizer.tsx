@@ -129,7 +129,7 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 
         const analyser = actx.createAnalyser();
         analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.3;
+        analyser.smoothingTimeConstant = 0.15;
         const gain = actx.createGain();
         gain.gain.value = 0;
         analyser.connect(gain);
