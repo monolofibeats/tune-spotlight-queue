@@ -35,6 +35,7 @@ export function BulkActionBar({
   onBulkStatusChange,
   onBulkDelete,
   onBulkRestore,
+  onBulkMarkPriority,
 }: BulkActionBarProps) {
   const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
