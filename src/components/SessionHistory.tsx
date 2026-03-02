@@ -29,7 +29,7 @@ interface SessionStats {
   totalEarnings: number;
 }
 
-interface SessionSubmission {
+export interface SessionSubmission {
   id: string;
   artist_name: string;
   song_title: string;
