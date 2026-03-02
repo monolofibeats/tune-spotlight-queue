@@ -121,7 +121,6 @@ interface SubmissionListItemProps {
     email: string | null;
   }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
-  onMarkPriority?: (id: string, isPriority: boolean) => void;
   showPriorityBadge?: boolean;
   /** Submission ID for drag-and-drop identification */
   draggable?: boolean;
