@@ -447,7 +447,68 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
           </div>
         </TabsContent>
 
-        <TabsContent value="bidding" className="space-y-4 mt-4">
+        <TabsContent value="spots" className="space-y-4 mt-4">
+          <p className="text-sm text-muted-foreground">
+            Set the price for each pre-stream priority spot. Fans can purchase these before your stream starts to guarantee their position.
+          </p>
+
+          {[
+            { num: 1, label: 'Spot #1 – Gold', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+            { num: 2, label: 'Spot #2 – Silver', Icon: Medal, color: 'text-slate-300', bg: 'bg-slate-400/10 border-slate-400/20' },
+            { num: 3, label: 'Spot #3 – Bronze', Icon: Award, color: 'text-amber-600', bg: 'bg-amber-600/10 border-amber-600/20' },
+          ].map(({ num, label, Icon, color, bg }) => (
+            <div key={num} className={`flex items-center justify-between p-4 rounded-lg border ${bg}`}>
+              <div className="flex items-center gap-3">
+                <Icon className={`w-5 h-5 ${color}`} />
+                <span className="text-sm font-medium">{label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min={2.5}
+                  max={1000}
+                  step={0.5}
+                  value={spotPrices[num] ?? ''}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') { setSpotPrices(p => ({ ...p, [num]: 0 })); return; }
+                    const val = parseFloat(raw);
+                    if (!isNaN(val)) setSpotPrices(p => ({ ...p, [num]: val }));
+                  }}
+                  className={`w-24 h-9 text-right ${(spotPrices[num] ?? 0) > 0 && (spotPrices[num] < 2.5 || spotPrices[num] > 1000) ? 'border-destructive' : ''}`}
+                />
+              </div>
+            </div>
+          ))}
+
+          {[1, 2, 3].some(n => spotPrices[n] > 0 && (spotPrices[n] < 2.5 || spotPrices[n] > 1000)) && (
+            <p className="text-xs text-destructive flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Each spot must cost at least €2.50 (max €1,000)
+            </p>
+          )}
+
+          <div className="p-4 rounded-lg bg-secondary/30 border border-border/20">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Preview</p>
+            <div className="flex items-end justify-center gap-3">
+              {[2, 1, 3].map(pos => {
+                const height = pos === 1 ? 'h-12' : pos === 2 ? 'h-9' : 'h-7';
+                const color = pos === 1 ? 'text-yellow-400' : pos === 2 ? 'text-slate-300' : 'text-amber-600';
+                const borderC = pos === 1 ? 'border-yellow-500/40' : pos === 2 ? 'border-slate-400/30' : 'border-amber-600/30';
+                return (
+                  <div key={pos} className={`flex flex-col items-center ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}>
+                    <span className={`text-xs font-bold ${color}`}>€{(spotPrices[pos] ?? 0).toFixed(2)}</span>
+                    <div className={`w-14 ${height} rounded-t-md border border-b-0 ${borderC} bg-gradient-to-t from-muted/20 to-transparent flex items-center justify-center`}>
+                      <span className={`text-lg font-black font-display ${color}`}>{pos}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </TabsContent>
+
           <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
             <div>
               <p className="text-sm font-medium">{t('pricing.bidding.enable')}</p>
