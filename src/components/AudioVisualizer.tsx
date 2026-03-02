@@ -568,7 +568,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       let rawEnergy = 0;
       for (let p = 0; p < POINT_COUNT; p++) rawEnergy += smoothedSpectrum[p];
       rawEnergy /= POINT_COUNT;
-      const eLerp = rawEnergy > smoothEnergy ? 0.3 : 0.05;
+      const eLerp = rawEnergy > smoothEnergy ? 0.5 : 0.1;
       smoothEnergy += (rawEnergy - smoothEnergy) * eLerp;
 
       // ═══════════════════════════════════════
