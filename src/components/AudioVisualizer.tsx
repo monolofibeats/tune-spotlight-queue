@@ -292,7 +292,7 @@ function keyDistance(key1: string, mode1: string, key2: string, mode2: string): 
 // ── Main Component ──
 // ═══════════════════════════════════════
 
-export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true, showKeyFinder: showKeyFinderProp = true, height: heightProp = 320 }: AudioVisualizerProps) {
+export function AudioVisualizer({ audioElement, className = '', showLUFS: showLUFSProp = true, showDBFS: showDBFSProp = true, showKeyFinder: showKeyFinderProp = true, height: heightProp = 320, colorHsl }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number | null>(null);
   const [mode, setMode] = useState<VisualizerMode>('spectrum');
