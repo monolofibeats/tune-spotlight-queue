@@ -1067,6 +1067,12 @@ const StreamerDashboard = () => {
                 </TabsList>
 
                 <div className="flex items-center gap-1.5 sm:ml-auto">
+                  <SessionLoadPicker
+                    streamerId={streamer.id}
+                    activeSessionFilter={sessionFilter}
+                    onLoadSession={setSessionFilter}
+                    onClearSession={() => setSessionFilter(null)}
+                  />
                   {canEdit && <DashboardBuilder {...builderProps} />}
                   <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
                     <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
