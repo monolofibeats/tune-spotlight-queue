@@ -499,22 +499,15 @@ export function NowPlayingPanel({
 
                 {/* Dropbox Audio Embed */}
                 {cfg.showDropboxEmbed && (submission.platform === 'dropbox' || (submission.platform === 'other' && submission.song_url && submission.song_url.includes('dropbox.com'))) && submission.song_url && (
-                  <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-3">
-                    <audio
-                      controls
-                      src={(() => {
-                        let directUrl = submission.song_url;
-                        if (directUrl.includes('dropbox.com')) {
-                          // Replace dl=0 or dl=1 with raw=1, keeping other params intact
-                          directUrl = directUrl.replace(/([?&])dl=[01]/, '$1raw=1');
-                          if (!directUrl.includes('raw=1')) {
-                            directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
-                          }
-                        }
-                        return directUrl;
-                      })()}
-                      className="w-full"
-                      preload="metadata"
+                  <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
+                    <iframe
+                      src={submission.song_url.replace(/([?&])dl=[01]/, '$1raw=1') + (submission.song_url.includes('raw=1') ? '' : (submission.song_url.includes('?') ? '&raw=1' : '?raw=1'))}
+                      width="100%"
+                      height="160"
+                      frameBorder="0"
+                      allow="autoplay"
+                      loading="lazy"
+                      className="rounded-lg"
                     />
                   </div>
                 )}

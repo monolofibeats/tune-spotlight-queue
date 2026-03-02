@@ -85,22 +85,21 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         );
       }
       case 'dropbox': {
-        // Convert Dropbox share link to direct playable link
-        let directUrl = url;
-        if (url.includes('dropbox.com')) {
-          // Replace dl=0 or dl=1 with raw=1, keeping other params intact
-          directUrl = url.replace(/([?&])dl=[01]/, '$1raw=1');
-          if (!directUrl.includes('raw=1')) {
-            directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
-          }
+        // Embed Dropbox's native file preview (shows waveform for audio)
+        let embedUrl = url.replace(/([?&])dl=[01]/, '$1raw=1');
+        if (!embedUrl.includes('raw=1')) {
+          embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'raw=1';
         }
         return (
-          <audio
-            controls
-            src={directUrl}
-            className="w-full rounded-xl"
-            onLoadedData={() => setIsLoaded(true)}
-            preload="metadata"
+          <iframe
+            src={embedUrl}
+            width="100%"
+            height="160"
+            frameBorder="0"
+            allow="autoplay"
+            loading="lazy"
+            onLoad={() => setIsLoaded(true)}
+            className="rounded-xl"
           />
         );
       }
