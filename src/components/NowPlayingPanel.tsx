@@ -443,7 +443,7 @@ export function NowPlayingPanel({
 
                 {/* Spotify Embed — compact */}
                 {cfg.showSpotifyEmbed && submission.platform === 'spotify' && submission.song_url && (
-                  <div className="rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                  <EmbedWithFallback url={submission.song_url} borderColor="primary">
                     {isLoadingSpotify ? (
                       <div className="flex items-center justify-center py-6 bg-card/50">
                         <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -459,7 +459,7 @@ export function NowPlayingPanel({
                         className="rounded-lg"
                       />
                     )}
-                  </div>
+                  </EmbedWithFallback>
                 )}
 
                 {/* SoundCloud Embed — compact */}
