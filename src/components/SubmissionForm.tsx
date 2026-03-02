@@ -23,13 +23,14 @@ import { parseUrlMetadata, parseFilename } from '@/lib/songMetadataParser';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
-type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
+type Platform = 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'dropbox' | 'other';
 
 const detectPlatform = (url: string): Platform => {
   if (url.includes('spotify.com')) return 'spotify';
   if (url.includes('music.apple.com')) return 'apple-music';
   if (url.includes('soundcloud.com')) return 'soundcloud';
   if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('dropbox.com')) return 'dropbox';
   return 'other';
 };
 
@@ -171,7 +172,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   }, [showSongUrl, songUrl]);
 
   const platform = songUrl ? detectPlatform(songUrl) : null;
-  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud');
+  const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud' || platform === 'youtube' || platform === 'dropbox');
 
   const autofillFromSpotify = async (url: string) => {
     // Browser fetch to Spotify pages is often blocked by CORS; use backend function instead.

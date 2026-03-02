@@ -1,7 +1,7 @@
 export interface Submission {
   id: string;
   songUrl: string;
-  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
+  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'dropbox' | 'other';
   artistName: string;
   songTitle: string;
   submitterName: string;

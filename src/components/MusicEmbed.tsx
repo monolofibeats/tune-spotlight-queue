@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 interface MusicEmbedProps {
   url: string;
-  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
+  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'dropbox' | 'other';
 }
 
 const extractSpotifyId = (url: string): string | null => {
@@ -64,6 +64,36 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
             src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%2306b6d4&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
             onLoad={() => setIsLoaded(true)}
             className="rounded-xl"
+          />
+        );
+      }
+      case 'youtube': {
+        const videoId = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+        if (!videoId) return null;
+        return (
+          <iframe
+            width="100%"
+            height="152"
+            src={`https://www.youtube.com/embed/${videoId}`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
+            onLoad={() => setIsLoaded(true)}
+            className="rounded-xl"
+          />
+        );
+      }
+      case 'dropbox': {
+        // Convert Dropbox share link to direct embeddable link
+        const directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '');
+        return (
+          <audio
+            controls
+            src={directUrl}
+            className="w-full rounded-xl"
+            onLoadedData={() => setIsLoaded(true)}
+            preload="metadata"
           />
         );
       }
