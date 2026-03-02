@@ -41,6 +41,7 @@ interface TopSongsPedestalProps {
   streamer: Streamer;
   submissions: Submission[];
   onStreamerUpdate?: (s: Streamer) => void;
+  onPlaySong?: (submission: Submission) => void;
 }
 
 export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: TopSongsPedestalProps) {
