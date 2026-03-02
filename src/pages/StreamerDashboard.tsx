@@ -596,8 +596,28 @@ const StreamerDashboard = () => {
     }
   };
 
+  // When a session filter is active, fetch the submission IDs for that session
+  useEffect(() => {
+    if (!sessionFilter || !streamer) {
+      setSessionSubmissionIds(null);
+      return;
+    }
+    const fetchIds = async () => {
+      const { data } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('streamer_id', streamer.id)
+        .gte('created_at', sessionFilter.startedAt)
+        .lte('created_at', sessionFilter.endedAt);
+      setSessionSubmissionIds(new Set((data || []).map(d => d.id)));
+    };
+    fetchIds();
+  }, [sessionFilter, streamer]);
+
   const filteredSubmissions = submissions.filter(s => {
     if (nowPlaying.submission && s.id === nowPlaying.submission.id) return false;
+    // Session filter: only show submissions from the loaded session
+    if (sessionSubmissionIds && !sessionSubmissionIds.has(s.id)) return false;
     const matchesSearch =
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.artist_name?.toLowerCase().includes(searchQuery.toLowerCase());
