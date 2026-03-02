@@ -22,6 +22,7 @@ interface SpotPrice {
   yourPrice: number;
   songTitle?: string;
   artistName?: string;
+  locked?: boolean;
 }
 
 interface SpotBiddingDialogProps {
