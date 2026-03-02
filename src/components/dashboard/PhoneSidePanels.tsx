@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { useAllPricingConfigs } from '@/hooks/usePricingConfig';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { MiniPedestal } from '@/components/MiniPedestal';
+import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
