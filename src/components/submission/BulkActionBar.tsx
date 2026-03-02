@@ -23,6 +23,7 @@ interface BulkActionBarProps {
   onBulkStatusChange: (status: string) => Promise<void>;
   onBulkDelete: (permanent?: boolean) => Promise<void>;
   onBulkRestore?: () => Promise<void>;
+  onBulkMarkPriority?: (isPriority: boolean) => Promise<void>;
 }
 
 export function BulkActionBar({
