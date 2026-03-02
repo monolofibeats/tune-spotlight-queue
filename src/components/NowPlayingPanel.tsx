@@ -361,7 +361,7 @@ export function NowPlayingPanel({
             {/* Main Content — compact */}
             <div className="p-3">
               <div className="np-main-content flex flex-col gap-3">
-                {/* Song Header + Action Buttons row */}
+                {/* Song Header — compact single row */}
                 <div className="flex items-center gap-3">
                   <div className="shrink-0 w-9 h-9 rounded-lg bg-yellow-500/20 flex items-center justify-center">
                     <Play className="w-4 h-4 text-yellow-500 fill-yellow-500" />
@@ -400,28 +400,6 @@ export function NowPlayingPanel({
                       )}
                     </div>
                   </div>
-
-                  {/* Done / Skip — inline with header */}
-                  {cfg.showActionButtons && onStatusChange && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        className="h-8 text-[11px] gap-1 px-2.5 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-emerald-500/30 transition-all"
-                        onClick={() => onStatusChange(submission.id, 'reviewed')}
-                      >
-                        <CheckCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span className="hidden sm:inline">{t('nowPlaying.done')}</span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="h-8 text-[11px] gap-1 px-2.5 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 hover:border-red-500/50 hover:shadow-[0_0_12px_-2px] hover:shadow-red-500/30 transition-all"
-                        onClick={() => onStatusChange(submission.id, 'skipped')}
-                      >
-                        <SkipForward className="w-3.5 h-3.5 shrink-0" />
-                        <span className="hidden sm:inline">{t('nowPlaying.skip')}</span>
-                      </Button>
-                    </div>
-                  )}
                 </div>
 
                 {/* Audio Player — compact wrapper */}
