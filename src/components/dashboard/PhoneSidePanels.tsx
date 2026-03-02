@@ -260,58 +260,56 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
   return (
     <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
       {/* Left Panel - Stats, Audio, Soundboard, Podium, Visibility */}
-      <div className="relative flex-shrink-0">
-        <AnimatePresence>
-          {leftOpen && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden h-full"
+      <div className="relative flex-1 min-w-0">
+        {leftOpen ? (
+          <>
+            <div className="h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+              <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
+            </div>
+            <button
+              onClick={() => setLeftOpen(false)}
+              className="absolute top-2 right-1 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
             >
-              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
-                <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <button
-          onClick={() => setLeftOpen(!leftOpen)}
-          className="absolute top-2 -right-3 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
-        >
-          {leftOpen ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-        </button>
+              <ChevronLeft className="w-3 h-3" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setLeftOpen(true)}
+            className="absolute top-2 left-0 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
+          >
+            <ChevronRight className="w-3 h-3" />
+          </button>
+        )}
       </div>
 
-      {/* Center Content */}
-      <div className="flex-1 min-w-0">
+      {/* Center Content - fixed width phone container */}
+      <div className="flex-shrink-0">
         {children}
       </div>
 
       {/* Right Panel - Pricing */}
-      <div className="relative flex-shrink-0">
-        <AnimatePresence>
-          {rightOpen && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden h-full"
+      <div className="relative flex-1 min-w-0">
+        {rightOpen ? (
+          <>
+            <div className="h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+              <RightPanel streamer={streamer} />
+            </div>
+            <button
+              onClick={() => setRightOpen(false)}
+              className="absolute top-2 left-1 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
             >
-              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
-                <RightPanel streamer={streamer} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <button
-          onClick={() => setRightOpen(!rightOpen)}
-          className="absolute top-2 -left-3 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
-        >
-          {rightOpen ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setRightOpen(true)}
+            className="absolute top-2 right-0 z-10 p-1 rounded-full bg-card border border-border/50 hover:bg-accent transition-colors"
+          >
+            <ChevronLeft className="w-3 h-3" />
+          </button>
+        )}
       </div>
     </div>
   );
