@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search, Check } from 'lucide-react';
+import { Trophy, RotateCcw, Eye, EyeOff, GripVertical, X, Crown, Medal, Award, Search, Check, ExternalLink, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +25,8 @@ interface Submission {
   song_title: string;
   platform: string;
   status: string;
+  song_url: string;
+  audio_file_url?: string | null;
 }
 
 interface TopSong {
@@ -39,9 +41,10 @@ interface TopSongsPedestalProps {
   streamer: Streamer;
   submissions: Submission[];
   onStreamerUpdate?: (s: Streamer) => void;
+  onPlaySong?: (submission: Submission) => void;
 }
 
-export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: TopSongsPedestalProps) {
+export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate, onPlaySong }: TopSongsPedestalProps) {
   const { t } = useLanguage();
   const [topSongs, setTopSongs] = useState<TopSong[]>([]);
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
@@ -378,8 +381,29 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: To
                       exit={{ opacity: 0, y: -10 }}
                       className="text-center w-full px-1"
                     >
-                      <p className="font-semibold text-xs sm:text-sm truncate">{song.submission.song_title}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
+                      <button
+                        onClick={() => {
+                          const sub = song.submission;
+                          if (!sub) return;
+                          if (sub.audio_file_url && onPlaySong) {
+                            onPlaySong(sub);
+                          } else if (sub.song_url) {
+                            window.open(sub.song_url, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
+                        className="group/link text-center w-full hover:opacity-80 transition-opacity cursor-pointer"
+                        title={song.submission?.audio_file_url ? 'Play in Now Playing' : 'Open link'}
+                      >
+                        <p className="font-semibold text-xs sm:text-sm truncate group-hover/link:underline">{song.submission.song_title}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
+                        <span className="inline-flex items-center gap-0.5 mt-0.5 text-[9px] text-primary/70">
+                          {song.submission.audio_file_url ? (
+                            <><Play className="w-2.5 h-2.5" /> Play</>
+                          ) : (
+                            <><ExternalLink className="w-2.5 h-2.5" /> Open</>
+                          )}
+                        </span>
+                      </button>
                       <Button
                         variant="ghost"
                         size="sm"

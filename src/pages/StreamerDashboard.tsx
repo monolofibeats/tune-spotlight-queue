@@ -1160,7 +1160,23 @@ const StreamerDashboard = () => {
                     onAddToPedestal={handleAddToPedestal}
                   >
                     <div className="rounded-2xl p-6 border border-border/20 bg-card/10 backdrop-blur-sm">
-                      <TopSongsPedestal streamer={streamer} submissions={submissions} onStreamerUpdate={setStreamer} />
+                      <TopSongsPedestal
+                        streamer={streamer}
+                        submissions={submissions}
+                        onStreamerUpdate={setStreamer}
+                        onPlaySong={(sub) => {
+                          if (sub.audio_file_url) {
+                            handleOpenNowPlaying(sub as any, null, true, 0);
+                            import('@/lib/storage').then(({ getSignedAudioUrl }) => {
+                              getSignedAudioUrl(sub.audio_file_url).then(signedUrl => {
+                                setNowPlaying(prev => prev.submission?.id === sub.id ? { ...prev, audioUrl: signedUrl, isLoading: false } : prev);
+                              });
+                            });
+                          } else if (sub.song_url) {
+                            window.open(sub.song_url, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
+                      />
                     </div>
                   </TopSongsDropZone>
                 </TabsContent>

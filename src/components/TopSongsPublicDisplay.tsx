@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Medal, Award, Trophy } from 'lucide-react';
+import { Crown, Medal, Award, Trophy, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -8,6 +8,7 @@ interface TopSongDisplay {
   position: number;
   artist_name: string;
   song_title: string;
+  song_url?: string;
 }
 
 interface TopSongsPublicDisplayProps {
@@ -37,7 +38,7 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
       const subIds = data.map(d => d.submission_id);
       const { data: subs } = await supabase
         .from('submissions')
-        .select('id, artist_name, song_title')
+        .select('id, artist_name, song_title, song_url')
         .in('id', subIds);
 
       if (subs) {
@@ -47,6 +48,7 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
             position: d.position,
             artist_name: sub?.artist_name || 'Unknown',
             song_title: sub?.song_title || 'Untitled',
+            song_url: sub?.song_url,
           };
         });
         setSongs(enriched);
@@ -105,8 +107,26 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
             >
               {/* Song info above */}
               <div className="w-full mb-1.5 text-center px-0.5">
-                <p className="text-[11px] sm:text-xs font-bold truncate">{song.song_title}</p>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                {song.song_url ? (
+                  <a
+                    href={song.song_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/link hover:opacity-80 transition-opacity block"
+                    title="Open song"
+                  >
+                    <p className="text-[11px] sm:text-xs font-bold truncate group-hover/link:underline">{song.song_title}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                    <span className="inline-flex items-center gap-0.5 text-[8px] text-primary/60">
+                      <ExternalLink className="w-2 h-2" /> Open
+                    </span>
+                  </a>
+                ) : (
+                  <>
+                    <p className="text-[11px] sm:text-xs font-bold truncate">{song.song_title}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                  </>
+                )}
               </div>
 
               {/* Podium block */}
