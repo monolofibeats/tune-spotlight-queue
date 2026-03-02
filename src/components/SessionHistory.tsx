@@ -274,7 +274,7 @@ function SessionDetailView({ session, streamerId, onClickSubmission }: {
 }
 
 // ─── Stream settings: recent sessions list ───
-export function SessionHistory({ streamerId }: SessionHistoryProps) {
+export function SessionHistory({ streamerId, onLoadSessionWithTrack }: SessionHistoryProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllDialog, setShowAllDialog] = useState(false);
