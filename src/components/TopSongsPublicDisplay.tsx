@@ -48,6 +48,7 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
             position: d.position,
             artist_name: sub?.artist_name || 'Unknown',
             song_title: sub?.song_title || 'Untitled',
+            song_url: sub?.song_url,
           };
         });
         setSongs(enriched);
