@@ -8,6 +8,7 @@ interface AudioPlayerProps {
   isLoading?: boolean;
   onEnded?: () => void;
   onAudioElement?: (el: HTMLAudioElement | null) => void;
+  crossOrigin?: '' | 'anonymous' | 'use-credentials';
 }
 
 interface SeekBarProps {
