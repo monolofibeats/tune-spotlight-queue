@@ -258,20 +258,20 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
   const [rightOpen, setRightOpen] = useState(true);
 
   return (
-    <div className="flex items-stretch gap-5 w-full min-h-[calc(100vh-140px)]">
-      {/* Left Panel */}
+    <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
+      {/* Left Panel - Stats, Audio, Soundboard, Podium, Visibility */}
       <div className="relative flex-shrink-0">
         <AnimatePresence>
           {leftOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 340, opacity: 1 }}
+              animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden h-full"
             >
-              <div className="w-[340px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
-                <LeftPanel streamer={streamer} />
+              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+                <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
               </div>
             </motion.div>
           )}
@@ -289,19 +289,19 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
         {children}
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Pricing */}
       <div className="relative flex-shrink-0">
         <AnimatePresence>
           {rightOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 340, opacity: 1 }}
+              animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden h-full"
             >
-              <div className="w-[340px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
-                <RightPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
+              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+                <RightPanel streamer={streamer} />
               </div>
             </motion.div>
           )}
