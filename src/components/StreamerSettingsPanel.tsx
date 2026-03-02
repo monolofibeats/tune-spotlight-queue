@@ -38,6 +38,7 @@ import {
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import { SessionManager } from '@/components/SessionManager';
+import { SessionHistory } from '@/components/SessionHistory';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
@@ -592,6 +593,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             {/* Stream Tab */}
             <TabsContent value="stream" forceMount className={`space-y-6 ${activeTab !== 'stream' ? 'hidden' : ''}`}>
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
+              <SessionHistory streamerId={initialStreamer.id} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
           </Tabs>
