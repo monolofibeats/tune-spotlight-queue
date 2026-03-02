@@ -20,7 +20,7 @@ interface SessionManagerProps {
   onShowSidePanelsChange?: (value: boolean) => void;
 }
 
-export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange }: SessionManagerProps) {
+export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange, showSidePanels = false, onShowSidePanelsChange }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
   const { t } = useLanguage();
