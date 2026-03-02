@@ -169,3 +169,26 @@
     margin-top: 0.125rem !important;
   }
 }
+
+/* ─── Dropbox Player — override AudioPlayer colors ─── */
+.dropbox-player .bg-amber-400\/80 {
+  background-color: rgba(0, 97, 255, 0.7) !important;
+}
+.dropbox-player .bg-amber-400\/20 {
+  background-color: rgba(0, 97, 255, 0.15) !important;
+}
+.dropbox-player .bg-amber-300\/95 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+.dropbox-player .border-amber-500\/50 {
+  border-color: rgba(0, 97, 255, 0.5) !important;
+}
+.dropbox-player .bg-background\/50 {
+  background-color: rgba(37, 42, 48, 0.8) !important;
+}
+.dropbox-player .border-border\/30 {
+  border-color: rgba(58, 63, 71, 0.5) !important;
+}
+.dropbox-player .text-muted-foreground {
+  color: #9aa5b4 !important;
+}
