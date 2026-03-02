@@ -369,7 +369,7 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
 
       {/* Session Detail Dialog — only the dialog's built-in X button */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="sr-only">Session Details</DialogTitle>
           </DialogHeader>
@@ -377,6 +377,15 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
             <SessionDetailView
               session={selectedSession}
               streamerId={streamerId}
+              onClickSubmission={(sess, sub) => {
+                if (onLoadSessionWithTrack && sess.ended_at) {
+                  onLoadSessionWithTrack(
+                    { sessionId: sess.id, title: sess.title, startedAt: sess.started_at, endedAt: sess.ended_at },
+                    sub
+                  );
+                  setDetailDialogOpen(false);
+                }
+              }}
             />
           )}
         </DialogContent>
