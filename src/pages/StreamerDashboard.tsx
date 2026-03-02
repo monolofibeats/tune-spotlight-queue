@@ -39,6 +39,7 @@ import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
+import { SessionLoadPicker, type SessionFilter } from '@/components/SessionHistory';
 import type { Layout } from 'react-grid-layout';
 import type { Streamer } from '@/types/streamer';
 
@@ -257,6 +258,8 @@ const StreamerDashboard = () => {
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
   const [dashboardShaking, setDashboardShaking] = useState(false);
+  const [sessionFilter, setSessionFilter] = useState<SessionFilter | null>(null);
+  const [sessionSubmissionIds, setSessionSubmissionIds] = useState<Set<string> | null>(null);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
 
   const [dashboardActiveTab, setDashboardActiveTab] = useState('submissions');
@@ -593,8 +596,28 @@ const StreamerDashboard = () => {
     }
   };
 
+  // When a session filter is active, fetch the submission IDs for that session
+  useEffect(() => {
+    if (!sessionFilter || !streamer) {
+      setSessionSubmissionIds(null);
+      return;
+    }
+    const fetchIds = async () => {
+      const { data } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('streamer_id', streamer.id)
+        .gte('created_at', sessionFilter.startedAt)
+        .lte('created_at', sessionFilter.endedAt);
+      setSessionSubmissionIds(new Set((data || []).map(d => d.id)));
+    };
+    fetchIds();
+  }, [sessionFilter, streamer]);
+
   const filteredSubmissions = submissions.filter(s => {
     if (nowPlaying.submission && s.id === nowPlaying.submission.id) return false;
+    // Session filter: only show submissions from the loaded session
+    if (sessionSubmissionIds && !sessionSubmissionIds.has(s.id)) return false;
     const matchesSearch =
       s.song_title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.artist_name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -774,34 +797,43 @@ const StreamerDashboard = () => {
         </div>
       ),
       search_filters: (
-        <div className="widget-search-filters flex flex-col sm:flex-row gap-2 sm:gap-3">
-          {searchConfig.showSearchBar !== false && (
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder={t('dashboard.searchTracksArtists')} value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm w-full" />
-            </div>
-          )}
-          {searchConfig.showStatusFilters !== false && (
-            <div className="flex gap-1 sm:gap-1.5 flex-wrap">
-              {[
-                { key: 'pending', label: t('dashboard.filterPending') },
-                { key: 'reviewed', label: t('dashboard.filterDone') },
-                { key: 'skipped', label: t('dashboard.filterSkipped') },
-                ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
-              ].map(({ key, label }) => (
-                <button key={key}
-                  className={`h-7 text-[11px] sm:text-xs px-2.5 sm:px-3 rounded-full font-medium transition-all ${
-                    statusFilter === key
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
-                  }`}
-                  onClick={() => setStatusFilter(key)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="widget-search-filters space-y-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            {searchConfig.showSearchBar !== false && (
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input placeholder={t('dashboard.searchTracksArtists')} value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm w-full" />
+              </div>
+            )}
+            {searchConfig.showStatusFilters !== false && (
+              <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+                {[
+                  { key: 'pending', label: t('dashboard.filterPending') },
+                  { key: 'reviewed', label: t('dashboard.filterDone') },
+                  { key: 'skipped', label: t('dashboard.filterSkipped') },
+                  ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
+                ].map(({ key, label }) => (
+                  <button key={key}
+                    className={`h-7 text-[11px] sm:text-xs px-2.5 sm:px-3 rounded-full font-medium transition-all ${
+                      statusFilter === key
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                    }`}
+                    onClick={() => setStatusFilter(key)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Session loader */}
+          <SessionLoadPicker
+            streamerId={streamer.id}
+            activeSessionFilter={sessionFilter}
+            onLoadSession={setSessionFilter}
+            onClearSession={() => setSessionFilter(null)}
+          />
         </div>
       ),
       queue: (
@@ -856,7 +888,7 @@ const StreamerDashboard = () => {
         </div>
       ),
     };
-  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode, widgetConfigs, getWidgetConfig]);
+  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode, widgetConfigs, getWidgetConfig, sessionFilter]);
 
   if (isLoading || authLoading) {
     return (
