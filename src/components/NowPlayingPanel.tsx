@@ -464,7 +464,7 @@ export function NowPlayingPanel({
 
                 {/* SoundCloud Embed — compact */}
                 {cfg.showSoundCloudEmbed && submission.platform === 'soundcloud' && submission.song_url && (
-                  <div className="rounded-lg overflow-hidden border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent">
+                  <EmbedWithFallback url={submission.song_url} borderColor="orange-500">
                     <iframe
                       width="100%"
                       height="130"
@@ -475,7 +475,7 @@ export function NowPlayingPanel({
                       loading="lazy"
                       className="rounded-lg"
                     />
-                  </div>
+                  </EmbedWithFallback>
                 )}
 
                 {/* YouTube Embed — compact */}
