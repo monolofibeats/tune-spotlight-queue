@@ -38,7 +38,7 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
       const subIds = data.map(d => d.submission_id);
       const { data: subs } = await supabase
         .from('submissions')
-        .select('id, artist_name, song_title')
+        .select('id, artist_name, song_title, song_url')
         .in('id', subIds);
 
       if (subs) {
