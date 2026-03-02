@@ -483,7 +483,7 @@ export function NowPlayingPanel({
                   const videoId = submission.song_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
                   if (!videoId) return null;
                   return (
-                    <div className="rounded-lg overflow-hidden border border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
+                    <EmbedWithFallback url={submission.song_url} borderColor="red-500">
                       <iframe
                         width="100%"
                         height="152"
@@ -494,7 +494,7 @@ export function NowPlayingPanel({
                         loading="lazy"
                         className="rounded-lg"
                       />
-                    </div>
+                    </EmbedWithFallback>
                   );
                 })()}
 
