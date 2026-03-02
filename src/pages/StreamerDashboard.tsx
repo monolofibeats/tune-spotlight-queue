@@ -1141,28 +1141,6 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
-                <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
-                <NowPlayingDropZone
-                  nowPlayingRef={nowPlayingRef}
-                  submissions={submissions}
-                  onOpenNowPlaying={handleOpenNowPlaying}
-                  hasSubmission={!!nowPlaying.submission}
-                >
-                  <NowPlayingPanel
-                    submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-                    isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-                    onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-                    onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
-                    onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
-                    onAddToPedestal={handleAddToPedestal}
-                    config={getWidgetConfig('now_playing')}
-                    compactVisualizer={phoneOptimized}
-                    textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
-                    widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
-                    heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
-                  />
-                </NowPlayingDropZone>
-                </PhoneAwareSubmissionsLayout>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
