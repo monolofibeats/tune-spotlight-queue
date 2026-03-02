@@ -620,3 +620,16 @@ body[data-anim-style="elegant"] * {
   border-radius: 0.75rem;
   overflow: hidden;
 }
+
+/* Dark-themed native audio player fixes */
+audio {
+  filter: invert(1) hue-rotate(180deg);
+  border-radius: 0.5rem;
+}
+audio::-webkit-media-controls-panel {
+  background: hsl(0 0% 10%);
+}
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+  color: hsl(0 0% 90%);
+}
