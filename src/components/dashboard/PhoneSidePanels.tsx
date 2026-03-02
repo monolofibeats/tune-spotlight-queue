@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
   Volume2, Bell, Trophy, Eye, Settings2
@@ -8,9 +8,10 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useStreamSession } from '@/hooks/useStreamSession';
-import { useAllPricingConfigs } from '@/hooks/usePricingConfig';
-import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
+import { PricingSettings, PricingSettingsHandle } from '@/components/streamer-settings/PricingSettings';
+import { Soundboard } from '@/components/Soundboard';
+import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
@@ -86,7 +87,6 @@ function useSessionStats(streamerId: string) {
     if (!currentSession) return;
 
     const fetch = async () => {
-      // Get submissions for this session (created after session start)
       const { data: subs } = await supabase
         .from('submissions')
         .select('email, amount_paid, created_at')
@@ -94,7 +94,6 @@ function useSessionStats(streamerId: string) {
         .gte('created_at', currentSession.started_at)
         .order('created_at', { ascending: false });
 
-      // Get earnings for this session
       const { data: earnings } = await supabase
         .from('streamer_earnings')
         .select('streamer_share_cents')
@@ -105,7 +104,6 @@ function useSessionStats(streamerId: string) {
       const trackCount = subs?.length ?? 0;
       const lastSongAt = subs?.[0]?.created_at ?? null;
 
-      // Top payer
       const payerMap: Record<string, number> = {};
       subs?.forEach(s => {
         if (s.email && s.amount_paid > 0) {
@@ -146,9 +144,31 @@ function useOnlineDuration() {
   return duration;
 }
 
-function LeftPanel({ streamerId }: { streamerId: string }) {
-  const { stats } = useSessionStats(streamerId);
+/* LEFT PANEL: Pricing (editable) + Soundboard */
+function LeftPanel({ streamer }: { streamer: Streamer }) {
+  const pricingRef = useRef<PricingSettingsHandle>(null);
+
+  return (
+    <div className="h-full flex flex-col">
+      <CollapsibleSection title="Pricing" icon={DollarSign}>
+        <div className="max-h-[60vh] overflow-y-auto -mx-1 px-1">
+          <PricingSettings ref={pricingRef} streamerId={streamer.id} />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={true}>
+        <SidePanelSoundboard />
+      </CollapsibleSection>
+    </div>
+  );
+}
+
+/* RIGHT PANEL: Session Stats + Audio + Podium + Section Visibility */
+function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
+  const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
+  const [volume, setVolume] = useState(80);
+  const [notifSounds, setNotifSounds] = useState(true);
 
   const fmt = (cents: number) => `€${(cents / 100).toFixed(2)}`;
   const timeSince = (iso: string | null) => {
@@ -158,6 +178,17 @@ function LeftPanel({ streamerId }: { streamerId: string }) {
     if (mins < 1) return 'Just now';
     if (mins < 60) return `${mins}m ago`;
     return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
+  };
+
+  const toggleVisibility = async (field: string, value: boolean) => {
+    const update: Record<string, boolean> = { [field]: value };
+    const { error } = await supabase
+      .from('streamers')
+      .update(update)
+      .eq('id', streamer.id);
+    if (!error && onStreamerUpdate) {
+      onStreamerUpdate({ ...streamer, ...update } as Streamer);
+    }
   };
 
   return (
@@ -175,30 +206,7 @@ function LeftPanel({ streamerId }: { streamerId: string }) {
           />
         )}
       </CollapsibleSection>
-    </div>
-  );
-}
 
-function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
-  const { configs, isLoading: pricingLoading } = useAllPricingConfigs(streamer.id);
-  const [volume, setVolume] = useState(80);
-  const [notifSounds, setNotifSounds] = useState(true);
-
-  const toggleVisibility = async (field: string, value: boolean) => {
-    const update: Record<string, boolean> = { [field]: value };
-    const { error } = await supabase
-      .from('streamers')
-      .update(update)
-      .eq('id', streamer.id);
-    if (!error && onStreamerUpdate) {
-      onStreamerUpdate({ ...streamer, ...update } as Streamer);
-    }
-  };
-
-  const fmtCents = (c: number) => `€${(c / 100).toFixed(2)}`;
-
-  return (
-    <div className="h-full flex flex-col">
       <CollapsibleSection title="Audio" icon={Volume2}>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -221,23 +229,6 @@ function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStre
 
       <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
         <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Pricing" icon={DollarSign} defaultOpen={false}>
-        {pricingLoading ? (
-          <p className="text-[10px] text-muted-foreground">Loading…</p>
-        ) : (
-          <div className="space-y-1.5">
-            {Object.entries(configs).map(([type, cfg]) => (
-              <div key={type} className="flex items-center justify-between p-1.5 rounded bg-muted/20">
-                <span className="text-[10px] capitalize">{type.replace(/_/g, ' ')}</span>
-                <span className={`text-[10px] font-medium ${cfg.is_active ? 'text-emerald-400' : 'text-muted-foreground'}`}>
-                  {cfg.is_active ? `${fmtCents(cfg.min_amount_cents)} – ${fmtCents(cfg.max_amount_cents)}` : 'Off'}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
       </CollapsibleSection>
 
       <CollapsibleSection title="Section Visibility" icon={Eye} defaultOpen={false}>
@@ -267,20 +258,20 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
   const [rightOpen, setRightOpen] = useState(true);
 
   return (
-    <div className="flex items-stretch gap-3 w-full min-h-[calc(100vh-140px)]">
+    <div className="flex items-stretch gap-5 w-full min-h-[calc(100vh-140px)]">
       {/* Left Panel */}
       <div className="relative flex-shrink-0">
         <AnimatePresence>
           {leftOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
+              animate={{ width: 340, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden h-full"
             >
-              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
-                <LeftPanel streamerId={streamer.id} />
+              <div className="w-[340px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+                <LeftPanel streamer={streamer} />
               </div>
             </motion.div>
           )}
@@ -304,12 +295,12 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
           {rightOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
+              animate={{ width: 340, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="overflow-hidden h-full"
             >
-              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+              <div className="w-[340px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
                 <RightPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
               </div>
             </motion.div>
