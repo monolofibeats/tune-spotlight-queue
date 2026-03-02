@@ -409,7 +409,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   />
                 </motion.div>
 
-                {/* Desktop PS tip — small peek behind card 3 */}
+                {/* Desktop PS tip — peek to the right of card 3 */}
                 {index === 2 && !tipExpanded && (
                   <AnimatePresence>
                     {showTip && (
@@ -418,13 +418,13 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-7 left-3`}
-                        style={{ zIndex: -1 }}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-3 -right-3 translate-x-full`}
+                        style={{ zIndex: 10 }}
                       >
                         <motion.div
                           onClick={(e) => { e.stopPropagation(); handleTipExpand(); }}
                           className="cursor-pointer"
-                          whileHover={{ scale: 1.05, x: 8 }}
+                          whileHover={{ scale: 1.05, x: 4 }}
                           whileTap={{ scale: 0.97 }}
                           animate={{ y: [0, -3, 0] }}
                           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
