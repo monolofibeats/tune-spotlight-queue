@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music, Play, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
 
 interface MusicEmbedProps {
   url: string;
@@ -85,23 +86,12 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         );
       }
       case 'dropbox': {
-        // Embed Dropbox's native file preview (shows waveform for audio)
-        let embedUrl = url.replace(/([?&])dl=[01]/, '$1raw=1');
-        if (!embedUrl.includes('raw=1')) {
-          embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'raw=1';
+        let directUrl = url.replace(/([?&])dl=[01]/, '$1raw=1');
+        if (!directUrl.includes('raw=1')) {
+          directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
         }
-        return (
-          <iframe
-            src={embedUrl}
-            width="100%"
-            height="160"
-            frameBorder="0"
-            allow="autoplay"
-            loading="lazy"
-            onLoad={() => setIsLoaded(true)}
-            className="rounded-xl"
-          />
-        );
+        setIsLoaded(true);
+        return <DropboxPlayerEmbed url={directUrl} compact={false} />;
       }
       default:
         return (
