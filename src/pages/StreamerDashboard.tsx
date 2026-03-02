@@ -254,6 +254,25 @@ function PhoneOptimizedNowPlaying({ phoneOptimized, children }: { phoneOptimized
   return <>{children}</>;
 }
 
+/** Wraps content with side panels when phone-optimized + showSidePanels + live */
+function SidePanelsWrapper({ streamer, phoneOptimized, showSidePanels, onStreamerUpdate, children }: {
+  streamer: Streamer;
+  phoneOptimized: boolean;
+  showSidePanels: boolean;
+  onStreamerUpdate?: (s: Streamer) => void;
+  children: React.ReactNode;
+}) {
+  const { isLive } = useStreamSession();
+  if (isLive && phoneOptimized && showSidePanels) {
+    return (
+      <PhoneSidePanels streamer={streamer} onStreamerUpdate={onStreamerUpdate}>
+        {children}
+      </PhoneSidePanels>
+    );
+  }
+  return <>{children}</>;
+}
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
