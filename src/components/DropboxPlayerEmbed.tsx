@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { AudioVisualizer } from '@/components/AudioVisualizer';
-import { Music2 } from 'lucide-react';
 
 interface DropboxPlayerEmbedProps {
   url: string;
   compact?: boolean;
 }
+
+// Dropbox blue HSL for the visualizer
+const DROPBOX_COLOR_HSL = '210 70% 62%';
 
 export function DropboxPlayerEmbed({ url, compact }: DropboxPlayerEmbedProps) {
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
@@ -16,31 +18,42 @@ export function DropboxPlayerEmbed({ url, compact }: DropboxPlayerEmbedProps) {
   }, []);
 
   return (
-    <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent">
-      <div className="px-3 py-2 flex items-center gap-2 border-b border-border/10">
-        <Music2 className="w-3.5 h-3.5 text-blue-400" />
-        <span className="text-xs font-medium text-blue-400">Dropbox Audio</span>
+    <div className="rounded-lg overflow-hidden border border-border/20 bg-[#1e1e1e]">
+      {/* Dropbox-style header */}
+      <div className="px-3 py-2 flex items-center gap-2 bg-[#2d2d2d] border-b border-border/10">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M6 2L0 6l6 4-6 4 6 4 6-4-6-4 6-4-6-4z" fill="#0061FF"/>
+          <path d="M18 2l-6 4 6 4-6 4 6 4 6-4-6-4 6-4-6-4z" fill="#0061FF"/>
+          <path d="M12 14l-6 4 6 4 6-4-6-4z" fill="#0061FF" opacity="0.7"/>
+        </svg>
+        <span className="text-xs font-medium text-[#b0b0b0]">Dropbox Audio</span>
       </div>
+
+      {/* Visualizer — Dropbox-style colors */}
+      {url && (
+        <div className="px-3 pt-3">
+          <AudioVisualizer
+            key={url}
+            audioElement={audioEl}
+            className="rounded-md"
+            showLUFS={false}
+            showDBFS={false}
+            showKeyFinder={false}
+            height={compact ? 120 : 180}
+            colorHsl={DROPBOX_COLOR_HSL}
+          />
+        </div>
+      )}
+
+      {/* Audio controls */}
       <div className="p-3">
         <AudioPlayer
           src={url}
           isLoading={false}
           onAudioElement={handleAudioElement}
+          crossOrigin="anonymous"
         />
       </div>
-      {url && (
-        <div className="px-3 pb-3">
-          <AudioVisualizer
-            key={url}
-            audioElement={audioEl}
-            className="rounded-lg"
-            showLUFS={false}
-            showDBFS={false}
-            showKeyFinder={false}
-            height={compact ? 120 : 200}
-          />
-        </div>
-      )}
     </div>
   );
 }

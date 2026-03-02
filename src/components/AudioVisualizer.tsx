@@ -117,15 +117,69 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
         const actx = audioCtxRef.current;
         if (actx.state === 'suspended') await actx.resume();
 
-        // Fetch and decode the audio file
-        const resp = await fetch(src);
-        if (!resp.ok || mySetupId !== setupIdRef.current) return;
-        const arrayBuf = await resp.arrayBuffer();
-        if (mySetupId !== setupIdRef.current) return;
-        const audioBuffer = await actx.decodeAudioData(arrayBuf);
-        if (mySetupId !== setupIdRef.current) return;
+        let usedMediaElement = false;
 
-        bufferRef.current = audioBuffer;
+        try {
+          // Try shadow pipeline (fetch + decode)
+          const resp = await fetch(src);
+          if (!resp.ok || mySetupId !== setupIdRef.current) return;
+          const arrayBuf = await resp.arrayBuffer();
+          if (mySetupId !== setupIdRef.current) return;
+          const audioBuffer = await actx.decodeAudioData(arrayBuf);
+          if (mySetupId !== setupIdRef.current) return;
+          bufferRef.current = audioBuffer;
+        } catch (fetchErr) {
+          // Fetch failed (likely CORS) — fall back to createMediaElementSource
+          console.info('AudioVisualizer: fetch failed, using MediaElementSource fallback');
+          usedMediaElement = true;
+
+          // Ensure crossOrigin is set for MediaElementSource
+          if (!audioElement.crossOrigin) {
+            audioElement.crossOrigin = 'anonymous';
+          }
+
+          const analyser = actx.createAnalyser();
+          analyser.fftSize = 2048;
+          analyser.smoothingTimeConstant = 0.3;
+
+          // createMediaElementSource can only be called once per element
+          let mediaSource: MediaElementAudioSourceNode;
+          try {
+            mediaSource = actx.createMediaElementSource(audioElement);
+          } catch {
+            // Already connected — just set up the analyser
+            console.warn('AudioVisualizer: MediaElementSource already created');
+            return;
+          }
+          mediaSource.connect(analyser);
+          analyser.connect(actx.destination);
+
+          analyserRef.current = analyser;
+          freqDataRef.current = new Uint8Array(analyser.frequencyBinCount);
+          timeDomainRef.current = new Float32Array(analyser.fftSize);
+          readyRef.current = true;
+
+          // For MediaElementSource, isPlaying follows the audio element directly
+          const onPlay = () => { isPlayingRef.current = true; };
+          const onPause = () => { isPlayingRef.current = false; };
+          const onEnded = () => { isPlayingRef.current = false; };
+
+          audioElement.addEventListener('play', onPlay);
+          audioElement.addEventListener('pause', onPause);
+          audioElement.addEventListener('ended', onEnded);
+
+          isPlayingRef.current = !audioElement.paused;
+
+          cleanupRef.current = () => {
+            audioElement.removeEventListener('play', onPlay);
+            audioElement.removeEventListener('pause', onPause);
+            audioElement.removeEventListener('ended', onEnded);
+          };
+
+          return;
+        }
+
+        if (usedMediaElement) return;
 
         const analyser = actx.createAnalyser();
         analyser.fftSize = 2048;

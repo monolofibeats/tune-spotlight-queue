@@ -379,7 +379,7 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
     return (
       <div ref={ref} className="flex flex-col gap-3 w-full p-3 rounded-lg bg-background/50 border border-border/30">
         {/* Always render the audio element so refs + listeners work even when src arrives later */}
-        <audio ref={audioRef} preload="metadata" />
+        <audio ref={audioRef} preload="metadata" crossOrigin={crossOrigin} />
         
         {hasError && src && (
           <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2">
