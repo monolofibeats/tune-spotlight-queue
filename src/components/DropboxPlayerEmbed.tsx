@@ -112,6 +112,52 @@ function StaticWaveform({
   );
 }
 
+/* ── Volume Fader ── */
+function VolumeFader({ volume, isMuted, onChange }: { volume: number; isMuted: boolean; onChange: (v: number) => void }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const getPct = useCallback((e: React.MouseEvent | MouseEvent) => {
+    if (!trackRef.current) return 0;
+    const rect = trackRef.current.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onChange(getPct(e));
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const win = trackRef.current?.ownerDocument?.defaultView ?? window;
+    const move = (e: MouseEvent) => onChange(getPct(e));
+    const up = () => setIsDragging(false);
+    win.addEventListener('mousemove', move);
+    win.addEventListener('mouseup', up);
+    return () => { win.removeEventListener('mousemove', move); win.removeEventListener('mouseup', up); };
+  }, [isDragging, getPct, onChange]);
+
+  const display = isMuted ? 0 : volume;
+
+  return (
+    <div
+      ref={trackRef}
+      className="w-20 h-5 flex items-center cursor-pointer group relative"
+      onMouseDown={handleMouseDown}
+    >
+      <div className="absolute inset-x-0 h-1 rounded-full" style={{ backgroundColor: '#3a4250' }}>
+        <div className="absolute h-full rounded-full" style={{ width: `${display * 100}%`, backgroundColor: '#637282' }} />
+      </div>
+      <div
+        className="absolute h-2.5 w-2.5 rounded-full shadow transform -translate-x-1/2 transition-transform group-hover:scale-125"
+        style={{ left: `${display * 100}%`, backgroundColor: '#c9d1d9' }}
+      />
+    </div>
+  );
+}
+
 export function DropboxPlayerEmbed({ url, compact }: DropboxPlayerEmbedProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const pendingSeekRef = useRef<number | null>(null);
