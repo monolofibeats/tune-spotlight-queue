@@ -220,7 +220,7 @@ function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStre
       </CollapsibleSection>
 
       <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
-        <MiniPedestal streamerId={streamer.id} />
+        <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Pricing" icon={DollarSign} defaultOpen={false}>
