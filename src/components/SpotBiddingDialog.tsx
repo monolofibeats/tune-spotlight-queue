@@ -113,6 +113,21 @@ export function SpotBiddingDialog({
       const loadedMinBid = skipConfig ? skipConfig.min_amount_cents / 100 : 2.50;
       setMinBidAmount(loadedMinBid);
 
+      // Fetch configured spot prices from pre_stream_spots
+      const { data: spotRows } = await (supabase
+        .from('pre_stream_spots' as any)
+        .select('spot_number, price_cents')
+        .eq('streamer_id', streamerId ?? '')
+        .is('session_id', null)
+        .order('spot_number', { ascending: true })) as any;
+
+      const configuredSpotPrices: Record<number, number> = {};
+      if (spotRows) {
+        spotRows.forEach((s: any) => {
+          configuredSpotPrices[s.spot_number] = s.price_cents / 100;
+        });
+      }
+
       // Get all pending priority submissions with their bids
       // Filter by streamerId if provided, otherwise get global queue
       let query = supabase
