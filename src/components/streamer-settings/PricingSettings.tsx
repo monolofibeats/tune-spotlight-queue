@@ -13,6 +13,8 @@ import {
   Crown,
   Medal,
   Award,
+  Ticket,
+  Tag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -324,22 +326,29 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="skip_line" className="gap-1.5 text-xs sm:text-sm">
-            <Zap className="w-3.5 h-3.5" />
-            {t('pricing.tab.skipLine')}
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="skip_line" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Ticket className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.skipLine')}</span>
+            <span className="sm:hidden">Skip</span>
           </TabsTrigger>
-          <TabsTrigger value="submission" className="gap-1.5 text-xs sm:text-sm">
-            <Send className="w-3.5 h-3.5" />
-            {t('pricing.tab.submissions')}
+          <TabsTrigger value="submission" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Send className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.submissions')}</span>
+            <span className="sm:hidden">Submit</span>
           </TabsTrigger>
-          <TabsTrigger value="spots" className="gap-1.5 text-xs sm:text-sm">
-            <Crown className="w-3.5 h-3.5" />
+          <TabsTrigger value="spots" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Crown className="w-3.5 h-3.5 shrink-0" />
             Spots
           </TabsTrigger>
-          <TabsTrigger value="bidding" className="gap-1.5 text-xs sm:text-sm">
-            <Percent className="w-3.5 h-3.5" />
-            {t('pricing.tab.bidding')}
+          <TabsTrigger value="bidding" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Percent className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.bidding')}</span>
+            <span className="sm:hidden">Bids</span>
+          </TabsTrigger>
+          <TabsTrigger value="codes" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Tag className="w-3.5 h-3.5 shrink-0" />
+            Codes
           </TabsTrigger>
         </TabsList>
 
@@ -457,13 +466,13 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
 
         <TabsContent value="spots" className="space-y-4 mt-4">
           <p className="text-sm text-muted-foreground">
-            Set the price for each pre-stream priority spot. Fans can purchase these before your stream starts to guarantee their position.
+            Set the price for each priority spot in the waiting list. Submitters can pay to skip directly to one of these positions.
           </p>
 
           {[
-            { num: 1, label: 'Spot #1 – Gold', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-            { num: 2, label: 'Spot #2 – Silver', Icon: Medal, color: 'text-slate-300', bg: 'bg-slate-400/10 border-slate-400/20' },
-            { num: 3, label: 'Spot #3 – Bronze', Icon: Award, color: 'text-amber-600', bg: 'bg-amber-600/10 border-amber-600/20' },
+            { num: 1, label: 'Spot #1', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+            { num: 2, label: 'Spot #2', Icon: Medal, color: 'text-slate-300', bg: 'bg-slate-400/10 border-slate-400/20' },
+            { num: 3, label: 'Spot #3', Icon: Award, color: 'text-amber-600', bg: 'bg-amber-600/10 border-amber-600/20' },
           ].map(({ num, label, Icon, color, bg }) => (
             <div key={num} className={`flex items-center justify-between p-4 rounded-lg border ${bg}`}>
               <div className="flex items-center gap-3">
@@ -496,25 +505,6 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
               Each spot must cost at least €2.50 (max €1,000)
             </p>
           )}
-
-          <div className="p-4 rounded-lg bg-secondary/30 border border-border/20">
-            <p className="text-xs text-muted-foreground mb-2 font-medium">Preview</p>
-            <div className="flex items-end justify-center gap-3">
-              {[2, 1, 3].map(pos => {
-                const height = pos === 1 ? 'h-12' : pos === 2 ? 'h-9' : 'h-7';
-                const color = pos === 1 ? 'text-yellow-400' : pos === 2 ? 'text-slate-300' : 'text-amber-600';
-                const borderC = pos === 1 ? 'border-yellow-500/40' : pos === 2 ? 'border-slate-400/30' : 'border-amber-600/30';
-                return (
-                  <div key={pos} className={`flex flex-col items-center ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}>
-                    <span className={`text-xs font-bold ${color}`}>€{(spotPrices[pos] ?? 0).toFixed(2)}</span>
-                    <div className={`w-14 ${height} rounded-t-md border border-b-0 ${borderC} bg-gradient-to-t from-muted/20 to-transparent flex items-center justify-center`}>
-                      <span className={`text-lg font-black font-display ${color}`}>{pos}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         </TabsContent>
 
         <TabsContent value="bidding" className="space-y-4 mt-4">
@@ -548,11 +538,11 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
             </>
           )}
         </TabsContent>
+
+        <TabsContent value="codes" className="space-y-4 mt-4">
+          <ReferralCodesPanel streamerId={streamerId} />
+        </TabsContent>
       </Tabs>
-
-
-
-      <ReferralCodesPanel streamerId={streamerId} />
 
       <p className="text-xs text-center text-muted-foreground">
         {t('pricing.effectImmediately')}
