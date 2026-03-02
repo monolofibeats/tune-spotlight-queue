@@ -94,7 +94,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
           <iframe
             src={embedUrl}
             width="100%"
-            height="420"
+            height="160"
             frameBorder="0"
             allow="autoplay"
             loading="lazy"
