@@ -418,7 +418,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.5, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-3 -right-3 translate-x-full`}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-3 left-full ml-3`}
                         style={{ zIndex: 10 }}
                       >
                         <motion.div
