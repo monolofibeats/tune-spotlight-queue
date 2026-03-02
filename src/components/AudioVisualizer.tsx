@@ -129,7 +129,7 @@ function useAudioAnalyser(audioElement: HTMLAudioElement | null) {
 
         const analyser = actx.createAnalyser();
         analyser.fftSize = 2048;
-        analyser.smoothingTimeConstant = 0.15;
+        analyser.smoothingTimeConstant = 0.05;
         const gain = actx.createGain();
         gain.gain.value = 0;
         analyser.connect(gain);
@@ -560,7 +560,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
           }
           const target = sum / count;
           const rising = target > smoothedSpectrum[p];
-          const lerp = rising ? 0.85 : 0.12;
+          const lerp = rising ? 0.95 : 0.2;
           smoothedSpectrum[p] += (target - smoothedSpectrum[p]) * lerp;
         }
       }
@@ -568,7 +568,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
       let rawEnergy = 0;
       for (let p = 0; p < POINT_COUNT; p++) rawEnergy += smoothedSpectrum[p];
       rawEnergy /= POINT_COUNT;
-      const eLerp = rawEnergy > smoothEnergy ? 0.5 : 0.1;
+      const eLerp = rawEnergy > smoothEnergy ? 0.7 : 0.2;
       smoothEnergy += (rawEnergy - smoothEnergy) * eLerp;
 
       // ═══════════════════════════════════════

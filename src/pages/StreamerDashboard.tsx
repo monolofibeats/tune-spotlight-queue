@@ -240,12 +240,12 @@ function PhoneAwareSubmissionsLayout({ phoneOptimized, children }: { phoneOptimi
   );
 }
 
-/** When phone-optimized + live, moves Now Playing panel up (negative margin to overlap with header area) */
+/** When phone-optimized + live, pulls Now Playing panel up with a small negative margin so it overlaps into the tab bar space */
 function PhoneOptimizedNowPlaying({ phoneOptimized, children }: { phoneOptimized: boolean; children: React.ReactNode }) {
   const { isLive } = useStreamSession();
   if (isLive && phoneOptimized) {
     return (
-      <div className="transition-all duration-500 -mt-14 mb-2 relative z-30">
+      <div className="transition-all duration-500 -mt-6 mb-1 relative z-30">
         {children}
       </div>
     );
@@ -1068,32 +1068,6 @@ const StreamerDashboard = () => {
         
         <main className={`${viewOptions.showHeader ? 'pt-20' : 'pt-2'} pb-12 px-2 sm:px-4`}>
           <div className="w-full">
-            {/* Now Playing panel — when phone-optimized + live, position it at the very top (inside header area) */}
-            <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
-              <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
-                <NowPlayingDropZone
-                  nowPlayingRef={nowPlayingRef}
-                  submissions={submissions}
-                  onOpenNowPlaying={handleOpenNowPlaying}
-                  hasSubmission={!!nowPlaying.submission}
-                >
-                  <NowPlayingPanel
-                    submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-                    isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-                    onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-                    onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
-                    onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
-                    onAddToPedestal={handleAddToPedestal}
-                    config={getWidgetConfig('now_playing')}
-                    compactVisualizer={phoneOptimized}
-                    textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
-                    widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
-                    heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
-                  />
-                </NowPlayingDropZone>
-              </PhoneAwareSubmissionsLayout>
-            </PhoneOptimizedNowPlaying>
-
             {/* Compact top bar: tabs + actions in one row */}
             <motion.div
               animate={dashboardShaking ? { x: [0, -4, 4, -3, 3, -1, 1, 0] } : { x: 0 }}
@@ -1141,6 +1115,30 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
+                <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
+                  <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
+                    <NowPlayingDropZone
+                      nowPlayingRef={nowPlayingRef}
+                      submissions={submissions}
+                      onOpenNowPlaying={handleOpenNowPlaying}
+                      hasSubmission={!!nowPlaying.submission}
+                    >
+                      <NowPlayingPanel
+                        submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
+                        isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
+                        onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
+                        onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
+                        onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
+                        onAddToPedestal={handleAddToPedestal}
+                        config={getWidgetConfig('now_playing')}
+                        compactVisualizer={phoneOptimized}
+                        textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
+                        widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
+                        heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
+                      />
+                    </NowPlayingDropZone>
+                  </PhoneAwareSubmissionsLayout>
+                </PhoneOptimizedNowPlaying>
                 <LiveAwareDashboardGrid
                   dashboardLayout={dashboardLayout}
                   isBuilderEditing={isBuilderEditing}
