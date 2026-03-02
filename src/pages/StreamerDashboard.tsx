@@ -884,6 +884,7 @@ const StreamerDashboard = () => {
               isTrashView={statusFilter === 'deleted'} onSelectAll={handleSelectAll}
               onDeselectAll={handleDeselectAll} onBulkStatusChange={handleBulkStatusChange}
               onBulkDelete={handleBulkDelete} onBulkRestore={handleBulkRestore}
+              onBulkMarkPriority={handleBulkMarkPriority}
             />
           )}
         </div>
