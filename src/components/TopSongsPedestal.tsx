@@ -44,7 +44,7 @@ interface TopSongsPedestalProps {
   onPlaySong?: (submission: Submission) => void;
 }
 
-export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate }: TopSongsPedestalProps) {
+export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate, onPlaySong }: TopSongsPedestalProps) {
   const { t } = useLanguage();
   const [topSongs, setTopSongs] = useState<TopSong[]>([]);
   const [showPublicly, setShowPublicly] = useState(!!streamer.show_top_songs);
