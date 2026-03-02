@@ -168,6 +168,8 @@ export function NowPlayingPanel({
     showSubmitterInsights: true,
     showSpotifyEmbed: true,
     showSoundCloudEmbed: true,
+    showYouTubeEmbed: true,
+    showDropboxEmbed: true,
     showMessage: true,
     showDownload: true,
     ...config,
