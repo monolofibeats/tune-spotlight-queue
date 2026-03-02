@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Music2, Euro, Star, ChevronDown, ChevronUp, Calendar, X, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Music2, Euro, Star, ChevronDown, Calendar, ArrowRight, Play, History, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+
+export interface SessionFilter {
+  sessionId: string;
+  title: string | null;
+  startedAt: string;
+  endedAt: string;
+}
 
 interface Session {
   id: string;
@@ -32,10 +39,18 @@ interface SessionSubmission {
   amount_paid: number;
   boost_amount: number;
   created_at: string;
+  audio_file_url: string | null;
 }
 
 interface SessionHistoryProps {
   streamerId: string;
+}
+
+interface SessionLoadPickerProps {
+  streamerId: string;
+  activeSessionFilter: SessionFilter | null;
+  onLoadSession: (filter: SessionFilter) => void;
+  onClearSession: () => void;
 }
 
 function formatDuration(seconds: number) {
@@ -55,8 +70,8 @@ function formatTime(dateStr: string) {
   return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
-function SessionCard({ session, streamerId, onClick, compact = false }: {
-  session: Session; streamerId: string; onClick: () => void; compact?: boolean;
+function SessionCard({ session, streamerId, onClick }: {
+  session: Session; streamerId: string; onClick: () => void;
 }) {
   const [stats, setStats] = useState<SessionStats | null>(null);
 
@@ -135,8 +150,8 @@ function SessionCard({ session, streamerId, onClick, compact = false }: {
   );
 }
 
-function SessionDetailView({ session, streamerId, onClose }: {
-  session: Session; streamerId: string; onClose: () => void;
+function SessionDetailView({ session, streamerId, onClickSubmission }: {
+  session: Session; streamerId: string; onClickSubmission?: (sub: SessionSubmission) => void;
 }) {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [submissions, setSubmissions] = useState<SessionSubmission[]>([]);
@@ -144,11 +159,11 @@ function SessionDetailView({ session, streamerId, onClose }: {
 
   useEffect(() => {
     if (!session.ended_at) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const [subRes, earningsRes] = await Promise.all([
         supabase.from('submissions')
-          .select('id, artist_name, song_title, platform, status, is_priority, amount_paid, boost_amount, created_at')
+          .select('id, artist_name, song_title, platform, status, is_priority, amount_paid, boost_amount, created_at, audio_file_url')
           .eq('streamer_id', streamerId)
           .gte('created_at', session.started_at)
           .lte('created_at', session.ended_at!)
@@ -170,13 +185,13 @@ function SessionDetailView({ session, streamerId, onClose }: {
       });
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [session, streamerId]);
 
   const statusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'approved': case 'reviewed': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'rejected': case 'skipped': return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'played': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       default: return 'bg-muted text-muted-foreground border-border/50';
     }
@@ -185,17 +200,12 @@ function SessionDetailView({ session, streamerId, onClose }: {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-lg">{session.title || 'Untitled Session'}</h3>
-          <p className="text-sm text-muted-foreground">
-            {formatDate(session.started_at)} · {formatTime(session.started_at)}
-            {session.ended_at && ` – ${formatTime(session.ended_at)}`}
-          </p>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0 h-8 w-8">
-          <X className="w-4 h-4" />
-        </Button>
+      <div>
+        <h3 className="font-semibold text-lg">{session.title || 'Untitled Session'}</h3>
+        <p className="text-sm text-muted-foreground">
+          {formatDate(session.started_at)} · {formatTime(session.started_at)}
+          {session.ended_at && ` – ${formatTime(session.ended_at)}`}
+        </p>
       </div>
 
       {/* Stats row */}
@@ -226,40 +236,43 @@ function SessionDetailView({ session, streamerId, onClose }: {
         ) : submissions.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">No submissions during this session</p>
         ) : (
-          <ScrollArea className="max-h-[320px]">
-            <div className="space-y-1.5 pr-2">
-              {submissions.map((sub, i) => (
-                <motion.div
-                  key={sub.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  className="flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20"
-                >
-                  <div className="flex-1 min-w-0" translate="no">
-                    <p className="text-sm font-medium truncate">
-                      <span className="text-muted-foreground">{sub.artist_name}</span>
-                      <span className="mx-1.5 text-muted-foreground/50">·</span>
-                      <span>{sub.song_title}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">{formatTime(sub.created_at)}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {sub.is_priority && <Star className="w-3 h-3 text-yellow-500" />}
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusColor(sub.status)}`}>
-                      {sub.status}
-                    </Badge>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="space-y-1.5">
+            {submissions.map((sub, i) => (
+              <motion.button
+                key={sub.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                onClick={() => onClickSubmission?.(sub)}
+                className="w-full text-left flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 hover:bg-card/40 hover:border-border/50 transition-all group"
+              >
+                <div className="flex items-center justify-center w-7 h-7 rounded-md bg-muted/30 group-hover:bg-primary/20 transition-colors shrink-0">
+                  <Play className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <div className="flex-1 min-w-0" translate="no">
+                  <p className="text-sm font-medium truncate">
+                    <span className="text-muted-foreground">{sub.artist_name}</span>
+                    <span className="mx-1.5 text-muted-foreground/50">·</span>
+                    <span>{sub.song_title}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">{formatTime(sub.created_at)}</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {sub.is_priority && <Star className="w-3 h-3 text-yellow-500" />}
+                  <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${statusColor(sub.status)}`}>
+                    {sub.status}
+                  </Badge>
+                </div>
+              </motion.button>
+            ))}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
+// ─── Stream settings: recent sessions list ───
 export function SessionHistory({ streamerId }: SessionHistoryProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -353,15 +366,117 @@ export function SessionHistory({ streamerId }: SessionHistoryProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Session Detail Dialog */}
+      {/* Session Detail Dialog — only the dialog's built-in X button */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Session Details</DialogTitle>
+          </DialogHeader>
           {selectedSession && (
             <SessionDetailView
               session={selectedSession}
               streamerId={streamerId}
-              onClose={() => setDetailDialogOpen(false)}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ─── Dashboard submissions tab: load previous session picker ───
+export function SessionLoadPicker({ streamerId, activeSessionFilter, onLoadSession, onClearSession }: SessionLoadPickerProps) {
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const fetchSessions = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('stream_sessions')
+      .select('id, title, started_at, ended_at, is_active')
+      .eq('streamer_id', streamerId)
+      .eq('is_active', false)
+      .order('started_at', { ascending: false });
+    setSessions(data || []);
+    setLoading(false);
+  };
+
+  const handleOpen = () => {
+    setDialogOpen(true);
+    fetchSessions();
+  };
+
+  const handleSelect = (session: Session) => {
+    if (!session.ended_at) return;
+    onLoadSession({
+      sessionId: session.id,
+      title: session.title,
+      startedAt: session.started_at,
+      endedAt: session.ended_at,
+    });
+    setDialogOpen(false);
+  };
+
+  return (
+    <>
+      {activeSessionFilter ? (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5">
+          <History className="w-3.5 h-3.5 text-primary shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-primary truncate">
+              Viewing: {activeSessionFilter.title || 'Untitled Session'}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              {formatDate(activeSessionFilter.startedAt)} · {formatTime(activeSessionFilter.startedAt)} – {formatTime(activeSessionFilter.endedAt)}
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClearSession} className="h-6 w-6 shrink-0 hover:bg-destructive/20">
+            <X className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOpen}
+          className="gap-1.5 text-xs h-7"
+        >
+          <History className="w-3.5 h-3.5" />
+          Load Session
+        </Button>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Load Previous Session
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground -mt-2">
+            Select a session to view only its submissions in your dashboard.
+          </p>
+          {loading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map(i => <div key={i} className="h-14 rounded-lg bg-muted/20 animate-pulse" />)}
+            </div>
+          ) : sessions.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">No previous sessions found</p>
+          ) : (
+            <ScrollArea className="max-h-[55vh] pr-2">
+              <div className="space-y-1.5">
+                {sessions.map(session => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    streamerId={streamerId}
+                    onClick={() => handleSelect(session)}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
           )}
         </DialogContent>
       </Dialog>
