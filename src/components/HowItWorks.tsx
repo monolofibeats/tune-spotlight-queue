@@ -350,7 +350,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
           </div>
         )}
 
-        <div className={`${compact ? `flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch ${!mobileCardsExpanded ? 'max-sm:hidden' : ''}` : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'}`}>
+        <div className={`${compact ? `flex flex-col items-center sm:grid sm:grid-cols-3 sm:gap-3 sm:mx-0 sm:items-stretch ${!mobileCardsExpanded ? 'max-sm:hidden' : ''}` : 'grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch'} overflow-visible`}>
             {steps.map((item, index) => {
               // Compact mobile: stacked cards with alternating left/right offsets and overlap
               const mobileCardStyles = compact ? {
