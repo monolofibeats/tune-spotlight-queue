@@ -538,11 +538,11 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
             </>
           )}
         </TabsContent>
+
+        <TabsContent value="codes" className="space-y-4 mt-4">
+          <ReferralCodesPanel streamerId={streamerId} />
+        </TabsContent>
       </Tabs>
-
-
-
-      <ReferralCodesPanel streamerId={streamerId} />
 
       <p className="text-xs text-center text-muted-foreground">
         {t('pricing.effectImmediately')}
