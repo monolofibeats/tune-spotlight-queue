@@ -66,6 +66,7 @@ interface StreamerSettingsPanelProps {
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
   onUnsavedChange?: (hasUnsaved: boolean) => void;
+  onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
 
 export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange }: StreamerSettingsPanelProps) {
