@@ -685,6 +685,18 @@ const StreamerDashboard = () => {
     setSelectedIds(new Set());
   }, [selectedIds]);
 
+  const handleBulkMarkPriority = useCallback(async (isPriority: boolean) => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('submissions').update({ is_priority: isPriority }).in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update priority", variant: "destructive" });
+    } else {
+      setSubmissions(prev => prev.map(s => ids.includes(s.id) ? { ...s, is_priority: isPriority } : s));
+      toast({ title: isPriority ? "Pinned as Priority" : "Priority removed", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} updated` });
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds]);
+
   const stats = {
     total: submissions.length,
     pending: submissions.filter(s => s.status === 'pending').length,
