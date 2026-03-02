@@ -827,13 +827,6 @@ const StreamerDashboard = () => {
               </div>
             )}
           </div>
-          {/* Session loader */}
-          <SessionLoadPicker
-            streamerId={streamer.id}
-            activeSessionFilter={sessionFilter}
-            onLoadSession={setSessionFilter}
-            onClearSession={() => setSessionFilter(null)}
-          />
         </div>
       ),
       queue: (
