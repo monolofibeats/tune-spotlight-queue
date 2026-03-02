@@ -44,6 +44,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 import { PlatformOpenButton } from '@/components/PlatformOpenButton';
+import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
 
 interface Submission {
   id: string;

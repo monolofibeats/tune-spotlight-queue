@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music, Play, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
 
 interface MusicEmbedProps {
   url: string;
