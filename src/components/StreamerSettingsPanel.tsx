@@ -38,6 +38,7 @@ import {
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
 import { SessionManager } from '@/components/SessionManager';
+import { SessionHistory } from '@/components/SessionHistory';
 import { StreamEmbedConfig } from '@/components/StreamEmbedConfig';
 import type { StreamEmbedConfigHandle } from '@/components/StreamEmbedConfig';
 import type { Streamer } from '@/types/streamer';
