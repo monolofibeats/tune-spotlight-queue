@@ -85,8 +85,14 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         );
       }
       case 'dropbox': {
-        // Convert Dropbox share link to direct embeddable link
-        const directUrl = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '');
+        // Convert Dropbox share link to direct playable link
+        let directUrl = url;
+        if (url.includes('dropbox.com')) {
+          directUrl = url.replace(/[?&]dl=0/, '?raw=1').replace(/[?&]dl=1/, '?raw=1');
+          if (!directUrl.includes('raw=1')) {
+            directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
+          }
+        }
         return (
           <audio
             controls

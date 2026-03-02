@@ -502,7 +502,16 @@ export function NowPlayingPanel({
                   <div className="rounded-lg overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent p-3">
                     <audio
                       controls
-                      src={submission.song_url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '').replace('?dl=1', '')}
+                      src={(() => {
+                        let directUrl = submission.song_url;
+                        if (directUrl.includes('dropbox.com')) {
+                          directUrl = directUrl.replace(/[?&]dl=0/, '?raw=1').replace(/[?&]dl=1/, '?raw=1');
+                          if (!directUrl.includes('raw=1')) {
+                            directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
+                          }
+                        }
+                        return directUrl;
+                      })()}
                       className="w-full"
                       preload="metadata"
                     />
