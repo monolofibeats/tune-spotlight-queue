@@ -267,6 +267,7 @@ const StreamerDashboard = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
   const [phoneOptimized, setPhoneOptimized] = useState(true);
+  const [showSidePanels, setShowSidePanels] = useState(false);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
