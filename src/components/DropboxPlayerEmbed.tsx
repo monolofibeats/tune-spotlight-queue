@@ -51,7 +51,6 @@ export function DropboxPlayerEmbed({ url, compact }: DropboxPlayerEmbedProps) {
           src={url}
           isLoading={false}
           onAudioElement={handleAudioElement}
-          crossOrigin="anonymous"
         />
       </div>
     </div>
