@@ -258,6 +258,8 @@ const StreamerDashboard = () => {
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
   const [dashboardShaking, setDashboardShaking] = useState(false);
+  const [sessionFilter, setSessionFilter] = useState<SessionFilter | null>(null);
+  const [sessionSubmissionIds, setSessionSubmissionIds] = useState<Set<string> | null>(null);
   const preOpenedWindowsRef = useRef<Map<string, Window>>(new Map());
 
   const [dashboardActiveTab, setDashboardActiveTab] = useState('submissions');
