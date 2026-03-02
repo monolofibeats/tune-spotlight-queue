@@ -162,32 +162,35 @@ export function SpotBiddingDialog({
         }
       }
 
-      // Calculate spot prices for top 5 positions
+      // Calculate spot prices for top 3 positions
       const calculatedSpots: SpotPrice[] = [];
       const percent = bidConfig?.min_amount_cents || 10;
 
       for (let i = 0; i < 3; i++) {
+        const spotNum = i + 1;
+        // Use configured spot price if available, otherwise fall back to skip_line minimum
+        const basePrice = configuredSpotPrices[spotNum] ?? loadedMinBid;
         const submission = pendingSubmissions?.[i];
         if (submission) {
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;
           const yourPrice = Math.max(
-            loadedMinBid,
+            basePrice,
             Math.ceil(totalPaid * (1 + percent / 100) * 100) / 100
           );
           
           calculatedSpots.push({
-            position: i + 1,
+            position: spotNum,
             currentPrice: totalPaid,
             yourPrice,
             songTitle: submission.song_title || undefined,
             artistName: submission.artist_name || undefined,
           });
         } else {
-          // Empty spot - use minimum price from DB
+          // Empty spot - use configured spot price
           calculatedSpots.push({
-            position: i + 1,
+            position: spotNum,
             currentPrice: 0,
-            yourPrice: loadedMinBid,
+            yourPrice: basePrice,
           });
         }
       }
