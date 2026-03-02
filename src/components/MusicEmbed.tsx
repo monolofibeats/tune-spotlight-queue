@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Music, Play, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
+import { EmbedFallback } from '@/components/EmbedFallback';
 
 interface MusicEmbedProps {
   url: string;
@@ -21,6 +22,27 @@ const extractAppleMusicId = (url: string): string | null => {
 
 export function MusicEmbed({ url, platform }: MusicEmbedProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasFailed, setHasFailed] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  // Reset on URL change
+  useEffect(() => {
+    setHasFailed(false);
+    setIsLoaded(false);
+  }, [url]);
+
+  // Timeout fallback: if iframe doesn't load within 15s, show fallback
+  useEffect(() => {
+    if (platform === 'other' || platform === 'dropbox' || isLoaded || hasFailed) return;
+    const timer = setTimeout(() => {
+      if (!isLoaded) setHasFailed(true);
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [url, platform, isLoaded, hasFailed]);
+
+  if (hasFailed) {
+    return <EmbedFallback url={url} onRetry={() => { setHasFailed(false); setIsLoaded(false); }} />;
+  }
 
   const renderEmbed = () => {
     switch (platform) {
@@ -29,6 +51,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         if (!trackId) return null;
         return (
           <iframe
+            ref={iframeRef}
             src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`}
             width="100%"
             height="152"
@@ -36,6 +59,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
             onLoad={() => setIsLoaded(true)}
+            onError={() => setHasFailed(true)}
             className="rounded-xl"
           />
         );
@@ -44,6 +68,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         const songId = extractAppleMusicId(url);
         return (
           <iframe
+            ref={iframeRef}
             allow="autoplay *; encrypted-media *; fullscreen *"
             frameBorder="0"
             height="175"
@@ -51,12 +76,14 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
             sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
             src={`https://embed.music.apple.com/us/album/${songId}`}
             onLoad={() => setIsLoaded(true)}
+            onError={() => setHasFailed(true)}
           />
         );
       }
       case 'soundcloud': {
         return (
           <iframe
+            ref={iframeRef}
             width="100%"
             height="166"
             scrolling="no"
@@ -64,6 +91,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
             allow="autoplay"
             src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%2306b6d4&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
             onLoad={() => setIsLoaded(true)}
+            onError={() => setHasFailed(true)}
             className="rounded-xl"
           />
         );
@@ -73,6 +101,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         if (!videoId) return null;
         return (
           <iframe
+            ref={iframeRef}
             width="100%"
             height="152"
             src={`https://www.youtube.com/embed/${videoId}`}
@@ -81,6 +110,7 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
             allowFullScreen
             loading="lazy"
             onLoad={() => setIsLoaded(true)}
+            onError={() => setHasFailed(true)}
             className="rounded-xl"
           />
         );
