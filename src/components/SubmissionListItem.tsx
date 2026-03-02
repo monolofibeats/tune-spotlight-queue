@@ -157,6 +157,7 @@ export function SubmissionListItem({
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [dotPopoverOpen, setDotPopoverOpen] = useState(false);
   
   const styles = getPositionStyles(position);
 
