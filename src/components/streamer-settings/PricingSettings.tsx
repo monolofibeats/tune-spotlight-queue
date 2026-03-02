@@ -157,6 +157,18 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum must be at least €2.50', variant: 'destructive' });
       return;
     }
+    if (skipLine.min > 1000) {
+      toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum cannot exceed €1,000', variant: 'destructive' });
+      return;
+    }
+    if (submission.min > 0 && submission.min < 2.5) {
+      toast({ title: t('pricing.invalidRange'), description: 'Submission price must be at least €2.50 (or free at €0)', variant: 'destructive' });
+      return;
+    }
+    if (submission.min > 1000) {
+      toast({ title: t('pricing.invalidRange'), description: 'Submission price cannot exceed €1,000', variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
 
     try {
