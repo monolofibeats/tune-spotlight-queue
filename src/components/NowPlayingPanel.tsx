@@ -45,6 +45,43 @@ import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 import { PlatformOpenButton } from '@/components/PlatformOpenButton';
 import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
+import { EmbedFallback } from '@/components/EmbedFallback';
+
+/** Wrapper that catches iframe load failures and shows a friendly fallback */
+function EmbedWithFallback({ children, url, borderColor = 'primary' }: { children: React.ReactNode; url: string; borderColor?: string }) {
+  const [failed, setFailed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setFailed(false);
+    const el = containerRef.current;
+    if (!el) return;
+    const iframe = el.querySelector('iframe');
+    if (!iframe) return;
+    const handleError = () => setFailed(true);
+    iframe.addEventListener('error', handleError);
+    // Also detect timeout-style failures via a timer: if iframe doesn't fire 'load' within 15s, show fallback
+    let loaded = false;
+    const handleLoad = () => { loaded = true; };
+    iframe.addEventListener('load', handleLoad);
+    const timer = setTimeout(() => { if (!loaded) setFailed(true); }, 15000);
+    return () => {
+      iframe.removeEventListener('error', handleError);
+      iframe.removeEventListener('load', handleLoad);
+      clearTimeout(timer);
+    };
+  }, [url]);
+
+  if (failed) {
+    return <EmbedFallback url={url} onRetry={() => setFailed(false)} />;
+  }
+
+  return (
+    <div ref={containerRef} className={`rounded-lg overflow-hidden border border-${borderColor}/20 bg-gradient-to-br from-${borderColor}/5 to-transparent`}>
+      {children}
+    </div>
+  );
+}
 
 interface Submission {
   id: string;
