@@ -25,6 +25,8 @@ interface Submission {
   song_title: string;
   platform: string;
   status: string;
+  song_url: string;
+  audio_file_url?: string | null;
 }
 
 interface TopSong {
