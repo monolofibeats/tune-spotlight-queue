@@ -152,7 +152,7 @@ function SessionCard({ session, streamerId, onClick }: {
 }
 
 function SessionDetailView({ session, streamerId, onClickSubmission }: {
-  session: Session; streamerId: string; onClickSubmission?: (sub: SessionSubmission) => void;
+  session: Session; streamerId: string; onClickSubmission?: (session: Session, sub: SessionSubmission) => void;
 }) {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [submissions, setSubmissions] = useState<SessionSubmission[]>([]);
