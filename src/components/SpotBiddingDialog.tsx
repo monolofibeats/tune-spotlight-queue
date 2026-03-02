@@ -162,16 +162,20 @@ export function SpotBiddingDialog({
         }
       }
 
-      // Calculate spot prices for top 3 positions
+      // Calculate spot prices with sequential fill logic:
+      // - Spots fill from #1 upward
+      // - Only the NEXT empty spot is claimable
+      // - Occupied spots can be outbid (pushing occupant down)
       const calculatedSpots: SpotPrice[] = [];
       const percent = bidConfig?.min_amount_cents || 10;
+      let firstEmptyFound = false;
 
       for (let i = 0; i < 3; i++) {
         const spotNum = i + 1;
-        // Use configured spot price if available, otherwise fall back to skip_line minimum
         const basePrice = configuredSpotPrices[spotNum] ?? loadedMinBid;
         const submission = pendingSubmissions?.[i];
         if (submission) {
+          // Occupied spot — show as outbiddable
           const totalPaid = bidsMap[submission.id || ''] || Number(submission.amount_paid) || 0;
           const yourPrice = Math.max(
             basePrice,
@@ -185,13 +189,16 @@ export function SpotBiddingDialog({
             songTitle: submission.song_title || undefined,
             artistName: submission.artist_name || undefined,
           });
-        } else {
-          // Empty spot - use configured spot price
+        } else if (!firstEmptyFound) {
+          // First empty spot — claimable
+          firstEmptyFound = true;
           calculatedSpots.push({
             position: spotNum,
             currentPrice: 0,
             yourPrice: basePrice,
           });
+          // Don't show any further empty spots
+          break;
         }
       }
 
