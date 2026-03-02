@@ -474,6 +474,16 @@ const StreamerDashboard = () => {
     }
   };
 
+  const handleMarkPriority = async (id: string, isPriority: boolean) => {
+    const { error } = await supabase.from('submissions').update({ is_priority: isPriority }).eq('id', id);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update priority", variant: "destructive" });
+    } else {
+      setSubmissions(prev => prev.map(s => s.id === id ? { ...s, is_priority: isPriority } : s));
+      toast({ title: isPriority ? "Pinned as Priority" : "Priority removed", description: isPriority ? "Submission moved to top of queue" : "Submission returned to normal queue" });
+    }
+  };
+
   const handleDeleteSubmission = async (id: string, permanent = false) => {
     const wasPlaying = nowPlaying.submission?.id === id;
     if (permanent) {
@@ -842,6 +852,7 @@ const StreamerDashboard = () => {
               onDelete={canEdit ? handleDeleteSubmission : undefined}
               onRestore={canEdit ? handleRestoreSubmission : undefined}
               onUpdate={canEdit ? handleUpdateSubmission : undefined}
+              onMarkPriority={canEdit ? handleMarkPriority : undefined}
               showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
               draggable={statusFilter !== 'deleted'}

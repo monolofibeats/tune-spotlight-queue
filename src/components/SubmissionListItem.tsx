@@ -17,10 +17,16 @@ import {
   Download,
   Play,
   ExternalLink,
-  Pencil
+  Pencil,
+  Pin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -121,6 +127,7 @@ interface SubmissionListItemProps {
     email: string | null;
   }) => Promise<void>;
   onPlayAudio?: (submission: Submission, audioUrl: string | null, isLoading: boolean) => void;
+  onMarkPriority?: (id: string, isPriority: boolean) => void;
   showPriorityBadge?: boolean;
   /** Submission ID for drag-and-drop identification */
   draggable?: boolean;
@@ -139,6 +146,7 @@ export function SubmissionListItem({
   onRestore,
   onUpdate,
   onPlayAudio,
+  onMarkPriority,
   showPriorityBadge = true,
   draggable = false,
 }: SubmissionListItemProps) {
@@ -149,6 +157,7 @@ export function SubmissionListItem({
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [dotPopoverOpen, setDotPopoverOpen] = useState(false);
   
   const styles = getPositionStyles(position);
 
@@ -307,39 +316,88 @@ export function SubmissionListItem({
           }
         }}
       >
-        {/* Selection dot / Drag handle — hold to drag, click to select */}
-        <button
-          className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all duration-200 flex items-center justify-center relative ${
-            isDragReady
-              ? 'bg-primary border-primary scale-125 shadow-lg shadow-primary/40'
-              : isSelected 
-                ? 'bg-primary border-primary scale-110' 
-                : 'border-muted-foreground/30 hover:border-primary/60'
-          }`}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            handleDotPointerDown();
-          }}
-          onPointerUp={(e) => {
-            e.stopPropagation();
-            handleDotPointerUp();
-          }}
-          onPointerLeave={() => {
-            // Cancel hold if pointer leaves the dot
-            if (holdTimerRef.current) {
-              clearTimeout(holdTimerRef.current);
-              holdTimerRef.current = null;
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-          aria-label={isDragReady ? 'Drag to move' : isSelected ? t('submission.deselect') : t('submission.select')}
-          style={isDragReady ? { cursor: 'grab' } : undefined}
-        >
-          {isSelected && !isDragReady && <Check className="w-3 h-3 text-primary-foreground" />}
-          {isDragReady && (
-            <span className="absolute inset-0 rounded-full animate-ping bg-primary/30" />
-          )}
-        </button>
+        {/* Selection dot / Drag handle — hold to drag, click to select/popover */}
+        <Popover open={dotPopoverOpen} onOpenChange={setDotPopoverOpen}>
+          <PopoverTrigger asChild>
+            <button
+              className={`w-5 h-5 rounded-full border-2 shrink-0 transition-all duration-200 flex items-center justify-center relative ${
+                isDragReady
+                  ? 'bg-primary border-primary scale-125 shadow-lg shadow-primary/40'
+                  : isSelected 
+                    ? 'bg-primary border-primary scale-110' 
+                    : submission.is_priority
+                      ? 'bg-amber-500 border-amber-500 scale-110'
+                      : 'border-muted-foreground/30 hover:border-primary/60'
+              }`}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleDotPointerDown();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                if (holdTimerRef.current) {
+                  clearTimeout(holdTimerRef.current);
+                  holdTimerRef.current = null;
+                }
+                if (!isDragReady) {
+                  if (isAdmin && onMarkPriority) {
+                    setDotPopoverOpen(true);
+                  } else {
+                    onToggleSelect?.(submission.id);
+                  }
+                }
+              }}
+              onPointerLeave={() => {
+                if (holdTimerRef.current) {
+                  clearTimeout(holdTimerRef.current);
+                  holdTimerRef.current = null;
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              aria-label={isDragReady ? 'Drag to move' : isSelected ? t('submission.deselect') : t('submission.select')}
+              style={isDragReady ? { cursor: 'grab' } : undefined}
+            >
+              {isSelected && !isDragReady && <Check className="w-3 h-3 text-primary-foreground" />}
+              {submission.is_priority && !isSelected && !isDragReady && <Pin className="w-2.5 h-2.5 text-white" />}
+              {isDragReady && (
+                <span className="absolute inset-0 rounded-full animate-ping bg-primary/30" />
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-40 p-1"
+            side="right"
+            align="start"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded hover:bg-muted transition-colors"
+              onClick={() => {
+                onToggleSelect?.(submission.id);
+                setDotPopoverOpen(false);
+              }}
+            >
+              <Check className="w-3 h-3" />
+              {isSelected ? t('submission.deselect') : t('submission.select')}
+            </button>
+            {onMarkPriority && (
+              <button
+                className={`w-full flex items-center gap-2 px-2 py-1.5 text-xs rounded transition-colors ${
+                  submission.is_priority
+                    ? 'hover:bg-muted text-muted-foreground'
+                    : 'hover:bg-amber-500/10 text-amber-500'
+                }`}
+                onClick={() => {
+                  onMarkPriority(submission.id, !submission.is_priority);
+                  setDotPopoverOpen(false);
+                }}
+              >
+                <Pin className="w-3 h-3" />
+                {submission.is_priority ? 'Remove Priority' : 'Mark as Priority'}
+              </button>
+            )}
+          </PopoverContent>
+        </Popover>
         {/* Position number - Star overlay for #1 */}
         {position && (
           <PositionBadge position={position} badgeClassName={styles.positionBadge} showGlow={position === 1} />
