@@ -280,12 +280,12 @@ const UserDashboard = () => {
                       )}
                     </div>
 
-                    {/* Embed for Spotify/SoundCloud */}
-                    {(submission.platform === 'spotify' || submission.platform === 'soundcloud') && (
+                    {/* Embed for supported platforms */}
+                    {(submission.platform === 'spotify' || submission.platform === 'soundcloud' || submission.platform === 'youtube' || submission.platform === 'dropbox') && (
                       <div className="mt-4">
                         <MusicEmbed 
                           url={submission.song_url} 
-                          platform={submission.platform as 'spotify' | 'soundcloud'} 
+                          platform={submission.platform as 'spotify' | 'soundcloud' | 'youtube' | 'dropbox'} 
                         />
                       </div>
                     )}
