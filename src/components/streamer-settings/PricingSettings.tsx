@@ -326,22 +326,29 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="skip_line" className="gap-1.5 text-xs sm:text-sm">
-            <Zap className="w-3.5 h-3.5" />
-            {t('pricing.tab.skipLine')}
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="skip_line" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Ticket className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.skipLine')}</span>
+            <span className="sm:hidden">Skip</span>
           </TabsTrigger>
-          <TabsTrigger value="submission" className="gap-1.5 text-xs sm:text-sm">
-            <Send className="w-3.5 h-3.5" />
-            {t('pricing.tab.submissions')}
+          <TabsTrigger value="submission" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Send className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.submissions')}</span>
+            <span className="sm:hidden">Submit</span>
           </TabsTrigger>
-          <TabsTrigger value="spots" className="gap-1.5 text-xs sm:text-sm">
-            <Crown className="w-3.5 h-3.5" />
+          <TabsTrigger value="spots" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Crown className="w-3.5 h-3.5 shrink-0" />
             Spots
           </TabsTrigger>
-          <TabsTrigger value="bidding" className="gap-1.5 text-xs sm:text-sm">
-            <Percent className="w-3.5 h-3.5" />
-            {t('pricing.tab.bidding')}
+          <TabsTrigger value="bidding" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Percent className="w-3.5 h-3.5 shrink-0" />
+            <span className="hidden sm:inline">{t('pricing.tab.bidding')}</span>
+            <span className="sm:hidden">Bids</span>
+          </TabsTrigger>
+          <TabsTrigger value="codes" className="gap-1 text-[10px] sm:text-xs px-1.5">
+            <Tag className="w-3.5 h-3.5 shrink-0" />
+            Codes
           </TabsTrigger>
         </TabsList>
 
