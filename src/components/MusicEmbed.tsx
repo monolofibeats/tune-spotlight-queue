@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 interface MusicEmbedProps {
   url: string;
-  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'other';
+  platform: 'spotify' | 'apple-music' | 'soundcloud' | 'youtube' | 'dropbox' | 'other';
 }
 
 const extractSpotifyId = (url: string): string | null => {
