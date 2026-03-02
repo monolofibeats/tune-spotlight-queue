@@ -144,27 +144,8 @@ function useOnlineDuration() {
   return duration;
 }
 
-/* LEFT PANEL: Pricing (editable) + Soundboard */
-function LeftPanel({ streamer }: { streamer: Streamer }) {
-  const pricingRef = useRef<PricingSettingsHandle>(null);
-
-  return (
-    <div className="h-full flex flex-col">
-      <CollapsibleSection title="Pricing" icon={DollarSign}>
-        <div className="max-h-[60vh] overflow-y-auto -mx-1 px-1">
-          <PricingSettings ref={pricingRef} streamerId={streamer.id} />
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={true}>
-        <SidePanelSoundboard />
-      </CollapsibleSection>
-    </div>
-  );
-}
-
-/* RIGHT PANEL: Session Stats + Audio + Podium + Section Visibility */
-function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
+/* LEFT PANEL: Session Stats + Audio + Soundboard + Podium + Section Visibility */
+function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
   const [volume, setVolume] = useState(80);
@@ -227,6 +208,10 @@ function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStre
         </div>
       </CollapsibleSection>
 
+      <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false}>
+        <SidePanelSoundboard />
+      </CollapsibleSection>
+
       <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
         <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} />
       </CollapsibleSection>
@@ -247,6 +232,21 @@ function RightPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStre
               />
             </div>
           ))}
+        </div>
+      </CollapsibleSection>
+    </div>
+  );
+}
+
+/* RIGHT PANEL: Pricing (editable) */
+function RightPanel({ streamer }: { streamer: Streamer }) {
+  const pricingRef = useRef<PricingSettingsHandle>(null);
+
+  return (
+    <div className="h-full flex flex-col">
+      <CollapsibleSection title="Pricing" icon={DollarSign}>
+        <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1">
+          <PricingSettings ref={pricingRef} streamerId={streamer.id} />
         </div>
       </CollapsibleSection>
     </div>
