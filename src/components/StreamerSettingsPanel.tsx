@@ -69,7 +69,7 @@ interface StreamerSettingsPanelProps {
   onLoadSessionWithTrack?: (filter: SessionFilter, submission: SessionSubmission) => void;
 }
 
-export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange }: StreamerSettingsPanelProps) {
+export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, phoneOptimized, onPhoneOptimizedChange, onUnsavedChange, onLoadSessionWithTrack }: StreamerSettingsPanelProps) {
   const { t } = useLanguage();
   const [streamer, setStreamer] = useState<ExtendedStreamer>(initialStreamer as ExtendedStreamer);
   const [isSaving, setIsSaving] = useState(false);
