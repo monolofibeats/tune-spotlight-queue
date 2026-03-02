@@ -542,14 +542,13 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                           <p className={`${compact ? 'text-[9px] mb-1.5' : 'text-xs mb-3'} text-emerald-200/90 leading-relaxed`}>
                             {t('howItWorks.tip.boostDesc')}
                           </p>
-                          <Link
-                            to="/browse"
+                          <button
+                            onClick={(e) => { e.stopPropagation(); scrollToSubmissionForm(); }}
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 ${compact ? 'text-[9px]' : 'text-[11px]'} font-semibold hover:bg-emerald-500/30 transition-colors`}
-                            onClick={(e) => e.stopPropagation()}
                           >
                             {t('howItWorks.tip.boostNow')}
                             <ArrowRight className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
-                          </Link>
+                          </button>
                           {referralCode && (
                             <div className={`${compact ? 'mt-1.5 pt-1' : 'mt-3 pt-2'} border-t border-emerald-500/20`}>
                               <p className={`${compact ? 'text-[8px]' : 'text-[10px]'} text-emerald-300/70 mb-1`}>🎁 {t('howItWorks.tip.discountCode')}</p>
