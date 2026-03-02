@@ -80,6 +80,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
 
   const handleDiscard = () => {
     syncFormState(configs);
+    setSpotPrices({ ...savedSpotPrices });
     setHasChanges(false);
     onChangeStatus?.(false);
   };
