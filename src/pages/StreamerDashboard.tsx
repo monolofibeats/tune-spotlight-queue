@@ -797,34 +797,43 @@ const StreamerDashboard = () => {
         </div>
       ),
       search_filters: (
-        <div className="widget-search-filters flex flex-col sm:flex-row gap-2 sm:gap-3">
-          {searchConfig.showSearchBar !== false && (
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder={t('dashboard.searchTracksArtists')} value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm w-full" />
-            </div>
-          )}
-          {searchConfig.showStatusFilters !== false && (
-            <div className="flex gap-1 sm:gap-1.5 flex-wrap">
-              {[
-                { key: 'pending', label: t('dashboard.filterPending') },
-                { key: 'reviewed', label: t('dashboard.filterDone') },
-                { key: 'skipped', label: t('dashboard.filterSkipped') },
-                ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
-              ].map(({ key, label }) => (
-                <button key={key}
-                  className={`h-7 text-[11px] sm:text-xs px-2.5 sm:px-3 rounded-full font-medium transition-all ${
-                    statusFilter === key
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
-                  }`}
-                  onClick={() => setStatusFilter(key)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="widget-search-filters space-y-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            {searchConfig.showSearchBar !== false && (
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input placeholder={t('dashboard.searchTracksArtists')} value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-8 text-sm w-full" />
+              </div>
+            )}
+            {searchConfig.showStatusFilters !== false && (
+              <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+                {[
+                  { key: 'pending', label: t('dashboard.filterPending') },
+                  { key: 'reviewed', label: t('dashboard.filterDone') },
+                  { key: 'skipped', label: t('dashboard.filterSkipped') },
+                  ...(searchConfig.showTrashFilter !== false ? [{ key: 'deleted', label: t('dashboard.filterTrash') }] : []),
+                ].map(({ key, label }) => (
+                  <button key={key}
+                    className={`h-7 text-[11px] sm:text-xs px-2.5 sm:px-3 rounded-full font-medium transition-all ${
+                      statusFilter === key
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                    }`}
+                    onClick={() => setStatusFilter(key)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Session loader */}
+          <SessionLoadPicker
+            streamerId={streamer.id}
+            activeSessionFilter={sessionFilter}
+            onLoadSession={setSessionFilter}
+            onClearSession={() => setSessionFilter(null)}
+          />
         </div>
       ),
       queue: (
