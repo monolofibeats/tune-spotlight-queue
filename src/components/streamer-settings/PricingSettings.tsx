@@ -178,11 +178,12 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     const subChanged = submission.min !== savedSub.min || submission.max !== savedSub.max || submission.step !== savedSub.step || submission.isActive !== savedSub.isActive;
     const openChanged = submissionsOpen !== savedOpen;
     const bidChanged = bidIncrementPercent !== savedBidPercent || bidIncrementActive !== savedBidActive;
+    const spotsChanged = [1, 2, 3].some(n => spotPrices[n] !== savedSpotPrices[n]);
 
-    const changed = skipChanged || subChanged || openChanged || bidChanged;
+    const changed = skipChanged || subChanged || openChanged || bidChanged || spotsChanged;
     setHasChanges(changed);
     onChangeStatus?.(changed);
-  }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
+  }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, savedSpotPrices]);
 
   const handleSave = async () => {
     if (skipLine.min < 2.5) {
