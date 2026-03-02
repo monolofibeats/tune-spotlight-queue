@@ -299,17 +299,17 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       </div>
 
       {/* Right Panel */}
-      <div className="relative flex-shrink-0">
+      <div className="relative flex-1 min-w-0">
         <AnimatePresence>
           {rightOpen && (
             <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden h-full"
+              className="h-full"
             >
-              <div className="w-[320px] h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
+              <div className="h-full rounded-xl border border-border/30 bg-card/30 backdrop-blur-sm overflow-y-auto">
                 <RightPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
               </div>
             </motion.div>
