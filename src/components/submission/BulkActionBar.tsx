@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
