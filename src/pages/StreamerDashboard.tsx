@@ -852,6 +852,7 @@ const StreamerDashboard = () => {
               onDelete={canEdit ? handleDeleteSubmission : undefined}
               onRestore={canEdit ? handleRestoreSubmission : undefined}
               onUpdate={canEdit ? handleUpdateSubmission : undefined}
+              onMarkPriority={canEdit ? handleMarkPriority : undefined}
               showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
               draggable={statusFilter !== 'deleted'}
