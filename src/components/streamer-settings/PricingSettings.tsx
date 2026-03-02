@@ -202,6 +202,14 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       toast({ title: t('pricing.invalidRange'), description: 'Submission price cannot exceed €1,000', variant: 'destructive' });
       return;
     }
+    // Validate spot prices
+    for (const n of [1, 2, 3]) {
+      const p = spotPrices[n] ?? 0;
+      if (p > 0 && (p < 2.5 || p > 1000)) {
+        toast({ title: t('pricing.invalidRange'), description: `Spot #${n} must cost at least €2.50 (max €1,000)`, variant: 'destructive' });
+        return;
+      }
+    }
     setIsSaving(true);
 
     try {
