@@ -17,7 +17,8 @@ import {
   Download,
   Play,
   ExternalLink,
-  Pencil
+  Pencil,
+  Pin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
