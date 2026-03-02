@@ -423,6 +423,7 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                       >
                         <motion.div
                           onClick={(e) => { e.stopPropagation(); handleTipExpand(); }}
+                          onMouseEnter={handleTipExpand}
                           className="cursor-pointer"
                           whileHover={{ scale: 1.05, x: 4 }}
                           whileTap={{ scale: 0.97 }}
