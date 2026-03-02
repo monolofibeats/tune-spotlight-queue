@@ -107,8 +107,26 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
             >
               {/* Song info above */}
               <div className="w-full mb-1.5 text-center px-0.5">
-                <p className="text-[11px] sm:text-xs font-bold truncate">{song.song_title}</p>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                {song.song_url ? (
+                  <a
+                    href={song.song_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/link hover:opacity-80 transition-opacity block"
+                    title="Open song"
+                  >
+                    <p className="text-[11px] sm:text-xs font-bold truncate group-hover/link:underline">{song.song_title}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                    <span className="inline-flex items-center gap-0.5 text-[8px] text-primary/60">
+                      <ExternalLink className="w-2 h-2" /> Open
+                    </span>
+                  </a>
+                ) : (
+                  <>
+                    <p className="text-[11px] sm:text-xs font-bold truncate">{song.song_title}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{song.artist_name}</p>
+                  </>
+                )}
               </div>
 
               {/* Podium block */}
