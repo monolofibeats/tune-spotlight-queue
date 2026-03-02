@@ -1172,6 +1172,7 @@ const StreamerDashboard = () => {
                                 setNowPlaying(prev => prev.submission?.id === sub.id ? { ...prev, audioUrl: signedUrl, isLoading: false } : prev);
                               });
                             });
+                            setTimeout(() => nowPlayingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
                           } else if (sub.song_url) {
                             window.open(sub.song_url, '_blank', 'noopener,noreferrer');
                           }
