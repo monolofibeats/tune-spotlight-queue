@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Medal, Award, Trophy } from 'lucide-react';
+import { Crown, Medal, Award, Trophy, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
 
@@ -8,6 +8,7 @@ interface TopSongDisplay {
   position: number;
   artist_name: string;
   song_title: string;
+  song_url?: string;
 }
 
 interface TopSongsPublicDisplayProps {
