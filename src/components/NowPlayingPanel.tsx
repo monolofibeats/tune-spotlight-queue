@@ -740,7 +740,7 @@ export function NowPlayingPanel({
 
             {/* Review Actions — compact bar */}
             {cfg.showActionButtons && onStatusChange && submission && (
-              <div className="px-3 py-2.5 border-t border-border/10 bg-card/10">
+              <div className="px-3 py-1 border-t border-border/10 bg-card/10">
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   <Button
                     size="sm"
