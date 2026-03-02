@@ -685,6 +685,18 @@ const StreamerDashboard = () => {
     setSelectedIds(new Set());
   }, [selectedIds]);
 
+  const handleBulkMarkPriority = useCallback(async (isPriority: boolean) => {
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from('submissions').update({ is_priority: isPriority }).in('id', ids);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update priority", variant: "destructive" });
+    } else {
+      setSubmissions(prev => prev.map(s => ids.includes(s.id) ? { ...s, is_priority: isPriority } : s));
+      toast({ title: isPriority ? "Pinned as Priority" : "Priority removed", description: `${ids.length} submission${ids.length > 1 ? 's' : ''} updated` });
+      setSelectedIds(new Set());
+    }
+  }, [selectedIds]);
+
   const stats = {
     total: submissions.length,
     pending: submissions.filter(s => s.status === 'pending').length,
@@ -852,7 +864,6 @@ const StreamerDashboard = () => {
               onDelete={canEdit ? handleDeleteSubmission : undefined}
               onRestore={canEdit ? handleRestoreSubmission : undefined}
               onUpdate={canEdit ? handleUpdateSubmission : undefined}
-              onMarkPriority={canEdit ? handleMarkPriority : undefined}
               showPriorityBadge={queueConfig.showPriorityBadge !== false}
               onPlayAudio={statusFilter === 'deleted' ? undefined : (sub, audioUrl, isLoading) => handleOpenNowPlaying(sub, audioUrl, isLoading, index + 1)}
               draggable={statusFilter !== 'deleted'}
@@ -872,6 +883,7 @@ const StreamerDashboard = () => {
               isTrashView={statusFilter === 'deleted'} onSelectAll={handleSelectAll}
               onDeselectAll={handleDeselectAll} onBulkStatusChange={handleBulkStatusChange}
               onBulkDelete={handleBulkDelete} onBulkRestore={handleBulkRestore}
+              onBulkMarkPriority={handleBulkMarkPriority}
             />
           )}
         </div>

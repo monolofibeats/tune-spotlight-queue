@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ interface BulkActionBarProps {
   onBulkStatusChange: (status: string) => Promise<void>;
   onBulkDelete: (permanent?: boolean) => Promise<void>;
   onBulkRestore?: () => Promise<void>;
+  onBulkMarkPriority?: (isPriority: boolean) => Promise<void>;
 }
 
 export function BulkActionBar({
@@ -34,6 +35,7 @@ export function BulkActionBar({
   onBulkStatusChange,
   onBulkDelete,
   onBulkRestore,
+  onBulkMarkPriority,
 }: BulkActionBarProps) {
   const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -142,6 +144,17 @@ export function BulkActionBar({
                 >
                   {t('bulk.pending')}
                 </Button>
+                {onBulkMarkPriority && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1 text-amber-500 hover:text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+                    onClick={() => handleAction(() => onBulkMarkPriority(true))}
+                  >
+                    <Pin className="w-3 h-3" />
+                    Priority
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
