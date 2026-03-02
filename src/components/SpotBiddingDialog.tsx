@@ -387,7 +387,7 @@ export function SpotBiddingDialog({
                           <Badge variant="secondary" className="text-[10px] sm:text-xs">{t('bidding.available')}</Badge>
                         )}
                         {isLocked && (
-                          <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground">{t('bidding.locked') || 'Locked'}</Badge>
+                          <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground">{t('bidding.unavailable') || 'Unavailable'}</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
