@@ -595,7 +595,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
             {/* Stream Tab */}
             <TabsContent value="stream" forceMount className={`space-y-6 ${activeTab !== 'stream' ? 'hidden' : ''}`}>
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} />
-              <SessionHistory streamerId={initialStreamer.id} />
+              <SessionHistory streamerId={initialStreamer.id} onLoadSessionWithTrack={onLoadSessionWithTrack} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
           </Tabs>
