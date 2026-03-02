@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
@@ -45,6 +45,43 @@ import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
 import { PlatformOpenButton } from '@/components/PlatformOpenButton';
 import { DropboxPlayerEmbed } from '@/components/DropboxPlayerEmbed';
+import { EmbedFallback } from '@/components/EmbedFallback';
+
+/** Wrapper that catches iframe load failures and shows a friendly fallback */
+function EmbedWithFallback({ children, url, borderColor = 'primary' }: { children: React.ReactNode; url: string; borderColor?: string }) {
+  const [failed, setFailed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setFailed(false);
+    const el = containerRef.current;
+    if (!el) return;
+    const iframe = el.querySelector('iframe');
+    if (!iframe) return;
+    const handleError = () => setFailed(true);
+    iframe.addEventListener('error', handleError);
+    // Also detect timeout-style failures via a timer: if iframe doesn't fire 'load' within 15s, show fallback
+    let loaded = false;
+    const handleLoad = () => { loaded = true; };
+    iframe.addEventListener('load', handleLoad);
+    const timer = setTimeout(() => { if (!loaded) setFailed(true); }, 15000);
+    return () => {
+      iframe.removeEventListener('error', handleError);
+      iframe.removeEventListener('load', handleLoad);
+      clearTimeout(timer);
+    };
+  }, [url]);
+
+  if (failed) {
+    return <EmbedFallback url={url} onRetry={() => setFailed(false)} />;
+  }
+
+  return (
+    <div ref={containerRef} className={`rounded-lg overflow-hidden border border-${borderColor}/20 bg-gradient-to-br from-${borderColor}/5 to-transparent`}>
+      {children}
+    </div>
+  );
+}
 
 interface Submission {
   id: string;
@@ -443,7 +480,7 @@ export function NowPlayingPanel({
 
                 {/* Spotify Embed — compact */}
                 {cfg.showSpotifyEmbed && submission.platform === 'spotify' && submission.song_url && (
-                  <div className="rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                  <EmbedWithFallback url={submission.song_url} borderColor="primary">
                     {isLoadingSpotify ? (
                       <div className="flex items-center justify-center py-6 bg-card/50">
                         <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -459,12 +496,12 @@ export function NowPlayingPanel({
                         className="rounded-lg"
                       />
                     )}
-                  </div>
+                  </EmbedWithFallback>
                 )}
 
                 {/* SoundCloud Embed — compact */}
                 {cfg.showSoundCloudEmbed && submission.platform === 'soundcloud' && submission.song_url && (
-                  <div className="rounded-lg overflow-hidden border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent">
+                  <EmbedWithFallback url={submission.song_url} borderColor="orange-500">
                     <iframe
                       width="100%"
                       height="130"
@@ -475,7 +512,7 @@ export function NowPlayingPanel({
                       loading="lazy"
                       className="rounded-lg"
                     />
-                  </div>
+                  </EmbedWithFallback>
                 )}
 
                 {/* YouTube Embed — compact */}
@@ -483,7 +520,7 @@ export function NowPlayingPanel({
                   const videoId = submission.song_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
                   if (!videoId) return null;
                   return (
-                    <div className="rounded-lg overflow-hidden border border-red-500/20 bg-gradient-to-br from-red-500/5 to-transparent">
+                    <EmbedWithFallback url={submission.song_url} borderColor="red-500">
                       <iframe
                         width="100%"
                         height="152"
@@ -494,7 +531,7 @@ export function NowPlayingPanel({
                         loading="lazy"
                         className="rounded-lg"
                       />
-                    </div>
+                    </EmbedWithFallback>
                   );
                 })()}
 
