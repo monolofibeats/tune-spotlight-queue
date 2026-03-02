@@ -381,8 +381,29 @@ export function TopSongsPedestal({ streamer, submissions, onStreamerUpdate, onPl
                       exit={{ opacity: 0, y: -10 }}
                       className="text-center w-full px-1"
                     >
-                      <p className="font-semibold text-xs sm:text-sm truncate">{song.submission.song_title}</p>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
+                      <button
+                        onClick={() => {
+                          const sub = song.submission;
+                          if (!sub) return;
+                          if (sub.audio_file_url && onPlaySong) {
+                            onPlaySong(sub);
+                          } else if (sub.song_url) {
+                            window.open(sub.song_url, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
+                        className="group/link text-center w-full hover:opacity-80 transition-opacity cursor-pointer"
+                        title={song.submission?.audio_file_url ? 'Play in Now Playing' : 'Open link'}
+                      >
+                        <p className="font-semibold text-xs sm:text-sm truncate group-hover/link:underline">{song.submission.song_title}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{song.submission.artist_name}</p>
+                        <span className="inline-flex items-center gap-0.5 mt-0.5 text-[9px] text-primary/70">
+                          {song.submission.audio_file_url ? (
+                            <><Play className="w-2.5 h-2.5" /> Play</>
+                          ) : (
+                            <><ExternalLink className="w-2.5 h-2.5" /> Open</>
+                          )}
+                        </span>
+                      </button>
                       <Button
                         variant="ghost"
                         size="sm"
