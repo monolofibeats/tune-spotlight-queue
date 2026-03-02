@@ -174,6 +174,21 @@ export function SessionManager({ streamerId: _streamerId, phoneOptimized = false
               onCheckedChange={(checked) => onPhoneOptimizedChange?.(checked)}
             />
           </div>
+          {phoneOptimized && (
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20">
+              <div className="flex items-center gap-2">
+                <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Display info on sides</p>
+                  <p className="text-[10px] text-muted-foreground">Show stats, audio, pricing panels alongside the queue</p>
+                </div>
+              </div>
+              <Switch
+                checked={showSidePanels}
+                onCheckedChange={(checked) => onShowSidePanelsChange?.(checked)}
+              />
+            </div>
+          )}
         </div>
       )}
 
