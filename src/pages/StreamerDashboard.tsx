@@ -888,7 +888,7 @@ const StreamerDashboard = () => {
         </div>
       ),
     };
-  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode, widgetConfigs, getWidgetConfig]);
+  }, [streamer, stats, nowPlaying, searchQuery, statusFilter, filteredSubmissions, selectedIds, isSelectionMode, widgetConfigs, getWidgetConfig, sessionFilter]);
 
   if (isLoading || authLoading) {
     return (
