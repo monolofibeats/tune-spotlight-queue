@@ -1188,7 +1188,7 @@ const StreamerDashboard = () => {
               {canEdit && (
                 <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
                   <div className="relative z-10">
-                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
+                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} showSidePanels={showSidePanels} onShowSidePanelsChange={setShowSidePanels} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
                       // Load the session filter
                       setSessionFilter(filter);
                       // Switch to submissions tab
