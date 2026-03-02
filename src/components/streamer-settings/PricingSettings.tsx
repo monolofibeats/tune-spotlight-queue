@@ -157,6 +157,18 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum must be at least €2.50', variant: 'destructive' });
       return;
     }
+    if (skipLine.min > 1000) {
+      toast({ title: t('pricing.invalidRange'), description: 'Skip the Line minimum cannot exceed €1,000', variant: 'destructive' });
+      return;
+    }
+    if (submission.min > 0 && submission.min < 2.5) {
+      toast({ title: t('pricing.invalidRange'), description: 'Submission price must be at least €2.50 (or free at €0)', variant: 'destructive' });
+      return;
+    }
+    if (submission.min > 1000) {
+      toast({ title: t('pricing.invalidRange'), description: 'Submission price cannot exceed €1,000', variant: 'destructive' });
+      return;
+    }
     setIsSaving(true);
 
     try {
@@ -280,13 +292,21 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                     <span className="text-sm text-muted-foreground">€</span>
                     <Input type="number" min={2.5} max={1000} step={0.5} value={skipLine.min}
                       onChange={(e) => {
-                        const val = Math.max(2.5, parseFloat(e.target.value) || 2.5);
-                        setSkipLine(s => ({ ...s, min: val }));
+                        const raw = e.target.value;
+                        if (raw === '') { setSkipLine(s => ({ ...s, min: 0 })); return; }
+                        const val = parseFloat(raw);
+                        if (!isNaN(val)) setSkipLine(s => ({ ...s, min: val }));
                       }}
-                      className="w-24 h-9 text-right" />
+                      className={`w-24 h-9 text-right ${skipLine.min < 2.5 || skipLine.min > 1000 ? 'border-destructive' : ''}`} />
                   </div>
                 </div>
-                <Slider value={[skipLine.min]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={1000} step={0.5} />
+                {(skipLine.min < 2.5 || skipLine.min > 1000) && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {skipLine.min < 2.5 ? 'Minimum €2.50 required' : 'Maximum €1,000 allowed'}
+                  </p>
+                )}
+                <Slider value={[Math.min(100, Math.max(2.5, skipLine.min))]} onValueChange={([val]) => setSkipLine(s => ({ ...s, min: val }))} min={2.5} max={100} step={0.5} />
               </div>
 
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
@@ -312,27 +332,34 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                   step={0.5}
                   value={submission.min}
                   onChange={(e) => {
-                    let val = Math.max(0, parseFloat(e.target.value) || 0);
-                    if (val > 0 && val < 2.5) val = 2.5;
-                    setSubmission(s => ({ ...s, min: val, isActive: val > 0 }));
+                    const raw = e.target.value;
+                    if (raw === '') { setSubmission(s => ({ ...s, min: 0, isActive: false })); return; }
+                    const val = parseFloat(raw);
+                    if (!isNaN(val)) setSubmission(s => ({ ...s, min: Math.max(0, val), isActive: val > 0 }));
                   }}
-                  className="w-24 h-9 text-right"
+                  className={`w-24 h-9 text-right ${submission.min > 0 && (submission.min < 2.5 || submission.min > 1000) ? 'border-destructive' : ''}`}
                 />
               </div>
             </div>
+            {submission.min > 0 && (submission.min < 2.5 || submission.min > 1000) && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {submission.min < 2.5 ? 'Minimum €2.50 required (or set to €0 for free)' : 'Maximum €1,000 allowed'}
+              </p>
+            )}
             <Slider
-              value={[submission.min]}
+              value={[Math.min(100, Math.max(0, submission.min))]}
               onValueChange={([val]) => {
                 const snapped = val > 0 && val < 2.5 ? 2.5 : val;
                 setSubmission(s => ({ ...s, min: snapped, isActive: snapped > 0 }));
               }}
               min={0}
-              max={1000}
+              max={100}
               step={0.5}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Free (€0.00)</span>
-              <span>€1,000.00</span>
+              <span>€100.00 (type up to €1,000)</span>
             </div>
           </div>
 
