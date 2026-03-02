@@ -103,6 +103,8 @@ export interface NowPlayingConfig {
   showSubmitterInsights?: boolean;
   showSpotifyEmbed?: boolean;
   showSoundCloudEmbed?: boolean;
+  showYouTubeEmbed?: boolean;
+  showDropboxEmbed?: boolean;
   showMessage?: boolean;
   showDownload?: boolean;
 }
