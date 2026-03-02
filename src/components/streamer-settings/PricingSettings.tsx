@@ -332,27 +332,34 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                   step={0.5}
                   value={submission.min}
                   onChange={(e) => {
-                    let val = Math.max(0, parseFloat(e.target.value) || 0);
-                    if (val > 0 && val < 2.5) val = 2.5;
-                    setSubmission(s => ({ ...s, min: val, isActive: val > 0 }));
+                    const raw = e.target.value;
+                    if (raw === '') { setSubmission(s => ({ ...s, min: 0, isActive: false })); return; }
+                    const val = parseFloat(raw);
+                    if (!isNaN(val)) setSubmission(s => ({ ...s, min: Math.max(0, val), isActive: val > 0 }));
                   }}
-                  className="w-24 h-9 text-right"
+                  className={`w-24 h-9 text-right ${submission.min > 0 && (submission.min < 2.5 || submission.min > 1000) ? 'border-destructive' : ''}`}
                 />
               </div>
             </div>
+            {submission.min > 0 && (submission.min < 2.5 || submission.min > 1000) && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {submission.min < 2.5 ? 'Minimum €2.50 required (or set to €0 for free)' : 'Maximum €1,000 allowed'}
+              </p>
+            )}
             <Slider
-              value={[submission.min]}
+              value={[Math.min(100, Math.max(0, submission.min))]}
               onValueChange={([val]) => {
                 const snapped = val > 0 && val < 2.5 ? 2.5 : val;
                 setSubmission(s => ({ ...s, min: snapped, isActive: snapped > 0 }));
               }}
               min={0}
-              max={1000}
+              max={100}
               step={0.5}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Free (€0.00)</span>
-              <span>€1,000.00</span>
+              <span>€100.00 (type up to €1,000)</span>
             </div>
           </div>
 

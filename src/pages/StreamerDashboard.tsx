@@ -1074,13 +1074,6 @@ const StreamerDashboard = () => {
                     onClearSession={() => setSessionFilter(null)}
                   />
                   {canEdit && <DashboardBuilder {...builderProps} />}
-                  <Button variant="outline" size="sm" asChild className="gap-1 text-[10px] h-7 px-2">
-                    <a href={`/${streamer.slug}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-3 h-3" />
-                      <span className="hidden sm:inline">{t('dashboard.viewPage')}</span>
-                      <span className="sm:hidden">Page</span>
-                    </a>
-                  </Button>
                 </div>
 
               </div>
