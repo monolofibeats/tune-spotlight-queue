@@ -560,7 +560,7 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
           }
           const target = sum / count;
           const rising = target > smoothedSpectrum[p];
-          const lerp = rising ? 0.65 : 0.06;
+          const lerp = rising ? 0.85 : 0.12;
           smoothedSpectrum[p] += (target - smoothedSpectrum[p]) * lerp;
         }
       }
