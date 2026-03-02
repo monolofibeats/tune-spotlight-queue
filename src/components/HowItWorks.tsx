@@ -448,17 +448,17 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                   </AnimatePresence>
                 )}
 
-                {/* Expanded tip — tucked behind card 3 only */}
+                {/* Expanded tip — positioned to the right of card 3 */}
                 {index === 2 && (
                   <AnimatePresence>
                     {tipExpanded && showTip && (
                       <motion.div
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.4, ease: 'easeOut' }}
-                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute -top-3 -bottom-3 left-1 -right-1`}
-                        style={{ zIndex: -1 }}
+                        className={`hidden ${compact ? 'sm:block' : 'md:block'} absolute top-0 bottom-0 -right-3 translate-x-full`}
+                        style={{ zIndex: 10, width: '200px' }}
                       >
                         <div className="h-full rounded-xl border border-emerald-500/25 bg-emerald-950/60 backdrop-blur-xl shadow-lg shadow-emerald-500/5 flex flex-col justify-center p-3">
                           <div className="flex items-center gap-1.5 mb-2">
@@ -470,14 +470,13 @@ export function HowItWorks({ compact = false }: HowItWorksProps) {
                           <p className="text-[9px] text-emerald-200/80 leading-relaxed mb-2.5">
                             {t('howItWorks.tip.boostDesc')}
                           </p>
-                          <Link
-                            to="/browse"
+                          <button
+                            onClick={(e) => { e.stopPropagation(); scrollToSubmissionForm(); }}
                             className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-[10px] font-semibold hover:bg-emerald-500/30 transition-colors mb-1"
-                            onClick={(e) => e.stopPropagation()}
                           >
                             {t('howItWorks.tip.boostNow')}
                             <ArrowRight className="w-2.5 h-2.5" />
-                          </Link>
+                          </button>
                           {referralCode && (
                             <div className="mt-1.5 pt-1.5 border-t border-emerald-500/20">
                               <p className="text-[8px] text-emerald-300/70 mb-1">🎁 {t('howItWorks.tip.discountCode')}</p>
