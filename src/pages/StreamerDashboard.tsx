@@ -36,6 +36,7 @@ import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { EarningsWidget } from '@/components/dashboard/widgets/EarningsWidget';
 import { QuickSettingsWidget } from '@/components/dashboard/widgets/QuickSettingsWidget';
 import { PopOutPortal } from '@/components/dashboard/PopOutPortal';
+import { PhoneSidePanels } from '@/components/dashboard/PhoneSidePanels';
 import { getDefaultLayout } from '@/components/dashboard/LayoutTemplates';
 import { getWidgetDef, type WidgetConfigs, getDefaultWidgetConfig } from '@/components/dashboard/WidgetRegistry';
 import { useStreamerPresets, type StreamerPreset } from '@/hooks/useStreamerPresets';
@@ -253,6 +254,25 @@ function PhoneOptimizedNowPlaying({ phoneOptimized, children }: { phoneOptimized
   return <>{children}</>;
 }
 
+/** Wraps content with side panels when phone-optimized + showSidePanels + live */
+function SidePanelsWrapper({ streamer, phoneOptimized, showSidePanels, onStreamerUpdate, children }: {
+  streamer: Streamer;
+  phoneOptimized: boolean;
+  showSidePanels: boolean;
+  onStreamerUpdate?: (s: Streamer) => void;
+  children: React.ReactNode;
+}) {
+  const { isLive } = useStreamSession();
+  if (isLive && phoneOptimized && showSidePanels) {
+    return (
+      <PhoneSidePanels streamer={streamer} onStreamerUpdate={onStreamerUpdate}>
+        {children}
+      </PhoneSidePanels>
+    );
+  }
+  return <>{children}</>;
+}
+
 const StreamerDashboard = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -267,6 +287,7 @@ const StreamerDashboard = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
   const [phoneOptimized, setPhoneOptimized] = useState(true);
+  const [showSidePanels, setShowSidePanels] = useState(false);
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
@@ -1115,42 +1136,44 @@ const StreamerDashboard = () => {
               </div>
 
               <TabsContent value="submissions" forceMount className={dashboardActiveTab !== 'submissions' ? 'hidden' : ''}>
-                <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
-                  <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
-                    <NowPlayingDropZone
-                      nowPlayingRef={nowPlayingRef}
-                      submissions={submissions}
-                      onOpenNowPlaying={handleOpenNowPlaying}
-                      hasSubmission={!!nowPlaying.submission}
-                    >
-                      <NowPlayingPanel
-                        submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
-                        isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
-                        onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
-                        onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
-                        onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
-                        onAddToPedestal={handleAddToPedestal}
-                        config={getWidgetConfig('now_playing')}
-                        compactVisualizer={phoneOptimized}
-                        textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
-                        widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
-                        heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
-                      />
-                    </NowPlayingDropZone>
-                  </PhoneAwareSubmissionsLayout>
-                </PhoneOptimizedNowPlaying>
-                <LiveAwareDashboardGrid
-                  dashboardLayout={dashboardLayout}
-                  isBuilderEditing={isBuilderEditing}
-                  canEdit={canEdit}
-                  setDashboardLayout={setDashboardLayout}
-                  widgetRenderers={widgetRenderers}
-                  poppedOutWidgets={poppedOutWidgets}
-                  popOutOptions={popOutOptions}
-                  handlePopOut={handlePopOut}
-                  widgetConfigs={widgetConfigs}
-                  phoneOptimized={phoneOptimized}
-                />
+                <SidePanelsWrapper streamer={streamer} phoneOptimized={phoneOptimized} showSidePanels={showSidePanels} onStreamerUpdate={setStreamer}>
+                  <PhoneOptimizedNowPlaying phoneOptimized={phoneOptimized}>
+                    <PhoneAwareSubmissionsLayout phoneOptimized={phoneOptimized}>
+                      <NowPlayingDropZone
+                        nowPlayingRef={nowPlayingRef}
+                        submissions={submissions}
+                        onOpenNowPlaying={handleOpenNowPlaying}
+                        hasSubmission={!!nowPlaying.submission}
+                      >
+                        <NowPlayingPanel
+                          submission={nowPlaying.submission} audioUrl={nowPlaying.audioUrl}
+                          isLoadingAudio={nowPlaying.isLoading} position={nowPlaying.position}
+                          onClose={handleCloseNowPlaying} onDownload={handleNowPlayingDownload}
+                          onStatusChange={getWidgetConfig('now_playing').showActionButtons !== false ? handleStatusChange : undefined}
+                          onDelete={getWidgetConfig('now_playing').showActionButtons !== false ? handleDeleteSubmission : undefined}
+                          onAddToPedestal={handleAddToPedestal}
+                          config={getWidgetConfig('now_playing')}
+                          compactVisualizer={phoneOptimized}
+                          textScale={(widgetConfigs['now_playing']?.textScale as number) ?? 100}
+                          widthCols={dashboardLayout.find(l => l.i === 'now_playing')?.w}
+                          heightRows={dashboardLayout.find(l => l.i === 'now_playing')?.h}
+                        />
+                      </NowPlayingDropZone>
+                    </PhoneAwareSubmissionsLayout>
+                  </PhoneOptimizedNowPlaying>
+                  <LiveAwareDashboardGrid
+                    dashboardLayout={dashboardLayout}
+                    isBuilderEditing={isBuilderEditing}
+                    canEdit={canEdit}
+                    setDashboardLayout={setDashboardLayout}
+                    widgetRenderers={widgetRenderers}
+                    poppedOutWidgets={poppedOutWidgets}
+                    popOutOptions={popOutOptions}
+                    handlePopOut={handlePopOut}
+                    widgetConfigs={widgetConfigs}
+                    phoneOptimized={phoneOptimized}
+                  />
+                </SidePanelsWrapper>
               </TabsContent>
 
               {canEdit && (
@@ -1187,7 +1210,7 @@ const StreamerDashboard = () => {
               {canEdit && (
                 <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
                   <div className="relative z-10">
-                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
+                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} showSidePanels={showSidePanels} onShowSidePanelsChange={setShowSidePanels} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
                       // Load the session filter
                       setSessionFilter(filter);
                       // Switch to submissions tab

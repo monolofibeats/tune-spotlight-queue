@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radio, Power, Loader2, Smartphone } from 'lucide-react';
+import { Radio, Power, Loader2, Smartphone, PanelLeftClose } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,9 +16,11 @@ interface SessionManagerProps {
   streamerId?: string;
   phoneOptimized?: boolean;
   onPhoneOptimizedChange?: (value: boolean) => void;
+  showSidePanels?: boolean;
+  onShowSidePanelsChange?: (value: boolean) => void;
 }
 
-export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange }: SessionManagerProps) {
+export function SessionManager({ streamerId: _streamerId, phoneOptimized = false, onPhoneOptimizedChange, showSidePanels = false, onShowSidePanelsChange }: SessionManagerProps) {
   const { currentSession, isLive, startSession, endSession } = useStreamSession();
   const { play } = useSoundEffects();
   const { t } = useLanguage();
@@ -172,6 +174,21 @@ export function SessionManager({ streamerId: _streamerId, phoneOptimized = false
               onCheckedChange={(checked) => onPhoneOptimizedChange?.(checked)}
             />
           </div>
+          {phoneOptimized && (
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20">
+              <div className="flex items-center gap-2">
+                <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Display info on sides</p>
+                  <p className="text-[10px] text-muted-foreground">Show stats, audio, pricing panels alongside the queue</p>
+                </div>
+              </div>
+              <Switch
+                checked={showSidePanels}
+                onCheckedChange={(checked) => onShowSidePanelsChange?.(checked)}
+              />
+            </div>
+          )}
         </div>
       )}
 
