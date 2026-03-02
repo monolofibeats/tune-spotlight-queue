@@ -88,7 +88,8 @@ export function MusicEmbed({ url, platform }: MusicEmbedProps) {
         // Convert Dropbox share link to direct playable link
         let directUrl = url;
         if (url.includes('dropbox.com')) {
-          directUrl = url.replace(/[?&]dl=0/, '?raw=1').replace(/[?&]dl=1/, '?raw=1');
+          // Replace dl=0 or dl=1 with raw=1, keeping other params intact
+          directUrl = url.replace(/([?&])dl=[01]/, '$1raw=1');
           if (!directUrl.includes('raw=1')) {
             directUrl += (directUrl.includes('?') ? '&' : '?') + 'raw=1';
           }
