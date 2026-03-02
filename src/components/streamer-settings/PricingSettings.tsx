@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { 
   DollarSign, 
   Settings, 
@@ -10,6 +10,9 @@ import {
   Ban,
   TrendingUp,
   Percent,
+  Crown,
+  Medal,
+  Award,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,8 +72,15 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
   const [bidIncrementPercent, setBidIncrementPercent] = useState(10);
   const [bidIncrementActive, setBidIncrementActive] = useState(true);
 
+  // Pre-stream spot prices (in euros)
+  const DEFAULT_SPOT_PRICES = { 1: 100, 2: 75, 3: 50 };
+  const [spotPrices, setSpotPrices] = useState<Record<number, number>>(DEFAULT_SPOT_PRICES);
+  const [savedSpotPrices, setSavedSpotPrices] = useState<Record<number, number>>(DEFAULT_SPOT_PRICES);
+  const [spotIds, setSpotIds] = useState<Record<number, string>>({});
+
   const handleDiscard = () => {
     syncFormState(configs);
+    setSpotPrices({ ...savedSpotPrices });
     setHasChanges(false);
     onChangeStatus?.(false);
   };
@@ -79,11 +89,33 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     save: handleSave,
     discard: handleDiscard,
     hasChanges,
-  }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, streamerId]);
+  }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, streamerId]);
 
   useEffect(() => {
     fetchConfigs();
+    fetchSpotPrices();
   }, [streamerId]);
+
+  const fetchSpotPrices = async () => {
+    const { data } = await (supabase
+      .from('pre_stream_spots' as any)
+      .select('*')
+      .eq('streamer_id', streamerId)
+      .is('session_id', null)
+      .order('spot_number', { ascending: true })) as any;
+
+    if (data && data.length > 0) {
+      const prices: Record<number, number> = {};
+      const ids: Record<number, string> = {};
+      data.forEach((s: any) => {
+        prices[s.spot_number] = s.price_cents / 100;
+        ids[s.spot_number] = s.id;
+      });
+      setSpotPrices(prices);
+      setSavedSpotPrices(prices);
+      setSpotIds(ids);
+    }
+  };
 
   const fetchConfigs = async () => {
     const { data, error } = await supabase
@@ -146,11 +178,12 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     const subChanged = submission.min !== savedSub.min || submission.max !== savedSub.max || submission.step !== savedSub.step || submission.isActive !== savedSub.isActive;
     const openChanged = submissionsOpen !== savedOpen;
     const bidChanged = bidIncrementPercent !== savedBidPercent || bidIncrementActive !== savedBidActive;
+    const spotsChanged = [1, 2, 3].some(n => spotPrices[n] !== savedSpotPrices[n]);
 
-    const changed = skipChanged || subChanged || openChanged || bidChanged;
+    const changed = skipChanged || subChanged || openChanged || bidChanged || spotsChanged;
     setHasChanges(changed);
     onChangeStatus?.(changed);
-  }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive]);
+  }, [configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, savedSpotPrices]);
 
   const handleSave = async () => {
     if (skipLine.min < 2.5) {
@@ -169,6 +202,14 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       toast({ title: t('pricing.invalidRange'), description: 'Submission price cannot exceed €1,000', variant: 'destructive' });
       return;
     }
+    // Validate spot prices
+    for (const n of [1, 2, 3]) {
+      const p = spotPrices[n] ?? 0;
+      if (p > 0 && (p < 2.5 || p > 1000)) {
+        toast({ title: t('pricing.invalidRange'), description: `Spot #${n} must cost at least €2.50 (max €1,000)`, variant: 'destructive' });
+        return;
+      }
+    }
     setIsSaving(true);
 
     try {
@@ -185,6 +226,33 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         .upsert(rows, { onConflict: 'streamer_id,config_type', ignoreDuplicates: false });
 
       if (error) throw new Error(error.message);
+
+      // Save spot prices
+      const spotsChanged = [1, 2, 3].some(n => spotPrices[n] !== savedSpotPrices[n]);
+      if (spotsChanged) {
+        for (const spotNum of [1, 2, 3]) {
+          const priceCents = Math.round(spotPrices[spotNum] * 100);
+          if (spotIds[spotNum]) {
+            // Update existing spot
+            await (supabase
+              .from('pre_stream_spots' as any)
+              .update({ price_cents: priceCents })
+              .eq('id', spotIds[spotNum])) as any;
+          } else {
+            // Create new spot
+            await (supabase
+              .from('pre_stream_spots' as any)
+              .insert({
+                spot_number: spotNum,
+                price_cents: priceCents,
+                is_available: true,
+                streamer_id: streamerId,
+                session_id: null,
+              })) as any;
+          }
+        }
+        await fetchSpotPrices();
+      }
 
       toast({
         title: t('pricing.updated'),
@@ -256,17 +324,21 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="skip_line" className="gap-2">
-            <Zap className="w-4 h-4" />
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="skip_line" className="gap-1.5 text-xs sm:text-sm">
+            <Zap className="w-3.5 h-3.5" />
             {t('pricing.tab.skipLine')}
           </TabsTrigger>
-          <TabsTrigger value="submission" className="gap-2">
-            <Send className="w-4 h-4" />
+          <TabsTrigger value="submission" className="gap-1.5 text-xs sm:text-sm">
+            <Send className="w-3.5 h-3.5" />
             {t('pricing.tab.submissions')}
           </TabsTrigger>
-          <TabsTrigger value="bidding" className="gap-2">
-            <Percent className="w-4 h-4" />
+          <TabsTrigger value="spots" className="gap-1.5 text-xs sm:text-sm">
+            <Crown className="w-3.5 h-3.5" />
+            Spots
+          </TabsTrigger>
+          <TabsTrigger value="bidding" className="gap-1.5 text-xs sm:text-sm">
+            <Percent className="w-3.5 h-3.5" />
             {t('pricing.tab.bidding')}
           </TabsTrigger>
         </TabsList>
@@ -380,6 +452,68 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
                 <p className="text-xs text-muted-foreground">{t('pricing.submission.freeActiveDesc')}</p>
               </>
             )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="spots" className="space-y-4 mt-4">
+          <p className="text-sm text-muted-foreground">
+            Set the price for each pre-stream priority spot. Fans can purchase these before your stream starts to guarantee their position.
+          </p>
+
+          {[
+            { num: 1, label: 'Spot #1 – Gold', Icon: Crown, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+            { num: 2, label: 'Spot #2 – Silver', Icon: Medal, color: 'text-slate-300', bg: 'bg-slate-400/10 border-slate-400/20' },
+            { num: 3, label: 'Spot #3 – Bronze', Icon: Award, color: 'text-amber-600', bg: 'bg-amber-600/10 border-amber-600/20' },
+          ].map(({ num, label, Icon, color, bg }) => (
+            <div key={num} className={`flex items-center justify-between p-4 rounded-lg border ${bg}`}>
+              <div className="flex items-center gap-3">
+                <Icon className={`w-5 h-5 ${color}`} />
+                <span className="text-sm font-medium">{label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  min={2.5}
+                  max={1000}
+                  step={0.5}
+                  value={spotPrices[num] ?? ''}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') { setSpotPrices(p => ({ ...p, [num]: 0 })); return; }
+                    const val = parseFloat(raw);
+                    if (!isNaN(val)) setSpotPrices(p => ({ ...p, [num]: val }));
+                  }}
+                  className={`w-24 h-9 text-right ${(spotPrices[num] ?? 0) > 0 && (spotPrices[num] < 2.5 || spotPrices[num] > 1000) ? 'border-destructive' : ''}`}
+                />
+              </div>
+            </div>
+          ))}
+
+          {[1, 2, 3].some(n => spotPrices[n] > 0 && (spotPrices[n] < 2.5 || spotPrices[n] > 1000)) && (
+            <p className="text-xs text-destructive flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Each spot must cost at least €2.50 (max €1,000)
+            </p>
+          )}
+
+          <div className="p-4 rounded-lg bg-secondary/30 border border-border/20">
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Preview</p>
+            <div className="flex items-end justify-center gap-3">
+              {[2, 1, 3].map(pos => {
+                const height = pos === 1 ? 'h-12' : pos === 2 ? 'h-9' : 'h-7';
+                const color = pos === 1 ? 'text-yellow-400' : pos === 2 ? 'text-slate-300' : 'text-amber-600';
+                const borderC = pos === 1 ? 'border-yellow-500/40' : pos === 2 ? 'border-slate-400/30' : 'border-amber-600/30';
+                return (
+                  <div key={pos} className={`flex flex-col items-center ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}>
+                    <span className={`text-xs font-bold ${color}`}>€{(spotPrices[pos] ?? 0).toFixed(2)}</span>
+                    <div className={`w-14 ${height} rounded-t-md border border-b-0 ${borderC} bg-gradient-to-t from-muted/20 to-transparent flex items-center justify-center`}>
+                      <span className={`text-lg font-black font-display ${color}`}>{pos}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </TabsContent>
 
