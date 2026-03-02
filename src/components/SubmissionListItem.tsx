@@ -139,7 +139,6 @@ export function SubmissionListItem({
   onRestore,
   onUpdate,
   onPlayAudio,
-  onMarkPriority,
   showPriorityBadge = true,
   draggable = false,
 }: SubmissionListItemProps) {
