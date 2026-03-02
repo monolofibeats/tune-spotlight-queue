@@ -314,7 +314,12 @@ export function AudioVisualizer({ audioElement, className = '', showLUFS: showLU
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const hsla = makeHslaFromCssVar('--primary');
+    const hsla = colorHsl
+      ? ((a: number) => {
+          const p = parseHslTriplet(colorHsl);
+          return p ? `hsla(${p.h}, ${p.s}%, ${p.l}%, ${a})` : `hsla(210, 60%, 60%, ${a})`;
+        })
+      : makeHslaFromCssVar('--primary');
     const waves = createWaveLines();
     const POINT_COUNT = waves[0].points.length;
     const smoothedSpectrum = new Float32Array(POINT_COUNT);
