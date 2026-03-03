@@ -808,9 +808,16 @@ body[data-anim-style="elegant"] * {
 .side-panel-pricing button {
   background-color: transparent !important;
 }
-.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
-.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
-.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute) {
+/* Section header buttons (CollapsibleSection) — no border */
+.side-panel-left-container > div > div > button,
+.side-panel-right-container > div > div > button,
+.side-panel-left-dimmable > div > button,
+.side-panel-right-dimmable > div > button {
+  border: none !important;
+}
+.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header),
+.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header),
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header) {
   border: 1px solid hsl(0 0% 28%) !important;
   color: hsl(0 0% 70%) !important;
 }
