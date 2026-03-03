@@ -108,7 +108,7 @@ export function SidePanelSoundboard() {
       {/* Volume */}
       <div className="flex items-center gap-2">
         <Volume2 className="w-3 h-3 text-neutral-400 shrink-0" />
-        <Slider value={[sbVolume]} onValueChange={([v]) => setSbVolume(v)} min={0} max={100} step={1} className="flex-1" />
+        <Slider value={[sbVolume]} onValueChange={([v]) => setSbVolume(v)} min={0} max={100} step={1} className="flex-1 side-panel-slider" />
         <span className="text-[10px] text-neutral-500 w-8 text-right">{sbVolume}%</span>
       </div>
 

@@ -15,9 +15,10 @@ interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
   topSongsMessage?: string;
+  hideTitle?: boolean;
 }
 
-export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage }: TopSongsPublicDisplayProps) {
+export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage, hideTitle }: TopSongsPublicDisplayProps) {
   const { t } = useLanguage();
   const [songs, setSongs] = useState<TopSongDisplay[]>([]);
 
@@ -89,11 +90,13 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
       transition={{ delay: 0.2 }}
       className="space-y-3"
     >
-      <div className="flex items-center justify-center gap-2">
-        <Trophy className="w-4 h-4 text-primary/60" />
-        <h3 className="text-sm font-semibold text-center tracking-wide">{t('topSongs.publicTitle')}</h3>
-        <Trophy className="w-4 h-4 text-primary/60" />
-      </div>
+      {!hideTitle && (
+        <div className="flex items-center justify-center gap-2">
+          <Trophy className="w-4 h-4 text-primary/60" />
+          <h3 className="text-sm font-semibold text-center tracking-wide">{t('topSongs.publicTitle')}</h3>
+          <Trophy className="w-4 h-4 text-primary/60" />
+        </div>
+      )}
 
       <div className="flex items-end justify-center gap-1.5 sm:gap-2 py-2">
         {[2, 1, 3].map(pos => {
