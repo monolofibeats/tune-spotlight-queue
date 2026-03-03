@@ -660,77 +660,42 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 45%) !important;
 }
 
-/* Pricing panel monochrome overrides — force ALL colored backgrounds to transparent/black */
-.side-panel-pricing .bg-primary\/20,
-.side-panel-pricing .bg-primary\/10,
-.side-panel-pricing .bg-primary\/5 {
+/* Pricing panel monochrome overrides — nuke ALL colored backgrounds */
+.side-panel-pricing [class*="bg-primary"],
+.side-panel-pricing [class*="bg-emerald"],
+.side-panel-pricing [class*="bg-amber"],
+.side-panel-pricing [class*="bg-yellow"],
+.side-panel-pricing [class*="bg-slate"],
+.side-panel-pricing [class*="bg-destructive"],
+.side-panel-pricing [class*="bg-secondary"] {
   background-color: transparent !important;
 }
 
-.side-panel-pricing .text-primary {
-  color: hsl(0 0% 75%) !important;
+.side-panel-pricing [class*="text-primary"] {
+  color: hsl(0 0% 70%) !important;
 }
 
-.side-panel-pricing .border-primary\/30,
-.side-panel-pricing .border-primary\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .bg-emerald-500\/10,
-.side-panel-pricing .bg-emerald-500\/20 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-emerald-500\/30,
-.side-panel-pricing .border-emerald-500\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-emerald-400 {
+.side-panel-pricing [class*="text-emerald"] {
   color: hsl(0 0% 65%) !important;
 }
 
-.side-panel-pricing .bg-amber-500\/10,
-.side-panel-pricing .bg-amber-500\/20 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-amber-500\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-amber-400 {
-  color: hsl(0 0% 65%) !important;
-}
-
-.side-panel-pricing .bg-yellow-500\/10,
-.side-panel-pricing .bg-slate-400\/10,
-.side-panel-pricing .bg-amber-600\/10 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-yellow-500\/20,
-.side-panel-pricing .border-slate-400\/20,
-.side-panel-pricing .border-amber-600\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-yellow-400,
-.side-panel-pricing .text-slate-300,
-.side-panel-pricing .text-amber-600 {
+.side-panel-pricing [class*="text-amber"],
+.side-panel-pricing [class*="text-yellow"],
+.side-panel-pricing [class*="text-slate"] {
   color: hsl(0 0% 60%) !important;
 }
 
-.side-panel-pricing .bg-destructive\/10 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-destructive\/30 {
-  border-color: hsl(0 0% 18%) !important;
-}
-
-.side-panel-pricing .text-destructive {
+.side-panel-pricing [class*="text-destructive"] {
   color: hsl(0 0% 50%) !important;
+}
+
+.side-panel-pricing [class*="border-primary"],
+.side-panel-pricing [class*="border-emerald"],
+.side-panel-pricing [class*="border-amber"],
+.side-panel-pricing [class*="border-yellow"],
+.side-panel-pricing [class*="border-slate"],
+.side-panel-pricing [class*="border-destructive"] {
+  border-color: hsl(0 0% 20%) !important;
 }
 
 /* Soundboard slider overrides */
