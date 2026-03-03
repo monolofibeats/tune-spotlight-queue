@@ -633,21 +633,30 @@ body[data-anim-style="elegant"] * {
   --ring: 0 0% 40% !important;
 }
 
-/* Exempt podium from monochrome — restore original colors */
-.side-panel-podium {
-  --primary: 50 100% 50% !important;
-  --accent: 50 100% 50% !important;
+/* Podium: monochrome outline-only (no color exemption) */
+.side-panel-podium [class*="bg-gradient"] {
+  background: transparent !important;
+  border: 1px solid hsl(0 0% 30%) !important;
 }
-.side-panel-left-container .side-panel-podium [class*="text-yellow"] { color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="text-slate"] { color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="text-amber"] { color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="bg-yellow"] { background-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="bg-slate"] { background-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="bg-amber"] { background-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="border-yellow"] { border-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="border-slate"] { border-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="border-amber"] { border-color: unset !important; }
-.side-panel-left-container .side-panel-podium [class*="text-primary"] { color: unset !important; }
+.side-panel-podium [class*="shadow-"] {
+  box-shadow: none !important;
+}
+.side-panel-podium [class*="ring-"] {
+  --tw-ring-color: transparent !important;
+}
+.side-panel-podium [class*="text-amber"],
+.side-panel-podium [class*="text-yellow"],
+.side-panel-podium [class*="text-slate"] {
+  color: hsl(0 0% 70%) !important;
+}
+.side-panel-podium [class*="bg-yellow"],
+.side-panel-podium [class*="bg-amber"],
+.side-panel-podium [class*="bg-slate"] {
+  background-color: transparent !important;
+}
+.side-panel-podium .drop-shadow-\[0_0_8px_rgba\(250\,204\,21\,0\.8\)\] {
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.3)) !important;
+}
 
 /* Kill any colored background class inside panels */
 .side-panel-left-container [class*="bg-primary"],
@@ -799,9 +808,16 @@ body[data-anim-style="elegant"] * {
 .side-panel-pricing button {
   background-color: transparent !important;
 }
-.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
-.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
-.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute) {
+/* Section header buttons (CollapsibleSection) — no border */
+.side-panel-left-container > div > div > button,
+.side-panel-right-container > div > div > button,
+.side-panel-left-dimmable > div > button,
+.side-panel-right-dimmable > div > button {
+  border: none !important;
+}
+.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header),
+.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header),
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute):not(.side-panel-section-header) {
   border: 1px solid hsl(0 0% 28%) !important;
   color: hsl(0 0% 70%) !important;
 }

@@ -37,7 +37,7 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
     <div className="last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-300 transition-colors"
+        className="side-panel-section-header w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-300 transition-colors"
       >
         <Icon className="w-3.5 h-3.5" />
         <span className="flex-1 text-left uppercase tracking-wider">{title}</span>
