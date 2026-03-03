@@ -646,6 +646,15 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 70%) !important;
 }
 
+/* Prevent slider thumb from being clipped */
+.side-panel-slider,
+.side-panel-mono .side-panel-slider {
+  overflow: visible !important;
+}
+.side-panel-slider [data-slot="slider-track"] {
+  overflow: visible !important;
+}
+
 /* Force switches in side-panel-mono to grey */
 .side-panel-mono [data-state="checked"] {
   background-color: hsl(0 0% 45%) !important;
