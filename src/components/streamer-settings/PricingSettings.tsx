@@ -93,6 +93,29 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     hasChanges,
   }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, streamerId]);
 
+  // Auto-save with debounce
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) return;
+    if (!hasChanges) return;
+
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      handleSave();
+    }, 1200);
+
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, hasChanges]);
+
+  // Mark initial load complete after configs are fetched
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [isLoading]);
+
   useEffect(() => {
     fetchConfigs();
     fetchSpotPrices();
