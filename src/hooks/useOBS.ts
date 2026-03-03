@@ -7,14 +7,14 @@ interface UseOBSOptions {
   autoConnect?: boolean;
 }
 
-export function useOBS({ url = 'ws://localhost:4455', password, autoConnect = true }: UseOBSOptions = {}) {
+export function useOBS({ url = 'ws://localhost:4455', password, autoConnect = false }: UseOBSOptions = {}) {
   const obsRef = useRef<OBSWebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (overridePassword?: string) => {
     if (obsRef.current) {
       try { await obsRef.current.disconnect(); } catch {}
     }
@@ -24,20 +24,36 @@ export function useOBS({ url = 'ws://localhost:4455', password, autoConnect = tr
     setConnecting(true);
     setError(null);
 
+    const pw = overridePassword ?? password;
+
     try {
-      await obs.connect(url, password);
+      console.log('[OBS] Connecting to', url, pw ? '(with password)' : '(no password)');
+      await obs.connect(url, pw || undefined);
+      console.log('[OBS] Connected successfully');
       setConnected(true);
       setConnecting(false);
 
       obs.on('ConnectionClosed', () => {
+        console.log('[OBS] Connection closed');
         setConnected(false);
-        // Auto-reconnect after 5s
-        reconnectTimer.current = setTimeout(() => connect(), 5000);
+        reconnectTimer.current = setTimeout(() => {
+          console.log('[OBS] Attempting reconnect...');
+          connect(pw || undefined);
+        }, 5000);
       });
     } catch (err: any) {
+      const msg = err?.message || String(err);
+      console.error('[OBS] Connection failed:', msg, err);
       setConnected(false);
       setConnecting(false);
-      setError(err?.message || 'Failed to connect to OBS');
+      
+      if (msg.includes('Authentication')) {
+        setError('Authentication failed – check your OBS WebSocket password.');
+      } else if (msg.includes('WebSocket') || msg.includes('connect')) {
+        setError('Cannot reach OBS. Is it running with WebSocket Server enabled on port 4455?');
+      } else {
+        setError(msg);
+      }
     }
   }, [url, password]);
 
@@ -48,6 +64,7 @@ export function useOBS({ url = 'ws://localhost:4455', password, autoConnect = tr
       obsRef.current = null;
     }
     setConnected(false);
+    setError(null);
   }, []);
 
   const saveReplayBuffer = useCallback(async () => {
@@ -76,14 +93,13 @@ export function useOBS({ url = 'ws://localhost:4455', password, autoConnect = tr
   }, [connected]);
 
   useEffect(() => {
-    if (autoConnect) connect();
     return () => {
       clearTimeout(reconnectTimer.current);
       if (obsRef.current) {
         try { obsRef.current.disconnect(); } catch {}
       }
     };
-  }, [autoConnect, connect]);
+  }, []);
 
   return {
     connected,
