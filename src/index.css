@@ -622,56 +622,30 @@ body[data-anim-style="elegant"] * {
 }
 
 /* ===== Side Panel Monochrome Overrides ===== */
+/* NUCLEAR: Kill ALL color in both side panel containers */
 
-/* Force all sliders in side panels to outline-only */
-.side-panel-slider [data-slot="slider-range"],
-.side-panel-mono [data-slot="slider-range"] {
-  background-color: transparent !important;
-  border-top: 1px solid hsl(0 0% 30%) !important;
-  border-bottom: 1px solid hsl(0 0% 30%) !important;
-}
-
-.side-panel-slider [data-slot="slider-track"],
-.side-panel-mono [data-slot="slider-track"] {
-  background-color: transparent !important;
-  border: 1px solid hsl(0 0% 20%) !important;
+/* --- Global color nuke for both panels --- */
+.side-panel-left-container,
+.side-panel-right-container,
+.side-panel-pricing {
+  --primary: 0 0% 50% !important;
+  --accent: 0 0% 50% !important;
+  --ring: 0 0% 40% !important;
 }
 
-.side-panel-slider [data-slot="slider-thumb"],
-.side-panel-mono [data-slot="slider-thumb"] {
-  border-color: hsl(0 0% 35%) !important;
-  background-color: transparent !important;
-}
-
-/* Prevent slider thumb from being clipped */
-.side-panel-slider,
-.side-panel-mono .side-panel-slider {
-  overflow: visible !important;
-}
-.side-panel-slider [data-slot="slider-track"] {
-  overflow: visible !important;
-}
-
-/* Force ALL switches in both panels to outline-only */
-.side-panel-mono [role="switch"],
-.side-panel-left-container [role="switch"],
-.side-panel-pricing [role="switch"] {
-  border: 1px solid hsl(0 0% 30%) !important;
-}
-.side-panel-mono [role="switch"][data-state="checked"],
-.side-panel-left-container [role="switch"][data-state="checked"],
-.side-panel-pricing [role="switch"][data-state="checked"] {
-  background-color: hsl(0 0% 20%) !important;
-  border-color: hsl(0 0% 45%) !important;
-}
-.side-panel-mono [role="switch"][data-state="unchecked"],
-.side-panel-left-container [role="switch"][data-state="unchecked"],
-.side-panel-pricing [role="switch"][data-state="unchecked"] {
-  background-color: transparent !important;
-  border-color: hsl(0 0% 25%) !important;
-}
-
-/* Pricing panel monochrome overrides — nuke ALL colored backgrounds */
+/* Kill any colored background class inside panels */
+.side-panel-left-container [class*="bg-primary"],
+.side-panel-left-container [class*="bg-emerald"],
+.side-panel-left-container [class*="bg-amber"],
+.side-panel-left-container [class*="bg-yellow"],
+.side-panel-left-container [class*="bg-destructive"],
+.side-panel-left-container [class*="bg-secondary"],
+.side-panel-right-container [class*="bg-primary"],
+.side-panel-right-container [class*="bg-emerald"],
+.side-panel-right-container [class*="bg-amber"],
+.side-panel-right-container [class*="bg-yellow"],
+.side-panel-right-container [class*="bg-destructive"],
+.side-panel-right-container [class*="bg-secondary"],
 .side-panel-pricing [class*="bg-primary"],
 .side-panel-pricing [class*="bg-emerald"],
 .side-panel-pricing [class*="bg-amber"],
@@ -682,24 +656,41 @@ body[data-anim-style="elegant"] * {
   background-color: transparent !important;
 }
 
+/* Kill colored text — all becomes grey */
+.side-panel-left-container [class*="text-primary"],
+.side-panel-right-container [class*="text-primary"],
 .side-panel-pricing [class*="text-primary"] {
   color: hsl(0 0% 70%) !important;
 }
-
+.side-panel-left-container [class*="text-emerald"],
+.side-panel-right-container [class*="text-emerald"],
 .side-panel-pricing [class*="text-emerald"] {
   color: hsl(0 0% 65%) !important;
 }
-
+.side-panel-left-container [class*="text-amber"],
+.side-panel-left-container [class*="text-yellow"],
+.side-panel-right-container [class*="text-amber"],
+.side-panel-right-container [class*="text-yellow"],
 .side-panel-pricing [class*="text-amber"],
 .side-panel-pricing [class*="text-yellow"],
 .side-panel-pricing [class*="text-slate"] {
   color: hsl(0 0% 60%) !important;
 }
-
+.side-panel-left-container [class*="text-destructive"],
+.side-panel-right-container [class*="text-destructive"],
 .side-panel-pricing [class*="text-destructive"] {
   color: hsl(0 0% 50%) !important;
 }
 
+/* Kill colored borders */
+.side-panel-left-container [class*="border-primary"],
+.side-panel-left-container [class*="border-emerald"],
+.side-panel-left-container [class*="border-amber"],
+.side-panel-left-container [class*="border-yellow"],
+.side-panel-right-container [class*="border-primary"],
+.side-panel-right-container [class*="border-emerald"],
+.side-panel-right-container [class*="border-amber"],
+.side-panel-right-container [class*="border-yellow"],
 .side-panel-pricing [class*="border-primary"],
 .side-panel-pricing [class*="border-emerald"],
 .side-panel-pricing [class*="border-amber"],
@@ -709,61 +700,121 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 20%) !important;
 }
 
-/* Soundboard slider overrides */
-.side-panel-podium .text-primary\/60 {
-  color: hsl(0 0% 45%) !important;
+/* --- Sliders: outline-only (target actual Radix classes) --- */
+.side-panel-left-container [data-radix-slider-track],
+.side-panel-right-container [data-radix-slider-track],
+.side-panel-pricing [data-radix-slider-track],
+.side-panel-slider [data-radix-slider-track] {
+  background-color: transparent !important;
+  border: 1px solid hsl(0 0% 20%) !important;
+  overflow: visible !important;
 }
 
-/* Pricing panel buttons: make them visible against dark background */
-.side-panel-pricing button[data-state="active"],
-.side-panel-pricing [role="tab"][data-state="active"] {
-  background-color: hsl(0 0% 25%) !important;
-  color: hsl(0 0% 95%) !important;
-  border: 1px solid hsl(0 0% 40%) !important;
+.side-panel-left-container [data-radix-slider-range],
+.side-panel-right-container [data-radix-slider-range],
+.side-panel-pricing [data-radix-slider-range],
+.side-panel-slider [data-radix-slider-range] {
+  background-color: transparent !important;
+  border-top: 1px solid hsl(0 0% 30%) !important;
+  border-bottom: 1px solid hsl(0 0% 30%) !important;
 }
 
-.side-panel-pricing [role="tab"] {
-  color: hsl(0 0% 50%) !important;
+.side-panel-left-container [data-radix-slider-thumb],
+.side-panel-right-container [data-radix-slider-thumb],
+.side-panel-pricing [data-radix-slider-thumb],
+.side-panel-slider [data-radix-slider-thumb] {
+  border-color: hsl(0 0% 35%) !important;
+  background-color: transparent !important;
 }
 
-.side-panel-pricing [role="tablist"] {
-  background-color: hsl(0 0% 5%) !important;
-  border-color: hsl(0 0% 12%) !important;
+/* Also target by class in case data attrs differ */
+.side-panel-left-container .bg-secondary,
+.side-panel-right-container .bg-secondary,
+.side-panel-pricing .bg-secondary,
+.side-panel-slider .bg-secondary {
+  background-color: transparent !important;
+  border: 1px solid hsl(0 0% 20%) !important;
 }
 
-/* ALL buttons inside pricing panel — outline only */
+.side-panel-left-container .bg-primary,
+.side-panel-right-container .bg-primary,
+.side-panel-pricing .bg-primary,
+.side-panel-slider .bg-primary {
+  background-color: transparent !important;
+}
+
+/* Slider thumb: target border-primary class */
+.side-panel-left-container .border-primary,
+.side-panel-right-container .border-primary,
+.side-panel-pricing .border-primary,
+.side-panel-slider .border-primary {
+  border-color: hsl(0 0% 35%) !important;
+}
+
+/* Prevent slider thumb clipping */
+.side-panel-slider,
+.side-panel-mono .side-panel-slider {
+  overflow: visible !important;
+}
+
+/* --- Switches: outline-only in ALL panels --- */
+.side-panel-left-container [role="switch"],
+.side-panel-right-container [role="switch"],
+.side-panel-pricing [role="switch"] {
+  border: 1px solid hsl(0 0% 30%) !important;
+  background-color: transparent !important;
+}
+.side-panel-left-container [role="switch"][data-state="checked"],
+.side-panel-right-container [role="switch"][data-state="checked"],
+.side-panel-pricing [role="switch"][data-state="checked"] {
+  background-color: hsl(0 0% 15%) !important;
+  border-color: hsl(0 0% 45%) !important;
+}
+.side-panel-left-container [role="switch"][data-state="unchecked"],
+.side-panel-right-container [role="switch"][data-state="unchecked"],
+.side-panel-pricing [role="switch"][data-state="unchecked"] {
+  background-color: transparent !important;
+  border-color: hsl(0 0% 25%) !important;
+}
+
+/* --- ALL buttons in ALL panels: outline-only, no fills --- */
+.side-panel-left-container button,
+.side-panel-right-container button,
 .side-panel-pricing button {
   background-color: transparent !important;
 }
-.side-panel-pricing button:not([role="tab"]):not([role="switch"]) {
+.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
+.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute),
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute) {
   border: 1px solid hsl(0 0% 28%) !important;
-  color: hsl(0 0% 75%) !important;
+  color: hsl(0 0% 70%) !important;
 }
-.side-panel-pricing button:not([role="tab"]):not([role="switch"]):hover {
+.side-panel-left-container button:not([role="tab"]):not([role="switch"]):not(.absolute):hover,
+.side-panel-right-container button:not([role="tab"]):not([role="switch"]):not(.absolute):hover,
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):not(.absolute):hover {
   background-color: hsl(0 0% 10%) !important;
   border-color: hsl(0 0% 45%) !important;
   color: hsl(0 0% 95%) !important;
 }
 
-/* Pricing sliders — outline only */
-.side-panel-pricing [data-slot="slider-range"] {
-  background-color: transparent !important;
-  border-top: 1px solid hsl(0 0% 30%) !important;
-  border-bottom: 1px solid hsl(0 0% 30%) !important;
+/* Pricing tabs */
+.side-panel-pricing [role="tab"] {
+  color: hsl(0 0% 50%) !important;
 }
-.side-panel-pricing [data-slot="slider-track"] {
-  background-color: transparent !important;
-  border: 1px solid hsl(0 0% 20%) !important;
-  overflow: visible !important;
+.side-panel-pricing button[data-state="active"],
+.side-panel-pricing [role="tab"][data-state="active"] {
+  background-color: hsl(0 0% 20%) !important;
+  color: hsl(0 0% 95%) !important;
+  border: 1px solid hsl(0 0% 40%) !important;
 }
-.side-panel-pricing [data-slot="slider-thumb"] {
-  border-color: hsl(0 0% 35%) !important;
-  background-color: transparent !important;
+.side-panel-pricing [role="tablist"] {
+  background-color: hsl(0 0% 5%) !important;
+  border-color: hsl(0 0% 12%) !important;
 }
 
-/* Pricing badge */
-.side-panel-pricing .border-primary\/30 .text-primary {
-  color: hsl(0 0% 65%) !important;
+/* Soundboard text overrides */
+.side-panel-podium .text-primary\/60 {
+  color: hsl(0 0% 45%) !important;
 }
 
 /* All cards/boxes inside panels: transparent */
@@ -785,7 +836,7 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* Side panels: both dim/blurry by default, clear on hover */
+/* --- Dim/blur both panels by default, clear on hover --- */
 .side-panel-right-container,
 .side-panel-left-dimmable {
   opacity: 0.35;
