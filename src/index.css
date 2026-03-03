@@ -623,25 +623,22 @@ body[data-anim-style="elegant"] * {
 
 /* ===== Side Panel Monochrome Overrides ===== */
 
-/* Force all sliders in side panels to outline-only / dim */
+/* Force all sliders in side panels to outline-only */
 .side-panel-slider [data-slot="slider-range"],
-.side-panel-slider .bg-primary,
-.side-panel-mono [data-slot="slider-range"],
-.side-panel-mono .bg-primary {
-  background-color: hsl(0 0% 25%) !important;
+.side-panel-mono [data-slot="slider-range"] {
+  background-color: transparent !important;
+  border-top: 1px solid hsl(0 0% 30%) !important;
+  border-bottom: 1px solid hsl(0 0% 30%) !important;
 }
 
 .side-panel-slider [data-slot="slider-track"],
-.side-panel-slider .bg-secondary,
-.side-panel-mono [data-slot="slider-track"],
-.side-panel-mono .bg-secondary {
-  background-color: hsl(0 0% 10%) !important;
+.side-panel-mono [data-slot="slider-track"] {
+  background-color: transparent !important;
+  border: 1px solid hsl(0 0% 20%) !important;
 }
 
 .side-panel-slider [data-slot="slider-thumb"],
-.side-panel-slider .border-primary,
-.side-panel-mono [data-slot="slider-thumb"],
-.side-panel-mono .border-primary {
+.side-panel-mono [data-slot="slider-thumb"] {
   border-color: hsl(0 0% 35%) !important;
   background-color: transparent !important;
 }
@@ -655,9 +652,23 @@ body[data-anim-style="elegant"] * {
   overflow: visible !important;
 }
 
-/* Force switches in side-panel-mono to grey */
-.side-panel-mono [data-state="checked"] {
-  background-color: hsl(0 0% 45%) !important;
+/* Force ALL switches in both panels to outline-only */
+.side-panel-mono [role="switch"],
+.side-panel-left-container [role="switch"],
+.side-panel-pricing [role="switch"] {
+  border: 1px solid hsl(0 0% 30%) !important;
+}
+.side-panel-mono [role="switch"][data-state="checked"],
+.side-panel-left-container [role="switch"][data-state="checked"],
+.side-panel-pricing [role="switch"][data-state="checked"] {
+  background-color: hsl(0 0% 20%) !important;
+  border-color: hsl(0 0% 45%) !important;
+}
+.side-panel-mono [role="switch"][data-state="unchecked"],
+.side-panel-left-container [role="switch"][data-state="unchecked"],
+.side-panel-pricing [role="switch"][data-state="unchecked"] {
+  background-color: transparent !important;
+  border-color: hsl(0 0% 25%) !important;
 }
 
 /* Pricing panel monochrome overrides — nuke ALL colored backgrounds */
@@ -734,20 +745,15 @@ body[data-anim-style="elegant"] * {
   color: hsl(0 0% 95%) !important;
 }
 
-/* Pricing switches — outline style */
-.side-panel-pricing [role="switch"][data-state="checked"] {
-  background-color: hsl(0 0% 35%) !important;
-}
-.side-panel-pricing [role="switch"][data-state="unchecked"] {
-  background-color: hsl(0 0% 12%) !important;
-}
-
-/* Pricing sliders — outline thumb */
+/* Pricing sliders — outline only */
 .side-panel-pricing [data-slot="slider-range"] {
-  background-color: hsl(0 0% 25%) !important;
+  background-color: transparent !important;
+  border-top: 1px solid hsl(0 0% 30%) !important;
+  border-bottom: 1px solid hsl(0 0% 30%) !important;
 }
 .side-panel-pricing [data-slot="slider-track"] {
-  background-color: hsl(0 0% 10%) !important;
+  background-color: transparent !important;
+  border: 1px solid hsl(0 0% 20%) !important;
   overflow: visible !important;
 }
 .side-panel-pricing [data-slot="slider-thumb"] {
@@ -779,23 +785,32 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* Side panels: both dim by default, full on hover */
+/* Side panels: both dim/blurry by default, clear on hover */
 .side-panel-right-container,
 .side-panel-left-dimmable {
   opacity: 0.35;
-  transition: opacity 0.3s ease;
+  filter: blur(1px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
 }
 .side-panel-right-container:hover {
   opacity: 1;
+  filter: blur(0);
 }
 .side-panel-left-container:hover .side-panel-left-dimmable {
   opacity: 1;
+  filter: blur(0);
 }
 
-/* Left panel container itself: transparent like the right */
+/* Both panel containers: transparent, darken on hover */
 .side-panel-left-container {
   background-color: transparent !important;
 }
 .side-panel-left-container:hover {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+}
+.side-panel-right-container {
+  background-color: transparent !important;
+}
+.side-panel-right-container:hover {
   background-color: rgba(0, 0, 0, 0.85) !important;
 }
