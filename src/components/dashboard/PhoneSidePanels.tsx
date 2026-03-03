@@ -267,7 +267,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {leftOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/5 bg-black/60 backdrop-blur-sm overflow-y-auto opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <div className="h-full rounded-xl border border-white/[0.03] bg-black/90 backdrop-blur-sm overflow-y-auto side-panel-left-container transition-all duration-300">
               <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
             </div>
             <button
