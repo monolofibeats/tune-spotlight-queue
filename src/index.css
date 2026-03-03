@@ -660,10 +660,11 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 45%) !important;
 }
 
-/* Pricing panel monochrome overrides */
+/* Pricing panel monochrome overrides — force ALL colored backgrounds to transparent/black */
 .side-panel-pricing .bg-primary\/20,
-.side-panel-pricing .bg-primary\/10 {
-  background-color: hsl(0 0% 15%) !important;
+.side-panel-pricing .bg-primary\/10,
+.side-panel-pricing .bg-primary\/5 {
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .text-primary {
