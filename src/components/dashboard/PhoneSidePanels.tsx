@@ -300,7 +300,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {rightOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/[0.03] backdrop-blur-sm overflow-y-auto side-panel-right-container side-panel-mono transition-all duration-300">
+            <div className="h-full rounded-xl backdrop-blur-sm overflow-y-auto side-panel-right-container side-panel-mono transition-all duration-300">
               <RightPanel streamer={streamer} />
             </div>
             <button
