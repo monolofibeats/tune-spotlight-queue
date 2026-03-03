@@ -832,24 +832,11 @@ body[data-anim-style="elegant"] * {
   opacity: 1;
 }
 
-.side-panel-left-container {
+/* Left panel: the non-stats content dims, stats stay bright */
+.side-panel-left-dimmable {
   opacity: 0.4;
   transition: opacity 0.3s ease;
 }
-.side-panel-left-container:hover {
+.side-panel-left-container:hover .side-panel-left-dimmable {
   opacity: 1;
-}
-
-/* Session stats: ALWAYS bright regardless of panel hover state */
-.side-panel-left-container .session-stats-always-bright {
-  opacity: 1 !important;
-  filter: brightness(2.5);
-  position: relative;
-  z-index: 1;
-}
-
-/* Override the parent's opacity for the stats section */
-.side-panel-left-container:not(:hover) .session-stats-always-bright {
-  /* Counter the parent 0.4 opacity: 1/0.4 ≈ 2.5 effective brightness */
-  opacity: 2.5 !important;
 }
