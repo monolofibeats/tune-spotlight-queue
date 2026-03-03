@@ -15,47 +15,64 @@ interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
   topSongsMessage?: string;
+  compact?: boolean;
 }
 
-export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage }: TopSongsPublicDisplayProps) {
+export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage, compact }: TopSongsPublicDisplayProps) {
   const { t } = useLanguage();
   const [songs, setSongs] = useState<TopSongDisplay[]>([]);
+
+  const fetchSongs = async () => {
+    const { data } = await supabase
+      .from('streamer_top_songs')
+      .select('position, submission_id')
+      .eq('streamer_id', streamerId)
+      .eq('is_active', true)
+      .order('position');
+
+    if (!data || data.length === 0) { setSongs([]); return; }
+
+    const subIds = data.map(d => d.submission_id);
+    const { data: subs } = await supabase
+      .from('submissions')
+      .select('id, artist_name, song_title, song_url')
+      .in('id', subIds);
+
+    if (subs) {
+      const enriched = data.map(d => {
+        const sub = subs.find(s => s.id === d.submission_id);
+        return {
+          position: d.position,
+          artist_name: sub?.artist_name || 'Unknown',
+          song_title: sub?.song_title || 'Untitled',
+          song_url: sub?.song_url,
+        };
+      });
+      setSongs(enriched);
+    }
+  };
 
   useEffect(() => {
     if (!showTopSongs) return;
 
-    const fetch = async () => {
-      const { data } = await supabase
-        .from('streamer_top_songs')
-        .select('position, submission_id')
-        .eq('streamer_id', streamerId)
-        .eq('is_active', true)
-        .order('position');
+    fetchSongs();
 
-      if (!data || data.length === 0) return;
+    // Real-time subscription for updates
+    const channel = supabase
+      .channel(`top-songs-${streamerId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'streamer_top_songs',
+          filter: `streamer_id=eq.${streamerId}`,
+        },
+        () => { fetchSongs(); }
+      )
+      .subscribe();
 
-      // Fetch submission details
-      const subIds = data.map(d => d.submission_id);
-      const { data: subs } = await supabase
-        .from('submissions')
-        .select('id, artist_name, song_title, song_url')
-        .in('id', subIds);
-
-      if (subs) {
-        const enriched = data.map(d => {
-          const sub = subs.find(s => s.id === d.submission_id);
-          return {
-            position: d.position,
-            artist_name: sub?.artist_name || 'Unknown',
-            song_title: sub?.song_title || 'Untitled',
-            song_url: sub?.song_url,
-          };
-        });
-        setSongs(enriched);
-      }
-    };
-
-    fetch();
+    return () => { supabase.removeChannel(channel); };
   }, [streamerId, showTopSongs]);
 
   if (!showTopSongs || songs.length === 0) return null;
@@ -66,11 +83,26 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
     return <Award className="w-5 h-5 text-amber-600" />;
   };
 
-  const getStyle = (pos: number) => {
-    if (pos === 1) return 'border-yellow-500/40 bg-yellow-500/5';
-    if (pos === 2) return 'border-slate-400/30 bg-slate-400/5';
-    return 'border-amber-600/30 bg-amber-600/5';
-  };
+  // Compact mode for side panels
+  if (compact) {
+    return (
+      <div className="space-y-1.5">
+        {[1, 2, 3].map(pos => {
+          const song = songs.find(s => s.position === pos);
+          if (!song) return null;
+          return (
+            <div key={pos} className="flex items-center gap-2 p-1.5 rounded-md bg-white/5">
+              <span className="text-sm">{pos === 1 ? '🥇' : pos === 2 ? '🥈' : '🥉'}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold truncate">{song.song_title}</p>
+                <p className="text-[8px] text-neutral-500 truncate">{song.artist_name}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -105,7 +137,6 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
               transition={{ delay: pos === 1 ? 0.1 : pos === 2 ? 0 : 0.2, duration: 0.4 }}
               className={`flex flex-col items-center w-[90px] sm:w-[110px] ${pos === 1 ? 'order-2' : pos === 2 ? 'order-1' : 'order-3'}`}
             >
-              {/* Song info above */}
               <div className="w-full mb-1.5 text-center px-0.5">
                 {song.song_url ? (
                   <a
@@ -129,7 +160,6 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
                 )}
               </div>
 
-              {/* Podium block */}
               <div className={`w-full ${podiumHeight} rounded-t-lg border border-b-0 ${podiumBg} flex flex-col items-center justify-start pt-2.5`}>
                 <div className="flex items-center justify-center w-7 h-7 rounded-full mb-0.5" style={{
                   backgroundColor: pos === 1 ? 'rgba(234,179,8,0.2)' : pos === 2 ? 'rgba(148,163,184,0.2)' : 'rgba(180,83,9,0.2)'
@@ -143,7 +173,6 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
                 </span>
               </div>
 
-              {/* Base */}
               <div className={`w-[calc(100%+4px)] h-1.5 rounded-b-sm ${
                 pos === 1 ? 'bg-yellow-500/40' : pos === 2 ? 'bg-slate-400/30' : 'bg-amber-700/30'
               }`} />
