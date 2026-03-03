@@ -568,7 +568,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </Tabs>
 
       <p className="text-xs text-center text-muted-foreground">
-        {t('pricing.effectImmediately')}
+        Changes are saved automatically
       </p>
     </div>
   );
