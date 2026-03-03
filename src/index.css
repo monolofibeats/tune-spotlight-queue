@@ -623,27 +623,27 @@ body[data-anim-style="elegant"] * {
 
 /* ===== Side Panel Monochrome Overrides ===== */
 
-/* Force all sliders in side panels to dimmer white/grey — smaller & subtler */
+/* Force all sliders in side panels to outline-only / dim */
 .side-panel-slider [data-slot="slider-range"],
 .side-panel-slider .bg-primary,
 .side-panel-mono [data-slot="slider-range"],
 .side-panel-mono .bg-primary {
-  background-color: hsl(0 0% 35%) !important;
+  background-color: hsl(0 0% 25%) !important;
 }
 
 .side-panel-slider [data-slot="slider-track"],
 .side-panel-slider .bg-secondary,
 .side-panel-mono [data-slot="slider-track"],
 .side-panel-mono .bg-secondary {
-  background-color: hsl(0 0% 15%) !important;
+  background-color: hsl(0 0% 10%) !important;
 }
 
 .side-panel-slider [data-slot="slider-thumb"],
 .side-panel-slider .border-primary,
 .side-panel-mono [data-slot="slider-thumb"],
 .side-panel-mono .border-primary {
-  border-color: hsl(0 0% 30%) !important;
-  background-color: hsl(0 0% 50%) !important;
+  border-color: hsl(0 0% 35%) !important;
+  background-color: transparent !important;
 }
 
 /* Prevent slider thumb from being clipped */
@@ -660,77 +660,42 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 45%) !important;
 }
 
-/* Pricing panel monochrome overrides — force ALL colored backgrounds to transparent/black */
-.side-panel-pricing .bg-primary\/20,
-.side-panel-pricing .bg-primary\/10,
-.side-panel-pricing .bg-primary\/5 {
+/* Pricing panel monochrome overrides — nuke ALL colored backgrounds */
+.side-panel-pricing [class*="bg-primary"],
+.side-panel-pricing [class*="bg-emerald"],
+.side-panel-pricing [class*="bg-amber"],
+.side-panel-pricing [class*="bg-yellow"],
+.side-panel-pricing [class*="bg-slate"],
+.side-panel-pricing [class*="bg-destructive"],
+.side-panel-pricing [class*="bg-secondary"] {
   background-color: transparent !important;
 }
 
-.side-panel-pricing .text-primary {
-  color: hsl(0 0% 75%) !important;
+.side-panel-pricing [class*="text-primary"] {
+  color: hsl(0 0% 70%) !important;
 }
 
-.side-panel-pricing .border-primary\/30,
-.side-panel-pricing .border-primary\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .bg-emerald-500\/10,
-.side-panel-pricing .bg-emerald-500\/20 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-emerald-500\/30,
-.side-panel-pricing .border-emerald-500\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-emerald-400 {
+.side-panel-pricing [class*="text-emerald"] {
   color: hsl(0 0% 65%) !important;
 }
 
-.side-panel-pricing .bg-amber-500\/10,
-.side-panel-pricing .bg-amber-500\/20 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-amber-500\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-amber-400 {
-  color: hsl(0 0% 65%) !important;
-}
-
-.side-panel-pricing .bg-yellow-500\/10,
-.side-panel-pricing .bg-slate-400\/10,
-.side-panel-pricing .bg-amber-600\/10 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-yellow-500\/20,
-.side-panel-pricing .border-slate-400\/20,
-.side-panel-pricing .border-amber-600\/20 {
-  border-color: hsl(0 0% 20%) !important;
-}
-
-.side-panel-pricing .text-yellow-400,
-.side-panel-pricing .text-slate-300,
-.side-panel-pricing .text-amber-600 {
+.side-panel-pricing [class*="text-amber"],
+.side-panel-pricing [class*="text-yellow"],
+.side-panel-pricing [class*="text-slate"] {
   color: hsl(0 0% 60%) !important;
 }
 
-.side-panel-pricing .bg-destructive\/10 {
-  background-color: transparent !important;
-}
-
-.side-panel-pricing .border-destructive\/30 {
-  border-color: hsl(0 0% 18%) !important;
-}
-
-.side-panel-pricing .text-destructive {
+.side-panel-pricing [class*="text-destructive"] {
   color: hsl(0 0% 50%) !important;
+}
+
+.side-panel-pricing [class*="border-primary"],
+.side-panel-pricing [class*="border-emerald"],
+.side-panel-pricing [class*="border-amber"],
+.side-panel-pricing [class*="border-yellow"],
+.side-panel-pricing [class*="border-slate"],
+.side-panel-pricing [class*="border-destructive"] {
+  border-color: hsl(0 0% 20%) !important;
 }
 
 /* Soundboard slider overrides */
@@ -755,48 +720,39 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 12%) !important;
 }
 
-.side-panel-pricing .bg-secondary\/30 {
+/* ALL buttons inside pricing panel — outline only */
+.side-panel-pricing button {
   background-color: transparent !important;
 }
-
-.side-panel-pricing .bg-secondary\/50 {
-  background-color: transparent !important;
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]) {
+  border: 1px solid hsl(0 0% 28%) !important;
+  color: hsl(0 0% 75%) !important;
 }
-
-/* ALL buttons inside pricing panel — outline only, visible text */
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]) {
-  background-color: transparent !important;
-  border: 1px solid hsl(0 0% 30%) !important;
-  color: hsl(0 0% 80%) !important;
-}
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]):hover {
-  background-color: hsl(0 0% 12%) !important;
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):hover {
+  background-color: hsl(0 0% 10%) !important;
   border-color: hsl(0 0% 45%) !important;
   color: hsl(0 0% 95%) !important;
 }
 
-/* Pricing switches — dim */
-.side-panel-pricing [data-state="checked"] {
-  background-color: hsl(0 0% 40%) !important;
-}
-
-.side-panel-pricing [data-state="unchecked"] {
-  background-color: hsl(0 0% 15%) !important;
-}
-
-/* Pricing slider overrides — dimmer */
-.side-panel-pricing [data-slot="slider-range"] {
+/* Pricing switches — outline style */
+.side-panel-pricing [role="switch"][data-state="checked"] {
   background-color: hsl(0 0% 35%) !important;
 }
-
-.side-panel-pricing [data-slot="slider-track"] {
-  background-color: hsl(0 0% 15%) !important;
-  overflow: visible !important;
+.side-panel-pricing [role="switch"][data-state="unchecked"] {
+  background-color: hsl(0 0% 12%) !important;
 }
 
+/* Pricing sliders — outline thumb */
+.side-panel-pricing [data-slot="slider-range"] {
+  background-color: hsl(0 0% 25%) !important;
+}
+.side-panel-pricing [data-slot="slider-track"] {
+  background-color: hsl(0 0% 10%) !important;
+  overflow: visible !important;
+}
 .side-panel-pricing [data-slot="slider-thumb"] {
-  border-color: hsl(0 0% 30%) !important;
-  background-color: hsl(0 0% 50%) !important;
+  border-color: hsl(0 0% 35%) !important;
+  background-color: transparent !important;
 }
 
 /* Pricing badge */
