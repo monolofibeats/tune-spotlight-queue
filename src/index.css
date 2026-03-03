@@ -859,14 +859,14 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* --- Dim/blur both panels by default, clear on hover --- */
-.side-panel-right-container,
+/* --- Dim/blur panel CONTENT by default, clear on hover --- */
+.side-panel-right-dimmable,
 .side-panel-left-dimmable {
   opacity: 0.35;
   filter: blur(1px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
-.side-panel-right-container:hover {
+.side-panel-right-container:hover .side-panel-right-dimmable {
   opacity: 1;
   filter: blur(0);
 }
