@@ -785,23 +785,32 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* Side panels: both dim by default, full on hover */
+/* Side panels: both dim/blurry by default, clear on hover */
 .side-panel-right-container,
 .side-panel-left-dimmable {
   opacity: 0.35;
-  transition: opacity 0.3s ease;
+  filter: blur(1px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
 }
 .side-panel-right-container:hover {
   opacity: 1;
+  filter: blur(0);
 }
 .side-panel-left-container:hover .side-panel-left-dimmable {
   opacity: 1;
+  filter: blur(0);
 }
 
-/* Left panel container itself: transparent like the right */
+/* Both panel containers: transparent, darken on hover */
 .side-panel-left-container {
   background-color: transparent !important;
 }
 .side-panel-left-container:hover {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+}
+.side-panel-right-container {
+  background-color: transparent !important;
+}
+.side-panel-right-container:hover {
   background-color: rgba(0, 0, 0, 0.85) !important;
 }
