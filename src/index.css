@@ -738,8 +738,9 @@ body[data-anim-style="elegant"] * {
 /* Pricing panel buttons: make them visible against dark background */
 .side-panel-pricing button[data-state="active"],
 .side-panel-pricing [role="tab"][data-state="active"] {
-  background-color: hsl(0 0% 25%) !important;
-  color: hsl(0 0% 90%) !important;
+  background-color: hsl(0 0% 30%) !important;
+  color: hsl(0 0% 95%) !important;
+  border: 1px solid hsl(0 0% 40%) !important;
 }
 
 .side-panel-pricing [role="tab"] {
@@ -747,16 +748,27 @@ body[data-anim-style="elegant"] * {
 }
 
 .side-panel-pricing [role="tablist"] {
-  background-color: hsl(0 0% 8%) !important;
-  border-color: hsl(0 0% 15%) !important;
+  background-color: hsl(0 0% 5%) !important;
+  border-color: hsl(0 0% 12%) !important;
 }
 
 .side-panel-pricing .bg-secondary\/30 {
-  background-color: hsl(0 0% 12%) !important;
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .bg-secondary\/50 {
-  background-color: hsl(0 0% 10%) !important;
+  background-color: transparent !important;
+}
+
+/* All buttons inside pricing panel — visible contrast */
+.side-panel-pricing button:not([role="tab"]):not([data-state]) {
+  background-color: hsl(0 0% 18%) !important;
+  border: 1px solid hsl(0 0% 30%) !important;
+  color: hsl(0 0% 85%) !important;
+}
+.side-panel-pricing button:not([role="tab"]):not([data-state]):hover {
+  background-color: hsl(0 0% 25%) !important;
+  border-color: hsl(0 0% 40%) !important;
 }
 
 /* Pricing switches */
@@ -786,4 +798,45 @@ body[data-anim-style="elegant"] * {
 /* Pricing badge */
 .side-panel-pricing .border-primary\/30 .text-primary {
   color: hsl(0 0% 65%) !important;
+}
+
+/* All cards/boxes inside panels: transparent */
+.side-panel-left-container .bg-card\/20,
+.side-panel-left-container .bg-card\/15,
+.side-panel-left-container .bg-card,
+.side-panel-right-container .bg-card\/20,
+.side-panel-right-container .bg-card\/15,
+.side-panel-right-container .bg-card,
+.side-panel-pricing .bg-card\/20,
+.side-panel-pricing .bg-card\/15,
+.side-panel-pricing .bg-card {
+  background-color: transparent !important;
+}
+
+.side-panel-left-container .border-border\/30,
+.side-panel-right-container .border-border\/30,
+.side-panel-pricing .border-border\/30 {
+  border-color: hsl(0 0% 8%) !important;
+}
+
+/* Side panels: dim by default, full on hover — session stats always bright */
+.side-panel-right-container {
+  opacity: 0.4;
+}
+.side-panel-right-container:hover {
+  opacity: 1;
+}
+
+/* Left panel: everything dim except session stats */
+.side-panel-left-container {
+  opacity: 0.4;
+}
+.side-panel-left-container:hover {
+  opacity: 1;
+}
+
+/* Session stats section always fully visible */
+.side-panel-left-container > div > div:first-child {
+  opacity: 1 !important;
+  filter: brightness(2.2);
 }
