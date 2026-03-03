@@ -11,6 +11,7 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { PricingSettings, PricingSettingsHandle } from '@/components/streamer-settings/PricingSettings';
 import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
+import { OBSPanel } from '@/components/dashboard/OBSPanel';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
