@@ -722,7 +722,7 @@ body[data-anim-style="elegant"] * {
 }
 
 .side-panel-pricing .bg-destructive\/10 {
-  background-color: hsl(0 0% 10%) !important;
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .border-destructive\/30 {
