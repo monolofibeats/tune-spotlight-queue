@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback, useRef } from 'react';
 import { 
   DollarSign, 
   Settings, 
@@ -92,6 +92,29 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
     discard: handleDiscard,
     hasChanges,
   }), [hasChanges, configs, skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, streamerId]);
+
+  // Auto-save with debounce
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const initialLoadDone = useRef(false);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) return;
+    if (!hasChanges) return;
+
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      handleSave();
+    }, 1200);
+
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [skipLine, submission, submissionsOpen, bidIncrementPercent, bidIncrementActive, spotPrices, hasChanges]);
+
+  // Mark initial load complete after configs are fetched
+  useEffect(() => {
+    if (!isLoading && !initialLoadDone.current) {
+      initialLoadDone.current = true;
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     fetchConfigs();
@@ -297,7 +320,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         </div>
         {hasChanges && (
           <Badge variant="outline" className="text-primary border-primary/30">
-            {t('pricing.unsavedChanges')}
+            Saving…
           </Badge>
         )}
       </div>
@@ -545,7 +568,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
       </Tabs>
 
       <p className="text-xs text-center text-muted-foreground">
-        {t('pricing.effectImmediately')}
+        Changes are saved automatically
       </p>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
   Volume2, Bell, Trophy, Eye, Monitor
@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
-import { PricingSettings, PricingSettingsHandle } from '@/components/streamer-settings/PricingSettings';
+import { PricingSettings } from '@/components/streamer-settings/PricingSettings';
 import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
 import { OBSPanel } from '@/components/dashboard/OBSPanel';
 import type { Streamer } from '@/types/streamer';
@@ -249,8 +249,6 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
 /* RIGHT PANEL */
 function RightPanel({ streamer }: { streamer: Streamer }) {
-  const pricingRef = useRef<PricingSettingsHandle>(null);
-
   return (
     <div className="h-full flex flex-col side-panel-right-dimmable">
       <CollapsibleSection title="OBS" icon={Monitor} defaultOpen={false}>
@@ -259,7 +257,7 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 
       <CollapsibleSection title="Pricing" icon={DollarSign}>
         <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
-          <PricingSettings ref={pricingRef} streamerId={streamer.id} />
+          <PricingSettings streamerId={streamer.id} />
         </div>
       </CollapsibleSection>
     </div>
