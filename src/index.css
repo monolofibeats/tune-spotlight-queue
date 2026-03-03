@@ -633,6 +633,22 @@ body[data-anim-style="elegant"] * {
   --ring: 0 0% 40% !important;
 }
 
+/* Exempt podium from monochrome — restore original colors */
+.side-panel-podium {
+  --primary: 50 100% 50% !important;
+  --accent: 50 100% 50% !important;
+}
+.side-panel-left-container .side-panel-podium [class*="text-yellow"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-slate"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-amber"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-yellow"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-slate"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-amber"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-yellow"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-slate"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-amber"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-primary"] { color: unset !important; }
+
 /* Kill any colored background class inside panels */
 .side-panel-left-container [class*="bg-primary"],
 .side-panel-left-container [class*="bg-emerald"],
@@ -836,14 +852,14 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* --- Dim/blur both panels by default, clear on hover --- */
-.side-panel-right-container,
+/* --- Dim/blur panel CONTENT by default, clear on hover --- */
+.side-panel-right-dimmable,
 .side-panel-left-dimmable {
   opacity: 0.35;
   filter: blur(1px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
-.side-panel-right-container:hover {
+.side-panel-right-container:hover .side-panel-right-dimmable {
   opacity: 1;
   filter: blur(0);
 }

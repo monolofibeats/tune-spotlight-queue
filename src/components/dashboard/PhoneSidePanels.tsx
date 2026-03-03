@@ -34,7 +34,7 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-white/5 last:border-b-0">
+    <div className="last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-300 transition-colors"
@@ -251,7 +251,7 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
   const pricingRef = useRef<PricingSettingsHandle>(null);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col side-panel-right-dimmable">
       <CollapsibleSection title="Pricing" icon={DollarSign}>
         <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
           <PricingSettings ref={pricingRef} streamerId={streamer.id} />
@@ -271,7 +271,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {leftOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/[0.03] backdrop-blur-sm overflow-y-auto side-panel-left-container transition-all duration-300">
+            <div className="h-full rounded-xl backdrop-blur-sm overflow-y-auto side-panel-left-container transition-all duration-300">
               <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
             </div>
             <button
@@ -300,7 +300,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {rightOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/[0.03] backdrop-blur-sm overflow-y-auto side-panel-right-container side-panel-mono transition-all duration-300">
+            <div className="h-full rounded-xl backdrop-blur-sm overflow-y-auto side-panel-right-container side-panel-mono transition-all duration-300">
               <RightPanel streamer={streamer} />
             </div>
             <button
