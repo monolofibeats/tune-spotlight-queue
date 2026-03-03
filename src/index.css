@@ -784,19 +784,19 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 15%) !important;
 }
 
-/* Pricing slider overrides */
+/* Pricing slider overrides — dimmer */
 .side-panel-pricing [data-slot="slider-range"] {
-  background-color: hsl(0 0% 55%) !important;
+  background-color: hsl(0 0% 35%) !important;
 }
 
 .side-panel-pricing [data-slot="slider-track"] {
-  background-color: hsl(0 0% 20%) !important;
+  background-color: hsl(0 0% 15%) !important;
   overflow: visible !important;
 }
 
 .side-panel-pricing [data-slot="slider-thumb"] {
-  border-color: hsl(0 0% 45%) !important;
-  background-color: hsl(0 0% 70%) !important;
+  border-color: hsl(0 0% 30%) !important;
+  background-color: hsl(0 0% 50%) !important;
 }
 
 /* Pricing badge */
