@@ -253,6 +253,10 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 
   return (
     <div className="h-full flex flex-col side-panel-right-dimmable">
+      <CollapsibleSection title="OBS" icon={Monitor} defaultOpen={false}>
+        <OBSPanel />
+      </CollapsibleSection>
+
       <CollapsibleSection title="Pricing" icon={DollarSign}>
         <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
           <PricingSettings ref={pricingRef} streamerId={streamer.id} />
