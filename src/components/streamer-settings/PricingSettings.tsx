@@ -320,7 +320,7 @@ export const PricingSettings = forwardRef<PricingSettingsHandle, PricingSettings
         </div>
         {hasChanges && (
           <Badge variant="outline" className="text-primary border-primary/30">
-            {t('pricing.unsavedChanges')}
+            Saving…
           </Badge>
         )}
       </div>
