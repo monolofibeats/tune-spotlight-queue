@@ -638,23 +638,16 @@ body[data-anim-style="elegant"] * {
   --primary: 50 100% 50% !important;
   --accent: 50 100% 50% !important;
 }
-.side-panel-podium [class*="text-yellow"] { color: revert !important; }
-.side-panel-podium [class*="text-slate"] { color: revert !important; }
-.side-panel-podium [class*="text-amber"] { color: revert !important; }
-.side-panel-podium [class*="bg-yellow"] { background-color: revert !important; }
-.side-panel-podium [class*="bg-slate"] { background-color: revert !important; }
-.side-panel-podium [class*="bg-amber"] { background-color: revert !important; }
-.side-panel-podium [class*="border-yellow"] { border-color: revert !important; }
-.side-panel-podium [class*="border-slate"] { border-color: revert !important; }
-.side-panel-podium [class*="border-amber"] { border-color: revert !important; }
-.side-panel-podium [class*="from-yellow"],
-.side-panel-podium [class*="via-yellow"],
-.side-panel-podium [class*="from-amber"],
-.side-panel-podium [class*="via-amber"],
-.side-panel-podium [class*="from-slate"],
-.side-panel-podium [class*="via-slate"] {
-  /* Allow gradient classes to work normally */
-}
+.side-panel-left-container .side-panel-podium [class*="text-yellow"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-slate"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-amber"] { color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-yellow"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-slate"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="bg-amber"] { background-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-yellow"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-slate"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="border-amber"] { border-color: unset !important; }
+.side-panel-left-container .side-panel-podium [class*="text-primary"] { color: unset !important; }
 
 /* Kill any colored background class inside panels */
 .side-panel-left-container [class*="bg-primary"],
