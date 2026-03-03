@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
   Volume2, Bell, Trophy, Eye, Monitor
