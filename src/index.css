@@ -660,10 +660,11 @@ body[data-anim-style="elegant"] * {
   background-color: hsl(0 0% 45%) !important;
 }
 
-/* Pricing panel monochrome overrides */
+/* Pricing panel monochrome overrides — force ALL colored backgrounds to transparent/black */
 .side-panel-pricing .bg-primary\/20,
-.side-panel-pricing .bg-primary\/10 {
-  background-color: hsl(0 0% 15%) !important;
+.side-panel-pricing .bg-primary\/10,
+.side-panel-pricing .bg-primary\/5 {
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .text-primary {
@@ -675,8 +676,9 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 20%) !important;
 }
 
-.side-panel-pricing .bg-emerald-500\/10 {
-  background-color: hsl(0 0% 12%) !important;
+.side-panel-pricing .bg-emerald-500\/10,
+.side-panel-pricing .bg-emerald-500\/20 {
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .border-emerald-500\/30,
@@ -688,8 +690,9 @@ body[data-anim-style="elegant"] * {
   color: hsl(0 0% 65%) !important;
 }
 
-.side-panel-pricing .bg-amber-500\/10 {
-  background-color: hsl(0 0% 12%) !important;
+.side-panel-pricing .bg-amber-500\/10,
+.side-panel-pricing .bg-amber-500\/20 {
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .border-amber-500\/20 {
@@ -703,7 +706,7 @@ body[data-anim-style="elegant"] * {
 .side-panel-pricing .bg-yellow-500\/10,
 .side-panel-pricing .bg-slate-400\/10,
 .side-panel-pricing .bg-amber-600\/10 {
-  background-color: hsl(0 0% 12%) !important;
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .border-yellow-500\/20,
@@ -719,7 +722,7 @@ body[data-anim-style="elegant"] * {
 }
 
 .side-panel-pricing .bg-destructive\/10 {
-  background-color: hsl(0 0% 10%) !important;
+  background-color: transparent !important;
 }
 
 .side-panel-pricing .border-destructive\/30 {
@@ -760,15 +763,16 @@ body[data-anim-style="elegant"] * {
   background-color: transparent !important;
 }
 
-/* All buttons inside pricing panel — visible contrast */
-.side-panel-pricing button:not([role="tab"]):not([data-state]) {
-  background-color: hsl(0 0% 18%) !important;
-  border: 1px solid hsl(0 0% 30%) !important;
+/* All buttons inside pricing panel — visible contrast against black bg */
+.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]) {
+  background-color: transparent !important;
+  border: 1px solid hsl(0 0% 35%) !important;
   color: hsl(0 0% 85%) !important;
 }
-.side-panel-pricing button:not([role="tab"]):not([data-state]):hover {
-  background-color: hsl(0 0% 25%) !important;
-  border-color: hsl(0 0% 40%) !important;
+.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):hover {
+  background-color: hsl(0 0% 15%) !important;
+  border-color: hsl(0 0% 50%) !important;
+  color: hsl(0 0% 95%) !important;
 }
 
 /* Pricing switches */
@@ -819,24 +823,20 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* Side panels: dim by default, full on hover — session stats always bright */
+/* Side panels: dim by default, full on hover */
 .side-panel-right-container {
   opacity: 0.4;
+  transition: opacity 0.3s ease;
 }
 .side-panel-right-container:hover {
   opacity: 1;
 }
 
-/* Left panel: everything dim except session stats */
-.side-panel-left-container {
+/* Left panel: the non-stats content dims, stats stay bright */
+.side-panel-left-dimmable {
   opacity: 0.4;
+  transition: opacity 0.3s ease;
 }
-.side-panel-left-container:hover {
+.side-panel-left-container:hover .side-panel-left-dimmable {
   opacity: 1;
-}
-
-/* Session stats section always fully visible */
-.side-panel-left-container > div > div:first-child {
-  opacity: 1 !important;
-  filter: brightness(2.2);
 }
