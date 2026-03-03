@@ -141,6 +141,10 @@ function useOnlineDuration() {
   return duration;
 }
 
+/* Monochrome overrides for side panel controls */
+const monoSwitchClass = "data-[state=checked]:bg-white data-[state=unchecked]:bg-neutral-700 border-neutral-600";
+const monoSliderTrackClass = "[&_[data-slot=slider-track]]:bg-neutral-700 [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:border-neutral-500 [&_.bg-primary]:bg-white [&_.bg-secondary]:bg-neutral-700 [&_.border-primary]:border-neutral-500";
+
 /* LEFT PANEL */
 function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
@@ -196,7 +200,7 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
               <Bell className="w-3 h-3 text-neutral-400" />
               <span className="text-[11px] text-neutral-300">Notification Sounds</span>
             </div>
-            <Switch checked={notifSounds} onCheckedChange={setNotifSounds} />
+            <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className={monoSwitchClass} />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
@@ -204,7 +208,7 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
               <span className="text-[11px] text-neutral-300">Volume</span>
               <span className="text-[10px] text-neutral-500 ml-auto">{volume}%</span>
             </div>
-            <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className="w-full" />
+            <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className={`w-full ${monoSliderTrackClass}`} />
           </div>
         </div>
       </CollapsibleSection>
@@ -214,8 +218,8 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
       </CollapsibleSection>
 
       <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
-        <div className="max-h-[180px] overflow-y-auto">
-          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} compact />
+        <div className="[&_.text-primary\\/60]:text-neutral-400 scale-[0.85] origin-top">
+          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} />
         </div>
       </CollapsibleSection>
 
@@ -232,6 +236,7 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
               <Switch
                 checked={!!(streamer as any)[key]}
                 onCheckedChange={(v) => toggleVisibility(key, v)}
+                className={monoSwitchClass}
               />
             </div>
           ))}

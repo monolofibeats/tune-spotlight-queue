@@ -286,8 +286,14 @@ const StreamerDashboard = () => {
   const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
-  const [phoneOptimized, setPhoneOptimized] = useState(true);
-  const [showSidePanels, setShowSidePanels] = useState(false);
+  const [phoneOptimized, setPhoneOptimized] = useState(() => {
+    const saved = localStorage.getItem('upstar-phone-optimized');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [showSidePanels, setShowSidePanels] = useState(() => {
+    const saved = localStorage.getItem('upstar-show-side-panels');
+    return saved === 'true';
+  });
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
@@ -1210,7 +1216,7 @@ const StreamerDashboard = () => {
               {canEdit && (
                 <TabsContent value="settings" forceMount className={dashboardActiveTab !== 'settings' ? 'hidden' : ''}>
                   <div className="relative z-10">
-                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={setPhoneOptimized} showSidePanels={showSidePanels} onShowSidePanelsChange={setShowSidePanels} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
+                    <StreamerSettingsPanel key={streamer.id} streamer={streamer} onUpdate={setStreamer} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={(v) => { localStorage.setItem('upstar-phone-optimized', String(v)); setPhoneOptimized(v); }} showSidePanels={showSidePanels} onShowSidePanelsChange={(v) => { localStorage.setItem('upstar-show-side-panels', String(v)); setShowSidePanels(v); }} onUnsavedChange={setSettingsHasUnsaved} onLoadSessionWithTrack={(filter, sub) => {
                       // Load the session filter
                       setSessionFilter(filter);
                       // Switch to submissions tab

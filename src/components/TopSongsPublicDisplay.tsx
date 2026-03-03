@@ -15,10 +15,9 @@ interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
   topSongsMessage?: string;
-  compact?: boolean;
 }
 
-export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage, compact }: TopSongsPublicDisplayProps) {
+export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage }: TopSongsPublicDisplayProps) {
   const { t } = useLanguage();
   const [songs, setSongs] = useState<TopSongDisplay[]>([]);
 
@@ -82,27 +81,6 @@ export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessag
     if (pos === 2) return <Medal className="w-5 h-5 text-slate-300" />;
     return <Award className="w-5 h-5 text-amber-600" />;
   };
-
-  // Compact mode for side panels
-  if (compact) {
-    return (
-      <div className="space-y-1.5">
-        {[1, 2, 3].map(pos => {
-          const song = songs.find(s => s.position === pos);
-          if (!song) return null;
-          return (
-            <div key={pos} className="flex items-center gap-2 p-1.5 rounded-md bg-white/5">
-              <span className="text-sm">{pos === 1 ? '🥇' : pos === 2 ? '🥈' : '🥉'}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-bold truncate">{song.song_title}</p>
-                <p className="text-[8px] text-neutral-500 truncate">{song.artist_name}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
 
   return (
     <motion.div
