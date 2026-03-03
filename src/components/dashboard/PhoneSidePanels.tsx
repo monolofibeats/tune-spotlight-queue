@@ -171,75 +171,77 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
   return (
     <div className="h-full flex flex-col">
-      <div className="session-stats-always-bright">
-        <CollapsibleSection title="Session Stats" icon={DollarSign}>
-          <div className="grid grid-cols-2 gap-1.5">
-            <StatCard label="Earnings" value={fmt(stats.earnings)} icon={DollarSign} />
-            <StatCard label="Tracks" value={String(stats.trackCount)} icon={Music} />
-            <StatCard label="Last Song" value={timeSince(stats.lastSongAt)} icon={Clock} />
-            <StatCard label="Online" value={duration} icon={Timer} />
-            {stats.topPayer && (
-              <div className="col-span-2">
-                <StatCard 
-                  label="Top Payer" 
-                  value={`${stats.topPayer.email.split('@')[0]}… €${stats.topPayer.amount.toFixed(2)}`} 
-                  icon={Crown} 
+      {/* Session stats — always fully visible */}
+      <CollapsibleSection title="Session Stats" icon={DollarSign}>
+        <div className="grid grid-cols-2 gap-1.5">
+          <StatCard label="Earnings" value={fmt(stats.earnings)} icon={DollarSign} />
+          <StatCard label="Tracks" value={String(stats.trackCount)} icon={Music} />
+          <StatCard label="Last Song" value={timeSince(stats.lastSongAt)} icon={Clock} />
+          <StatCard label="Online" value={duration} icon={Timer} />
+          {stats.topPayer && (
+            <div className="col-span-2">
+              <StatCard 
+                label="Top Payer" 
+                value={`${stats.topPayer.email.split('@')[0]}… €${stats.topPayer.amount.toFixed(2)}`} 
+                icon={Crown} 
+              />
+            </div>
+          )}
+        </div>
+      </CollapsibleSection>
+
+      {/* Everything below dims when not hovered */}
+      <div className="side-panel-left-dimmable flex-1 flex flex-col">
+        <CollapsibleSection title="Audio" icon={Volume2}>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Bell className="w-3 h-3 text-neutral-500" />
+                <span className="text-[11px] text-neutral-400">Notification Sounds</span>
+              </div>
+              <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <Volume2 className="w-3 h-3 text-neutral-500" />
+                <span className="text-[11px] text-neutral-400">Volume</span>
+                <span className="text-[10px] text-neutral-600 ml-auto">{volume}%</span>
+              </div>
+              <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className="w-full side-panel-slider" />
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false}>
+          <SidePanelSoundboard />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
+          <div className="side-panel-podium scale-75 origin-top -mb-8">
+            <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} hideTitle />
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Section Visibility" icon={Eye} defaultOpen={false}>
+          <div className="space-y-2">
+            {[
+              { key: 'show_how_it_works', label: 'How It Works' },
+              { key: 'show_stream_embed', label: 'Stream Embed' },
+              { key: 'show_public_queue', label: 'Public Queue' },
+              { key: 'show_top_songs', label: 'Top Songs' },
+            ].map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between">
+                <span className="text-[11px] text-neutral-400">{label}</span>
+                <Switch
+                  checked={!!(streamer as any)[key]}
+                  onCheckedChange={(v) => toggleVisibility(key, v)}
+                  className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700"
                 />
               </div>
-            )}
+            ))}
           </div>
         </CollapsibleSection>
       </div>
-
-      <CollapsibleSection title="Audio" icon={Volume2}>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Bell className="w-3 h-3 text-neutral-500" />
-              <span className="text-[11px] text-neutral-400">Notification Sounds</span>
-            </div>
-            <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
-              <Volume2 className="w-3 h-3 text-neutral-500" />
-              <span className="text-[11px] text-neutral-400">Volume</span>
-              <span className="text-[10px] text-neutral-600 ml-auto">{volume}%</span>
-            </div>
-            <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className="w-full side-panel-slider" />
-          </div>
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false}>
-        <SidePanelSoundboard />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
-        <div className="side-panel-podium scale-75 origin-top -mb-8">
-          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} hideTitle />
-        </div>
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Section Visibility" icon={Eye} defaultOpen={false}>
-        <div className="space-y-2">
-          {[
-            { key: 'show_how_it_works', label: 'How It Works' },
-            { key: 'show_stream_embed', label: 'Stream Embed' },
-            { key: 'show_public_queue', label: 'Public Queue' },
-            { key: 'show_top_songs', label: 'Top Songs' },
-          ].map(({ key, label }) => (
-            <div key={key} className="flex items-center justify-between">
-              <span className="text-[11px] text-neutral-400">{label}</span>
-              <Switch
-                checked={!!(streamer as any)[key]}
-                onCheckedChange={(v) => toggleVisibility(key, v)}
-                className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700"
-              />
-            </div>
-          ))}
-        </div>
-      </CollapsibleSection>
     </div>
   );
 }
