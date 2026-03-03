@@ -64,7 +64,7 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
   return (
-    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-white/[0.06] border border-white/[0.08]">
+    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-transparent border border-white/[0.15]">
       <Icon className="w-3 h-3 text-neutral-300 shrink-0" />
       <div className="min-w-0">
         <p className="text-[10px] font-bold truncate text-neutral-100">{value}</p>

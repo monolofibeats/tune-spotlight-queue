@@ -823,20 +823,23 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 8%) !important;
 }
 
-/* Side panels: dim by default, full on hover */
-.side-panel-right-container {
-  opacity: 0.4;
+/* Side panels: both dim by default, full on hover */
+.side-panel-right-container,
+.side-panel-left-dimmable {
+  opacity: 0.35;
   transition: opacity 0.3s ease;
 }
 .side-panel-right-container:hover {
   opacity: 1;
 }
-
-/* Left panel: the non-stats content dims, stats stay bright */
-.side-panel-left-dimmable {
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-}
 .side-panel-left-container:hover .side-panel-left-dimmable {
   opacity: 1;
+}
+
+/* Left panel container itself: transparent like the right */
+.side-panel-left-container {
+  background-color: transparent !important;
+}
+.side-panel-left-container:hover {
+  background-color: rgba(0, 0, 0, 0.85) !important;
 }
