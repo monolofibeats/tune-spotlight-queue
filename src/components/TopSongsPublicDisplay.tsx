@@ -15,9 +15,10 @@ interface TopSongsPublicDisplayProps {
   streamerId: string;
   showTopSongs?: boolean;
   topSongsMessage?: string;
+  hideTitle?: boolean;
 }
 
-export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage }: TopSongsPublicDisplayProps) {
+export function TopSongsPublicDisplay({ streamerId, showTopSongs, topSongsMessage, hideTitle }: TopSongsPublicDisplayProps) {
   const { t } = useLanguage();
   const [songs, setSongs] = useState<TopSongDisplay[]>([]);
 
