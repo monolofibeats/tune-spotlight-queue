@@ -34,10 +34,10 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-white/10 last:border-b-0">
+    <div className="border-b border-white/5 last:border-b-0">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-400 hover:text-white transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-300 transition-colors"
       >
         <Icon className="w-3.5 h-3.5" />
         <span className="flex-1 text-left uppercase tracking-wider">{title}</span>
@@ -64,11 +64,11 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: React.ElementType }) {
   return (
-    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-white/5">
-      <Icon className="w-3 h-3 text-neutral-400 shrink-0" />
+    <div className="flex items-center gap-1.5 p-1.5 rounded-md bg-white/[0.03]">
+      <Icon className="w-3 h-3 text-neutral-500 shrink-0" />
       <div className="min-w-0">
-        <p className="text-[10px] font-bold truncate text-white">{value}</p>
-        <p className="text-[8px] text-neutral-500">{label}</p>
+        <p className="text-[10px] font-bold truncate text-neutral-300">{value}</p>
+        <p className="text-[8px] text-neutral-600">{label}</p>
       </div>
     </div>
   );
@@ -141,10 +141,6 @@ function useOnlineDuration() {
   return duration;
 }
 
-/* Monochrome overrides for side panel controls */
-const monoSwitchClass = "data-[state=checked]:bg-white data-[state=unchecked]:bg-neutral-700 border-neutral-600";
-const monoSliderTrackClass = "[&_[data-slot=slider-track]]:bg-neutral-700 [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-thumb]]:bg-white [&_[data-slot=slider-thumb]]:border-neutral-500 [&_.bg-primary]:bg-white [&_.bg-secondary]:bg-neutral-700 [&_.border-primary]:border-neutral-500";
-
 /* LEFT PANEL */
 function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
@@ -197,18 +193,18 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <Bell className="w-3 h-3 text-neutral-400" />
-              <span className="text-[11px] text-neutral-300">Notification Sounds</span>
+              <Bell className="w-3 h-3 text-neutral-500" />
+              <span className="text-[11px] text-neutral-400">Notification Sounds</span>
             </div>
-            <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className={monoSwitchClass} />
+            <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700" />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <Volume2 className="w-3 h-3 text-neutral-400" />
-              <span className="text-[11px] text-neutral-300">Volume</span>
-              <span className="text-[10px] text-neutral-500 ml-auto">{volume}%</span>
+              <Volume2 className="w-3 h-3 text-neutral-500" />
+              <span className="text-[11px] text-neutral-400">Volume</span>
+              <span className="text-[10px] text-neutral-600 ml-auto">{volume}%</span>
             </div>
-            <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className={`w-full ${monoSliderTrackClass}`} />
+            <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className="w-full side-panel-slider" />
           </div>
         </div>
       </CollapsibleSection>
@@ -218,8 +214,8 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
       </CollapsibleSection>
 
       <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
-        <div className="[&_.text-primary\\/60]:text-neutral-400 scale-[0.85] origin-top">
-          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} />
+        <div className="side-panel-podium scale-75 origin-top -mb-8">
+          <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} hideTitle />
         </div>
       </CollapsibleSection>
 
@@ -232,11 +228,11 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
             { key: 'show_top_songs', label: 'Top Songs' },
           ].map(({ key, label }) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-[11px] text-neutral-300">{label}</span>
+              <span className="text-[11px] text-neutral-400">{label}</span>
               <Switch
                 checked={!!(streamer as any)[key]}
                 onCheckedChange={(v) => toggleVisibility(key, v)}
-                className={monoSwitchClass}
+                className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700"
               />
             </div>
           ))}
@@ -253,7 +249,7 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
   return (
     <div className="h-full flex flex-col">
       <CollapsibleSection title="Pricing" icon={DollarSign}>
-        <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1">
+        <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
           <PricingSettings ref={pricingRef} streamerId={streamer.id} />
         </div>
       </CollapsibleSection>
@@ -271,22 +267,22 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {leftOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm overflow-y-auto">
+            <div className="h-full rounded-xl border border-white/5 bg-black/60 backdrop-blur-sm overflow-y-auto opacity-60 hover:opacity-100 transition-opacity duration-300">
               <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
             </div>
             <button
               onClick={() => setLeftOpen(false)}
-              className="absolute top-2 right-1 z-10 p-1 rounded-full bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+              className="absolute top-2 right-1 z-10 p-1 rounded-full bg-black/70 border border-white/10 hover:bg-white/10 transition-colors"
             >
-              <ChevronLeft className="w-3 h-3 text-white" />
+              <ChevronLeft className="w-3 h-3 text-neutral-400" />
             </button>
           </>
         ) : (
           <button
             onClick={() => setLeftOpen(true)}
-            className="absolute top-2 left-0 z-10 p-1 rounded-full bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+            className="absolute top-2 left-0 z-10 p-1 rounded-full bg-black/70 border border-white/10 hover:bg-white/10 transition-colors"
           >
-            <ChevronRight className="w-3 h-3 text-white" />
+            <ChevronRight className="w-3 h-3 text-neutral-400" />
           </button>
         )}
       </div>
@@ -300,22 +296,22 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       <div className="relative flex-1 min-w-0">
         {rightOpen ? (
           <>
-            <div className="h-full rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm overflow-y-auto">
+            <div className="h-full rounded-xl border border-white/5 bg-black/60 backdrop-blur-sm overflow-y-auto opacity-60 hover:opacity-100 transition-opacity duration-300 side-panel-mono">
               <RightPanel streamer={streamer} />
             </div>
             <button
               onClick={() => setRightOpen(false)}
-              className="absolute top-2 left-1 z-10 p-1 rounded-full bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+              className="absolute top-2 left-1 z-10 p-1 rounded-full bg-black/70 border border-white/10 hover:bg-white/10 transition-colors"
             >
-              <ChevronRight className="w-3 h-3 text-white" />
+              <ChevronRight className="w-3 h-3 text-neutral-400" />
             </button>
           </>
         ) : (
           <button
             onClick={() => setRightOpen(true)}
-            className="absolute top-2 right-0 z-10 p-1 rounded-full bg-black/60 border border-white/10 hover:bg-white/10 transition-colors"
+            className="absolute top-2 right-0 z-10 p-1 rounded-full bg-black/70 border border-white/10 hover:bg-white/10 transition-colors"
           >
-            <ChevronLeft className="w-3 h-3 text-white" />
+            <ChevronLeft className="w-3 h-3 text-neutral-400" />
           </button>
         )}
       </div>
