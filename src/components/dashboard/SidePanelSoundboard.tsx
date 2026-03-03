@@ -120,7 +120,7 @@ export function SidePanelSoundboard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full h-auto py-2 flex flex-col items-center gap-0.5 text-[9px] border-white/10 bg-white/5 hover:bg-white/10"
+                className="w-full h-auto py-2 flex flex-col items-center gap-0.5 text-[9px] border-white/10 bg-transparent hover:bg-white/10"
                 onClick={() => playSound(BUILTIN_URLS[effect.id], sbVolume / 100)}
               >
                 <span className="text-base">{effect.emoji}</span>
