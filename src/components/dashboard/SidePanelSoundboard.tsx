@@ -210,7 +210,7 @@ export function SidePanelSoundboard() {
             </Button>
           </div>
           <div className="flex gap-1.5">
-            <Button size="sm" className="flex-1 h-7 text-xs" onClick={addCustomSound} disabled={!pendingFile || !newLabel.trim()}>
+            <Button size="sm" className="flex-1 h-7 text-xs bg-neutral-600 hover:bg-neutral-500 text-white border-0" onClick={addCustomSound} disabled={!pendingFile || !newLabel.trim()}>
               Add
             </Button>
             <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setShowAddForm(false); setPendingFile(null); }}>

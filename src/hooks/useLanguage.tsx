@@ -1639,7 +1639,7 @@ const translations: Record<Language, Record<string, string>> = {
     'pricing.submissionsClosed': 'Einreichungen geschlossen',
     'pricing.submissionsOpenDesc': 'Nutzer können Tracks einreichen',
     'pricing.submissionsClosedDesc': 'Nutzer können gerade keine Tracks einreichen',
-    'pricing.tab.skipLine': 'Warteliste überspringen',
+    'pricing.tab.skipLine': 'Skips',
     'pricing.tab.submissions': 'Einreichungen',
     'pricing.tab.bidding': 'Gebotsschritte',
     'pricing.skipLine.enabled': 'Warteschlange überspringen aktiviert',

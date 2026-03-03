@@ -734,3 +734,56 @@ body[data-anim-style="elegant"] * {
 .side-panel-podium .text-primary\/60 {
   color: hsl(0 0% 45%) !important;
 }
+
+/* Pricing panel buttons: make them visible against dark background */
+.side-panel-pricing button[data-state="active"],
+.side-panel-pricing [role="tab"][data-state="active"] {
+  background-color: hsl(0 0% 25%) !important;
+  color: hsl(0 0% 90%) !important;
+}
+
+.side-panel-pricing [role="tab"] {
+  color: hsl(0 0% 50%) !important;
+}
+
+.side-panel-pricing [role="tablist"] {
+  background-color: hsl(0 0% 8%) !important;
+  border-color: hsl(0 0% 15%) !important;
+}
+
+.side-panel-pricing .bg-secondary\/30 {
+  background-color: hsl(0 0% 12%) !important;
+}
+
+.side-panel-pricing .bg-secondary\/50 {
+  background-color: hsl(0 0% 10%) !important;
+}
+
+/* Pricing switches */
+.side-panel-pricing [data-state="checked"] {
+  background-color: hsl(0 0% 50%) !important;
+}
+
+.side-panel-pricing [data-state="unchecked"] {
+  background-color: hsl(0 0% 20%) !important;
+}
+
+/* Pricing slider overrides */
+.side-panel-pricing [data-slot="slider-range"] {
+  background-color: hsl(0 0% 55%) !important;
+}
+
+.side-panel-pricing [data-slot="slider-track"] {
+  background-color: hsl(0 0% 20%) !important;
+  overflow: visible !important;
+}
+
+.side-panel-pricing [data-slot="slider-thumb"] {
+  border-color: hsl(0 0% 45%) !important;
+  background-color: hsl(0 0% 70%) !important;
+}
+
+/* Pricing badge */
+.side-panel-pricing .border-primary\/30 .text-primary {
+  color: hsl(0 0% 65%) !important;
+}
