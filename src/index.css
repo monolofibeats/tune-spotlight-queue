@@ -720,48 +720,39 @@ body[data-anim-style="elegant"] * {
   border-color: hsl(0 0% 12%) !important;
 }
 
-.side-panel-pricing .bg-secondary\/30 {
+/* ALL buttons inside pricing panel — outline only */
+.side-panel-pricing button {
   background-color: transparent !important;
 }
-
-.side-panel-pricing .bg-secondary\/50 {
-  background-color: transparent !important;
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]) {
+  border: 1px solid hsl(0 0% 28%) !important;
+  color: hsl(0 0% 75%) !important;
 }
-
-/* ALL buttons inside pricing panel — outline only, visible text */
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]) {
-  background-color: transparent !important;
-  border: 1px solid hsl(0 0% 30%) !important;
-  color: hsl(0 0% 80%) !important;
-}
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]):hover {
-  background-color: hsl(0 0% 12%) !important;
+.side-panel-pricing button:not([role="tab"]):not([role="switch"]):hover {
+  background-color: hsl(0 0% 10%) !important;
   border-color: hsl(0 0% 45%) !important;
   color: hsl(0 0% 95%) !important;
 }
 
-/* Pricing switches — dim */
-.side-panel-pricing [data-state="checked"] {
-  background-color: hsl(0 0% 40%) !important;
-}
-
-.side-panel-pricing [data-state="unchecked"] {
-  background-color: hsl(0 0% 15%) !important;
-}
-
-/* Pricing slider overrides — dimmer */
-.side-panel-pricing [data-slot="slider-range"] {
+/* Pricing switches — outline style */
+.side-panel-pricing [role="switch"][data-state="checked"] {
   background-color: hsl(0 0% 35%) !important;
 }
-
-.side-panel-pricing [data-slot="slider-track"] {
-  background-color: hsl(0 0% 15%) !important;
-  overflow: visible !important;
+.side-panel-pricing [role="switch"][data-state="unchecked"] {
+  background-color: hsl(0 0% 12%) !important;
 }
 
+/* Pricing sliders — outline thumb */
+.side-panel-pricing [data-slot="slider-range"] {
+  background-color: hsl(0 0% 25%) !important;
+}
+.side-panel-pricing [data-slot="slider-track"] {
+  background-color: hsl(0 0% 10%) !important;
+  overflow: visible !important;
+}
 .side-panel-pricing [data-slot="slider-thumb"] {
-  border-color: hsl(0 0% 30%) !important;
-  background-color: hsl(0 0% 50%) !important;
+  border-color: hsl(0 0% 35%) !important;
+  background-color: transparent !important;
 }
 
 /* Pricing badge */
