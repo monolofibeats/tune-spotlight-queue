@@ -171,23 +171,25 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
   return (
     <div className="h-full flex flex-col">
-      <CollapsibleSection title="Session Stats" icon={DollarSign}>
-        <div className="grid grid-cols-2 gap-1.5">
-          <StatCard label="Earnings" value={fmt(stats.earnings)} icon={DollarSign} />
-          <StatCard label="Tracks" value={String(stats.trackCount)} icon={Music} />
-          <StatCard label="Last Song" value={timeSince(stats.lastSongAt)} icon={Clock} />
-          <StatCard label="Online" value={duration} icon={Timer} />
-          {stats.topPayer && (
-            <div className="col-span-2">
-              <StatCard 
-                label="Top Payer" 
-                value={`${stats.topPayer.email.split('@')[0]}… €${stats.topPayer.amount.toFixed(2)}`} 
-                icon={Crown} 
-              />
-            </div>
-          )}
-        </div>
-      </CollapsibleSection>
+      <div className="session-stats-always-bright">
+        <CollapsibleSection title="Session Stats" icon={DollarSign}>
+          <div className="grid grid-cols-2 gap-1.5">
+            <StatCard label="Earnings" value={fmt(stats.earnings)} icon={DollarSign} />
+            <StatCard label="Tracks" value={String(stats.trackCount)} icon={Music} />
+            <StatCard label="Last Song" value={timeSince(stats.lastSongAt)} icon={Clock} />
+            <StatCard label="Online" value={duration} icon={Timer} />
+            {stats.topPayer && (
+              <div className="col-span-2">
+                <StatCard 
+                  label="Top Payer" 
+                  value={`${stats.topPayer.email.split('@')[0]}… €${stats.topPayer.amount.toFixed(2)}`} 
+                  icon={Crown} 
+                />
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
+      </div>
 
       <CollapsibleSection title="Audio" icon={Volume2}>
         <div className="space-y-3">
