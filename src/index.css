@@ -741,7 +741,7 @@ body[data-anim-style="elegant"] * {
 /* Pricing panel buttons: make them visible against dark background */
 .side-panel-pricing button[data-state="active"],
 .side-panel-pricing [role="tab"][data-state="active"] {
-  background-color: hsl(0 0% 30%) !important;
+  background-color: hsl(0 0% 25%) !important;
   color: hsl(0 0% 95%) !important;
   border: 1px solid hsl(0 0% 40%) !important;
 }
@@ -763,25 +763,25 @@ body[data-anim-style="elegant"] * {
   background-color: transparent !important;
 }
 
-/* All buttons inside pricing panel — visible contrast against black bg */
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]) {
+/* ALL buttons inside pricing panel — outline only, visible text */
+.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]) {
   background-color: transparent !important;
-  border: 1px solid hsl(0 0% 35%) !important;
-  color: hsl(0 0% 85%) !important;
+  border: 1px solid hsl(0 0% 30%) !important;
+  color: hsl(0 0% 80%) !important;
 }
-.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):hover {
-  background-color: hsl(0 0% 15%) !important;
-  border-color: hsl(0 0% 50%) !important;
+.side-panel-pricing button:not([role="tab"]):not([data-state="checked"]):not([data-state="unchecked"]):not([data-radix-collection-item]):hover {
+  background-color: hsl(0 0% 12%) !important;
+  border-color: hsl(0 0% 45%) !important;
   color: hsl(0 0% 95%) !important;
 }
 
-/* Pricing switches */
+/* Pricing switches — dim */
 .side-panel-pricing [data-state="checked"] {
-  background-color: hsl(0 0% 50%) !important;
+  background-color: hsl(0 0% 40%) !important;
 }
 
 .side-panel-pricing [data-state="unchecked"] {
-  background-color: hsl(0 0% 20%) !important;
+  background-color: hsl(0 0% 15%) !important;
 }
 
 /* Pricing slider overrides */
