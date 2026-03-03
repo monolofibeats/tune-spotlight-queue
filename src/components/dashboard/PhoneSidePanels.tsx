@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
-  Volume2, Bell, Trophy, Eye
+  Volume2, Bell, Trophy, Eye, Monitor
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { useStreamSession } from '@/hooks/useStreamSession';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { PricingSettings, PricingSettingsHandle } from '@/components/streamer-settings/PricingSettings';
 import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
+import { OBSPanel } from '@/components/dashboard/OBSPanel';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
@@ -252,6 +253,10 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 
   return (
     <div className="h-full flex flex-col side-panel-right-dimmable">
+      <CollapsibleSection title="OBS" icon={Monitor} defaultOpen={false}>
+        <OBSPanel />
+      </CollapsibleSection>
+
       <CollapsibleSection title="Pricing" icon={DollarSign}>
         <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
           <PricingSettings ref={pricingRef} streamerId={streamer.id} />
