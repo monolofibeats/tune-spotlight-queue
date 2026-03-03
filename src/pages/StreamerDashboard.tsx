@@ -286,8 +286,14 @@ const StreamerDashboard = () => {
   const [teamRole, setTeamRole] = useState<TeamRole>(null); // null = owner
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBuilderEditing, setIsBuilderEditing] = useState(false);
-  const [phoneOptimized, setPhoneOptimized] = useState(true);
-  const [showSidePanels, setShowSidePanels] = useState(false);
+  const [phoneOptimized, setPhoneOptimized] = useState(() => {
+    const saved = localStorage.getItem('upstar-phone-optimized');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [showSidePanels, setShowSidePanels] = useState(() => {
+    const saved = localStorage.getItem('upstar-show-side-panels');
+    return saved === 'true';
+  });
   const [poppedOutWidgets, setPoppedOutWidgets] = useState<Set<string>>(new Set());
   const [pendingPopOuts, setPendingPopOuts] = useState<string[]>([]);
   const [settingsHasUnsaved, setSettingsHasUnsaved] = useState(false);
