@@ -1262,7 +1262,9 @@ export type Database = {
           instagram_url: string | null
           is_live: boolean | null
           next_stream_at: string | null
+          next_stream_platform: string | null
           offline_message: string | null
+          offline_socials: Json | null
           page_language: string | null
           primary_color: string | null
           rejection_reason: string | null
@@ -1312,7 +1314,9 @@ export type Database = {
           instagram_url?: string | null
           is_live?: boolean | null
           next_stream_at?: string | null
+          next_stream_platform?: string | null
           offline_message?: string | null
+          offline_socials?: Json | null
           page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
@@ -1362,7 +1366,9 @@ export type Database = {
           instagram_url?: string | null
           is_live?: boolean | null
           next_stream_at?: string | null
+          next_stream_platform?: string | null
           offline_message?: string | null
+          offline_socials?: Json | null
           page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
