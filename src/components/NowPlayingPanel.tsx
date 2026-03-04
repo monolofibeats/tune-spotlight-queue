@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Volume2, VolumeX } from 'lucide-react';
 import {
   X, 
   Music2, 
@@ -220,6 +220,10 @@ export function NowPlayingPanel({
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
   const [insightsExpanded, setInsightsExpanded] = useState(false);
+  const [ttsMuted, setTtsMuted] = useState(() => {
+    try { return localStorage.getItem('upstar_tts_muted') === 'true'; } catch { return false; }
+  });
+  const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
     setAudioEl(el);
@@ -292,6 +296,45 @@ export function NowPlayingPanel({
 
     fetchSpotifyMeta();
   }, [submission?.song_url]);
+
+  // TTS: auto-read submission message when a new submission is opened
+  useEffect(() => {
+    if (!submission || !submission.message || ttsMuted) {
+      return;
+    }
+    // Only speak once per submission
+    if (ttsSpokenIdRef.current === submission.id) return;
+    ttsSpokenIdRef.current = submission.id;
+
+    // Cancel any ongoing speech
+    window.speechSynthesis?.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(submission.message);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 0.8;
+    window.speechSynthesis?.speak(utterance);
+
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, [submission?.id, submission?.message, ttsMuted]);
+
+  // Reset spoken ID when submission changes
+  useEffect(() => {
+    if (!submission) {
+      ttsSpokenIdRef.current = null;
+    }
+  }, [submission?.id]);
+
+  const toggleTtsMute = useCallback(() => {
+    setTtsMuted(prev => {
+      const next = !prev;
+      try { localStorage.setItem('upstar_tts_muted', String(next)); } catch {}
+      if (next) window.speechSynthesis?.cancel();
+      return next;
+    });
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('de-DE', {
@@ -552,10 +595,19 @@ export function NowPlayingPanel({
                 )}
 
                 {cfg.showMessage && submission.message && (
-                  <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20">
-                    <p className="text-xs text-muted-foreground italic line-clamp-2">
+                  <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20 flex items-start gap-2">
+                    <p className="text-xs text-muted-foreground italic line-clamp-2 flex-1">
                       "{submission.message}"
                     </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 shrink-0"
+                      onClick={toggleTtsMute}
+                      title={ttsMuted ? 'Unmute message reading' : 'Mute message reading'}
+                    >
+                      {ttsMuted ? <VolumeX className="w-3.5 h-3.5 text-muted-foreground" /> : <Volume2 className="w-3.5 h-3.5 text-primary" />}
+                    </Button>
                   </div>
                 )}
 
