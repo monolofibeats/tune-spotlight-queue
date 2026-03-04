@@ -149,6 +149,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setShowTopSongs(s.show_top_songs ?? false);
     setShowPublicQueue((s as any).show_public_queue ?? true);
     setCustomCss(s.custom_css || '');
+    setOfflineMessage((s as any).offline_message || '');
+    setNextStreamAt((s as any).next_stream_at || '');
+    setShowOfflineSignup((s as any).show_offline_signup ?? true);
     setPageLanguage(s.page_language || 'de');
   }, []);
 
