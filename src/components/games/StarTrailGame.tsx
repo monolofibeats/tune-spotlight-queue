@@ -167,8 +167,10 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   useEffect(() => {
     const audio = new Audio('/sfx/fairy-sparkle.mp3');
     audio.preload = 'auto';
-    audio.volume = 0.12;
+    audio.volume = 0.14;
+    audio.loop = true;
     sparkleAudioRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; };
   }, []);
 
   const fetchLeaderboard = useCallback(async () => {
