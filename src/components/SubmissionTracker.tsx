@@ -127,11 +127,11 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
                 </div>
 
                 {/* Queue position & wait time info */}
-                {queueInfo && (
-                  <div className="px-3 pb-3">
-                    <div className="rounded-lg bg-muted/40 border border-border/30 p-3 space-y-2.5">
+                <div className="px-3 pb-3">
+                  <div className="rounded-lg bg-muted/40 border border-border/30 p-3 space-y-2.5">
+                    {queueInfo ? (
                       <div className="flex items-start gap-2">
-                        <TrendingUp className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                        <Clock className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
                         <p className="text-xs text-foreground leading-relaxed">
                           You are on spot <span className="font-bold text-primary">#{queueInfo.position}</span> of {queueInfo.totalInQueue}.
                           {' '}It will take approximately{' '}
@@ -139,41 +139,33 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
                           {' '}until your song gets reviewed.
                         </p>
                       </div>
+                    ) : (
+                      <div className="flex items-start gap-2">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0 animate-pulse" />
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          Calculating your queue position…
+                        </p>
+                      </div>
+                    )}
 
-                      {queueInfo.position > 1 && (
-                        <div className="flex items-center gap-2">
-                          <p className="text-[11px] text-muted-foreground flex-1">
-                            Don't want to wait? Push your song to the top!
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => setBiddingSub(sub)}
-                            className="text-xs gap-1.5 h-7 px-3 shrink-0"
-                          >
-                            <Zap className="w-3 h-3" />
-                            Skip the Line
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    {(!queueInfo || queueInfo.position > 1) && (
+                      <div className="flex items-center gap-2">
+                        <p className="text-[11px] text-muted-foreground flex-1">
+                          Don't want to wait? Push your song to the top!
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => setBiddingSub(sub)}
+                          className="text-xs gap-1.5 h-7 px-3 shrink-0"
+                        >
+                          <Zap className="w-3 h-3" />
+                          Skip the Line
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {/* Fallback skip button when no queue info yet */}
-                {!queueInfo && (
-                  <div className="px-3 pb-3 flex justify-end">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setBiddingSub(sub)}
-                      className="text-xs gap-1 h-7 px-2"
-                    >
-                      <Zap className="w-3 h-3" />
-                      Skip
-                    </Button>
-                  </div>
-                )}
+                </div>
               </motion.div>
             );
           })}
