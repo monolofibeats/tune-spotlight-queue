@@ -1098,6 +1098,38 @@ export type Database = {
           },
         ]
       }
+      streamer_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          streamer_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          streamer_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          streamer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamer_subscribers_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streamer_team_members: {
         Row: {
           accepted_at: string | null
@@ -1229,10 +1261,13 @@ export type Database = {
           id: string
           instagram_url: string | null
           is_live: boolean | null
+          next_stream_at: string | null
+          offline_message: string | null
           page_language: string | null
           primary_color: string | null
           rejection_reason: string | null
           show_how_it_works: boolean | null
+          show_offline_signup: boolean | null
           show_public_queue: boolean | null
           show_stream_embed: boolean | null
           show_top_songs: boolean | null
@@ -1276,10 +1311,13 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_live?: boolean | null
+          next_stream_at?: string | null
+          offline_message?: string | null
           page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
+          show_offline_signup?: boolean | null
           show_public_queue?: boolean | null
           show_stream_embed?: boolean | null
           show_top_songs?: boolean | null
@@ -1323,10 +1361,13 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_live?: boolean | null
+          next_stream_at?: string | null
+          offline_message?: string | null
           page_language?: string | null
           primary_color?: string | null
           rejection_reason?: string | null
           show_how_it_works?: boolean | null
+          show_offline_signup?: boolean | null
           show_public_queue?: boolean | null
           show_stream_embed?: boolean | null
           show_top_songs?: boolean | null
