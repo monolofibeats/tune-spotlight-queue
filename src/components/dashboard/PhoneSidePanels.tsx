@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
-  Volume2, Trophy, Eye, Monitor
+  Volume2, Trophy, Eye, Monitor, Star
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { PricingSettings } from '@/components/streamer-settings/PricingSettings';
 import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
 import { OBSPanel } from '@/components/dashboard/OBSPanel';
+import { StarTrailGame } from '@/components/games/StarTrailGame';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
