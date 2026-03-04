@@ -226,6 +226,8 @@ export function NowPlayingPanel({
   const [ttsVolume, setTtsVolume] = useState(() => {
     try { return parseFloat(localStorage.getItem('upstar_tts_volume') || '0.8'); } catch { return 0.8; }
   });
+  const ttsVolumeRef = useRef(ttsVolume);
+  ttsVolumeRef.current = ttsVolume;
   const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
@@ -315,13 +317,13 @@ export function NowPlayingPanel({
     const utterance = new SpeechSynthesisUtterance(submission.message);
     utterance.rate = 0.95;
     utterance.pitch = 1;
-    utterance.volume = ttsVolume;
+    utterance.volume = ttsVolumeRef.current;
     window.speechSynthesis?.speak(utterance);
 
     return () => {
       window.speechSynthesis?.cancel();
     };
-  }, [submission?.id, submission?.message, ttsMuted, ttsVolume]);
+  }, [submission?.id, submission?.message, ttsMuted]);
 
   // Reset spoken ID when submission changes
   useEffect(() => {
