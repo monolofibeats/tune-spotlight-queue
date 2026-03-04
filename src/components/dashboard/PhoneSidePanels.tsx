@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
-  Volume2, Bell, Trophy, Eye, Monitor
+  Volume2, Trophy, Eye, Monitor
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
@@ -146,8 +145,6 @@ function useOnlineDuration() {
 function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
-  const [volume, setVolume] = useState(80);
-  const [notifSounds, setNotifSounds] = useState(true);
 
   const fmt = (cents: number) => `€${(cents / 100).toFixed(2)}`;
   const timeSince = (iso: string | null) => {
@@ -193,25 +190,6 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
       {/* Everything below dims when not hovered */}
       <div className="side-panel-left-dimmable flex-1 flex flex-col">
-        <CollapsibleSection title="Audio" icon={Volume2}>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Bell className="w-3 h-3 text-neutral-500" />
-                <span className="text-[11px] text-neutral-400">Notification Sounds</span>
-              </div>
-              <Switch checked={notifSounds} onCheckedChange={setNotifSounds} className="data-[state=checked]:bg-neutral-400 data-[state=unchecked]:bg-neutral-700" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <Volume2 className="w-3 h-3 text-neutral-500" />
-                <span className="text-[11px] text-neutral-400">Volume</span>
-                <span className="text-[10px] text-neutral-600 ml-auto">{volume}%</span>
-              </div>
-              <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={100} step={1} className="w-full side-panel-slider" />
-            </div>
-          </div>
-        </CollapsibleSection>
 
         <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false}>
           <SidePanelSoundboard />
