@@ -23,6 +23,7 @@ import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
+import { StarTrailLeaderboard } from '@/components/games/StarTrailLeaderboard';
 
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
@@ -355,6 +356,13 @@ function StreamerPageContent() {
           </div>
         </section>
       )}
+
+      {/* Star Trail Leaderboard */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-xl">
+          <StarTrailLeaderboard streamerId={streamer.id} />
+        </div>
+      </section>
 
       {/* Tracked Submissions - below the form */}
       {currentSubmissions.length > 0 && (
