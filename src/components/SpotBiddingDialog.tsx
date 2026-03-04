@@ -384,6 +384,36 @@ export function SpotBiddingDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Song info + queue position */}
+        <div className="rounded-lg border border-border/40 bg-muted/30 p-3 space-y-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Music2 className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{songTitle}</p>
+              <p className="text-xs text-muted-foreground truncate">by {artistName}</p>
+            </div>
+          </div>
+
+          {queuePosition && (
+            <div className="flex items-start gap-2 pt-1 border-t border-border/30">
+              <Clock className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You are on spot <span className="font-bold text-primary">#{queuePosition.position}</span> of {queuePosition.total}.
+                {' '}Estimated wait: <span className="font-bold text-primary">
+                  {(() => {
+                    const totalMin = queuePosition.position * MINUTES_PER_SONG;
+                    const h = Math.floor(totalMin / 60);
+                    const m = totalMin % 60;
+                    return h > 0 ? `~${h}h ${m > 0 ? `${m}min` : ''}` : `~${m}min`;
+                  })()}
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
