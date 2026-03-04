@@ -12,6 +12,8 @@ interface StreamerOfflineStateProps {
   offlineMessage?: string | null;
   nextStreamAt?: string | null;
   showOfflineSignup?: boolean;
+  nextStreamPlatform?: string | null;
+  offlineSocials?: string[];
   twitchUrl?: string | null;
   youtubeUrl?: string | null;
   tiktokUrl?: string | null;
