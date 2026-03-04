@@ -223,6 +223,9 @@ export function NowPlayingPanel({
   const [ttsMuted, setTtsMuted] = useState(() => {
     try { return localStorage.getItem('upstar_tts_muted') === 'true'; } catch { return false; }
   });
+  const [ttsVolume, setTtsVolume] = useState(() => {
+    try { return parseFloat(localStorage.getItem('upstar_tts_volume') || '0.8'); } catch { return 0.8; }
+  });
   const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
@@ -312,13 +315,13 @@ export function NowPlayingPanel({
     const utterance = new SpeechSynthesisUtterance(submission.message);
     utterance.rate = 0.95;
     utterance.pitch = 1;
-    utterance.volume = 0.8;
+    utterance.volume = ttsVolume;
     window.speechSynthesis?.speak(utterance);
 
     return () => {
       window.speechSynthesis?.cancel();
     };
-  }, [submission?.id, submission?.message, ttsMuted]);
+  }, [submission?.id, submission?.message, ttsMuted, ttsVolume]);
 
   // Reset spoken ID when submission changes
   useEffect(() => {
@@ -595,19 +598,40 @@ export function NowPlayingPanel({
                 )}
 
                 {cfg.showMessage && submission.message && (
-                  <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20 flex items-start gap-2">
-                    <p className="text-xs text-muted-foreground italic line-clamp-2 flex-1">
-                      "{submission.message}"
-                    </p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 shrink-0"
-                      onClick={toggleTtsMute}
-                      title={ttsMuted ? 'Unmute message reading' : 'Mute message reading'}
-                    >
-                      {ttsMuted ? <VolumeX className="w-3.5 h-3.5 text-muted-foreground" /> : <Volume2 className="w-3.5 h-3.5 text-primary" />}
-                    </Button>
+                  <div className="rounded-lg bg-card/20 border border-border/20">
+                    <div className="px-3 py-2 flex items-start gap-2">
+                      <p className="text-xs text-muted-foreground italic line-clamp-2 flex-1">
+                        "{submission.message}"
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 shrink-0"
+                        onClick={toggleTtsMute}
+                        title={ttsMuted ? 'Unmute message reading' : 'Mute message reading'}
+                      >
+                        {ttsMuted ? <VolumeX className="w-3.5 h-3.5 text-muted-foreground" /> : <Volume2 className="w-3.5 h-3.5 text-primary" />}
+                      </Button>
+                    </div>
+                    {!ttsMuted && (
+                      <div className="px-3 pb-2 flex items-center gap-2">
+                        <VolumeX className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={ttsVolume}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value);
+                            setTtsVolume(v);
+                            try { localStorage.setItem('upstar_tts_volume', String(v)); } catch {}
+                          }}
+                          className="w-full h-1 accent-primary cursor-pointer"
+                        />
+                        <Volume2 className="w-3 h-3 text-muted-foreground shrink-0" />
+                      </div>
+                    )}
                   </div>
                 )}
 
