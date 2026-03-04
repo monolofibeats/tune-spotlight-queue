@@ -435,16 +435,17 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         
         {/* Buffering progress bar */}
         {isBuffering && src && bufferProgress < 100 && !hasError && (
-          <div className="flex items-center gap-2 px-1">
-            <div className="flex-1 h-1.5 bg-secondary/30 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-amber-400/70 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${bufferProgress}%` }}
+          <div className="flex items-center gap-1.5 px-1">
+            <svg className="w-4 h-4 -rotate-90 shrink-0" viewBox="0 0 16 16">
+              <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" className="text-secondary/30" strokeWidth="2" />
+              <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" className="text-amber-400/80" strokeWidth="2"
+                strokeDasharray={`${bufferProgress * 0.377} 37.7`}
+                strokeLinecap="round"
+                style={{ transition: 'stroke-dasharray 0.3s ease-out' }}
               />
-            </div>
-            <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-              {bufferProgress < 1 ? 'Loading…' : `${Math.round(bufferProgress)}%`}
-              {bufferEta && ` · ${bufferEta}`}
+            </svg>
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+              {bufferProgress < 1 ? 'Loading…' : `${Math.round(bufferProgress)}%`}{bufferEta && ` · ${bufferEta}`}
             </span>
           </div>
         )}
