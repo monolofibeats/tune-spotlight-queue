@@ -293,7 +293,25 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
   const [showStarTrail, setShowStarTrail] = useState(false);
 
   return (
-    <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
+    <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)] relative">
+      {/* Star Trail overlay — full width on top of everything */}
+      <AnimatePresence>
+        {showStarTrail && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            className="absolute inset-0 z-30 flex items-start justify-center pt-2 bg-background/70 backdrop-blur-md rounded-xl"
+          >
+            <StarTrailGame
+              streamerId={streamer.id}
+              streamerName={streamer.display_name}
+              onClose={() => setShowStarTrail(false)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Left Panel */}
       <div className="relative flex-1 min-w-0">
         {leftOpen ? (
@@ -321,22 +339,6 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       {/* Center Content */}
       <div className="flex-shrink-0 w-[480px] relative">
         {children}
-        <AnimatePresence>
-          {showStarTrail && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl"
-            >
-              <StarTrailGame
-                streamerId={streamer.id}
-                streamerName={streamer.display_name}
-                onClose={() => setShowStarTrail(false)}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Right Panel */}

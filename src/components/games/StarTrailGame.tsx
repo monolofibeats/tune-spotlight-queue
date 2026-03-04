@@ -162,8 +162,14 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
   const lastSoundRef = useRef(0);
-  const chimeSounds = useRef<('chime1' | 'chime2' | 'sparkle' | 'bellHit')[]>(['chime1', 'chime2', 'sparkle', 'bellHit']);
-  const chimeIndexRef = useRef(0);
+  // Fairy sparkle sound for tracing
+  const sparkleAudioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    const audio = new Audio('/sfx/fairy-sparkle.mp3');
+    audio.preload = 'auto';
+    audio.volume = 0.12;
+    sparkleAudioRef.current = audio;
+  }, []);
 
   const fetchLeaderboard = useCallback(async () => {
     const { data } = await supabase
@@ -365,13 +371,15 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
         life: 0.5 + Math.random() * 0.5,
       });
     }
-    // Glitter chime trace sound (throttled, cycling through chime variants)
+    // Fairy sparkle trace sound (throttled, replays from start each time)
     const now = Date.now();
-    if (now - lastSoundRef.current > 180) {
-      const sounds = chimeSounds.current;
-      const sound = sounds[chimeIndexRef.current % sounds.length];
-      chimeIndexRef.current++;
-      play(sound, 0.06 + Math.random() * 0.04);
+    if (now - lastSoundRef.current > 250) {
+      const audio = sparkleAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.volume = 0.08 + Math.random() * 0.06;
+        audio.play().catch(() => {});
+      }
       lastSoundRef.current = now;
     }
   };
@@ -425,7 +433,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/30 max-w-[420px] mx-auto"
+      className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/30 w-full max-w-[520px] mx-auto"
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full">
