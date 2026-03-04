@@ -648,6 +648,52 @@ const StreamerSettings = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
+                <h2 className="font-semibold text-lg">Offline State</h2>
+                <p className="text-sm text-muted-foreground">
+                  Customize what visitors see when your stream is not active.
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="offlineMessage">Offline Message</Label>
+                    <Textarea
+                      id="offlineMessage"
+                      value={offlineMessage}
+                      onChange={(e) => setOfflineMessage(e.target.value)}
+                      placeholder="When the stream is active you can submit your songs here for review"
+                      rows={2}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="nextStreamAt">Next Stream Date & Time</Label>
+                    <Input
+                      id="nextStreamAt"
+                      type="datetime-local"
+                      value={nextStreamAt ? new Date(nextStreamAt).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => setNextStreamAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Set when your next stream will be — displayed to visitors on the offline page
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Show Email Signup</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Let visitors subscribe for notifications when you go live
+                      </p>
+                    </div>
+                    <Switch
+                      checked={showOfflineSignup}
+                      onCheckedChange={setShowOfflineSignup}
+                    />
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Form Builder Tab */}
