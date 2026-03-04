@@ -72,7 +72,21 @@ export function SpotBiddingDialog({
   const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{ position: number; total: number } | null>(null);
 
-  const MINUTES_PER_SONG = 5;
+  // Organic wait estimate: seeded random 3-7 min per song
+  const estimateWait = (position: number) => {
+    const seed = originalSubmissionId || songTitle || 'x';
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+    const rng = (i: number) => { const x = Math.sin(h + i) * 10000; return x - Math.floor(x); };
+    let totalMin = 0;
+    for (let i = 0; i < position; i++) totalMin += 3 + Math.floor(rng(i) * 5);
+    const mod5 = totalMin % 5;
+    if (mod5 === 0) totalMin += (rng(position + 99) > 0.5 ? 1 : 2);
+    const hrs = Math.floor(totalMin / 60);
+    const mins = totalMin % 60;
+    if (hrs > 0) return `~${hrs}h ${mins}min`;
+    return `~${mins}min`;
+  };
 
   useEffect(() => {
     if (open) {
