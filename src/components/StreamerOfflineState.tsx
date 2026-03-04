@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Calendar, Clock, ExternalLink, CheckCircle, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
