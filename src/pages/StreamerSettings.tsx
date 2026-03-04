@@ -27,6 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -107,6 +108,8 @@ const StreamerSettings = () => {
   const [offlineMessage, setOfflineMessage] = useState('');
   const [nextStreamAt, setNextStreamAt] = useState('');
   const [showOfflineSignup, setShowOfflineSignup] = useState(true);
+  const [offlineSocials, setOfflineSocials] = useState<string[]>(['twitch', 'instagram', 'tiktok']);
+  const [nextStreamPlatform, setNextStreamPlatform] = useState('');
   
   // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
@@ -188,6 +191,8 @@ const StreamerSettings = () => {
       setOfflineMessage((s as any).offline_message || '');
       setNextStreamAt((s as any).next_stream_at || '');
       setShowOfflineSignup((s as any).show_offline_signup ?? true);
+      setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+      setNextStreamPlatform((s as any).next_stream_platform || '');
       
       // Social
       setTwitchUrl(s.twitch_url || '');
@@ -236,6 +241,8 @@ const StreamerSettings = () => {
       offlineMessage !== ((s as any).offline_message || '') ||
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
+      JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
+      nextStreamPlatform !== ((s as any).next_stream_platform || '') ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
       tiktokUrl !== (s.tiktok_url || '') ||
@@ -243,7 +250,7 @@ const StreamerSettings = () => {
       twitterUrl !== (s.twitter_url || '') ||
       pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, offlineMessage, nextStreamAt, showOfflineSignup, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, offlineMessage, nextStreamAt, showOfflineSignup, offlineSocials, nextStreamPlatform, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges;
 
@@ -280,6 +287,8 @@ const StreamerSettings = () => {
     setOfflineMessage((s as any).offline_message || '');
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
+    setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+    setNextStreamPlatform((s as any).next_stream_platform || '');
     setTwitchUrl(s.twitch_url || '');
     setYoutubeUrl(s.youtube_url || '');
     setTiktokUrl(s.tiktok_url || '');
@@ -389,6 +398,8 @@ const StreamerSettings = () => {
           offline_message: offlineMessage || null,
           next_stream_at: nextStreamAt || null,
           show_offline_signup: showOfflineSignup,
+          offline_socials: offlineSocials,
+          next_stream_platform: nextStreamPlatform || null,
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
@@ -691,6 +702,51 @@ const StreamerSettings = () => {
                       checked={showOfflineSignup}
                       onCheckedChange={setShowOfflineSignup}
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Next Stream Platform</Label>
+                    <Select value={nextStreamPlatform} onValueChange={setNextStreamPlatform}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Where will you stream next?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Not specified</SelectItem>
+                        <SelectItem value="twitch">Twitch</SelectItem>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                        <SelectItem value="tiktok">TikTok</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Tell visitors where your next stream will be
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Social Links on Offline Page</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Choose which social links to display when you're offline
+                    </p>
+                    {[
+                      { key: 'twitch', label: 'Twitch' },
+                      { key: 'youtube', label: 'YouTube' },
+                      { key: 'tiktok', label: 'TikTok' },
+                      { key: 'instagram', label: 'Instagram' },
+                      { key: 'twitter', label: 'X / Twitter' },
+                    ].map((social) => (
+                      <div key={social.key} className="flex items-center justify-between">
+                        <span className="text-sm">{social.label}</span>
+                        <Switch
+                          checked={offlineSocials.includes(social.key)}
+                          onCheckedChange={(checked) => {
+                            setOfflineSocials(prev =>
+                              checked ? [...prev, social.key] : prev.filter(s => s !== social.key)
+                            );
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
