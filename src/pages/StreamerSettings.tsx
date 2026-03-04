@@ -184,6 +184,9 @@ const StreamerSettings = () => {
       setShowHowItWorks(s.show_how_it_works ?? true);
       setShowStreamEmbed(s.show_stream_embed ?? true);
       setCustomCss(s.custom_css || '');
+      setOfflineMessage((s as any).offline_message || '');
+      setNextStreamAt((s as any).next_stream_at || '');
+      setShowOfflineSignup((s as any).show_offline_signup ?? true);
       
       // Social
       setTwitchUrl(s.twitch_url || '');
