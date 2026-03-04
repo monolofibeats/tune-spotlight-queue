@@ -177,8 +177,7 @@ function useOnlineDuration() {
   return duration;
 }
 
-/* LEFT PANEL */
-function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
+function LeftPanel({ streamer, onStreamerUpdate, onStartStarTrail }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void; onStartStarTrail: () => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
   const pk = (key: string) => getPanelKey(streamer.id, key);
