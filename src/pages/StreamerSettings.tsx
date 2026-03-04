@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { detectPlatform, migrateLegacySocials, type SocialLink } from '@/lib/detectPlatform';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -108,8 +109,9 @@ const StreamerSettings = () => {
   const [offlineMessage, setOfflineMessage] = useState('');
   const [nextStreamAt, setNextStreamAt] = useState('');
   const [showOfflineSignup, setShowOfflineSignup] = useState(true);
-  const [offlineSocials, setOfflineSocials] = useState<string[]>(['twitch', 'instagram', 'tiktok']);
+  const [offlineSocials, setOfflineSocials] = useState<Array<{url: string, platform: string}>>([]);
   const [nextStreamPlatform, setNextStreamPlatform] = useState('');
+  const [newSocialLink, setNewSocialLink] = useState('');
   
   // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
@@ -191,7 +193,7 @@ const StreamerSettings = () => {
       setOfflineMessage((s as any).offline_message || '');
       setNextStreamAt((s as any).next_stream_at || '');
       setShowOfflineSignup((s as any).show_offline_signup ?? true);
-      setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+      setOfflineSocials(migrateLegacySocials((s as any).offline_socials, s));
       setNextStreamPlatform((s as any).next_stream_platform || 'none');
       
       // Social
@@ -241,7 +243,7 @@ const StreamerSettings = () => {
       offlineMessage !== ((s as any).offline_message || '') ||
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
-      JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
+      JSON.stringify(offlineSocials) !== JSON.stringify(migrateLegacySocials((s as any).offline_socials, s)) ||
       nextStreamPlatform !== ((s as any).next_stream_platform || 'none') ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
@@ -287,7 +289,7 @@ const StreamerSettings = () => {
     setOfflineMessage((s as any).offline_message || '');
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
-    setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+    setOfflineSocials(migrateLegacySocials((s as any).offline_socials, s));
     setNextStreamPlatform((s as any).next_stream_platform || 'none');
     setTwitchUrl(s.twitch_url || '');
     setYoutubeUrl(s.youtube_url || '');
@@ -724,29 +726,48 @@ const StreamerSettings = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <Label>Social Links on Offline Page</Label>
+                    <Label>Social / Follow Links</Label>
                     <p className="text-xs text-muted-foreground">
-                      Choose which social links to display when you're offline
+                      Add links to your socials — platform icons are detected automatically
                     </p>
-                    {[
-                      { key: 'twitch', label: 'Twitch' },
-                      { key: 'youtube', label: 'YouTube' },
-                      { key: 'tiktok', label: 'TikTok' },
-                      { key: 'instagram', label: 'Instagram' },
-                      { key: 'twitter', label: 'X / Twitter' },
-                    ].map((social) => (
-                      <div key={social.key} className="flex items-center justify-between">
-                        <span className="text-sm">{social.label}</span>
-                        <Switch
-                          checked={offlineSocials.includes(social.key)}
-                          onCheckedChange={(checked) => {
-                            setOfflineSocials(prev =>
-                              checked ? [...prev, social.key] : prev.filter(s => s !== social.key)
-                            );
-                          }}
-                        />
+                    {offlineSocials.map((link, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground w-20 capitalize">{link.platform === 'link' ? 'Website' : link.platform}</span>
+                        <Input value={link.url} readOnly className="flex-1 h-8 text-sm bg-muted/30" />
+                        <Button variant="ghost" size="sm" className="h-8 px-2 text-destructive" onClick={() => setOfflineSocials(prev => prev.filter((_, i) => i !== idx))}>✕</Button>
                       </div>
                     ))}
+                    <div className="flex gap-2">
+                      <Input
+                        value={newSocialLink}
+                        onChange={(e) => setNewSocialLink(e.target.value)}
+                        placeholder="Paste a link (e.g. https://twitch.tv/yourname)"
+                        className="flex-1 h-9 text-sm"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newSocialLink.trim()) {
+                            e.preventDefault();
+                            const url = newSocialLink.trim();
+                            setOfflineSocials(prev => [...prev, { url, platform: detectPlatform(url) }]);
+                            setNewSocialLink('');
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9"
+                        disabled={!newSocialLink.trim()}
+                        onClick={() => {
+                          const url = newSocialLink.trim();
+                          if (url) {
+                            setOfflineSocials(prev => [...prev, { url, platform: detectPlatform(url) }]);
+                            setNewSocialLink('');
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
