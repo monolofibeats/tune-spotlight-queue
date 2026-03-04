@@ -671,19 +671,14 @@ const StreamerSettings = () => {
                     <Label>Next Stream Date & Time</Label>
                     <div className="flex gap-2">
                       <Input
-                        type="text"
-                        placeholder="DD.MM.YYYY"
-                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`; } catch { return ''; } })() : ''}
+                        type="date"
+                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; } catch { return ''; } })() : ''}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          const match = val.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-                          if (match) {
-                            const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
-                            const newDate = new Date(parseInt(match[3]), parseInt(match[2])-1, parseInt(match[1]), existing.getHours(), existing.getMinutes());
-                            if (!isNaN(newDate.getTime())) setNextStreamAt(newDate.toISOString());
-                          } else if (!val) {
-                            setNextStreamAt('');
-                          }
+                          if (!e.target.value) { setNextStreamAt(''); return; }
+                          const [y, mo, da] = e.target.value.split('-').map(Number);
+                          const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
+                          const newDate = new Date(y, mo - 1, da, existing.getHours(), existing.getMinutes());
+                          if (!isNaN(newDate.getTime())) setNextStreamAt(newDate.toISOString());
                         }}
                         className="flex-1"
                       />
@@ -701,7 +696,7 @@ const StreamerSettings = () => {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Set when your next stream will be — DD.MM.YYYY format
+                      Displayed to visitors on the offline page
                     </p>
                   </div>
 
