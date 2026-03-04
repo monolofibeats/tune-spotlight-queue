@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
-  Volume2, Trophy, Eye, Monitor
+  Volume2, Trophy, Eye, Monitor, Star
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
@@ -11,12 +11,14 @@ import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
 import { PricingSettings } from '@/components/streamer-settings/PricingSettings';
 import { SidePanelSoundboard } from '@/components/dashboard/SidePanelSoundboard';
 import { OBSPanel } from '@/components/dashboard/OBSPanel';
+import { StarTrailGame } from '@/components/games/StarTrailGame';
 import type { Streamer } from '@/types/streamer';
 
 interface PhoneSidePanelsProps {
   streamer: Streamer;
   children: React.ReactNode;
   onStreamerUpdate?: (streamer: Streamer) => void;
+  onStarTrailToggle?: (active: boolean) => void;
 }
 
 interface SessionStats {
@@ -175,8 +177,7 @@ function useOnlineDuration() {
   return duration;
 }
 
-/* LEFT PANEL */
-function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
+function LeftPanel({ streamer, onStreamerUpdate, onStartStarTrail }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void; onStartStarTrail: () => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
   const pk = (key: string) => getPanelKey(streamer.id, key);
@@ -223,6 +224,16 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
       </CollapsibleSection>
 
       <div className="side-panel-left-dimmable flex-1 flex flex-col">
+        <CollapsibleSection title="Star Trail" icon={Star} defaultOpen={false} storageKey={pk('sec-startrail')}>
+          <button
+            onClick={onStartStarTrail}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-xs font-semibold text-primary"
+          >
+            <Star className="w-3.5 h-3.5 fill-primary" />
+            Launch Star Trail
+          </button>
+        </CollapsibleSection>
+
         <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false} storageKey={pk('sec-soundboard')}>
           <SidePanelSoundboard streamerId={streamer.id} />
         </CollapsibleSection>
@@ -279,6 +290,7 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneSidePanelsProps) {
   const [leftOpen, setLeftOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'left-open'), true);
   const [rightOpen, setRightOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'right-open'), true);
+  const [showStarTrail, setShowStarTrail] = useState(false);
 
   return (
     <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
@@ -287,7 +299,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
         {leftOpen ? (
           <>
             <div className="h-full rounded-xl backdrop-blur-sm overflow-y-auto side-panel-left-container transition-all duration-300">
-              <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
+              <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} onStartStarTrail={() => setShowStarTrail(true)} />
             </div>
             <button
               onClick={() => setLeftOpen(false)}
@@ -307,8 +319,24 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       </div>
 
       {/* Center Content */}
-      <div className="flex-shrink-0 w-[480px]">
+      <div className="flex-shrink-0 w-[480px] relative">
         {children}
+        <AnimatePresence>
+          {showStarTrail && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl"
+            >
+              <StarTrailGame
+                streamerId={streamer.id}
+                streamerName={streamer.display_name}
+                onClose={() => setShowStarTrail(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Right Panel */}
