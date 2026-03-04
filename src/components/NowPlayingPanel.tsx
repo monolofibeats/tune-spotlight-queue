@@ -229,6 +229,8 @@ export function NowPlayingPanel({
   const ttsVolumeRef = useRef(ttsVolume);
   ttsVolumeRef.current = ttsVolume;
   const ttsSpokenIdRef = useRef<string | null>(null);
+  const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const ttsTextRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
     setAudioEl(el);
@@ -302,14 +304,16 @@ export function NowPlayingPanel({
     fetchSpotifyMeta();
   }, [submission?.song_url]);
 
-  // TTS: auto-read submission message when a new submission is opened
+   // TTS: auto-read submission message when a new submission is opened
   useEffect(() => {
     if (!submission || !submission.message || ttsMuted) {
+      ttsTextRef.current = null;
       return;
     }
     // Only speak once per submission
     if (ttsSpokenIdRef.current === submission.id) return;
     ttsSpokenIdRef.current = submission.id;
+    ttsTextRef.current = submission.message;
 
     // Cancel any ongoing speech
     window.speechSynthesis?.cancel();
@@ -318,10 +322,12 @@ export function NowPlayingPanel({
     utterance.rate = 0.95;
     utterance.pitch = 1;
     utterance.volume = ttsVolumeRef.current;
+    ttsUtteranceRef.current = utterance;
     window.speechSynthesis?.speak(utterance);
 
     return () => {
       window.speechSynthesis?.cancel();
+      ttsUtteranceRef.current = null;
     };
   }, [submission?.id, submission?.message, ttsMuted]);
 
@@ -632,6 +638,16 @@ export function NowPlayingPanel({
                             const v = parseFloat(e.target.value);
                             setTtsVolume(v);
                             try { localStorage.setItem('upstar_tts_volume', String(v)); } catch {}
+                            // Restart speech at new volume if currently speaking
+                            if (window.speechSynthesis?.speaking && ttsTextRef.current) {
+                              window.speechSynthesis.cancel();
+                              const u = new SpeechSynthesisUtterance(ttsTextRef.current);
+                              u.rate = 0.95;
+                              u.pitch = 1;
+                              u.volume = v;
+                              ttsUtteranceRef.current = u;
+                              window.speechSynthesis.speak(u);
+                            }
                           }}
                           className="w-full h-1 accent-primary cursor-pointer"
                         />
