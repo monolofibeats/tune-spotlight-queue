@@ -394,7 +394,7 @@ const StreamerSettings = () => {
           instagram_url: instagramUrl || null,
           twitter_url: twitterUrl || null,
           page_language: pageLanguage,
-        })
+        } as any)
         .eq('id', streamer.id)
         .select('*')
         .single();
