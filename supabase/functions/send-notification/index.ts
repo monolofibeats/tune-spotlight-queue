@@ -128,9 +128,11 @@ async function buildEmails(
       break;
     }
 
-    // ── Session started (notify team members) ────────────────────────
+    // ── Session started (notify team members + subscribers) ────────────
     case "session_started": {
       const { streamer_id, streamer_name, session_title, slug } = payload as any;
+
+      // Notify team members
       const { data: teamMembers } = await supabase
         .from("streamer_team_members")
         .select("email")
@@ -148,6 +150,30 @@ async function buildEmails(
              <p>Head to the dashboard to help manage submissions!</p>`,
             `${siteUrl}/streamer/${slug}/dashboard`,
             "Open Dashboard",
+          ),
+        });
+      }
+
+      // Notify subscribers (fans who signed up for go-live alerts)
+      const { data: subscribers } = await supabase
+        .from("streamer_subscribers")
+        .select("email")
+        .eq("streamer_id", streamer_id)
+        .eq("is_active", true);
+
+      const subscriberEmails = subscribers?.map((s: any) => s.email).filter(Boolean) || [];
+      // Remove duplicates with team emails
+      const uniqueSubscriberEmails = subscriberEmails.filter((e: string) => !teamEmails.includes(e));
+      if (uniqueSubscriberEmails.length) {
+        emails.push({
+          to: uniqueSubscriberEmails,
+          subject: `🔴 ${streamer_name} just went live!`,
+          html: wrapEmail(
+            "🔴 Stream Started",
+            `<p><strong>${streamer_name}</strong> is now live${session_title ? ` – <em>"${session_title}"</em>` : ""}!</p>
+             <p>Head over to their page and submit your song now 🎵</p>`,
+            `${siteUrl}/streamer/${slug}`,
+            "Go to Stream",
           ),
         });
       }
