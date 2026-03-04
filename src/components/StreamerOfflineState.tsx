@@ -200,7 +200,13 @@ export function StreamerOfflineState({
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {nextStream.timeStr}
               </span>
-              <span className="text-xs text-primary font-medium">{nextStream.relativeStr}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-1 font-mono text-lg font-bold text-primary">
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.hours}</span>
+              <span className="text-primary/50">:</span>
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.minutes}</span>
+              <span className="text-primary/50">:</span>
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.seconds}</span>
             </div>
           </div>
         )}
