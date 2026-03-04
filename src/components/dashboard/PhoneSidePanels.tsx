@@ -146,8 +146,6 @@ function useOnlineDuration() {
 function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
-  const [volume, setVolume] = useState(80);
-  const [notifSounds, setNotifSounds] = useState(true);
 
   const fmt = (cents: number) => `€${(cents / 100).toFixed(2)}`;
   const timeSince = (iso: string | null) => {
