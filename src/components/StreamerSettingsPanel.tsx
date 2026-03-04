@@ -574,6 +574,47 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                   </div>
                 </div>
               </div>
+
+              {/* Offline State */}
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">Offline State</h3>
+                <p className="text-sm text-muted-foreground">
+                  Customize what visitors see when your stream is not active.
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="offlineMessagePanel">Offline Message</Label>
+                    <Textarea
+                      id="offlineMessagePanel"
+                      value={offlineMessage}
+                      onChange={(e) => setOfflineMessage(e.target.value)}
+                      placeholder="When the stream is active you can submit your songs here for review"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nextStreamAtPanel">Next Stream Date & Time</Label>
+                    <Input
+                      id="nextStreamAtPanel"
+                      type="datetime-local"
+                      value={nextStreamAt ? (() => { try { return new Date(nextStreamAt).toISOString().slice(0, 16); } catch { return ''; } })() : ''}
+                      onChange={(e) => setNextStreamAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Displayed to visitors on the offline page
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Show Email Signup</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Let visitors subscribe for go-live notifications
+                      </p>
+                    </div>
+                    <Switch checked={showOfflineSignup} onCheckedChange={setShowOfflineSignup} />
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Pricing Tab */}
