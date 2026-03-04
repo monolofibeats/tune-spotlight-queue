@@ -433,7 +433,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/30 max-w-[420px] mx-auto"
+      className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-card/20 backdrop-blur-xl border border-border/30 w-full max-w-[520px] mx-auto"
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full">
