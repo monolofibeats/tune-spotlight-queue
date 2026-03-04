@@ -1,13 +1,26 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Music2, Zap, Clock, TrendingUp } from 'lucide-react';
+import { Music2, Zap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { TrackedSubmission } from '@/hooks/useTrackedSubmission';
 import { supabase } from '@/integrations/supabase/client';
 
-const MINUTES_PER_SONG = 5;
+// Organic wait estimate: seeded random 3-7 min per song, avoids round numbers
+function estimateWait(position: number, seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  const rng = (i: number) => { const x = Math.sin(h + i) * 10000; return x - Math.floor(x); };
+  let totalMin = 0;
+  for (let i = 0; i < position; i++) totalMin += 3 + Math.floor(rng(i) * 5);
+  const mod5 = totalMin % 5;
+  if (mod5 === 0) totalMin += (rng(position + 99) > 0.5 ? 1 : 2);
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  if (hours > 0) return `~${hours}h ${mins}min`;
+  return `~${mins}min`;
+}
 
 interface QueueInfo {
   position: number;
@@ -23,19 +36,13 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
   const [biddingSub, setBiddingSub] = useState<TrackedSubmission | null>(null);
   const [queueMap, setQueueMap] = useState<Map<string, QueueInfo>>(new Map());
 
-  // Only show active (pending) submissions — reviewed/skipped/deleted ones are hidden
   const activeSubmissions = submissions.filter(sub => !sub.doneStatus);
 
-  // Fetch queue positions for all active submissions
   useEffect(() => {
     const fetchPositions = async () => {
       const withIds = activeSubmissions.filter(s => s.submissionId && s.streamerId);
       if (withIds.length === 0) return;
-
-      // Get unique streamer IDs
       const streamerIds = [...new Set(withIds.map(s => s.streamerId!))];
-
-      // Fetch all pending submissions for these streamers, ordered by priority
       const { data } = await supabase
         .from('public_submissions_queue')
         .select('id, streamer_id, is_priority, boost_amount, amount_paid, created_at')
@@ -45,43 +52,24 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
         .order('boost_amount', { ascending: false })
         .order('amount_paid', { ascending: false })
         .order('created_at', { ascending: true });
-
       if (!data) return;
-
       const newMap = new Map<string, QueueInfo>();
-
       for (const sub of withIds) {
         if (!sub.submissionId) continue;
-        // Filter queue for this streamer
         const streamerQueue = data.filter(q => q.streamer_id === sub.streamerId);
         const idx = streamerQueue.findIndex(q => q.id === sub.submissionId);
         if (idx !== -1) {
-          newMap.set(sub.submissionId, {
-            position: idx + 1,
-            totalInQueue: streamerQueue.length,
-          });
+          newMap.set(sub.submissionId, { position: idx + 1, totalInQueue: streamerQueue.length });
         }
       }
-
       setQueueMap(newMap);
     };
-
     fetchPositions();
     const interval = setInterval(fetchPositions, 10_000);
     return () => clearInterval(interval);
   }, [activeSubmissions.map(s => s.submissionId).join(',')]);
 
   if (activeSubmissions.length === 0) return null;
-
-  const formatWaitTime = (position: number) => {
-    const totalMinutes = position * MINUTES_PER_SONG;
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours > 0) {
-      return `~${hours}h ${mins > 0 ? `${mins}min` : ''}`;
-    }
-    return `~${mins}min`;
-  };
 
   return (
     <>
