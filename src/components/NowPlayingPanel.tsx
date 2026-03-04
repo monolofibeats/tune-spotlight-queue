@@ -226,6 +226,8 @@ export function NowPlayingPanel({
   const [ttsVolume, setTtsVolume] = useState(() => {
     try { return parseFloat(localStorage.getItem('upstar_tts_volume') || '0.8'); } catch { return 0.8; }
   });
+  const ttsVolumeRef = useRef(ttsVolume);
+  ttsVolumeRef.current = ttsVolume;
   const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
