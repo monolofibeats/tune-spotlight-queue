@@ -23,6 +23,7 @@ import { PreStreamSpots } from '@/components/PreStreamSpots';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
+import { StarTrailLeaderboard } from '@/components/games/StarTrailLeaderboard';
 
 import { useLanguage } from '@/hooks/useLanguage';
 import { useTrackedSubmission } from '@/hooks/useTrackedSubmission';
