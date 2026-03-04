@@ -1,16 +1,22 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Volume2, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Volume2, Plus, Trash2, Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { SOUNDBOARD_EFFECTS, SoundEffect } from '@/hooks/useSoundEffects';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CustomSound {
   id: string;
   label: string;
   emoji: string;
-  url: string;
+  url: string; // public URL from storage
+  storagePath: string; // path in bucket
+}
+
+interface SidePanelSoundboardProps {
+  streamerId: string;
 }
 
 // Keep a local audio cache for playback
@@ -29,26 +35,53 @@ function playSound(url: string, volume: number) {
   } catch {}
 }
 
-export function SidePanelSoundboard() {
-  const [sbVolume, setSbVolume] = useState(70);
-  const [customSounds, setCustomSounds] = useState<CustomSound[]>([]);
+function getStorageKey(streamerId: string, suffix: string) {
+  return `upstar-sb-${streamerId}-${suffix}`;
+}
+
+export function SidePanelSoundboard({ streamerId }: SidePanelSoundboardProps) {
+  const [sbVolume, setSbVolume] = useState(() => {
+    try {
+      const saved = localStorage.getItem(getStorageKey(streamerId, 'volume'));
+      return saved ? Number(saved) : 70;
+    } catch { return 70; }
+  });
+
+  const [customSounds, setCustomSounds] = useState<CustomSound[]>(() => {
+    try {
+      const saved = localStorage.getItem(getStorageKey(streamerId, 'custom'));
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const [newEmoji, setNewEmoji] = useState('🔊');
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Track which built-in effects are hidden
   const [hiddenBuiltins, setHiddenBuiltins] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem('upstar-hidden-soundboard');
+      const saved = localStorage.getItem(getStorageKey(streamerId, 'hidden'));
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch { return new Set(); }
   });
 
+  // Persist volume
+  useEffect(() => {
+    localStorage.setItem(getStorageKey(streamerId, 'volume'), String(sbVolume));
+  }, [sbVolume, streamerId]);
+
+  // Persist custom sounds metadata
+  useEffect(() => {
+    localStorage.setItem(getStorageKey(streamerId, 'custom'), JSON.stringify(customSounds));
+  }, [customSounds, streamerId]);
+
   const saveHidden = (next: Set<string>) => {
     setHiddenBuiltins(next);
-    localStorage.setItem('upstar-hidden-soundboard', JSON.stringify([...next]));
+    localStorage.setItem(getStorageKey(streamerId, 'hidden'), JSON.stringify([...next]));
   };
 
   const hideBuiltin = (id: string) => {
@@ -69,27 +102,51 @@ export function SidePanelSoundboard() {
     }
   };
 
-  const addCustomSound = () => {
+  const addCustomSound = async () => {
     if (!newLabel.trim() || !pendingFile) return;
-    const url = URL.createObjectURL(pendingFile);
-    setCustomSounds(prev => [...prev, {
-      id: `custom-${Date.now()}`,
-      label: newLabel.trim(),
-      emoji: newEmoji || '🔊',
-      url,
-    }]);
-    setNewLabel('');
-    setNewEmoji('🔊');
-    setPendingFile(null);
-    setShowAddForm(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    setUploading(true);
+
+    try {
+      const ext = pendingFile.name.split('.').pop() || 'mp3';
+      const path = `soundboard/${streamerId}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('stream-media')
+        .upload(path, pendingFile, { cacheControl: '31536000', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('stream-media')
+        .getPublicUrl(path);
+
+      setCustomSounds(prev => [...prev, {
+        id: `custom-${Date.now()}`,
+        label: newLabel.trim(),
+        emoji: newEmoji || '🔊',
+        url: urlData.publicUrl,
+        storagePath: path,
+      }]);
+
+      setNewLabel('');
+      setNewEmoji('🔊');
+      setPendingFile(null);
+      setShowAddForm(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      console.error('Failed to upload sound:', err);
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const removeCustom = (id: string) => {
+  const removeCustom = async (id: string) => {
     const sound = customSounds.find(s => s.id === id);
-    if (sound) URL.revokeObjectURL(sound.url);
+    if (sound?.storagePath) {
+      await supabase.storage.from('stream-media').remove([sound.storagePath]);
+    }
+    audioCache.delete(sound?.url || '');
     setCustomSounds(prev => prev.filter(s => s.id !== id));
-    audioCache.delete(id);
   };
 
   // Built-in sound URLs from the hook's SOUNDS map
@@ -204,16 +261,18 @@ export function SidePanelSoundboard() {
               size="sm"
               className="flex-1 h-7 text-xs border-white/10 bg-white/5"
               onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
             >
               <Upload className="w-3 h-3 mr-1" />
               {pendingFile ? pendingFile.name.slice(0, 20) : 'Upload Audio'}
             </Button>
           </div>
           <div className="flex gap-1.5">
-            <Button size="sm" className="flex-1 h-7 text-xs bg-neutral-600 hover:bg-neutral-500 text-white border-0" onClick={addCustomSound} disabled={!pendingFile || !newLabel.trim()}>
-              Add
+            <Button size="sm" className="flex-1 h-7 text-xs bg-neutral-600 hover:bg-neutral-500 text-white border-0" onClick={addCustomSound} disabled={!pendingFile || !newLabel.trim() || uploading}>
+              {uploading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {uploading ? 'Uploading…' : 'Add'}
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setShowAddForm(false); setPendingFile(null); }}>
+            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setShowAddForm(false); setPendingFile(null); }} disabled={uploading}>
               Cancel
             </Button>
           </div>
