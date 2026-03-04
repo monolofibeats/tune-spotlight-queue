@@ -72,16 +72,13 @@ export function SpotBiddingDialog({
   const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{ position: number; total: number } | null>(null);
 
-  // Organic wait estimate: seeded random 3-7 min per song, always monotonically increasing
+  // Organic wait estimate: fixed-seed accumulation so times are always monotonically increasing
   const estimateWait = (position: number) => {
-    const seed = originalSubmissionId || songTitle || 'x';
-    let h = 0;
-    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-    const rng = (i: number) => { const x = Math.sin(h + i) * 10000; return x - Math.floor(x); };
+    const rng = (i: number) => { const x = Math.sin(42 + i * 127.1) * 10000; return x - Math.floor(x); };
     let totalMin = 0;
     for (let i = 0; i < position; i++) totalMin += 3 + Math.floor(rng(i) * 5);
-    if (totalMin % 5 === 0) totalMin += 1 + Math.floor(rng(position + 99) * 2);
-    if (totalMin % 10 === 0) totalMin += 1;
+    if (totalMin % 5 === 0) totalMin += 1;
+    if (totalMin % 10 === 0) totalMin += 2;
     const hrs = Math.floor(totalMin / 60);
     const mins = totalMin % 60;
     if (hrs > 0) return `~${hrs}h ${mins}min`;
