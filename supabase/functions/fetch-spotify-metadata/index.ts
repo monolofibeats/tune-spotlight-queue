@@ -200,6 +200,9 @@ serve(async (req) => {
       );
     }
 
+    // quick=true skips artist profile fetching (used by form autofill)
+    const quickMode = raw.quick === true;
+
     const { url } = parsed.data;
     const result: SpotifyMetadata = {};
 
