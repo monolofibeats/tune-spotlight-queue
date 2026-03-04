@@ -166,8 +166,6 @@ const parseDropboxUrl = (url: string): SongMetadata => {
       if (['scl', 'fi', 's', 'sh'].includes(decoded)) continue;
       // Check if it looks like a filename
       if (decoded.match(/\.(mp3|wav|flac|aac|ogg|m4a|wma|aiff|mp4|webm)$/i) || decoded.includes(' - ')) {
-        const { parseFilename } = require('@/lib/songMetadataParser');
-        // Use the existing parseFilename helper
         return parseFilenameLocal(decoded);
       }
     }
