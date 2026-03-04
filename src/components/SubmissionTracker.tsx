@@ -88,7 +88,6 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
         <AnimatePresence mode="popLayout">
           {activeSubmissions.map((sub, i) => {
             const queueInfo = sub.submissionId ? queueMap.get(sub.submissionId) : null;
-            const seed = sub.submissionId || String(sub.trackedAt);
 
             return (
               <motion.div
