@@ -373,43 +373,34 @@ export function SpotBiddingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] rounded-xl p-4 sm:p-6">
-        <DialogHeader className="space-y-1">
-          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+      <DialogContent className="sm:max-w-md w-[calc(100vw-2rem)] rounded-xl p-3 sm:p-4">
+        <DialogHeader className="space-y-0.5">
+          <DialogTitle className="flex items-center gap-1.5 text-sm sm:text-base">
+            <Zap className="w-4 h-4 text-primary shrink-0" />
             {t('bidding.title')}
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm">
-            {t('bidding.desc')}
-          </DialogDescription>
         </DialogHeader>
 
-        {/* Song info + queue position */}
-        <div className="rounded-lg border border-border/40 bg-muted/30 p-3 space-y-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Music2 className="w-4 h-4 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{songTitle}</p>
-              <p className="text-xs text-muted-foreground truncate">by {artistName}</p>
-            </div>
+        {/* Song info + queue position — compact */}
+        <div className="rounded-lg border border-border/40 bg-muted/30 px-3 py-2 space-y-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <Music2 className="w-3.5 h-3.5 text-primary shrink-0" />
+            <p className="text-xs font-medium truncate flex-1 min-w-0">{songTitle} <span className="text-muted-foreground font-normal">– {artistName}</span></p>
           </div>
 
           {queuePosition && (
-            <div className="flex items-start gap-2 pt-1 border-t border-border/30">
-              <Clock className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                You are on spot <span className="font-bold text-primary">#{queuePosition.position}</span> of {queuePosition.total}.
-                {' '}Estimated wait: <span className="font-bold text-primary">
-                  {(() => {
-                    const totalMin = queuePosition.position * MINUTES_PER_SONG;
-                    const h = Math.floor(totalMin / 60);
-                    const m = totalMin % 60;
-                    return h > 0 ? `~${h}h ${m > 0 ? `${m}min` : ''}` : `~${m}min`;
-                  })()}
-                </span>
-              </p>
+            <div className="text-[11px] text-muted-foreground leading-snug">
+              <Clock className="w-3 h-3 inline mr-1 -mt-0.5" />
+              Spot <span className="font-bold text-primary">#{queuePosition.position}</span> of {queuePosition.total} — est. wait{' '}
+              <span className="font-bold text-primary">
+                {(() => {
+                  const totalMin = queuePosition.position * MINUTES_PER_SONG;
+                  const h = Math.floor(totalMin / 60);
+                  const m = totalMin % 60;
+                  return h > 0 ? `~${h}h${m > 0 ? ` ${m}min` : ''}` : `~${m}min`;
+                })()}
+              </span>.
+              {' '}Buy a top spot below to skip the line!
             </div>
           )}
         </div>
