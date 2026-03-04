@@ -703,6 +703,51 @@ const StreamerSettings = () => {
                       onCheckedChange={setShowOfflineSignup}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Next Stream Platform</Label>
+                    <Select value={nextStreamPlatform} onValueChange={setNextStreamPlatform}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Where will you stream next?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Not specified</SelectItem>
+                        <SelectItem value="twitch">Twitch</SelectItem>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                        <SelectItem value="tiktok">TikTok</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Tell visitors where your next stream will be
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Social Links on Offline Page</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Choose which social links to display when you're offline
+                    </p>
+                    {[
+                      { key: 'twitch', label: 'Twitch' },
+                      { key: 'youtube', label: 'YouTube' },
+                      { key: 'tiktok', label: 'TikTok' },
+                      { key: 'instagram', label: 'Instagram' },
+                      { key: 'twitter', label: 'X / Twitter' },
+                    ].map((social) => (
+                      <div key={social.key} className="flex items-center justify-between">
+                        <span className="text-sm">{social.label}</span>
+                        <Switch
+                          checked={offlineSocials.includes(social.key)}
+                          onCheckedChange={(checked) => {
+                            setOfflineSocials(prev =>
+                              checked ? [...prev, social.key] : prev.filter(s => s !== social.key)
+                            );
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </TabsContent>
