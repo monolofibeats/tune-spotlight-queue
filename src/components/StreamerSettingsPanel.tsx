@@ -116,6 +116,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [showTopSongs, setShowTopSongs] = useState(false);
   const [showPublicQueue, setShowPublicQueue] = useState(true);
   const [customCss, setCustomCss] = useState('');
+  const [offlineMessage, setOfflineMessage] = useState('');
+  const [nextStreamAt, setNextStreamAt] = useState('');
+  const [showOfflineSignup, setShowOfflineSignup] = useState(true);
 
   // Language
   const [pageLanguage, setPageLanguage] = useState('de');
@@ -146,6 +149,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setShowTopSongs(s.show_top_songs ?? false);
     setShowPublicQueue((s as any).show_public_queue ?? true);
     setCustomCss(s.custom_css || '');
+    setOfflineMessage((s as any).offline_message || '');
+    setNextStreamAt((s as any).next_stream_at || '');
+    setShowOfflineSignup((s as any).show_offline_signup ?? true);
     setPageLanguage(s.page_language || 'de');
   }, []);
 
@@ -186,9 +192,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       showTopSongs !== (s.show_top_songs ?? false) ||
       showPublicQueue !== ((s as any).show_public_queue ?? true) ||
       customCss !== (s.custom_css || '') ||
+      offlineMessage !== ((s as any).offline_message || '') ||
+      nextStreamAt !== ((s as any).next_stream_at || '') ||
+      showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, pageLanguage]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, offlineMessage, nextStreamAt, showOfflineSignup, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
@@ -305,8 +314,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           show_top_songs: showTopSongs,
           show_public_queue: showPublicQueue,
           custom_css: customCss || null,
+          offline_message: offlineMessage || null,
+          next_stream_at: nextStreamAt || null,
+          show_offline_signup: showOfflineSignup,
           page_language: pageLanguage,
-        })
+        } as any)
         .eq('id', streamer.id)
         .select('*')
         .maybeSingle();
@@ -559,6 +571,47 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                       <p className="text-xs text-muted-foreground">{t('pageSettings.sectionVisibility.streamEmbedDesc')}</p>
                     </div>
                     <Switch checked={showStreamEmbed} onCheckedChange={setShowStreamEmbed} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Offline State */}
+              <div className="backdrop-blur-md bg-card/20 border border-border/30 rounded-xl p-6 space-y-4">
+                <h3 className="font-semibold text-lg">Offline State</h3>
+                <p className="text-sm text-muted-foreground">
+                  Customize what visitors see when your stream is not active.
+                </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="offlineMessagePanel">Offline Message</Label>
+                    <Textarea
+                      id="offlineMessagePanel"
+                      value={offlineMessage}
+                      onChange={(e) => setOfflineMessage(e.target.value)}
+                      placeholder="When the stream is active you can submit your songs here for review"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nextStreamAtPanel">Next Stream Date & Time</Label>
+                    <Input
+                      id="nextStreamAtPanel"
+                      type="datetime-local"
+                      value={nextStreamAt ? (() => { try { return new Date(nextStreamAt).toISOString().slice(0, 16); } catch { return ''; } })() : ''}
+                      onChange={(e) => setNextStreamAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Displayed to visitors on the offline page
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Show Email Signup</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Let visitors subscribe for go-live notifications
+                      </p>
+                    </div>
+                    <Switch checked={showOfflineSignup} onCheckedChange={setShowOfflineSignup} />
                   </div>
                 </div>
               </div>
