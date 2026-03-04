@@ -120,6 +120,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [offlineMessage, setOfflineMessage] = useState('');
   const [nextStreamAt, setNextStreamAt] = useState('');
   const [showOfflineSignup, setShowOfflineSignup] = useState(true);
+  const [offlineSocials, setOfflineSocials] = useState<string[]>(['twitch', 'instagram', 'tiktok']);
+  const [nextStreamPlatform, setNextStreamPlatform] = useState('');
 
   // Language
   const [pageLanguage, setPageLanguage] = useState('de');
