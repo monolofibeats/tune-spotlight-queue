@@ -299,6 +299,10 @@ export const parseUrlMetadata = (url: string): SongMetadata => {
   if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
     return parseYouTubeUrl(url);
   }
+
+  if (lowerUrl.includes('dropbox.com')) {
+    return parseDropboxUrl(url);
+  }
   
   return {};
 };

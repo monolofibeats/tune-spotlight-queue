@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useStreamerFormFields } from '@/hooks/useStreamerFormFields';
-import { parseUrlMetadata, parseFilename } from '@/lib/songMetadataParser';
+import { parseUrlMetadata, parseFilename, fetchYouTubeMetadata } from '@/lib/songMetadataParser';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
