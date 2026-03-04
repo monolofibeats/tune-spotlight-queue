@@ -966,6 +966,7 @@ const translations: Record<Language, Record<string, string>> = {
     'bidding.available': 'Available',
     'bidding.bid': 'Bid',
     'bidding.toClaim': 'to claim',
+    'bidding.toOutbid': 'to outbid',
     'bidding.discountPlaceholder': 'Discount code',
     'bidding.apply': 'Apply',
     'bidding.discountApplied': '{percent}% discount will be applied at checkout',
