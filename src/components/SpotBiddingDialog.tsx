@@ -424,11 +424,7 @@ export function SpotBiddingDialog({
               const isAvailable = spot.currentPrice === 0;
               const isLocked = !!spot.locked;
 
-              // Estimate wait if you grab this spot
-              const spotWaitMin = spot.position * MINUTES_PER_SONG;
-              const wH = Math.floor(spotWaitMin / 60);
-              const wM = spotWaitMin % 60;
-              const waitLabel = wH > 0 ? `~${wH}h${wM > 0 ? ` ${wM}min` : ''}` : `~${wM}min`;
+              const waitLabel = estimateWait(spot.position);
               
               return (
                 <motion.button
