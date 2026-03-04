@@ -490,7 +490,7 @@ export function SpotBiddingDialog({
                         <Loader2 className="w-4 h-4 animate-spin ml-auto" />
                       ) : !isLocked ? (
                         <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          {isAvailable ? t('bidding.toClaim') : t('bidding.toOutbid') || 'to outbid'}
+                          {isAvailable ? t('bidding.toClaim') : t('bidding.toOutbid')}
                         </p>
                       ) : null}
                     </div>
