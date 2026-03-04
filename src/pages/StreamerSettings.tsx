@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -669,32 +670,11 @@ const StreamerSettings = () => {
                   
                   <div className="space-y-2">
                     <Label>Next Stream Date & Time</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="date"
-                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; } catch { return ''; } })() : ''}
-                        onChange={(e) => {
-                          if (!e.target.value) { setNextStreamAt(''); return; }
-                          const [y, mo, da] = e.target.value.split('-').map(Number);
-                          const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
-                          const newDate = new Date(y, mo - 1, da, existing.getHours(), existing.getMinutes());
-                          if (!isNaN(newDate.getTime())) setNextStreamAt(newDate.toISOString());
-                        }}
-                        className="flex-1"
-                      />
-                      <Input
-                        type="time"
-                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; } catch { return ''; } })() : ''}
-                        onChange={(e) => {
-                          if (!e.target.value) return;
-                          const [h, m] = e.target.value.split(':').map(Number);
-                          const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
-                          existing.setHours(h, m, 0, 0);
-                          setNextStreamAt(existing.toISOString());
-                        }}
-                        className="w-28"
-                      />
-                    </div>
+                    <DateTimePicker
+                      value={nextStreamAt ? new Date(nextStreamAt) : null}
+                      onChange={(d) => setNextStreamAt(d ? d.toISOString() : '')}
+                      placeholder="Pick next stream date & time"
+                    />
                     <p className="text-xs text-muted-foreground">
                       Displayed to visitors on the offline page
                     </p>
