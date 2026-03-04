@@ -116,6 +116,9 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
   const [showTopSongs, setShowTopSongs] = useState(false);
   const [showPublicQueue, setShowPublicQueue] = useState(true);
   const [customCss, setCustomCss] = useState('');
+  const [offlineMessage, setOfflineMessage] = useState('');
+  const [nextStreamAt, setNextStreamAt] = useState('');
+  const [showOfflineSignup, setShowOfflineSignup] = useState(true);
 
   // Language
   const [pageLanguage, setPageLanguage] = useState('de');
