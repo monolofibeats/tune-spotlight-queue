@@ -711,7 +711,7 @@ const StreamerSettings = () => {
                         <SelectValue placeholder="Where will you stream next?" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Not specified</SelectItem>
+                        <SelectItem value="none">Not specified</SelectItem>
                         <SelectItem value="twitch">Twitch</SelectItem>
                         <SelectItem value="youtube">YouTube</SelectItem>
                         <SelectItem value="tiktok">TikTok</SelectItem>
