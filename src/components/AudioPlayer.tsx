@@ -248,6 +248,10 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
     const [volume, setVolume] = useState(0.8);
     const [isMuted, setIsMuted] = useState(false);
     const [hasError, setHasError] = useState(false);
+    const [bufferProgress, setBufferProgress] = useState(0); // 0-100
+    const [isBuffering, setIsBuffering] = useState(false);
+    const bufferStartRef = useRef<number>(0);
+    const [bufferEta, setBufferEta] = useState<string | null>(null);
 
     useEffect(() => {
       const audio = audioRef.current;
@@ -256,9 +260,6 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       // Expose audio element to parent (e.g. for visualizer)
       onAudioElement?.(audio);
 
-      // Attach listeners *after* the audio element exists, and re-run when src changes.
-      // Previously, the <audio> element wasn't rendered until src existed, so the effect
-      // ran with audioRef.current === null and never attached listeners.
       const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
       const handleLoadedMetadata = () => {
         const dur = Number.isFinite(audio.duration) ? audio.duration : 0;
@@ -280,12 +281,46 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         onEnded?.();
       };
       const handleError = () => {
-        // Don't flag error when src is empty/null (still loading)
         if (!src) return;
         setIsPlaying(false);
         setDuration(0);
         setCurrentTime(0);
         setHasError(true);
+        setIsBuffering(false);
+      };
+
+      // Buffering state tracking
+      const handleCanPlayThrough = () => {
+        setIsBuffering(false);
+        setBufferProgress(100);
+        setBufferEta(null);
+      };
+      const handleWaiting = () => {
+        setIsBuffering(true);
+        bufferStartRef.current = Date.now();
+      };
+      const handleCanPlay = () => {
+        // canplay fires when enough data is available to start — keep buffering indicator if not fully ready
+      };
+      const handleProgress = () => {
+        if (audio.buffered.length > 0 && audio.duration > 0) {
+          const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+          const pct = Math.min(100, (bufferedEnd / audio.duration) * 100);
+          setBufferProgress(pct);
+
+          // ETA calculation
+          const elapsed = (Date.now() - bufferStartRef.current) / 1000;
+          if (pct > 0 && pct < 100 && elapsed > 0.5) {
+            const remaining = ((100 - pct) / pct) * elapsed;
+            if (remaining < 60) {
+              setBufferEta(`~${Math.ceil(remaining)}s`);
+            } else {
+              setBufferEta(`~${Math.ceil(remaining / 60)}m`);
+            }
+          } else if (pct >= 100) {
+            setBufferEta(null);
+          }
+        }
       };
 
       audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -293,6 +328,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       audio.addEventListener('durationchange', handleDurationChange);
       audio.addEventListener('ended', handleEnded);
       audio.addEventListener('error', handleError);
+      audio.addEventListener('canplaythrough', handleCanPlayThrough);
+      audio.addEventListener('waiting', handleWaiting);
+      audio.addEventListener('progress', handleProgress);
 
       // Ensure src changes trigger a real reload and metadata fetch
       audio.pause();
@@ -300,11 +338,15 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
       setCurrentTime(0);
       setDuration(0);
       setHasError(false);
-      pendingSeekRef.current = null;
+      setBufferProgress(0);
+      setIsBuffering(false);
+      setBufferEta(null);
+      bufferStartRef.current = Date.now();
       pendingSeekRef.current = null;
 
       audio.src = src ?? '';
       if (src) {
+        setIsBuffering(true);
         audio.load();
       }
 
@@ -314,6 +356,9 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
         audio.removeEventListener('durationchange', handleDurationChange);
         audio.removeEventListener('ended', handleEnded);
         audio.removeEventListener('error', handleError);
+        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+        audio.removeEventListener('waiting', handleWaiting);
+        audio.removeEventListener('progress', handleProgress);
         onAudioElement?.(null);
       };
     }, [src, onEnded, onAudioElement]);
