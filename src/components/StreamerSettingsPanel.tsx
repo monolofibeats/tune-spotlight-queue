@@ -192,9 +192,12 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       showTopSongs !== (s.show_top_songs ?? false) ||
       showPublicQueue !== ((s as any).show_public_queue ?? true) ||
       customCss !== (s.custom_css || '') ||
+      offlineMessage !== ((s as any).offline_message || '') ||
+      nextStreamAt !== ((s as any).next_stream_at || '') ||
+      showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, pageLanguage]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, offlineMessage, nextStreamAt, showOfflineSignup, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges || streamEmbedHasChanges;
 
