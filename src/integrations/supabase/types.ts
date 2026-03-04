@@ -529,6 +529,47 @@ export type Database = {
           },
         ]
       }
+      star_trail_scores: {
+        Row: {
+          accuracy: number
+          completion: number
+          created_at: string
+          id: string
+          score: number
+          shape: string
+          streamer_id: string
+          streamer_name: string
+        }
+        Insert: {
+          accuracy: number
+          completion: number
+          created_at?: string
+          id?: string
+          score: number
+          shape: string
+          streamer_id: string
+          streamer_name: string
+        }
+        Update: {
+          accuracy?: number
+          completion?: number
+          created_at?: string
+          id?: string
+          score?: number
+          shape?: string
+          streamer_id?: string
+          streamer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "star_trail_scores_streamer_id_fkey"
+            columns: ["streamer_id"]
+            isOneToOne: false
+            referencedRelation: "streamers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stem_separation_jobs: {
         Row: {
           back_url: string | null
