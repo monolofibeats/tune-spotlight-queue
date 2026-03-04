@@ -243,7 +243,7 @@ const StreamerSettings = () => {
       offlineMessage !== ((s as any).offline_message || '') ||
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
-      JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
+      JSON.stringify(offlineSocials) !== JSON.stringify(migrateLegacySocials((s as any).offline_socials, s)) ||
       nextStreamPlatform !== ((s as any).next_stream_platform || 'none') ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
