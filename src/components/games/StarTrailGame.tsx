@@ -445,12 +445,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
     isDrawingRef.current = true;
     const pos = getPos(e);
     if (pos) addPoint(pos);
-    // Start continuous fairy sparkle sound
-    const audio = sparkleAudioRef.current;
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    }
+    // Start continuous chime synth
+    startChimeSound();
   };
 
   const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
