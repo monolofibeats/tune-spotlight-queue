@@ -7,17 +7,19 @@ import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { TrackedSubmission } from '@/hooks/useTrackedSubmission';
 import { supabase } from '@/integrations/supabase/client';
 
-// Organic wait estimate: seeded random 3-7 min per song, always monotonically increasing
-function estimateWait(position: number, seed: string): string {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-  const rng = (i: number) => { const x = Math.sin(h + i) * 10000; return x - Math.floor(x); };
-  // Accumulate: each song adds 3-7 min, guaranteeing monotonic increase
+// Organic wait estimate: fixed-seed accumulation so position N always > position N-1
+// Uses a constant seed so every caller gets the same ladder of times.
+function estimateWait(position: number): string {
+  // Deterministic pseudo-random per slot index (fixed seed = 42)
+  const rng = (i: number) => { const x = Math.sin(42 + i * 127.1) * 10000; return x - Math.floor(x); };
   let totalMin = 0;
-  for (let i = 0; i < position; i++) totalMin += 3 + Math.floor(rng(i) * 5);
-  // Nudge away from multiples of 5 to look organic
-  if (totalMin % 5 === 0) totalMin += 1 + Math.floor(rng(position + 99) * 2);
-  if (totalMin % 10 === 0) totalMin += 1;
+  for (let i = 0; i < position; i++) {
+    // Each slot adds 3-7 min
+    totalMin += 3 + Math.floor(rng(i) * 5);
+  }
+  // Nudge away from "too round" numbers
+  if (totalMin % 5 === 0) totalMin += 1;
+  if (totalMin % 10 === 0) totalMin += 2;
   const hours = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
   if (hours > 0) return `~${hours}h ${mins}min`;
