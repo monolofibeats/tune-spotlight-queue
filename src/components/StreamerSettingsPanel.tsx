@@ -314,8 +314,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           show_top_songs: showTopSongs,
           show_public_queue: showPublicQueue,
           custom_css: customCss || null,
+          offline_message: offlineMessage || null,
+          next_stream_at: nextStreamAt || null,
+          show_offline_signup: showOfflineSignup,
           page_language: pageLanguage,
-        })
+        } as any)
         .eq('id', streamer.id)
         .select('*')
         .maybeSingle();
