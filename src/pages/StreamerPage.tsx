@@ -357,6 +357,13 @@ function StreamerPageContent() {
         </section>
       )}
 
+      {/* Star Trail Leaderboard */}
+      <section className="pb-4 px-4">
+        <div className="container mx-auto max-w-xl">
+          <StarTrailLeaderboard streamerId={streamer.id} />
+        </div>
+      </section>
+
       {/* Tracked Submissions - below the form */}
       {currentSubmissions.length > 0 && (
         <section className="pb-8 px-4">
