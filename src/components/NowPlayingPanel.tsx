@@ -624,7 +624,11 @@ export function NowPlayingPanel({
                           max="1"
                           step="0.05"
                           value={ttsVolume}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => {
+                            e.stopPropagation();
                             const v = parseFloat(e.target.value);
                             setTtsVolume(v);
                             try { localStorage.setItem('upstar_tts_volume', String(v)); } catch {}
