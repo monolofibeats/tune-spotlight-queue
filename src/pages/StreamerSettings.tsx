@@ -232,6 +232,9 @@ const StreamerSettings = () => {
       showHowItWorks !== (s.show_how_it_works ?? true) ||
       showStreamEmbed !== (s.show_stream_embed ?? true) ||
       customCss !== (s.custom_css || '') ||
+      offlineMessage !== ((s as any).offline_message || '') ||
+      nextStreamAt !== ((s as any).next_stream_at || '') ||
+      showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
       tiktokUrl !== (s.tiktok_url || '') ||
@@ -239,7 +242,7 @@ const StreamerSettings = () => {
       twitterUrl !== (s.twitter_url || '') ||
       pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, offlineMessage, nextStreamAt, showOfflineSignup, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges;
 
