@@ -1,29 +1,33 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Trophy, X, RotateCcw } from 'lucide-react';
+import { Star, Trophy, X, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 // --- Shape generation ---
 type Point = { x: number; y: number };
-type ShapeDef = { name: string; icon: string; generate: (n?: number) => Point[] };
+type ShapeDef = { name: string; icon: string; difficulty: Difficulty; generate: (n?: number) => Point[] };
+type Difficulty = 'easy' | 'medium' | 'hard';
+
+const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; emoji: string; time: number; color: string }> = {
+  easy:   { label: 'Easy',   emoji: '🟢', time: 15, color: 'text-green-400' },
+  medium: { label: 'Medium', emoji: '🟡', time: 10, color: 'text-primary' },
+  hard:   { label: 'Hard',   emoji: '🔴', time: 7,  color: 'text-destructive' },
+};
 
 const SHAPES: ShapeDef[] = [
   {
-    name: 'Circle', icon: '⭕',
+    name: 'Circle', icon: '⭕', difficulty: 'easy',
     generate: (n = 120) => Array.from({ length: n }, (_, i) => {
       const t = (i / n) * Math.PI * 2;
       return { x: 0.5 + 0.35 * Math.cos(t), y: 0.5 + 0.35 * Math.sin(t) };
     }),
   },
   {
-    name: 'Triangle', icon: '🔺',
+    name: 'Triangle', icon: '🔺', difficulty: 'easy',
     generate: (n = 120) => {
-      const verts: Point[] = [
-        { x: 0.5, y: 0.12 },
-        { x: 0.87, y: 0.82 },
-        { x: 0.13, y: 0.82 },
-      ];
+      const verts: Point[] = [{ x: 0.5, y: 0.12 }, { x: 0.87, y: 0.82 }, { x: 0.13, y: 0.82 }];
       const pts: Point[] = [];
       const perSide = Math.floor(n / 3);
       for (let s = 0; s < 3; s++) {
@@ -37,14 +41,21 @@ const SHAPES: ShapeDef[] = [
     },
   },
   {
-    name: 'Wave', icon: '🌊',
+    name: 'Wave', icon: '🌊', difficulty: 'medium',
     generate: (n = 120) => Array.from({ length: n }, (_, i) => {
       const t = i / (n - 1);
       return { x: 0.1 + t * 0.8, y: 0.5 + 0.25 * Math.sin(t * Math.PI * 4) };
     }),
   },
   {
-    name: 'Spiral', icon: '🌀',
+    name: 'Figure 8', icon: '♾️', difficulty: 'medium',
+    generate: (n = 140) => Array.from({ length: n }, (_, i) => {
+      const t = (i / n) * Math.PI * 2;
+      return { x: 0.5 + 0.3 * Math.sin(t), y: 0.5 + 0.25 * Math.sin(2 * t) };
+    }),
+  },
+  {
+    name: 'Spiral', icon: '🌀', difficulty: 'hard',
     generate: (n = 150) => Array.from({ length: n }, (_, i) => {
       const t = (i / n) * Math.PI * 4;
       const r = 0.08 + (i / n) * 0.3;
@@ -52,10 +63,36 @@ const SHAPES: ShapeDef[] = [
     }),
   },
   {
-    name: 'Figure 8', icon: '♾️',
+    name: 'Star', icon: '⭐', difficulty: 'hard',
+    generate: (n = 150) => {
+      const pts: Point[] = [];
+      const spikes = 5;
+      const outerR = 0.38, innerR = 0.15;
+      const totalVerts = spikes * 2;
+      const perSeg = Math.floor(n / totalVerts);
+      const verts: Point[] = [];
+      for (let i = 0; i < totalVerts; i++) {
+        const angle = (i / totalVerts) * Math.PI * 2 - Math.PI / 2;
+        const r = i % 2 === 0 ? outerR : innerR;
+        verts.push({ x: 0.5 + r * Math.cos(angle), y: 0.5 + r * Math.sin(angle) });
+      }
+      for (let s = 0; s < totalVerts; s++) {
+        const a = verts[s], b = verts[(s + 1) % totalVerts];
+        for (let i = 0; i < perSeg; i++) {
+          const t = i / perSeg;
+          pts.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+        }
+      }
+      return pts;
+    },
+  },
+  {
+    name: 'Heart', icon: '❤️', difficulty: 'hard',
     generate: (n = 140) => Array.from({ length: n }, (_, i) => {
       const t = (i / n) * Math.PI * 2;
-      return { x: 0.5 + 0.3 * Math.sin(t), y: 0.5 + 0.25 * Math.sin(2 * t) };
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+      return { x: 0.5 + x / 50, y: 0.48 + y / 50 };
     }),
   },
 ];
@@ -63,10 +100,7 @@ const SHAPES: ShapeDef[] = [
 // --- Scoring ---
 function calculateScore(playerPath: Point[], targetPoints: Point[], size: number): { accuracy: number; completion: number; score: number } {
   if (playerPath.length < 5) return { accuracy: 0, completion: 0, score: 0 };
-
-  const threshold = 0.06; // normalized distance threshold
-
-  // Accuracy: average min distance from each player point to target
+  const threshold = 0.06;
   let totalDist = 0;
   for (const pp of playerPath) {
     const np = { x: pp.x / size, y: pp.y / size };
@@ -79,20 +113,14 @@ function calculateScore(playerPath: Point[], targetPoints: Point[], size: number
   }
   const avgDist = totalDist / playerPath.length;
   const accuracy = Math.max(0, Math.min(100, Math.round((1 - avgDist / 0.3) * 100)));
-
-  // Completion: % of target points that have a player point nearby
   let covered = 0;
   for (const tp of targetPoints) {
     for (const pp of playerPath) {
       const np = { x: pp.x / size, y: pp.y / size };
-      if (Math.hypot(np.x - tp.x, np.y - tp.y) < threshold) {
-        covered++;
-        break;
-      }
+      if (Math.hypot(np.x - tp.x, np.y - tp.y) < threshold) { covered++; break; }
     }
   }
   const completion = Math.round((covered / targetPoints.length) * 100);
-
   const score = Math.round(accuracy * 0.6 + completion * 0.4);
   return { accuracy, completion, score };
 }
@@ -110,19 +138,22 @@ interface LeaderboardEntry {
 interface StarTrailGameProps {
   streamerId: string;
   streamerName: string;
-  onClose: () => void;
+  onClose?: () => void;
+  readOnly?: boolean; // for public display
 }
 
 type GameState = 'idle' | 'playing' | 'finished';
 
-export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGameProps) {
+export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: StarTrailGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<GameState>('idle');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('medium');
   const [currentShape, setCurrentShape] = useState<ShapeDef>(SHAPES[0]);
   const [timeLeft, setTimeLeft] = useState(10);
   const [result, setResult] = useState<{ accuracy: number; completion: number; score: number } | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [scoreSaved, setScoreSaved] = useState(false);
+  const { play } = useSoundEffects();
 
   const playerPathRef = useRef<Point[]>([]);
   const isDrawingRef = useRef(false);
@@ -130,8 +161,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
+  const lastSoundRef = useRef(0);
 
-  // Fetch leaderboard
   const fetchLeaderboard = useCallback(async () => {
     const { data } = await supabase
       .from('star_trail_scores')
@@ -151,7 +182,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
     if (!container) return;
     const s = Math.min(container.clientWidth, container.clientHeight, 400);
     sizeRef.current = s;
-    canvas.width = s * 2; // retina
+    canvas.width = s * 2;
     canvas.height = s * 2;
     canvas.style.width = `${s}px`;
     canvas.style.height = `${s}px`;
@@ -210,7 +241,6 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
           const age = 1 - (i / path.length) * 0.7;
           const alpha = Math.max(0.05, age);
           const glow = 4 + age * 8;
-
           ctx.save();
           ctx.shadowColor = `hsla(45 90% 60% / ${alpha})`;
           ctx.shadowBlur = glow * scale;
@@ -222,8 +252,6 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
           ctx.stroke();
           ctx.restore();
         }
-
-        // Star at tip
         const tip = path[path.length - 1];
         ctx.save();
         ctx.shadowColor = 'hsla(45 95% 65% / 0.9)';
@@ -239,11 +267,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
       const parts = particlesRef.current;
       for (let i = parts.length - 1; i >= 0; i--) {
         const p = parts[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.02;
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
         if (p.life <= 0) { parts.splice(i, 1); continue; }
-
         ctx.save();
         ctx.globalAlpha = p.life;
         ctx.shadowColor = 'hsla(45 90% 70% / 0.8)';
@@ -265,18 +290,17 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
   // Timer
   useEffect(() => {
     if (gameState !== 'playing') return;
-    setTimeLeft(10);
+    const totalTime = DIFFICULTY_CONFIG[selectedDifficulty].time;
+    setTimeLeft(totalTime);
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
-          endRound();
-          return 0;
-        }
+        if (prev <= 4 && prev > 1) play('pop', 0.15);
+        if (prev <= 1) { endRound(); return 0; }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [gameState]);
+  }, [gameState, selectedDifficulty]);
 
   const endRound = useCallback(() => {
     clearInterval(timerRef.current);
@@ -286,15 +310,22 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
     setResult(r);
     setGameState('finished');
     setScoreSaved(false);
-  }, [currentShape]);
+    // Score reveal sound
+    if (r.score >= 80) play('tada', 0.3);
+    else if (r.score >= 50) play('success', 0.25);
+    else play('ding', 0.2);
+  }, [currentShape, play]);
 
   const startRound = () => {
-    const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    const shapesForDiff = SHAPES.filter(s => s.difficulty === selectedDifficulty);
+    const pool = shapesForDiff.length > 0 ? shapesForDiff : SHAPES;
+    const shape = pool[Math.floor(Math.random() * pool.length)];
     setCurrentShape(shape);
     playerPathRef.current = [];
     particlesRef.current = [];
     setResult(null);
     setGameState('playing');
+    play('woosh', 0.2);
   };
 
   const saveScore = async () => {
@@ -308,6 +339,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
       shape: currentShape.name,
     });
     setScoreSaved(true);
+    play('success', 0.3);
     fetchLeaderboard();
   };
 
@@ -323,7 +355,6 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
 
   const addPoint = (pos: Point) => {
     playerPathRef.current.push(pos);
-    // Spawn particles
     for (let i = 0; i < 2; i++) {
       particlesRef.current.push({
         x: pos.x, y: pos.y,
@@ -331,6 +362,12 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
         vy: (Math.random() - 0.5) * 2,
         life: 0.5 + Math.random() * 0.5,
       });
+    }
+    // Subtle trace sound (throttled)
+    const now = Date.now();
+    if (now - lastSoundRef.current > 200) {
+      play('pop', 0.04);
+      lastSoundRef.current = now;
     }
   };
 
@@ -351,6 +388,33 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
 
   const handlePointerUp = () => { isDrawingRef.current = false; };
 
+  // Read-only leaderboard mode for public page
+  if (readOnly) {
+    return (
+      <div className="w-full">
+        {leaderboard.length > 0 ? (
+          <div className="space-y-1">
+            {leaderboard.slice(0, 5).map((entry, i) => (
+              <div
+                key={entry.id}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs bg-card/20 backdrop-blur-sm border border-border/20"
+              >
+                <span className={`w-5 text-right font-bold ${i < 3 ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+                </span>
+                <span className="flex-1 truncate font-medium text-foreground">{entry.streamer_name}</span>
+                <span className="text-muted-foreground text-[10px]">{entry.shape}</span>
+                <span className="font-bold text-primary tabular-nums">{entry.score}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground text-center py-3">No scores yet — be the first!</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -366,17 +430,43 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
         </div>
         <div className="flex items-center gap-2">
           {gameState === 'playing' && (
-            <span className="text-xs font-mono font-bold text-primary tabular-nums">{timeLeft}s</span>
+            <span className={`text-xs font-mono font-bold tabular-nums ${timeLeft <= 3 ? 'text-destructive animate-pulse' : 'text-primary'}`}>
+              {timeLeft}s
+            </span>
           )}
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-card/40 transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          {onClose && (
+            <button onClick={onClose} className="p-1 rounded-full hover:bg-card/40 transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Difficulty selector - shown in idle state */}
+      {gameState === 'idle' && (
+        <div className="flex gap-1.5 w-full">
+          {(Object.entries(DIFFICULTY_CONFIG) as [Difficulty, typeof DIFFICULTY_CONFIG.easy][]).map(([key, cfg]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedDifficulty(key)}
+              className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                selectedDifficulty === key
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-border/20 bg-card/10 text-muted-foreground hover:bg-card/20'
+              }`}
+            >
+              <span>{cfg.emoji}</span>
+              <span>{cfg.label}</span>
+              <span className="text-[9px] opacity-60">{cfg.time}s</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Shape indicator */}
       {gameState === 'playing' && (
-        <div className="text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Zap className={`w-3 h-3 ${DIFFICULTY_CONFIG[currentShape.difficulty].color}`} />
           Trace the <span className="text-primary font-semibold">{currentShape.icon} {currentShape.name}</span>
         </div>
       )}
@@ -433,6 +523,9 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
               >
                 {result.score}
               </motion.div>
+              <div className="text-xs text-muted-foreground mb-1">
+                {currentShape.icon} {currentShape.name} · {DIFFICULTY_CONFIG[currentShape.difficulty].emoji} {DIFFICULTY_CONFIG[currentShape.difficulty].label}
+              </div>
               <div className="flex gap-4 text-xs text-muted-foreground">
                 <div className="text-center">
                   <div className="text-foreground font-bold">{result.accuracy}%</div>
@@ -474,7 +567,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose }: StarTrailGa
                 className="flex items-center gap-2 px-2 py-1 rounded-md text-[11px] bg-card/10 border border-border/10"
               >
                 <span className={`w-4 text-right font-bold ${i < 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {i + 1}.
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
                 </span>
                 <span className="flex-1 truncate text-foreground">{entry.streamer_name}</span>
                 <span className="text-muted-foreground">{entry.shape}</span>
