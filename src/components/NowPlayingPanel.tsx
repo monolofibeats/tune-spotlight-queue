@@ -223,6 +223,9 @@ export function NowPlayingPanel({
   const [ttsMuted, setTtsMuted] = useState(() => {
     try { return localStorage.getItem('upstar_tts_muted') === 'true'; } catch { return false; }
   });
+  const [ttsVolume, setTtsVolume] = useState(() => {
+    try { return parseFloat(localStorage.getItem('upstar_tts_volume') || '0.8'); } catch { return 0.8; }
+  });
   const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
