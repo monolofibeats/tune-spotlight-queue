@@ -155,6 +155,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setOfflineMessage((s as any).offline_message || '');
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
+    setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+    setNextStreamPlatform((s as any).next_stream_platform || '');
     setPageLanguage(s.page_language || 'de');
   }, []);
 
