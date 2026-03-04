@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, DollarSign, Music, Clock, Timer, Crown,
-  Volume2, Bell, Trophy, Eye, Monitor
+  Volume2, Trophy, Eye, Monitor
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
