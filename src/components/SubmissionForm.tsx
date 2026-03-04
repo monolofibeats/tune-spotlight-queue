@@ -175,27 +175,26 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
   const showPreview = songUrl && (platform === 'spotify' || platform === 'soundcloud' || platform === 'youtube' || platform === 'dropbox');
 
   const autofillFromSpotify = async (url: string) => {
-    // Browser fetch to Spotify pages is often blocked by CORS; use backend function instead.
     if (!url.includes('spotify.com') || !url.includes('/track/')) return;
-
     try {
       const { data, error } = await supabase.functions.invoke('fetch-spotify-metadata', {
         body: { url },
       });
       if (error) return;
-
       const meta = data as { songTitle?: string; artistName?: string } | null;
       if (!meta) return;
+      if (meta.artistName && !artistName.trim()) setArtistName(meta.artistName);
+      if (meta.songTitle && !songTitle.trim()) setSongTitle(meta.songTitle);
+    } catch {}
+  };
 
-      if (meta.artistName && !artistName.trim()) {
-        setArtistName(meta.artistName);
-      }
-      if (meta.songTitle && !songTitle.trim()) {
-        setSongTitle(meta.songTitle);
-      }
-    } catch {
-      // Ignore autofill errors (user can always type manually)
-    }
+  const autofillFromYouTube = async (url: string) => {
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) return;
+    try {
+      const meta = await fetchYouTubeMetadata(url);
+      if (meta.artistName && !artistName.trim()) setArtistName(meta.artistName);
+      if (meta.songTitle && !songTitle.trim()) setSongTitle(meta.songTitle);
+    } catch {}
   };
 
   const isStepEnabled = (fieldStep: number) => {
