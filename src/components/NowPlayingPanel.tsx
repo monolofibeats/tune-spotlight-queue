@@ -220,6 +220,10 @@ export function NowPlayingPanel({
   const [copiedContact, setCopiedContact] = useState(false);
   const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
   const [insightsExpanded, setInsightsExpanded] = useState(false);
+  const [ttsMuted, setTtsMuted] = useState(() => {
+    try { return localStorage.getItem('upstar_tts_muted') === 'true'; } catch { return false; }
+  });
+  const ttsSpokenIdRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
     setAudioEl(el);
