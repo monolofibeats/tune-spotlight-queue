@@ -321,7 +321,7 @@ export function NowPlayingPanel({
     return () => {
       window.speechSynthesis?.cancel();
     };
-  }, [submission?.id, submission?.message, ttsMuted]);
+  }, [submission?.id, submission?.message, ttsMuted, ttsVolume]);
 
   // Reset spoken ID when submission changes
   useEffect(() => {
