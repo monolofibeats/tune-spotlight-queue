@@ -113,12 +113,93 @@ const parseSoundCloudUrl = (url: string): SongMetadata => {
 };
 
 /**
- * Parse YouTube URL - try to extract from video title patterns
- * Format varies, but often: Artist - Song Title or Song Title by Artist
+ * Fetch YouTube video title via oEmbed API and parse "Artist - Song" pattern
  */
+export const fetchYouTubeMetadata = async (url: string): Promise<SongMetadata> => {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    const response = await fetch(oembedUrl);
+    if (!response.ok) return {};
+
+    const data = await response.json();
+    const title: string | undefined = data.title;
+    if (!title) return {};
+
+    // Common YouTube music title patterns: "Artist - Song Title", "Artist — Song Title"
+    const separators = [' - ', ' – ', ' — ', ' | '];
+    for (const sep of separators) {
+      if (title.includes(sep)) {
+        const parts = title.split(sep);
+        let artistName = parts[0].trim();
+        let songTitle = parts.slice(1).join(sep).trim();
+
+        // Remove common suffixes like (Official Video), [Lyrics], etc.
+        songTitle = songTitle
+          .replace(/\s*[\(\[]?(official\s*(audio|video|music\s*video|lyric\s*video|visualizer)?|lyric\s*video|lyrics?|audio|hq|hd|4k|remastered|live|ft\.?[^)\]]*|feat\.?[^)\]]*)?[\)\]]?\s*$/gi, '')
+          .trim();
+
+        return { artistName: artistName || undefined, songTitle: songTitle || undefined };
+      }
+    }
+
+    // No separator found — use the whole title as song title
+    return { songTitle: title };
+  } catch (e) {
+    console.error('Failed to fetch YouTube metadata:', e);
+  }
+  return {};
+};
+
+/**
+ * Parse Dropbox URL to extract filename from the path
+ * Format: https://www.dropbox.com/scl/fi/.../Artist - Song.mp3?...
+ */
+const parseDropboxUrl = (url: string): SongMetadata => {
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/').filter(Boolean);
+
+    // Find a part that looks like a filename (has an extension or is the last meaningful segment)
+    for (let i = pathParts.length - 1; i >= 0; i--) {
+      const decoded = decodeURIComponent(pathParts[i]);
+      // Skip known Dropbox path segments
+      if (['scl', 'fi', 's', 'sh'].includes(decoded)) continue;
+      // Check if it looks like a filename
+      if (decoded.match(/\.(mp3|wav|flac|aac|ogg|m4a|wma|aiff|mp4|webm)$/i) || decoded.includes(' - ')) {
+        const { parseFilename } = require('@/lib/songMetadataParser');
+        // Use the existing parseFilename helper
+        return parseFilenameLocal(decoded);
+      }
+    }
+  } catch (e) {
+    // Invalid URL
+  }
+  return {};
+};
+
+/** Local version of parseFilename to avoid circular import */
+const parseFilenameLocal = (filename: string): SongMetadata => {
+  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+  const separators = [' - ', ' – ', ' — ', '_-_', ' _ ', '_'];
+  for (const sep of separators) {
+    if (nameWithoutExt.includes(sep)) {
+      const parts = nameWithoutExt.split(sep);
+      if (parts.length >= 2) {
+        const artistName = parts[0].trim().replace(/_/g, ' ');
+        let songTitle = parts.slice(1).join(sep).trim().replace(/_/g, ' ');
+        songTitle = songTitle
+          .replace(/\s*\(?(official\s*(audio|video|music\s*video|lyric\s*video)?|lyric\s*video|audio|hq|hd)\)?$/i, '')
+          .trim();
+        return { artistName: artistName || undefined, songTitle: songTitle || undefined };
+      }
+    }
+  }
+  return { songTitle: nameWithoutExt.replace(/_/g, ' ').trim() || undefined };
+};
+
 const parseYouTubeUrl = (url: string): SongMetadata => {
   // YouTube URLs don't contain metadata in the URL itself
-  // Would need API call to fetch video title
+  // Use fetchYouTubeMetadata for async scraping
   return {};
 };
 

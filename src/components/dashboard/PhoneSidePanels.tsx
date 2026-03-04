@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useStreamSession } from '@/hooks/useStreamSession';
 import { TopSongsPublicDisplay } from '@/components/TopSongsPublicDisplay';
