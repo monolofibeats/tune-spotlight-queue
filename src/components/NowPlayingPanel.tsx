@@ -229,6 +229,8 @@ export function NowPlayingPanel({
   const ttsVolumeRef = useRef(ttsVolume);
   ttsVolumeRef.current = ttsVolume;
   const ttsSpokenIdRef = useRef<string | null>(null);
+  const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const ttsTextRef = useRef<string | null>(null);
 
   const handleAudioElement = useCallback((el: HTMLAudioElement | null) => {
     setAudioEl(el);
