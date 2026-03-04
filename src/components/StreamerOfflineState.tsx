@@ -27,6 +27,8 @@ export function StreamerOfflineState({
   offlineMessage,
   nextStreamAt,
   showOfflineSignup = true,
+  nextStreamPlatform,
+  offlineSocials,
   twitchUrl,
   youtubeUrl,
   tiktokUrl,
