@@ -301,7 +301,8 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            className="absolute inset-0 z-30 flex items-start justify-center pt-2 bg-background/70 backdrop-blur-md rounded-xl"
+            className="fixed inset-0 z-[9999] flex items-start justify-center pt-8 bg-background/80 backdrop-blur-lg"
+            style={{ position: 'fixed' }}
           >
             <StarTrailGame
               streamerId={streamer.id}
