@@ -406,14 +406,7 @@ export function SpotBiddingDialog({
             <div className="text-[11px] text-muted-foreground leading-snug">
               <Clock className="w-3 h-3 inline mr-1 -mt-0.5" />
               Spot <span className="font-bold text-primary">#{queuePosition.position}</span> of {queuePosition.total} — est. wait{' '}
-              <span className="font-bold text-primary">
-                {(() => {
-                  const totalMin = queuePosition.position * MINUTES_PER_SONG;
-                  const h = Math.floor(totalMin / 60);
-                  const m = totalMin % 60;
-                  return h > 0 ? `~${h}h${m > 0 ? ` ${m}min` : ''}` : `~${m}min`;
-                })()}
-              </span>.
+              <span className="font-bold text-primary">{estimateWait(queuePosition.position)}</span>.
               {' '}Buy a top spot below to skip the line!
             </div>
           )}
