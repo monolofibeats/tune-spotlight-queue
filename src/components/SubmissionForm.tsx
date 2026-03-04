@@ -178,7 +178,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     if (!url.includes('spotify.com') || !url.includes('/track/')) return;
     try {
       const { data, error } = await supabase.functions.invoke('fetch-spotify-metadata', {
-        body: { url },
+        body: { url, quick: true },
       });
       if (error) return;
       const meta = data as { songTitle?: string; artistName?: string } | null;
