@@ -458,9 +458,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
   const handlePointerUp = () => {
     isDrawingRef.current = false;
-    // Pause fairy sparkle sound
-    const audio = sparkleAudioRef.current;
-    if (audio) { audio.pause(); }
+    // Stop chime synth
+    stopChimeSound();
   };
 
   // Read-only leaderboard mode for public page
