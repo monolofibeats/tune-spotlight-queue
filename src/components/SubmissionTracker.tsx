@@ -108,7 +108,7 @@ export function SubmissionTracker({ submissions, onDismiss }: SubmissionTrackerP
                   {queueInfo ? (
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       Spot <span className="font-semibold text-primary">#{queueInfo.position}</span>
-                      {' · '}wait {estimateWait(queueInfo.position, seed)}
+                      {' · '}wait {estimateWait(queueInfo.position)}
                     </p>
                   ) : (
                     <p className="text-[11px] text-muted-foreground mt-0.5 animate-pulse">
