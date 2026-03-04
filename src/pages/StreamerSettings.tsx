@@ -107,6 +107,8 @@ const StreamerSettings = () => {
   const [offlineMessage, setOfflineMessage] = useState('');
   const [nextStreamAt, setNextStreamAt] = useState('');
   const [showOfflineSignup, setShowOfflineSignup] = useState(true);
+  const [offlineSocials, setOfflineSocials] = useState<string[]>(['twitch', 'instagram', 'tiktok']);
+  const [nextStreamPlatform, setNextStreamPlatform] = useState('');
   
   // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
