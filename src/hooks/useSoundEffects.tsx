@@ -23,6 +23,12 @@ const SOUNDS = {
   pop: 'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3',
   ding: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
   magic: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3',
+
+  // Glitter / chime sounds for Star Trail
+  chime1: 'https://assets.mixkit.co/active_storage/sfx/2313/2313-preview.mp3',
+  chime2: 'https://assets.mixkit.co/active_storage/sfx/2309/2309-preview.mp3',
+  sparkle: 'https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3',
+  bellHit: 'https://assets.mixkit.co/active_storage/sfx/2316/2316-preview.mp3',
 };
 
 export type SoundEffect = keyof typeof SOUNDS;

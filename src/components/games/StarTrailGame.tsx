@@ -162,6 +162,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
   const lastSoundRef = useRef(0);
+  const chimeSounds = useRef<('chime1' | 'chime2' | 'sparkle' | 'bellHit')[]>(['chime1', 'chime2', 'sparkle', 'bellHit']);
+  const chimeIndexRef = useRef(0);
 
   const fetchLeaderboard = useCallback(async () => {
     const { data } = await supabase
