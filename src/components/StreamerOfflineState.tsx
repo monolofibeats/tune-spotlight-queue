@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Calendar, Clock, ExternalLink, CheckCircle, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -119,13 +119,37 @@ export function StreamerOfflineState({
   const nextStreamDate = nextStreamAt ? new Date(nextStreamAt) : null;
   const isNextStreamInFuture = nextStreamDate && nextStreamDate > new Date();
 
+  // Live countdown state
+  const [countdown, setCountdown] = useState({ hours: '00', minutes: '00', seconds: '00' });
+
+  useEffect(() => {
+    if (!nextStreamDate) return;
+
+    const tick = () => {
+      const now = new Date();
+      const diff = nextStreamDate.getTime() - now.getTime();
+      if (diff <= 0) {
+        setCountdown({ hours: '00', minutes: '00', seconds: '00' });
+        return;
+      }
+      const totalSeconds = Math.floor(diff / 1000);
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      setCountdown({
+        hours: String(h).padStart(2, '0'),
+        minutes: String(m).padStart(2, '0'),
+        seconds: String(s).padStart(2, '0'),
+      });
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [nextStreamAt]);
+
   const formatNextStream = () => {
     if (!nextStreamDate || !isNextStreamInFuture) return null;
-    
-    const now = new Date();
-    const diff = nextStreamDate.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     
     const dateStr = nextStreamDate.toLocaleDateString('de-DE', {
       weekday: 'long',
@@ -137,16 +161,7 @@ export function StreamerOfflineState({
       minute: '2-digit',
     });
 
-    let relativeStr = '';
-    if (days > 0) {
-      relativeStr = `in ${days} day${days > 1 ? 's' : ''}`;
-    } else if (hours > 0) {
-      relativeStr = `in ${hours} hour${hours > 1 ? 's' : ''}`;
-    } else {
-      relativeStr = 'very soon';
-    }
-
-    return { dateStr, timeStr, relativeStr };
+    return { dateStr, timeStr };
   };
 
   const nextStream = formatNextStream();
@@ -185,7 +200,13 @@ export function StreamerOfflineState({
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {nextStream.timeStr}
               </span>
-              <span className="text-xs text-primary font-medium">{nextStream.relativeStr}</span>
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-1 font-mono text-lg font-bold text-primary">
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.hours}</span>
+              <span className="text-primary/50">:</span>
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.minutes}</span>
+              <span className="text-primary/50">:</span>
+              <span className="bg-primary/10 rounded px-1.5 py-0.5">{countdown.seconds}</span>
             </div>
           </div>
         )}
