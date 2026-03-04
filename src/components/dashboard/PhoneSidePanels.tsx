@@ -18,6 +18,7 @@ interface PhoneSidePanelsProps {
   streamer: Streamer;
   children: React.ReactNode;
   onStreamerUpdate?: (streamer: Streamer) => void;
+  onStarTrailToggle?: (active: boolean) => void;
 }
 
 interface SessionStats {
