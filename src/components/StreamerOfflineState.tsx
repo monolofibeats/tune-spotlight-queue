@@ -95,12 +95,12 @@ export function StreamerOfflineState({
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     
-    const dateStr = nextStreamDate.toLocaleDateString(undefined, {
+    const dateStr = nextStreamDate.toLocaleDateString('de-DE', {
       weekday: 'long',
-      month: 'long',
       day: 'numeric',
+      month: 'long',
     });
-    const timeStr = nextStreamDate.toLocaleTimeString(undefined, {
+    const timeStr = nextStreamDate.toLocaleTimeString('de-DE', {
       hour: '2-digit',
       minute: '2-digit',
     });
