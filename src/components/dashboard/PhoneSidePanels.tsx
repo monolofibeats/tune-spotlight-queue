@@ -26,17 +26,51 @@ interface SessionStats {
   topPayer: { email: string; amount: number } | null;
 }
 
-function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }: {
+function getPanelKey(streamerId: string, key: string) {
+  return `upstar-panel-${streamerId}-${key}`;
+}
+
+function usePersistedBoolean(storageKey: string, defaultValue: boolean): [boolean, (v: boolean) => void] {
+  const [value, setValue] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved !== null ? saved === 'true' : defaultValue;
+    } catch { return defaultValue; }
+  });
+  const set = (v: boolean) => {
+    setValue(v);
+    localStorage.setItem(storageKey, String(v));
+  };
+  return [value, set];
+}
+
+function CollapsibleSection({ title, icon: Icon, children, storageKey, defaultOpen = true }: {
   title: string;
   icon: React.ElementType;
   children: React.ReactNode;
+  storageKey?: string;
   defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(() => {
+    if (storageKey) {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved !== null) return saved === 'true';
+      } catch {}
+    }
+    return defaultOpen;
+  });
+
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (storageKey) localStorage.setItem(storageKey, String(next));
+  };
+
   return (
     <div className="last:border-b-0">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={toggle}
         className="side-panel-section-header w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-300 transition-colors"
       >
         <Icon className="w-3.5 h-3.5" />
@@ -145,6 +179,7 @@ function useOnlineDuration() {
 function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStreamerUpdate?: (s: Streamer) => void }) {
   const { stats } = useSessionStats(streamer.id);
   const duration = useOnlineDuration();
+  const pk = (key: string) => getPanelKey(streamer.id, key);
 
   const fmt = (cents: number) => `€${(cents / 100).toFixed(2)}`;
   const timeSince = (iso: string | null) => {
@@ -169,8 +204,7 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
   return (
     <div className="h-full flex flex-col">
-      {/* Session stats — always fully visible */}
-      <CollapsibleSection title="Session Stats" icon={DollarSign}>
+      <CollapsibleSection title="Session Stats" icon={DollarSign} storageKey={pk('sec-stats')}>
         <div className="grid grid-cols-2 gap-1.5">
           <StatCard label="Earnings" value={fmt(stats.earnings)} icon={DollarSign} />
           <StatCard label="Tracks" value={String(stats.trackCount)} icon={Music} />
@@ -188,20 +222,18 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
         </div>
       </CollapsibleSection>
 
-      {/* Everything below dims when not hovered */}
       <div className="side-panel-left-dimmable flex-1 flex flex-col">
-
-        <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false}>
-          <SidePanelSoundboard />
+        <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false} storageKey={pk('sec-soundboard')}>
+          <SidePanelSoundboard streamerId={streamer.id} />
         </CollapsibleSection>
 
-        <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false}>
+        <CollapsibleSection title="Podium" icon={Trophy} defaultOpen={false} storageKey={pk('sec-podium')}>
           <div className="side-panel-podium scale-75 origin-top -mb-8">
             <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} hideTitle />
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Section Visibility" icon={Eye} defaultOpen={false}>
+        <CollapsibleSection title="Section Visibility" icon={Eye} defaultOpen={false} storageKey={pk('sec-visibility')}>
           <div className="space-y-2">
             {[
               { key: 'show_how_it_works', label: 'How It Works' },
@@ -227,13 +259,15 @@ function LeftPanel({ streamer, onStreamerUpdate }: { streamer: Streamer; onStrea
 
 /* RIGHT PANEL */
 function RightPanel({ streamer }: { streamer: Streamer }) {
+  const pk = (key: string) => getPanelKey(streamer.id, key);
+
   return (
     <div className="h-full flex flex-col side-panel-right-dimmable">
-      <CollapsibleSection title="OBS" icon={Monitor} defaultOpen={false}>
+      <CollapsibleSection title="OBS" icon={Monitor} defaultOpen={false} storageKey={pk('sec-obs')}>
         <OBSPanel />
       </CollapsibleSection>
 
-      <CollapsibleSection title="Pricing" icon={DollarSign}>
+      <CollapsibleSection title="Pricing" icon={DollarSign} storageKey={pk('sec-pricing')}>
         <div className="max-h-[80vh] overflow-y-auto -mx-1 px-1 side-panel-pricing">
           <PricingSettings streamerId={streamer.id} />
         </div>
@@ -243,8 +277,8 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 }
 
 export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneSidePanelsProps) {
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(true);
+  const [leftOpen, setLeftOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'left-open'), true);
+  const [rightOpen, setRightOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'right-open'), true);
 
   return (
     <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
