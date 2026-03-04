@@ -675,6 +675,12 @@ const StreamerDashboard = () => {
       ? s.status !== 'deleted'
       : s.status === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    // For done/skipped/deleted tabs, sort chronologically (newest submitted first)
+    if (['reviewed', 'skipped', 'deleted'].includes(statusFilter)) {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    return 0; // preserve existing order for pending/all
   });
 
   useEffect(() => { setSelectedIds(new Set()); }, [statusFilter]);
