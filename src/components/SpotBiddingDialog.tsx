@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Loader2, Crown, Medal, Award, Tag, Check } from 'lucide-react';
+import { Zap, Loader2, Crown, Medal, Award, Tag, Check, Clock, TrendingUp, Music2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

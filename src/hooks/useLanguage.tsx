@@ -1937,6 +1937,7 @@ const translations: Record<Language, Record<string, string>> = {
     'bidding.available': 'Verfügbar',
     'bidding.bid': 'Gebot',
     'bidding.toClaim': 'zum Sichern',
+    'bidding.toOutbid': 'zum Überbieten',
     'bidding.discountPlaceholder': 'Rabattcode',
     'bidding.apply': 'Einlösen',
     'bidding.discountApplied': '{percent}% Rabatt wird an der Kasse angewendet',
