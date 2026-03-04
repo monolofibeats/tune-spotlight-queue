@@ -162,12 +162,14 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
   const lastSoundRef = useRef(0);
-  // Chime sound using uploaded audio file with smooth looping via Web Audio API
+  // Chime sound – crossfade-looping the best section of the audio
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const chimeNodesRef = useRef<{ source: AudioBufferSourceNode; masterGain: GainNode } | null>(null);
+  const chimeMasterRef = useRef<GainNode | null>(null);
   const chimeBufferRef = useRef<AudioBuffer | null>(null);
+  const chimeTimerRef = useRef<ReturnType<typeof setInterval>>();
+  const chimeActiveRef = useRef(false);
 
-  // Preload the chime audio buffer
+  // Preload the chime audio buffer once
   useEffect(() => {
     fetch('/sfx/chimes.wav')
       .then(r => r.arrayBuffer())
@@ -182,6 +184,38 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
     return () => { stopChimeSound(); };
   }, []);
 
+  // Spawn one looping voice that fades in, plays the sweet spot, then fades out
+  const spawnVoice = useCallback((ctx: AudioContext, buffer: AudioBuffer, master: GainNode) => {
+    const duration = buffer.duration;
+    // Use the middle ~40% as the "best part"
+    const loopLen = Math.min(duration * 0.4, 3);  // max 3s loop segment
+    const start = Math.max(0, (duration - loopLen) / 2);
+    const fadeTime = Math.min(loopLen * 0.35, 0.8); // crossfade duration
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const voiceGain = ctx.createGain();
+    voiceGain.gain.value = 0;
+    source.connect(voiceGain);
+    voiceGain.connect(master);
+
+    const now = ctx.currentTime;
+    source.start(now, start, loopLen);
+
+    // Fade in
+    voiceGain.gain.setTargetAtTime(1, now, fadeTime * 0.3);
+    // Fade out before end
+    voiceGain.gain.setTargetAtTime(0, now + loopLen - fadeTime, fadeTime * 0.3);
+
+    // Auto-cleanup
+    source.onended = () => {
+      try { source.disconnect(); voiceGain.disconnect(); } catch {}
+    };
+
+    return loopLen;
+  }, []);
+
   const startChimeSound = useCallback(() => {
     stopChimeSound();
     const buffer = chimeBufferRef.current;
@@ -189,35 +223,48 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
     const ctx = new AudioContext();
     audioCtxRef.current = ctx;
+    chimeActiveRef.current = true;
 
     const masterGain = ctx.createGain();
     masterGain.gain.value = 0;
     masterGain.connect(ctx.destination);
+    chimeMasterRef.current = masterGain;
 
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(masterGain);
-    source.start();
+    // Fade master in
+    masterGain.gain.setTargetAtTime(0.22, ctx.currentTime, 0.1);
 
-    // Smooth fade in
-    masterGain.gain.setTargetAtTime(0.22, ctx.currentTime, 0.12);
+    // Calculate loop timing
+    const duration = buffer.duration;
+    const loopLen = Math.min(duration * 0.4, 3);
+    const overlap = Math.min(loopLen * 0.35, 0.8);
+    const interval = (loopLen - overlap) * 1000; // ms between spawns
 
-    chimeNodesRef.current = { source, masterGain };
-  }, []);
+    // Spawn first voice immediately
+    spawnVoice(ctx, buffer, masterGain);
+
+    // Keep spawning overlapping voices for seamless crossfade loop
+    chimeTimerRef.current = setInterval(() => {
+      if (!chimeActiveRef.current) return;
+      const c = audioCtxRef.current;
+      const b = chimeBufferRef.current;
+      const m = chimeMasterRef.current;
+      if (c && b && m) spawnVoice(c, b, m);
+    }, interval);
+  }, [spawnVoice]);
 
   const stopChimeSound = useCallback(() => {
+    chimeActiveRef.current = false;
+    clearInterval(chimeTimerRef.current);
     const ctx = audioCtxRef.current;
-    const nodes = chimeNodesRef.current;
-    if (ctx && nodes) {
-      nodes.masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
+    const master = chimeMasterRef.current;
+    if (ctx && master) {
+      master.gain.setTargetAtTime(0, ctx.currentTime, 0.18);
       setTimeout(() => {
-        try { nodes.source.stop(); } catch {}
         try { ctx.close(); } catch {}
-      }, 400);
+      }, 500);
     }
     audioCtxRef.current = null;
-    chimeNodesRef.current = null;
+    chimeMasterRef.current = null;
   }, []);
 
   const fetchLeaderboard = useCallback(async () => {
