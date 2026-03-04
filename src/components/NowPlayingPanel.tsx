@@ -315,7 +315,7 @@ export function NowPlayingPanel({
     const utterance = new SpeechSynthesisUtterance(submission.message);
     utterance.rate = 0.95;
     utterance.pitch = 1;
-    utterance.volume = 0.8;
+    utterance.volume = ttsVolume;
     window.speechSynthesis?.speak(utterance);
 
     return () => {
