@@ -173,7 +173,7 @@ async function buildEmails(
             `<p><strong>${streamer_name}</strong> is now live${session_title ? ` – <em>"${session_title}"</em>` : ""}!</p>
              <p>Head over to their page and submit your song now 🎵</p>`,
             `${siteUrl}/streamer/${slug}`,
-            "Go to Stream",
+            "Submit Your Song",
           ),
         });
       }
