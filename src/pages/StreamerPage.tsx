@@ -386,6 +386,8 @@ function StreamerPageContent() {
               offlineMessage={(streamer as any).offline_message}
               nextStreamAt={(streamer as any).next_stream_at}
               showOfflineSignup={(streamer as any).show_offline_signup ?? true}
+              nextStreamPlatform={(streamer as any).next_stream_platform}
+              offlineSocials={(streamer as any).offline_socials}
               twitchUrl={streamer.twitch_url}
               youtubeUrl={streamer.youtube_url}
               tiktokUrl={streamer.tiktok_url}
