@@ -371,13 +371,15 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
         life: 0.5 + Math.random() * 0.5,
       });
     }
-    // Glitter chime trace sound (throttled, cycling through chime variants)
+    // Fairy sparkle trace sound (throttled, replays from start each time)
     const now = Date.now();
-    if (now - lastSoundRef.current > 180) {
-      const sounds = chimeSounds.current;
-      const sound = sounds[chimeIndexRef.current % sounds.length];
-      chimeIndexRef.current++;
-      play(sound, 0.06 + Math.random() * 0.04);
+    if (now - lastSoundRef.current > 250) {
+      const audio = sparkleAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.volume = 0.08 + Math.random() * 0.06;
+        audio.play().catch(() => {});
+      }
       lastSoundRef.current = now;
     }
   };
