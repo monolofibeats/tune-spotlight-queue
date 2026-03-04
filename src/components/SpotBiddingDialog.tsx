@@ -77,10 +77,47 @@ export function SpotBiddingDialog({
   useEffect(() => {
     if (open) {
       fetchSpotPrices();
+      fetchQueuePosition();
       setDiscountCode('');
       setDiscountPercent(null);
     }
   }, [open]);
+
+  const fetchQueuePosition = async () => {
+    if (!originalSubmissionId || !streamerId) {
+      // No existing submission to track position of — just show total queue size
+      if (streamerId) {
+        const { data } = await supabase
+          .from('public_submissions_queue')
+          .select('id')
+          .eq('streamer_id', streamerId)
+          .eq('status', 'pending');
+        if (data) {
+          setQueuePosition({ position: data.length, total: data.length });
+        }
+      }
+      return;
+    }
+
+    const { data } = await supabase
+      .from('public_submissions_queue')
+      .select('id, is_priority, boost_amount, amount_paid, created_at')
+      .eq('streamer_id', streamerId)
+      .eq('status', 'pending')
+      .order('is_priority', { ascending: false })
+      .order('boost_amount', { ascending: false })
+      .order('amount_paid', { ascending: false })
+      .order('created_at', { ascending: true });
+
+    if (!data) return;
+
+    const idx = data.findIndex(q => q.id === originalSubmissionId);
+    if (idx !== -1) {
+      setQueuePosition({ position: idx + 1, total: data.length });
+    } else {
+      setQueuePosition({ position: data.length + 1, total: data.length + 1 });
+    }
+  };
 
   const fetchSpotPrices = async () => {
     setIsLoading(true);
