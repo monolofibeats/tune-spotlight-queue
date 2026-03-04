@@ -20,6 +20,7 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { StreamerOfflineState } from '@/components/StreamerOfflineState';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
