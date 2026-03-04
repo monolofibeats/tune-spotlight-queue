@@ -200,6 +200,8 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       offlineMessage !== ((s as any).offline_message || '') ||
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
+      JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
+      nextStreamPlatform !== ((s as any).next_stream_platform || '') ||
       pageLanguage !== (s.page_language || 'de')
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, offlineMessage, nextStreamAt, showOfflineSignup, pageLanguage]);
