@@ -433,7 +433,21 @@ export const AudioPlayer = forwardRef<HTMLDivElement, AudioPlayerProps>(
           </div>
         )}
         
-        {/* Progress bar and time */}
+        {/* Buffering progress bar */}
+        {isBuffering && src && bufferProgress < 100 && !hasError && (
+          <div className="flex items-center gap-2 px-1">
+            <div className="flex-1 h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-amber-400/70 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${bufferProgress}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+              {bufferProgress < 1 ? 'Loading…' : `${Math.round(bufferProgress)}%`}
+              {bufferEta && ` · ${bufferEta}`}
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-3">
           {/* Play/Pause button */}
           <Button
