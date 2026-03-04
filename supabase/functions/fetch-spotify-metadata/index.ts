@@ -245,7 +245,7 @@ serve(async (req) => {
       }
     }
 
-    if (result.artistId) {
+    if (result.artistId && !quickMode) {
       const artistOembed = await fetchArtistOembed(result.artistId);
       if (artistOembed.artistImage) result.artistImage = artistOembed.artistImage;
 
