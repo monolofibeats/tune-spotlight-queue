@@ -304,14 +304,16 @@ export function NowPlayingPanel({
     fetchSpotifyMeta();
   }, [submission?.song_url]);
 
-  // TTS: auto-read submission message when a new submission is opened
+   // TTS: auto-read submission message when a new submission is opened
   useEffect(() => {
     if (!submission || !submission.message || ttsMuted) {
+      ttsTextRef.current = null;
       return;
     }
     // Only speak once per submission
     if (ttsSpokenIdRef.current === submission.id) return;
     ttsSpokenIdRef.current = submission.id;
+    ttsTextRef.current = submission.message;
 
     // Cancel any ongoing speech
     window.speechSynthesis?.cancel();
@@ -320,10 +322,12 @@ export function NowPlayingPanel({
     utterance.rate = 0.95;
     utterance.pitch = 1;
     utterance.volume = ttsVolumeRef.current;
+    ttsUtteranceRef.current = utterance;
     window.speechSynthesis?.speak(utterance);
 
     return () => {
       window.speechSynthesis?.cancel();
+      ttsUtteranceRef.current = null;
     };
   }, [submission?.id, submission?.message, ttsMuted]);
 
