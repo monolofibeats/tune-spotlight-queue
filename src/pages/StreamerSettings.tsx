@@ -103,6 +103,9 @@ const StreamerSettings = () => {
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
+  const [offlineMessage, setOfflineMessage] = useState('');
+  const [nextStreamAt, setNextStreamAt] = useState('');
+  const [showOfflineSignup, setShowOfflineSignup] = useState(true);
   
   // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
@@ -181,6 +184,9 @@ const StreamerSettings = () => {
       setShowHowItWorks(s.show_how_it_works ?? true);
       setShowStreamEmbed(s.show_stream_embed ?? true);
       setCustomCss(s.custom_css || '');
+      setOfflineMessage((s as any).offline_message || '');
+      setNextStreamAt((s as any).next_stream_at || '');
+      setShowOfflineSignup((s as any).show_offline_signup ?? true);
       
       // Social
       setTwitchUrl(s.twitch_url || '');
@@ -226,6 +232,9 @@ const StreamerSettings = () => {
       showHowItWorks !== (s.show_how_it_works ?? true) ||
       showStreamEmbed !== (s.show_stream_embed ?? true) ||
       customCss !== (s.custom_css || '') ||
+      offlineMessage !== ((s as any).offline_message || '') ||
+      nextStreamAt !== ((s as any).next_stream_at || '') ||
+      showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
       tiktokUrl !== (s.tiktok_url || '') ||
@@ -233,7 +242,7 @@ const StreamerSettings = () => {
       twitterUrl !== (s.twitter_url || '') ||
       pageLanguage !== (s.page_language || 'de')
     );
-  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
+  }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, customCss, offlineMessage, nextStreamAt, showOfflineSignup, twitchUrl, youtubeUrl, tiktokUrl, instagramUrl, twitterUrl, pageLanguage]);
 
   const anyUnsaved = hasUnsavedChanges || pricingHasChanges || formFieldHasChanges;
 
@@ -267,6 +276,9 @@ const StreamerSettings = () => {
     setShowHowItWorks(s.show_how_it_works ?? true);
     setShowStreamEmbed(s.show_stream_embed ?? true);
     setCustomCss(s.custom_css || '');
+    setOfflineMessage((s as any).offline_message || '');
+    setNextStreamAt((s as any).next_stream_at || '');
+    setShowOfflineSignup((s as any).show_offline_signup ?? true);
     setTwitchUrl(s.twitch_url || '');
     setYoutubeUrl(s.youtube_url || '');
     setTiktokUrl(s.tiktok_url || '');
@@ -373,13 +385,16 @@ const StreamerSettings = () => {
           show_how_it_works: showHowItWorks,
           show_stream_embed: showStreamEmbed,
           custom_css: customCss || null,
+          offline_message: offlineMessage || null,
+          next_stream_at: nextStreamAt || null,
+          show_offline_signup: showOfflineSignup,
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
           instagram_url: instagramUrl || null,
           twitter_url: twitterUrl || null,
           page_language: pageLanguage,
-        })
+        } as any)
         .eq('id', streamer.id)
         .select('*')
         .single();
@@ -629,6 +644,52 @@ const StreamerSettings = () => {
                     <Switch
                       checked={showStreamEmbed}
                       onCheckedChange={setShowStreamEmbed}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card/50 border border-border/50 rounded-xl p-6 space-y-6">
+                <h2 className="font-semibold text-lg">Offline State</h2>
+                <p className="text-sm text-muted-foreground">
+                  Customize what visitors see when your stream is not active.
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="offlineMessage">Offline Message</Label>
+                    <Textarea
+                      id="offlineMessage"
+                      value={offlineMessage}
+                      onChange={(e) => setOfflineMessage(e.target.value)}
+                      placeholder="When the stream is active you can submit your songs here for review"
+                      rows={2}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="nextStreamAt">Next Stream Date & Time</Label>
+                    <Input
+                      id="nextStreamAt"
+                      type="datetime-local"
+                      value={nextStreamAt ? new Date(nextStreamAt).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => setNextStreamAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Set when your next stream will be — displayed to visitors on the offline page
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Show Email Signup</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Let visitors subscribe for notifications when you go live
+                      </p>
+                    </div>
+                    <Switch
+                      checked={showOfflineSignup}
+                      onCheckedChange={setShowOfflineSignup}
                     />
                   </div>
                 </div>

@@ -20,6 +20,7 @@ import { SpecialEventBanner } from '@/components/SpecialEventBanner';
 import { HowItWorks } from '@/components/HowItWorks';
 import { StreamerDashboardAccessButton } from '@/components/StreamerDashboardAccessButton';
 import { PreStreamSpots } from '@/components/PreStreamSpots';
+import { StreamerOfflineState } from '@/components/StreamerOfflineState';
 import { PublicQueueDisplay } from '@/components/PublicQueueDisplay';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Footer } from '@/components/Footer';
@@ -306,69 +307,91 @@ function StreamerPageContent() {
         />
       )}
 
-      {/* How It Works - between hero and form */}
-      {(streamer.show_how_it_works ?? true) && (
-        <section className="pb-4 px-4">
-          <div className="container mx-auto max-w-3xl">
-            <HowItWorks compact />
-          </div>
-        </section>
-      )}
+      {isStreamerLive ? (
+        <>
+          {/* How It Works - between hero and form */}
+          {(streamer.show_how_it_works ?? true) && (
+            <section className="pb-4 px-4">
+              <div className="container mx-auto max-w-3xl">
+                <HowItWorks compact />
+              </div>
+            </section>
+          )}
 
-      {/* Main Content - Submission Form */}
-      <section className="pb-4 px-4">
-        <div className="container mx-auto max-w-xl">
-          <SubmissionForm
-            streamerId={streamer.id}
-            streamerSlug={streamer.slug}
-            onSubmissionTracked={(sub) => trackSubmission(sub)}
-          />
-        </div>
-      </section>
+          {/* Main Content - Submission Form */}
+          <section className="pb-4 px-4">
+            <div className="container mx-auto max-w-xl">
+              <SubmissionForm
+                streamerId={streamer.id}
+                streamerSlug={streamer.slug}
+                onSubmissionTracked={(sub) => trackSubmission(sub)}
+              />
+            </div>
+          </section>
 
-      {/* Top Songs Pedestal - below form when public */}
-      {!!streamer.show_top_songs && (
-        <section className="pb-4 px-4">
-          <div className="container mx-auto max-w-xl">
-            <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} topSongsMessage={streamer.top_songs_message} />
-          </div>
-        </section>
-      )}
+          {/* Top Songs Pedestal - below form when public */}
+          {!!streamer.show_top_songs && (
+            <section className="pb-4 px-4">
+              <div className="container mx-auto max-w-xl">
+                <TopSongsPublicDisplay streamerId={streamer.id} showTopSongs={true} topSongsMessage={streamer.top_songs_message} />
+              </div>
+            </section>
+          )}
 
-      {/* Public Waiting List */}
-      {(streamer as any).show_public_queue !== false && (
-        <section className="pb-4 px-4">
-          <div className="container mx-auto max-w-xl">
-            <PublicQueueDisplay
-              streamerId={streamer.id}
-              streamerSlug={streamer.slug}
-              trackedSubmissions={currentSubmissions}
-            />
-          </div>
-        </section>
-      )}
+          {/* Public Waiting List */}
+          {(streamer as any).show_public_queue !== false && (
+            <section className="pb-4 px-4">
+              <div className="container mx-auto max-w-xl">
+                <PublicQueueDisplay
+                  streamerId={streamer.id}
+                  streamerSlug={streamer.slug}
+                  trackedSubmissions={currentSubmissions}
+                />
+              </div>
+            </section>
+          )}
 
-      {/* Stream Embed (looping video, Twitch, YouTube etc.) */}
-      {(streamer.show_stream_embed ?? true) && (
-        <section className="pb-4 px-4">
-          <div className="container mx-auto max-w-3xl">
-            <StreamEmbed streamerId={streamer.id} />
-          </div>
-        </section>
-      )}
+          {/* Stream Embed (looping video, Twitch, YouTube etc.) */}
+          {(streamer.show_stream_embed ?? true) && (
+            <section className="pb-4 px-4">
+              <div className="container mx-auto max-w-3xl">
+                <StreamEmbed streamerId={streamer.id} />
+              </div>
+            </section>
+          )}
 
-      {/* Star Trail Leaderboard */}
-      <section className="pb-4 px-4">
-        <div className="container mx-auto max-w-xl">
-          <StarTrailLeaderboard streamerId={streamer.id} />
-        </div>
-      </section>
+          {/* Star Trail Leaderboard */}
+          <section className="pb-4 px-4">
+            <div className="container mx-auto max-w-xl">
+              <StarTrailLeaderboard streamerId={streamer.id} />
+            </div>
+          </section>
 
-      {/* Tracked Submissions - below the form */}
-      {currentSubmissions.length > 0 && (
+          {/* Tracked Submissions - below the form */}
+          {currentSubmissions.length > 0 && (
+            <section className="pb-8 px-4">
+              <div className="container mx-auto max-w-xl">
+                <SubmissionTracker submissions={currentSubmissions} onDismiss={(trackedAt) => clearSubmission(slug || null, trackedAt)} />
+              </div>
+            </section>
+          )}
+        </>
+      ) : (
+        /* Offline State */
         <section className="pb-8 px-4">
           <div className="container mx-auto max-w-xl">
-            <SubmissionTracker submissions={currentSubmissions} onDismiss={(trackedAt) => clearSubmission(slug || null, trackedAt)} />
+            <StreamerOfflineState
+              streamerId={streamer.id}
+              streamerName={streamer.display_name}
+              offlineMessage={(streamer as any).offline_message}
+              nextStreamAt={(streamer as any).next_stream_at}
+              showOfflineSignup={(streamer as any).show_offline_signup ?? true}
+              twitchUrl={streamer.twitch_url}
+              youtubeUrl={streamer.youtube_url}
+              tiktokUrl={streamer.tiktok_url}
+              instagramUrl={streamer.instagram_url}
+              twitterUrl={streamer.twitter_url}
+            />
           </div>
         </section>
       )}
