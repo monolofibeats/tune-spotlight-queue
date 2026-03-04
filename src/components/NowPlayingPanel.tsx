@@ -595,10 +595,19 @@ export function NowPlayingPanel({
                 )}
 
                 {cfg.showMessage && submission.message && (
-                  <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20">
-                    <p className="text-xs text-muted-foreground italic line-clamp-2">
+                  <div className="px-3 py-2 rounded-lg bg-card/20 border border-border/20 flex items-start gap-2">
+                    <p className="text-xs text-muted-foreground italic line-clamp-2 flex-1">
                       "{submission.message}"
                     </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 shrink-0"
+                      onClick={toggleTtsMute}
+                      title={ttsMuted ? 'Unmute message reading' : 'Mute message reading'}
+                    >
+                      {ttsMuted ? <VolumeX className="w-3.5 h-3.5 text-muted-foreground" /> : <Volume2 className="w-3.5 h-3.5 text-primary" />}
+                    </Button>
                   </div>
                 )}
 
