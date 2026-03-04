@@ -204,11 +204,11 @@ export function StreamerOfflineState({
         )}
 
         {/* Social Links */}
-        {socialLinks.length > 0 && (
+        {allSocialLinks.length > 0 && (
           <div className="px-6 pb-6 pt-2">
             <p className="text-xs text-muted-foreground mb-3 text-center">Follow {streamerName}</p>
             <div className="flex items-center justify-center gap-2">
-              {socialLinks.map((link) => (
+              {allSocialLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.url!}
