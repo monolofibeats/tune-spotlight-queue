@@ -152,7 +152,9 @@ export function StreamerOfflineState({
           <div className="mx-6 mb-4 rounded-xl bg-primary/5 border border-primary/20 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wide">Next Stream</span>
+              <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                Next Stream{nextStreamPlatform && platformLabels[nextStreamPlatform] ? ` on ${platformLabels[nextStreamPlatform]}` : ''}
+              </span>
             </div>
             <p className="text-sm font-medium text-foreground">{nextStream.dateStr}</p>
             <div className="flex items-center gap-3 mt-1">
