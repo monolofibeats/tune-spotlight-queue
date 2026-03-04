@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { detectPlatform, migrateLegacySocials, type SocialLink } from '@/lib/detectPlatform';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
