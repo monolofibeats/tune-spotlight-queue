@@ -103,6 +103,9 @@ const StreamerSettings = () => {
   const [showHowItWorks, setShowHowItWorks] = useState(true);
   const [showStreamEmbed, setShowStreamEmbed] = useState(true);
   const [customCss, setCustomCss] = useState('');
+  const [offlineMessage, setOfflineMessage] = useState('');
+  const [nextStreamAt, setNextStreamAt] = useState('');
+  const [showOfflineSignup, setShowOfflineSignup] = useState(true);
   
   // Form state - Social
   const [twitchUrl, setTwitchUrl] = useState('');
