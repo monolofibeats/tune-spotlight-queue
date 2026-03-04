@@ -314,6 +314,9 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
   const endRound = useCallback(() => {
     clearInterval(timerRef.current);
+    // Stop sparkle sound
+    const audio = sparkleAudioRef.current;
+    if (audio) { audio.pause(); }
     const size = sizeRef.current;
     const targetPts = currentShape.generate();
     const r = calculateScore(playerPathRef.current, targetPts, size);
