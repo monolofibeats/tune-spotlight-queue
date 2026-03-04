@@ -297,6 +297,45 @@ export function NowPlayingPanel({
     fetchSpotifyMeta();
   }, [submission?.song_url]);
 
+  // TTS: auto-read submission message when a new submission is opened
+  useEffect(() => {
+    if (!submission || !submission.message || ttsMuted) {
+      return;
+    }
+    // Only speak once per submission
+    if (ttsSpokenIdRef.current === submission.id) return;
+    ttsSpokenIdRef.current = submission.id;
+
+    // Cancel any ongoing speech
+    window.speechSynthesis?.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(submission.message);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 0.8;
+    window.speechSynthesis?.speak(utterance);
+
+    return () => {
+      window.speechSynthesis?.cancel();
+    };
+  }, [submission?.id, submission?.message, ttsMuted]);
+
+  // Reset spoken ID when submission changes
+  useEffect(() => {
+    if (!submission) {
+      ttsSpokenIdRef.current = null;
+    }
+  }, [submission?.id]);
+
+  const toggleTtsMute = useCallback(() => {
+    setTtsMuted(prev => {
+      const next = !prev;
+      try { localStorage.setItem('upstar_tts_muted', String(next)); } catch {}
+      if (next) window.speechSynthesis?.cancel();
+      return next;
+    });
+  }, []);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('de-DE', {
       year: 'numeric',
