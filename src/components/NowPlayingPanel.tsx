@@ -638,6 +638,16 @@ export function NowPlayingPanel({
                             const v = parseFloat(e.target.value);
                             setTtsVolume(v);
                             try { localStorage.setItem('upstar_tts_volume', String(v)); } catch {}
+                            // Restart speech at new volume if currently speaking
+                            if (window.speechSynthesis?.speaking && ttsTextRef.current) {
+                              window.speechSynthesis.cancel();
+                              const u = new SpeechSynthesisUtterance(ttsTextRef.current);
+                              u.rate = 0.95;
+                              u.pitch = 1;
+                              u.volume = v;
+                              ttsUtteranceRef.current = u;
+                              window.speechSynthesis.speak(u);
+                            }
                           }}
                           className="w-full h-1 accent-primary cursor-pointer"
                         />
