@@ -192,7 +192,7 @@ const StreamerSettings = () => {
       setNextStreamAt((s as any).next_stream_at || '');
       setShowOfflineSignup((s as any).show_offline_signup ?? true);
       setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
-      setNextStreamPlatform((s as any).next_stream_platform || '');
+      setNextStreamPlatform((s as any).next_stream_platform || 'none');
       
       // Social
       setTwitchUrl(s.twitch_url || '');
@@ -242,7 +242,7 @@ const StreamerSettings = () => {
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
-      nextStreamPlatform !== ((s as any).next_stream_platform || '') ||
+      nextStreamPlatform !== ((s as any).next_stream_platform || 'none') ||
       twitchUrl !== (s.twitch_url || '') ||
       youtubeUrl !== (s.youtube_url || '') ||
       tiktokUrl !== (s.tiktok_url || '') ||
@@ -288,7 +288,7 @@ const StreamerSettings = () => {
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
     setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
-    setNextStreamPlatform((s as any).next_stream_platform || '');
+    setNextStreamPlatform((s as any).next_stream_platform || 'none');
     setTwitchUrl(s.twitch_url || '');
     setYoutubeUrl(s.youtube_url || '');
     setTiktokUrl(s.tiktok_url || '');
@@ -399,7 +399,7 @@ const StreamerSettings = () => {
           next_stream_at: nextStreamAt || null,
           show_offline_signup: showOfflineSignup,
           offline_socials: offlineSocials,
-          next_stream_platform: nextStreamPlatform || null,
+          next_stream_platform: nextStreamPlatform === 'none' ? null : nextStreamPlatform || null,
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,
@@ -711,7 +711,7 @@ const StreamerSettings = () => {
                         <SelectValue placeholder="Where will you stream next?" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Not specified</SelectItem>
+                        <SelectItem value="none">Not specified</SelectItem>
                         <SelectItem value="twitch">Twitch</SelectItem>
                         <SelectItem value="youtube">YouTube</SelectItem>
                         <SelectItem value="tiktok">TikTok</SelectItem>

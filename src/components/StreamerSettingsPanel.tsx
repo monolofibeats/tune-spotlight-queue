@@ -157,7 +157,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
     setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
-    setNextStreamPlatform((s as any).next_stream_platform || '');
+    setNextStreamPlatform((s as any).next_stream_platform || 'none');
     setPageLanguage(s.page_language || 'de');
   }, []);
 
@@ -202,7 +202,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
       nextStreamAt !== ((s as any).next_stream_at || '') ||
       showOfflineSignup !== ((s as any).show_offline_signup ?? true) ||
       JSON.stringify(offlineSocials) !== JSON.stringify((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']) ||
-      nextStreamPlatform !== ((s as any).next_stream_platform || '') ||
+      nextStreamPlatform !== ((s as any).next_stream_platform || 'none') ||
       pageLanguage !== (s.page_language || 'de')
     );
   }, [streamer, displayName, bio, avatarUrl, bannerUrl, heroTitle, heroSubtitle, welcomeMessage, primaryColor, accentColor, fontFamily, buttonStyle, backgroundType, backgroundImageUrl, backgroundGradient, animationStyle, cardStyle, bannerEnabled, bannerText, bannerLink, bannerColor, showHowItWorks, showStreamEmbed, showTopSongs, showPublicQueue, customCss, offlineMessage, nextStreamAt, showOfflineSignup, offlineSocials, nextStreamPlatform, pageLanguage]);
@@ -326,7 +326,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           next_stream_at: nextStreamAt || null,
           show_offline_signup: showOfflineSignup,
           offline_socials: offlineSocials,
-          next_stream_platform: nextStreamPlatform || null,
+          next_stream_platform: nextStreamPlatform === 'none' ? null : nextStreamPlatform || null,
           page_language: pageLanguage,
         } as any)
         .eq('id', streamer.id)
@@ -630,7 +630,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                         <SelectValue placeholder="Where will you stream next?" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Not specified</SelectItem>
+                        <SelectItem value="none">Not specified</SelectItem>
                         <SelectItem value="twitch">Twitch</SelectItem>
                         <SelectItem value="youtube">YouTube</SelectItem>
                         <SelectItem value="tiktok">TikTok</SelectItem>
