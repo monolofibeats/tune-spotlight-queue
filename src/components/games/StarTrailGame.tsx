@@ -162,16 +162,77 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
   const lastSoundRef = useRef(0);
-  // Fairy sparkle sound for tracing
-  const sparkleAudioRef = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => {
-    const audio = new Audio('/sfx/fairy-sparkle.mp3');
-    audio.preload = 'auto';
-    audio.volume = 0.14;
-    audio.loop = true;
-    sparkleAudioRef.current = audio;
-    return () => { audio.pause(); audio.src = ''; };
+  // Procedural magic chime synth via Web Audio API
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const chimeNodesRef = useRef<{ gains: GainNode[]; masterGain: GainNode; lfo: OscillatorNode } | null>(null);
+
+  const startChimeSound = useCallback(() => {
+    // Stop any existing sound first
+    stopChimeSound();
+
+    const ctx = new AudioContext();
+    audioCtxRef.current = ctx;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0;
+    masterGain.connect(ctx.destination);
+
+    // Shimmer frequencies – pentatonic chime tones
+    const freqs = [1318, 1568, 1760, 2093, 2349, 2637, 3136];
+    const gains: GainNode[] = [];
+
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+
+      // Slight detuning for richness
+      osc.detune.value = (Math.random() - 0.5) * 12;
+
+      const g = ctx.createGain();
+      // Stagger volumes so it shimmers
+      g.gain.value = 0.04 + (i % 2 === 0 ? 0.025 : 0.015);
+      gains.push(g);
+
+      osc.connect(g);
+      g.connect(masterGain);
+      osc.start();
+    });
+
+    // LFO to modulate master gain for a twinkling effect
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 5.5; // twinkle rate
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.04; // modulation depth
+    lfo.connect(lfoGain);
+    lfoGain.connect(masterGain.gain);
+    lfo.start();
+
+    // Fade in smoothly
+    masterGain.gain.setTargetAtTime(0.12, ctx.currentTime, 0.08);
+
+    chimeNodesRef.current = { gains, masterGain, lfo };
   }, []);
+
+  const stopChimeSound = useCallback(() => {
+    const ctx = audioCtxRef.current;
+    const nodes = chimeNodesRef.current;
+    if (ctx && nodes) {
+      // Smooth fade out
+      nodes.masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
+      setTimeout(() => {
+        try { ctx.close(); } catch {}
+      }, 300);
+    }
+    audioCtxRef.current = null;
+    chimeNodesRef.current = null;
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { stopChimeSound(); };
+  }, [stopChimeSound]);
 
   const fetchLeaderboard = useCallback(async () => {
     const { data } = await supabase
@@ -314,9 +375,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
   const endRound = useCallback(() => {
     clearInterval(timerRef.current);
-    // Stop sparkle sound
-    const audio = sparkleAudioRef.current;
-    if (audio) { audio.pause(); }
+    // Stop chime sound
+    stopChimeSound();
     const size = sizeRef.current;
     const targetPts = currentShape.generate();
     const r = calculateScore(playerPathRef.current, targetPts, size);
@@ -385,12 +445,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
     isDrawingRef.current = true;
     const pos = getPos(e);
     if (pos) addPoint(pos);
-    // Start continuous fairy sparkle sound
-    const audio = sparkleAudioRef.current;
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
-    }
+    // Start continuous chime synth
+    startChimeSound();
   };
 
   const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
@@ -402,9 +458,8 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
   const handlePointerUp = () => {
     isDrawingRef.current = false;
-    // Pause fairy sparkle sound
-    const audio = sparkleAudioRef.current;
-    if (audio) { audio.pause(); }
+    // Stop chime synth
+    stopChimeSound();
   };
 
   // Read-only leaderboard mode for public page
