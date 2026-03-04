@@ -286,6 +286,8 @@ const StreamerSettings = () => {
     setOfflineMessage((s as any).offline_message || '');
     setNextStreamAt((s as any).next_stream_at || '');
     setShowOfflineSignup((s as any).show_offline_signup ?? true);
+    setOfflineSocials((s as any).offline_socials ?? ['twitch', 'instagram', 'tiktok']);
+    setNextStreamPlatform((s as any).next_stream_platform || '');
     setTwitchUrl(s.twitch_url || '');
     setYoutubeUrl(s.youtube_url || '');
     setTiktokUrl(s.tiktok_url || '');
