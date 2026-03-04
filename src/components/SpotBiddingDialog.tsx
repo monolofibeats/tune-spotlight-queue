@@ -410,23 +410,29 @@ export function SpotBiddingDialog({
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="space-y-2 sm:space-y-3 py-2 sm:py-4">
+          <div className="space-y-1.5 py-1">
             {spots.map((spot, index) => {
               const Icon = SPOT_ICONS[index] || Award;
               const colorClass = SPOT_COLORS[index] || 'text-muted-foreground';
               const isAvailable = spot.currentPrice === 0;
               const isLocked = !!spot.locked;
+
+              // Estimate wait if you grab this spot
+              const spotWaitMin = spot.position * MINUTES_PER_SONG;
+              const wH = Math.floor(spotWaitMin / 60);
+              const wM = spotWaitMin % 60;
+              const waitLabel = wH > 0 ? `~${wH}h${wM > 0 ? ` ${wM}min` : ''}` : `~${wM}min`;
               
               return (
                 <motion.button
                   key={spot.position}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index * 0.03 }}
                   onClick={() => !isLocked && handleSelectSpot(spot.position)}
                   disabled={isProcessing || isLocked}
                   className={`
-                    w-full p-3 sm:p-4 rounded-xl border transition-all text-left overflow-hidden
+                    w-full px-3 py-2 rounded-lg border transition-all text-left overflow-hidden
                     ${isLocked
                       ? 'border-border/30 bg-muted/30 opacity-40 cursor-not-allowed'
                       : selectedSpot === spot.position 
@@ -436,53 +442,46 @@ export function SpotBiddingDialog({
                     ${isProcessing && selectedSpot !== spot.position ? 'opacity-50' : ''}
                   `}
                 >
-                  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ${isLocked ? 'text-muted-foreground' : colorClass}`}>
-                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0 ${isLocked ? 'text-muted-foreground' : colorClass}`}>
+                      <Icon className="w-3.5 h-3.5" />
                     </div>
                     
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-sm sm:text-base">#{spot.position}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-xs sm:text-sm">#{spot.position}</span>
                         {isAvailable && !isLocked && (
-                          <Badge variant="secondary" className="text-[10px] sm:text-xs">{t('bidding.available')}</Badge>
+                          <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{t('bidding.available')}</Badge>
                         )}
                         {isLocked && (
-                          <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground">Unavailable</Badge>
+                          <Badge variant="outline" className="text-[9px] px-1.5 py-0 text-muted-foreground">Unavailable</Badge>
                         )}
                       </div>
                       {spot.songTitle && (
-                        <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                          {spot.songTitle} – {spot.artistName}
-                        </p>
+                        <p className="text-[10px] text-muted-foreground truncate">{spot.songTitle} – {spot.artistName}</p>
                       )}
-                      {!isAvailable && (
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          {t('bidding.bid')}: €{spot.currentPrice.toFixed(2)}
+                      {!isLocked && (
+                        <p className="text-[10px] text-muted-foreground">
+                          <TrendingUp className="w-2.5 h-2.5 inline mr-0.5 -mt-px" />
+                          wait: {waitLabel}
                         </p>
                       )}
                     </div>
 
                     <div className="text-right shrink-0">
                       {!isLocked && discountPercent ? (
-                        <div className="flex items-center gap-1.5 justify-end">
-                          <p className="text-xs sm:text-sm text-muted-foreground line-through">
-                            €{spot.yourPrice.toFixed(2)}
-                          </p>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] px-1.5 py-0">
-                            -{discountPercent}%
-                          </Badge>
+                        <div className="flex items-center gap-1 justify-end">
+                          <p className="text-[10px] text-muted-foreground line-through">€{spot.yourPrice.toFixed(2)}</p>
+                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[9px] px-1 py-0">-{discountPercent}%</Badge>
                         </div>
                       ) : null}
-                      <p className={`text-base sm:text-lg font-bold ${isLocked ? 'text-muted-foreground' : 'text-primary'}`}>
+                      <p className={`text-sm font-bold ${isLocked ? 'text-muted-foreground' : 'text-primary'}`}>
                         €{(discountPercent && !isLocked ? spot.yourPrice * (1 - discountPercent / 100) : spot.yourPrice).toFixed(2)}
                       </p>
                       {selectedSpot === spot.position && isProcessing ? (
-                        <Loader2 className="w-4 h-4 animate-spin ml-auto" />
+                        <Loader2 className="w-3 h-3 animate-spin ml-auto" />
                       ) : !isLocked ? (
-                        <p className="text-[10px] sm:text-xs text-muted-foreground">
-                          {isAvailable ? t('bidding.toClaim') : t('bidding.toOutbid')}
-                        </p>
+                        <p className="text-[9px] text-muted-foreground">{isAvailable ? t('bidding.toClaim') : t('bidding.toOutbid')}</p>
                       ) : null}
                     </div>
                   </div>
@@ -492,10 +491,10 @@ export function SpotBiddingDialog({
 
             {/* Discount Code Input */}
             {!isAdmin && (
-              <div className="pt-2 border-t border-border/30 space-y-2">
-                <div className="flex items-center gap-2">
+              <div className="pt-1.5 border-t border-border/30 space-y-1.5">
+                <div className="flex items-center gap-1.5">
                   <div className="relative flex-1">
-                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                     <Input
                       placeholder={t('bidding.discountPlaceholder')}
                       value={discountCode}
@@ -503,14 +502,14 @@ export function SpotBiddingDialog({
                         setDiscountCode(e.target.value.toUpperCase());
                         setDiscountPercent(null);
                       }}
-                      className="h-9 text-xs pl-9 bg-background/50 font-mono tracking-wider"
+                      className="h-7 text-[11px] pl-7 bg-background/50 font-mono tracking-wider"
                     />
                   </div>
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="h-9 text-xs"
+                    className="h-7 text-[11px] px-2"
                     disabled={!discountCode.trim() || isValidatingCode || discountPercent !== null}
                     onClick={() => validateDiscountCode(discountCode)}
                   >
@@ -518,9 +517,9 @@ export function SpotBiddingDialog({
                   </Button>
                 </div>
                 {discountPercent && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                    <Tag className="w-3 h-3 text-emerald-400" />
-                    <span className="text-[11px] text-emerald-300 font-medium">
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30">
+                    <Tag className="w-2.5 h-2.5 text-emerald-400" />
+                    <span className="text-[10px] text-emerald-300 font-medium">
                       {t('bidding.discountApplied').replace('{percent}', String(discountPercent))}
                     </span>
                   </div>
@@ -528,9 +527,7 @@ export function SpotBiddingDialog({
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground text-center pt-2">
-              {t('bidding.outbidNotice')}
-            </p>
+            <p className="text-[10px] text-muted-foreground text-center">{t('bidding.outbidNotice')}</p>
           </div>
         )}
       </DialogContent>
