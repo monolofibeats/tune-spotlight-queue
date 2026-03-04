@@ -162,122 +162,63 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   const particlesRef = useRef<{ x: number; y: number; life: number; vx: number; vy: number }[]>([]);
   const sizeRef = useRef(360);
   const lastSoundRef = useRef(0);
-  // Procedural magic chime synth via Web Audio API
+  // Chime sound using uploaded audio file with smooth looping via Web Audio API
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const chimeNodesRef = useRef<{ masterGain: GainNode } | null>(null);
+  const chimeNodesRef = useRef<{ source: AudioBufferSourceNode; masterGain: GainNode } | null>(null);
+  const chimeBufferRef = useRef<AudioBuffer | null>(null);
+
+  // Preload the chime audio buffer
+  useEffect(() => {
+    fetch('/sfx/chimes.wav')
+      .then(r => r.arrayBuffer())
+      .then(buf => {
+        const ctx = new AudioContext();
+        return ctx.decodeAudioData(buf).then(decoded => {
+          chimeBufferRef.current = decoded;
+          ctx.close();
+        });
+      })
+      .catch(() => {});
+    return () => { stopChimeSound(); };
+  }, []);
 
   const startChimeSound = useCallback(() => {
     stopChimeSound();
+    const buffer = chimeBufferRef.current;
+    if (!buffer) return;
 
     const ctx = new AudioContext();
     audioCtxRef.current = ctx;
 
     const masterGain = ctx.createGain();
     masterGain.gain.value = 0;
-
-    // Reverb via convolver (synthetic impulse)
-    const convolver = ctx.createConvolver();
-    const sampleRate = ctx.sampleRate;
-    const length = sampleRate * 2;
-    const impulse = ctx.createBuffer(2, length, sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const data = impulse.getChannelData(ch);
-      for (let i = 0; i < length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5);
-      }
-    }
-    convolver.buffer = impulse;
-
-    // Wet/dry mix
-    const dryGain = ctx.createGain();
-    dryGain.gain.value = 0.4;
-    const wetGain = ctx.createGain();
-    wetGain.gain.value = 0.6;
-
-    const preGain = ctx.createGain();
-    preGain.gain.value = 1;
-
-    preGain.connect(dryGain);
-    preGain.connect(convolver);
-    convolver.connect(wetGain);
-    dryGain.connect(masterGain);
-    wetGain.connect(masterGain);
     masterGain.connect(ctx.destination);
 
-    // Celestial bell/chime tones - higher harmonics with gentle detuning
-    const chimeFreqs = [
-      // Layer 1: bright bells
-      { f: 2093, type: 'sine' as OscillatorType, vol: 0.035 },
-      { f: 2637, type: 'sine' as OscillatorType, vol: 0.03 },
-      { f: 3136, type: 'sine' as OscillatorType, vol: 0.025 },
-      { f: 3520, type: 'sine' as OscillatorType, vol: 0.02 },
-      // Layer 2: sparkle overtones
-      { f: 4186, type: 'sine' as OscillatorType, vol: 0.015 },
-      { f: 4699, type: 'sine' as OscillatorType, vol: 0.012 },
-      { f: 5274, type: 'sine' as OscillatorType, vol: 0.01 },
-      // Layer 3: sub warmth
-      { f: 1047, type: 'sine' as OscillatorType, vol: 0.02 },
-      { f: 1319, type: 'triangle' as OscillatorType, vol: 0.015 },
-    ];
-
-    chimeFreqs.forEach(({ f, type, vol }, i) => {
-      const osc = ctx.createOscillator();
-      osc.type = type;
-      osc.frequency.value = f;
-      // Gentle random detuning for chorus effect
-      osc.detune.value = (Math.random() - 0.5) * 8;
-
-      const g = ctx.createGain();
-      g.gain.value = vol;
-
-      // Individual slow LFO per tone for shimmer
-      const lfo = ctx.createOscillator();
-      lfo.type = 'sine';
-      lfo.frequency.value = 2 + Math.random() * 4; // 2-6 Hz shimmer
-      const lfoGain = ctx.createGain();
-      lfoGain.gain.value = vol * 0.5; // modulate 50% of volume
-      lfo.connect(lfoGain);
-      lfoGain.connect(g.gain);
-      lfo.start();
-
-      osc.connect(g);
-      g.connect(preGain);
-      osc.start();
-    });
-
-    // Master twinkle LFO
-    const masterLfo = ctx.createOscillator();
-    masterLfo.type = 'sine';
-    masterLfo.frequency.value = 3.2;
-    const masterLfoGain = ctx.createGain();
-    masterLfoGain.gain.value = 0.025;
-    masterLfo.connect(masterLfoGain);
-    masterLfoGain.connect(masterGain.gain);
-    masterLfo.start();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(masterGain);
+    source.start();
 
     // Smooth fade in
-    masterGain.gain.setTargetAtTime(0.18, ctx.currentTime, 0.15);
+    masterGain.gain.setTargetAtTime(0.22, ctx.currentTime, 0.12);
 
-    chimeNodesRef.current = { masterGain };
+    chimeNodesRef.current = { source, masterGain };
   }, []);
 
   const stopChimeSound = useCallback(() => {
     const ctx = audioCtxRef.current;
     const nodes = chimeNodesRef.current;
     if (ctx && nodes) {
-      nodes.masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.18);
+      nodes.masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
       setTimeout(() => {
+        try { nodes.source.stop(); } catch {}
         try { ctx.close(); } catch {}
-      }, 500);
+      }, 400);
     }
     audioCtxRef.current = null;
     chimeNodesRef.current = null;
   }, []);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => { stopChimeSound(); };
-  }, [stopChimeSound]);
 
   const fetchLeaderboard = useCallback(async () => {
     const { data } = await supabase
