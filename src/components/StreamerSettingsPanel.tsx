@@ -593,15 +593,40 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nextStreamAtPanel">Next Stream Date & Time</Label>
-                    <Input
-                      id="nextStreamAtPanel"
-                      type="datetime-local"
-                      value={nextStreamAt ? (() => { try { return new Date(nextStreamAt).toISOString().slice(0, 16); } catch { return ''; } })() : ''}
-                      onChange={(e) => setNextStreamAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
-                    />
+                    <Label>Next Stream Date & Time</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="DD.MM.YYYY"
+                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`; } catch { return ''; } })() : ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const match = val.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+                          if (match) {
+                            const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
+                            const newDate = new Date(parseInt(match[3]), parseInt(match[2])-1, parseInt(match[1]), existing.getHours(), existing.getMinutes());
+                            if (!isNaN(newDate.getTime())) setNextStreamAt(newDate.toISOString());
+                          } else if (!val) {
+                            setNextStreamAt('');
+                          }
+                        }}
+                        className="flex-1"
+                      />
+                      <Input
+                        type="time"
+                        value={nextStreamAt ? (() => { try { const d = new Date(nextStreamAt); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; } catch { return ''; } })() : ''}
+                        onChange={(e) => {
+                          if (!e.target.value) return;
+                          const [h, m] = e.target.value.split(':').map(Number);
+                          const existing = nextStreamAt ? new Date(nextStreamAt) : new Date();
+                          existing.setHours(h, m, 0, 0);
+                          setNextStreamAt(existing.toISOString());
+                        }}
+                        className="w-28"
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Displayed to visitors on the offline page
+                      Displayed to visitors on the offline page (DD.MM.YYYY)
                     </p>
                   </div>
                   <div className="flex items-center justify-between">
