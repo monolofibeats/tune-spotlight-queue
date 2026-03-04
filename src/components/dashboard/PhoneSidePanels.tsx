@@ -224,6 +224,16 @@ function LeftPanel({ streamer, onStreamerUpdate, onStartStarTrail }: { streamer:
       </CollapsibleSection>
 
       <div className="side-panel-left-dimmable flex-1 flex flex-col">
+        <CollapsibleSection title="Star Trail" icon={Star} defaultOpen={false} storageKey={pk('sec-startrail')}>
+          <button
+            onClick={onStartStarTrail}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-xs font-semibold text-primary"
+          >
+            <Star className="w-3.5 h-3.5 fill-primary" />
+            Launch Star Trail
+          </button>
+        </CollapsibleSection>
+
         <CollapsibleSection title="Soundboard" icon={Volume2} defaultOpen={false} storageKey={pk('sec-soundboard')}>
           <SidePanelSoundboard streamerId={streamer.id} />
         </CollapsibleSection>
