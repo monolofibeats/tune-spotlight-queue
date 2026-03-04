@@ -399,7 +399,7 @@ const StreamerSettings = () => {
           next_stream_at: nextStreamAt || null,
           show_offline_signup: showOfflineSignup,
           offline_socials: offlineSocials,
-          next_stream_platform: nextStreamPlatform || null,
+          next_stream_platform: nextStreamPlatform === 'none' ? null : nextStreamPlatform || null,
           twitch_url: twitchUrl || null,
           youtube_url: youtubeUrl || null,
           tiktok_url: tiktokUrl || null,

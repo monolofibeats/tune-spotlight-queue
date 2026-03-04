@@ -326,7 +326,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
           next_stream_at: nextStreamAt || null,
           show_offline_signup: showOfflineSignup,
           offline_socials: offlineSocials,
-          next_stream_platform: nextStreamPlatform || null,
+          next_stream_platform: nextStreamPlatform === 'none' ? null : nextStreamPlatform || null,
           page_language: pageLanguage,
         } as any)
         .eq('id', streamer.id)
