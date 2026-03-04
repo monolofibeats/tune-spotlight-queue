@@ -1177,6 +1177,10 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                           return;
                         }
 
+                        if (pasted.includes('youtube.com') || pasted.includes('youtu.be')) {
+                          void autofillFromYouTube(pasted);
+                        }
+
                         const metadata = parseUrlMetadata(pasted);
                         if (metadata.artistName && !artistName.trim()) {
                           setArtistName(metadata.artistName);
@@ -1188,6 +1192,9 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
                       onBlur={() => {
                         if (songUrl.includes('spotify.com')) {
                           void autofillFromSpotify(songUrl);
+                        }
+                        if (songUrl.includes('youtube.com') || songUrl.includes('youtu.be')) {
+                          void autofillFromYouTube(songUrl);
                         }
                       }}
                       className="h-10 text-sm bg-background/50"
