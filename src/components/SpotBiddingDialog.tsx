@@ -70,6 +70,9 @@ export function SpotBiddingDialog({
   const [discountCode, setDiscountCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState<number | null>(null);
   const [isValidatingCode, setIsValidatingCode] = useState(false);
+  const [queuePosition, setQueuePosition] = useState<{ position: number; total: number } | null>(null);
+
+  const MINUTES_PER_SONG = 5;
 
   useEffect(() => {
     if (open) {
