@@ -167,8 +167,10 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
   useEffect(() => {
     const audio = new Audio('/sfx/fairy-sparkle.mp3');
     audio.preload = 'auto';
-    audio.volume = 0.12;
+    audio.volume = 0.14;
+    audio.loop = true;
     sparkleAudioRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; };
   }, []);
 
   const fetchLeaderboard = useCallback(async () => {
@@ -312,6 +314,9 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
 
   const endRound = useCallback(() => {
     clearInterval(timerRef.current);
+    // Stop sparkle sound
+    const audio = sparkleAudioRef.current;
+    if (audio) { audio.pause(); }
     const size = sizeRef.current;
     const targetPts = currentShape.generate();
     const r = calculateScore(playerPathRef.current, targetPts, size);
@@ -371,17 +376,7 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
         life: 0.5 + Math.random() * 0.5,
       });
     }
-    // Fairy sparkle trace sound (throttled, replays from start each time)
-    const now = Date.now();
-    if (now - lastSoundRef.current > 250) {
-      const audio = sparkleAudioRef.current;
-      if (audio) {
-        audio.currentTime = 0;
-        audio.volume = 0.08 + Math.random() * 0.06;
-        audio.play().catch(() => {});
-      }
-      lastSoundRef.current = now;
-    }
+    // Keep sparkle audio playing while drawing (started on pointer down)
   };
 
   const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
@@ -390,6 +385,12 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
     isDrawingRef.current = true;
     const pos = getPos(e);
     if (pos) addPoint(pos);
+    // Start continuous fairy sparkle sound
+    const audio = sparkleAudioRef.current;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
   };
 
   const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
@@ -399,7 +400,12 @@ export function StarTrailGame({ streamerId, streamerName, onClose, readOnly }: S
     if (pos) addPoint(pos);
   };
 
-  const handlePointerUp = () => { isDrawingRef.current = false; };
+  const handlePointerUp = () => {
+    isDrawingRef.current = false;
+    // Pause fairy sparkle sound
+    const audio = sparkleAudioRef.current;
+    if (audio) { audio.pause(); }
+  };
 
   // Read-only leaderboard mode for public page
   if (readOnly) {
