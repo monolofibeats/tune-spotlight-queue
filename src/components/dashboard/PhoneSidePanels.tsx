@@ -290,6 +290,7 @@ function RightPanel({ streamer }: { streamer: Streamer }) {
 export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneSidePanelsProps) {
   const [leftOpen, setLeftOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'left-open'), true);
   const [rightOpen, setRightOpen] = usePersistedBoolean(getPanelKey(streamer.id, 'right-open'), true);
+  const [showStarTrail, setShowStarTrail] = useState(false);
 
   return (
     <div className="flex items-stretch gap-2 w-full min-h-[calc(100vh-140px)]">
@@ -298,7 +299,7 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
         {leftOpen ? (
           <>
             <div className="h-full rounded-xl backdrop-blur-sm overflow-y-auto side-panel-left-container transition-all duration-300">
-              <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} />
+              <LeftPanel streamer={streamer} onStreamerUpdate={onStreamerUpdate} onStartStarTrail={() => setShowStarTrail(true)} />
             </div>
             <button
               onClick={() => setLeftOpen(false)}
@@ -318,8 +319,24 @@ export function PhoneSidePanels({ streamer, children, onStreamerUpdate }: PhoneS
       </div>
 
       {/* Center Content */}
-      <div className="flex-shrink-0 w-[480px]">
+      <div className="flex-shrink-0 w-[480px] relative">
         {children}
+        <AnimatePresence>
+          {showStarTrail && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl"
+            >
+              <StarTrailGame
+                streamerId={streamer.id}
+                streamerName={streamer.display_name}
+                onClose={() => setShowStarTrail(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Right Panel */}
