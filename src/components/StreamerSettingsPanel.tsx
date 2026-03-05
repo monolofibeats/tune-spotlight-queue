@@ -20,6 +20,7 @@ import {
   User,
   Globe,
   Image,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ import {
 } from '@/components/streamer-settings';
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
+import { CommunityPanel } from '@/components/streamer-settings/CommunityPanel';
 import { SessionManager } from '@/components/SessionManager';
 import { SessionHistory, type SessionFilter } from '@/components/SessionHistory';
 import type { SessionSubmission } from '@/components/SessionHistory';
@@ -383,6 +385,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
     { id: 'language', label: t('pageSettings.tab.language') || 'Language', icon: Globe },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
+    { id: 'community', label: 'Community', icon: Users },
   ];
 
   return (
@@ -727,6 +730,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               <SessionManager streamerId={initialStreamer.id} phoneOptimized={phoneOptimized} onPhoneOptimizedChange={onPhoneOptimizedChange} showSidePanels={showSidePanels} onShowSidePanelsChange={onShowSidePanelsChange} />
               <SessionHistory streamerId={initialStreamer.id} onLoadSessionWithTrack={onLoadSessionWithTrack} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
+            </TabsContent>
+
+            {/* Community Tab */}
+            <TabsContent value="community" forceMount className={`space-y-6 ${activeTab !== 'community' ? 'hidden' : ''}`}>
+              <CommunityPanel streamerId={initialStreamer.id} />
             </TabsContent>
           </Tabs>
         </div>
