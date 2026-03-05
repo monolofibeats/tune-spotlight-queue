@@ -41,6 +41,7 @@ import {
 } from '@/components/streamer-settings';
 import type { PricingSettingsHandle, FormFieldBuilderHandle } from '@/components/streamer-settings';
 import { ImageUploadInput } from '@/components/streamer-settings/ImageUploadInput';
+import { CommunityPanel } from '@/components/streamer-settings/CommunityPanel';
 import { SessionManager } from '@/components/SessionManager';
 import { SessionHistory, type SessionFilter } from '@/components/SessionHistory';
 import type { SessionSubmission } from '@/components/SessionHistory';
