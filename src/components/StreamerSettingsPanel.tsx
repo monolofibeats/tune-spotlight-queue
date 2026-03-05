@@ -730,6 +730,11 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
               <SessionHistory streamerId={initialStreamer.id} onLoadSessionWithTrack={onLoadSessionWithTrack} />
               <StreamEmbedConfig ref={streamEmbedRef} streamerId={initialStreamer.id} onChangeStatus={setStreamEmbedHasChanges} />
             </TabsContent>
+
+            {/* Community Tab */}
+            <TabsContent value="community" forceMount className={`space-y-6 ${activeTab !== 'community' ? 'hidden' : ''}`}>
+              <CommunityPanel streamerId={initialStreamer.id} />
+            </TabsContent>
           </Tabs>
         </div>
 
