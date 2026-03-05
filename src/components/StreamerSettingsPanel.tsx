@@ -384,6 +384,7 @@ export function StreamerSettingsPanel({ streamer: initialStreamer, onUpdate, pho
     { id: 'design', label: t('pageSettings.tab.design'), icon: Palette },
     { id: 'language', label: t('pageSettings.tab.language') || 'Language', icon: Globe },
     { id: 'stream', label: t('pageSettings.tab.stream'), icon: Radio },
+    { id: 'community', label: 'Community', icon: Users },
   ];
 
   return (
