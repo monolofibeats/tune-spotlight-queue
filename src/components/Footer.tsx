@@ -23,10 +23,8 @@ export function Footer() {
     socials: {
       title: t('footer.socials'),
       links: [
-        { label: 'Instagram', href: 'https://www.instagram.com/mosi039/', external: true },
-        { label: 'TikTok', href: 'https://www.tiktok.com/@mosi391', external: true },
-        { label: 'Twitch', href: 'https://www.twitch.tv/', external: true },
-        { label: 'Youtube', href: 'https://www.youtube.com/@UpStargg', external: true },
+        { label: 'Instagram', href: 'https://www.instagram.com/elysium.audio/', external: true },
+        { label: 'TikTok', href: 'https://www.tiktok.com/@upstar.gg', external: true },
       ],
     },
   };
