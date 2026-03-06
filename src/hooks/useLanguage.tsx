@@ -1242,7 +1242,7 @@ const translations: Record<Language, Record<string, string>> = {
     'submission.status.deleted': 'gelöscht',
     'submission.select': 'Auswählen',
     'submission.deselect': 'Abwählen',
-    'submission.priority': 'Priorität',
+    'submission.priority': 'VIP',
     'submission.uploadedAudio': 'Hochgeladene Audio-Datei',
     'submission.play': 'Abspielen',
     'submission.download': 'Herunterladen',
