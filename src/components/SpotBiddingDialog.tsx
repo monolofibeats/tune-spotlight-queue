@@ -341,7 +341,7 @@ export function SpotBiddingDialog({
           const STORAGE_KEY = 'upstar_tracked_submissions';
           const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
           const newEntry = {
-            submissionId: insertedSub?.id || undefined,
+            submissionId: finalSubId || undefined,
             songTitle: songTitle || 'Untitled',
             artistName: artistName || 'Unknown Artist',
             songUrl: songUrl || 'direct-upload',
@@ -352,7 +352,7 @@ export function SpotBiddingDialog({
             trackedAt: Date.now(),
           };
           // Deduplicate
-          if (!insertedSub?.id || !existing.some((s: any) => s.submissionId === insertedSub.id)) {
+          if (!finalSubId || !existing.some((s: any) => s.submissionId === finalSubId)) {
             existing.push(newEntry);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
           }
