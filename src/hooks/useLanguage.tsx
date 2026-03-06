@@ -1952,7 +1952,7 @@ const translations: Record<Language, Record<string, string>> = {
     'bidding.discountAppliedToastDesc': 'Dein Rabatt wird an der Kasse angewendet.',
     'bidding.error': 'Fehler',
     'bidding.errorLoadSpots': 'Fehler beim Laden der Spot-Preise',
-    'bidding.adminBypass': 'Prioritäts-Einreichung hinzugefügt! 🎉',
+    'bidding.adminBypass': 'VIP-Einreichung hinzugefügt! 🎉',
     'bidding.adminBypassDesc': 'Admin-Bypass: Platz #{position} gesichert',
     'bidding.failed': 'Fehlgeschlagen',
   },
