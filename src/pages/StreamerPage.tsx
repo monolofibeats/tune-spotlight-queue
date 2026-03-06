@@ -47,6 +47,65 @@ function StreamerPageContent() {
   const [showOutbidBanner, setShowOutbidBanner] = useState(false);
   const [showOutbidDialog, setShowOutbidDialog] = useState(false);
 
+  // Track paid/priority submissions after Stripe redirect at the page level
+  // This ensures tracking works even if SubmissionForm hasn't mounted yet
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    const paymentStatus = searchParams.get('payment');
+    const submissionPayment = searchParams.get('submission_payment');
+
+    // Priority payment return
+    if (paymentStatus === 'success' && sessionId) {
+      const pendingRaw = localStorage.getItem('upstar_pending_priority_submission');
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw);
+          // We need the submissionId from the verification response, so invoke it here
+          supabase.functions.invoke('verify-payment', { body: { sessionId } }).then(({ data }) => {
+            if (data?.success) {
+              trackSubmission({
+                submissionId: data.submissionId || undefined,
+                songTitle: pending.songTitle,
+                artistName: pending.artistName,
+                songUrl: pending.songUrl,
+                platform: pending.platform,
+                audioFileUrl: pending.audioFileUrl,
+                streamerId: pending.streamerId,
+                streamerSlug: pending.streamerSlug,
+              });
+            }
+          }).catch(() => {});
+          localStorage.removeItem('upstar_pending_priority_submission');
+        } catch {}
+      }
+    }
+
+    // Paid submission return
+    if (submissionPayment === 'success' && sessionId) {
+      const pendingRaw = localStorage.getItem('upstar_pending_paid_submission');
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw);
+          supabase.functions.invoke('verify-submission-payment', { body: { sessionId } }).then(({ data }) => {
+            if (data?.success) {
+              trackSubmission({
+                submissionId: data.submissionId || undefined,
+                songTitle: pending.songTitle,
+                artistName: pending.artistName,
+                songUrl: pending.songUrl,
+                platform: pending.platform,
+                audioFileUrl: pending.audioFileUrl,
+                streamerId: pending.streamerId,
+                streamerSlug: pending.streamerSlug,
+              });
+            }
+          }).catch(() => {});
+          localStorage.removeItem('upstar_pending_paid_submission');
+        } catch {}
+      }
+    }
+  }, [searchParams, trackSubmission]);
+
   // Handle bid payment success redirect
   useEffect(() => {
     if (bidPaymentStatus === 'success') {
