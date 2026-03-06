@@ -15,8 +15,6 @@ export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) 
   const initialLoadRef = useRef(true);
   const { language } = useLanguage();
 
-  const { language } = useLanguage();
-
   const showAlert = useCallback((alert: PriorityAlert) => {
     setAlerts(prev => [...prev, alert]);
     setTimeout(() => {
