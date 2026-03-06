@@ -30,7 +30,7 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
   const { t } = useLanguage();
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [biddingSub, setBiddingSub] = useState<TrackedSubmission | null>(null);
+  const [biddingItem, setBiddingItem] = useState<QueueItem | null>(null);
 
   // Build a set of tracked submission IDs for quick lookup
   const trackedIds = new Set(
