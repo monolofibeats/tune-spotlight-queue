@@ -1917,7 +1917,7 @@ const translations: Record<Language, Record<string, string>> = {
     'support.faq.2.q': 'Welche Gebühren erhebt die Plattform?',
     'support.faq.2.a': 'Bei jeder Einreichungszahlung wird eine kleine Plattformgebühr abgezogen. Die genaue Aufteilung ist auf deinen Zahlungs- und Statistikseiten sichtbar. Stripe-Verarbeitungsgebühren werden ebenfalls abgezogen, bevor dein Anteil berechnet wird.',
     'support.faq.3.q': 'Wie verwalte ich meine Einreichungswarteschlange?',
-    'support.faq.3.a': "Dein Dashboard zeigt alle eingehenden Einreichungen sortiert nach Priorität und Zahlungsbetrag. Du kannst Songs als 'wird gespielt', 'bewertet' oder 'übersprungen' markieren. Verwende die Massenaktionsleiste, um mehrere Einreichungen gleichzeitig zu verwalten.",
+    'support.faq.3.a': "Dein Dashboard zeigt alle eingehenden Einreichungen sortiert nach VIP-Status und Zahlungsbetrag. Du kannst Songs als 'wird gespielt', 'bewertet' oder 'übersprungen' markieren. Verwende die Massenaktionsleiste, um mehrere Einreichungen gleichzeitig zu verwalten.",
     'support.faq.4.q': 'Kann ich Teammitglieder einladen, um meine Seite zu verwalten?',
     'support.faq.4.a': 'Ja! Gehe zu deinen Streamer-Einstellungen und öffne den Bereich Team-Manager. Du kannst Teammitglieder per E-Mail einladen und ihnen Rollen wie Betrachter, Bearbeiter oder Admin zuweisen. Bearbeiter und Admins können deine Warteschlange und Einstellungen verwalten.',
     'support.faq.5.q': 'Wie funktionieren Vorlagen?',
