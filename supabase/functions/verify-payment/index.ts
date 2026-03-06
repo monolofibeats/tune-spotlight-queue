@@ -83,7 +83,7 @@ serve(async (req) => {
 
       return new Response(JSON.stringify({
         success: true,
-        message: "Your priority submission has been added to the queue!",
+        message: "Your VIP submission has been added to the queue!",
         submissionId: alreadyProcessedId,
         actionLink,
         hashedToken,
