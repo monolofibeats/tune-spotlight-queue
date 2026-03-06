@@ -50,9 +50,8 @@ serve(async (req) => {
       streamerSlug,
       referralCode,
       originalSubmissionId,
+      targetSpot,
     } = await req.json();
-
-    const targetSpot = (await req.clone().json().catch(() => ({}))).targetSpot;
 
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
 
