@@ -300,7 +300,7 @@ export function SpotBiddingDialog({
     try {
       // Admin bypass - no payment required
       if (isAdmin) {
-        const { error } = await supabase.from('submissions').insert({
+        const { data: insertedSub, error } = await supabase.from('submissions').insert({
           song_url: songUrl || 'direct-upload',
           platform: platform || 'other',
           artist_name: artistName || 'Unknown Artist',
@@ -312,7 +312,7 @@ export function SpotBiddingDialog({
           user_id: user?.id || null,
           audio_file_url: audioFileUrl || null,
           streamer_id: streamerId || null,
-        });
+        }).select('id').single();
 
         if (error) throw error;
 
@@ -325,13 +325,37 @@ export function SpotBiddingDialog({
             .eq('status', 'pending');
         }
 
+        // Track the admin-bypassed priority submission
+        onSuccess?.();
+
+        // Also save to localStorage so SubmissionTracker picks it up
+        try {
+          const STORAGE_KEY = 'upstar_tracked_submissions';
+          const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          const newEntry = {
+            submissionId: insertedSub?.id || undefined,
+            songTitle: songTitle || 'Untitled',
+            artistName: artistName || 'Unknown Artist',
+            songUrl: songUrl || 'direct-upload',
+            platform: platform || 'other',
+            audioFileUrl: audioFileUrl || null,
+            streamerId: streamerId || null,
+            streamerSlug: streamerSlug || null,
+            trackedAt: Date.now(),
+          };
+          // Deduplicate
+          if (!insertedSub?.id || !existing.some((s: any) => s.submissionId === insertedSub.id)) {
+            existing.push(newEntry);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+          }
+        } catch {}
+
         toast({
           title: t('bidding.adminBypass'),
           description: t('bidding.adminBypassDesc').replace('{position}', String(spotPosition)),
         });
         
         onOpenChange(false);
-        onSuccess?.();
         return;
       }
 
