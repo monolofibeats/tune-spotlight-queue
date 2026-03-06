@@ -51,7 +51,24 @@ export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) 
         filter: `streamer_id=eq.${streamerId}`,
       }, (payload) => {
         const row = payload.new as any;
-        if (row.is_priority && row.amount_paid > 0 && !seenIdsRef.current.has(row.id) && !initialLoadRef.current) {
+        if (row.is_priority && !seenIdsRef.current.has(row.id) && !initialLoadRef.current) {
+          seenIdsRef.current.add(row.id);
+          showAlert({
+            id: row.id,
+            artistName: row.artist_name || 'Someone',
+            songTitle: row.song_title || 'a track',
+          });
+        }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'submissions',
+        filter: `streamer_id=eq.${streamerId}`,
+      }, (payload) => {
+        const row = payload.new as any;
+        const old = payload.old as any;
+        if (row.is_priority && !old.is_priority && !seenIdsRef.current.has(row.id) && !initialLoadRef.current) {
           seenIdsRef.current.add(row.id);
           showAlert({
             id: row.id,
