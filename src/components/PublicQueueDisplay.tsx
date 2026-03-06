@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
-import { TrackedSubmission } from '@/hooks/useTrackedSubmission';
+import type { TrackedSubmission } from '@/hooks/useTrackedSubmission';
 import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { PositionBadge } from './queue/PositionBadge';
 
@@ -30,7 +30,7 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
   const { t } = useLanguage();
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [biddingSub, setBiddingSub] = useState<TrackedSubmission | null>(null);
+  const [biddingItem, setBiddingItem] = useState<QueueItem | null>(null);
 
   // Build a set of tracked submission IDs for quick lookup
   const trackedIds = new Set(
@@ -156,11 +156,11 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
                     </Badge>
                   )}
 
-                  {isOwn && tracked && !item.is_priority && (
+                  {!item.is_priority && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setBiddingSub(tracked)}
+                      onClick={() => setBiddingItem(item)}
                       className="text-xs gap-1 h-7 px-2.5 border-primary/40 text-primary hover:bg-primary/10"
                     >
                       <Zap className="w-3 h-3" />
@@ -181,17 +181,16 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
       </div>
 
       {/* Bidding Dialog */}
-      {biddingSub && (
+      {biddingItem && (
         <SpotBiddingDialog
-          open={!!biddingSub}
-          onOpenChange={(open) => { if (!open) setBiddingSub(null); }}
-          songUrl={biddingSub.songUrl}
-          artistName={biddingSub.artistName}
-          songTitle={biddingSub.songTitle}
+          open={!!biddingItem}
+          onOpenChange={(open) => { if (!open) setBiddingItem(null); }}
+          songUrl=""
+          artistName={biddingItem.artist_name}
+          songTitle={biddingItem.song_title}
           email=""
-          platform={biddingSub.platform}
-          audioFileUrl={biddingSub.audioFileUrl}
-          originalSubmissionId={biddingSub.submissionId || null}
+          platform={biddingItem.platform}
+          originalSubmissionId={biddingItem.id}
           streamerId={streamerId}
           streamerSlug={streamerSlug || ''}
         />
