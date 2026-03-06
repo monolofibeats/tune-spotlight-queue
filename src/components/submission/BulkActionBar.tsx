@@ -60,7 +60,7 @@ export function BulkActionBar({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="sticky top-2 z-30 mx-auto max-w-xl"
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-xl"
         >
           <div className="glass-strong rounded-xl border border-primary/30 shadow-lg shadow-primary/10 px-4 py-3 flex items-center gap-3 flex-wrap">
             {/* Selection info */}
