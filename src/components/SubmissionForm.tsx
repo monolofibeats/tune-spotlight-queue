@@ -511,7 +511,7 @@ export function SubmissionForm({ watchlistRef, streamerId, streamerSlug, onSubmi
     };
 
     verifyPayment();
-  }, [searchParams, watchlistRef, play]);
+  }, [searchParams, watchlistRef, play, onSubmissionTracked]);
 
   const uploadAudioFile = async (): Promise<string | null> => {
     if (!audioFile) return null;
