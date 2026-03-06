@@ -51,7 +51,7 @@ export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) 
         filter: `streamer_id=eq.${streamerId}`,
       }, (payload) => {
         const row = payload.new as any;
-        if (row.is_priority && row.amount_paid > 0 && !seenIdsRef.current.has(row.id) && !initialLoadRef.current) {
+        if (row.is_priority && !seenIdsRef.current.has(row.id) && !initialLoadRef.current) {
           seenIdsRef.current.add(row.id);
           showAlert({
             id: row.id,
