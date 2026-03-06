@@ -300,29 +300,37 @@ export function SpotBiddingDialog({
     try {
       // Admin bypass - no payment required
       if (isAdmin) {
-        const { data: insertedSub, error } = await supabase.from('submissions').insert({
-          song_url: songUrl || 'direct-upload',
-          platform: platform || 'other',
-          artist_name: artistName || 'Unknown Artist',
-          song_title: songTitle || 'Untitled',
-          message: message || null,
-          email: user?.email || email || null,
-          amount_paid: spot.yourPrice,
-          is_priority: true,
-          user_id: user?.id || null,
-          audio_file_url: audioFileUrl || null,
-          streamer_id: streamerId || null,
-        }).select('id').single();
+        let finalSubId: string | undefined;
 
-        if (error) throw error;
-
-        // Soft-delete the original free submission to prevent duplicates
         if (originalSubmissionId) {
-          await supabase
+          // Upgrade existing submission in-place (preserves song_url, audio_file_url, etc.)
+          const { error } = await supabase
             .from('submissions')
-            .update({ status: 'deleted' })
+            .update({
+              is_priority: true,
+              amount_paid: spot.yourPrice,
+            })
             .eq('id', originalSubmissionId)
             .eq('status', 'pending');
+          if (error) throw error;
+          finalSubId = originalSubmissionId;
+        } else {
+          // No original — insert a brand new submission
+          const { data: insertedSub, error } = await supabase.from('submissions').insert({
+            song_url: songUrl || 'direct-upload',
+            platform: platform || 'other',
+            artist_name: artistName || 'Unknown Artist',
+            song_title: songTitle || 'Untitled',
+            message: message || null,
+            email: user?.email || email || null,
+            amount_paid: spot.yourPrice,
+            is_priority: true,
+            user_id: user?.id || null,
+            audio_file_url: audioFileUrl || null,
+            streamer_id: streamerId || null,
+          }).select('id').single();
+          if (error) throw error;
+          finalSubId = insertedSub?.id;
         }
 
         // Track the admin-bypassed priority submission
@@ -333,7 +341,7 @@ export function SpotBiddingDialog({
           const STORAGE_KEY = 'upstar_tracked_submissions';
           const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
           const newEntry = {
-            submissionId: insertedSub?.id || undefined,
+            submissionId: finalSubId || undefined,
             songTitle: songTitle || 'Untitled',
             artistName: artistName || 'Unknown Artist',
             songUrl: songUrl || 'direct-upload',
@@ -344,7 +352,7 @@ export function SpotBiddingDialog({
             trackedAt: Date.now(),
           };
           // Deduplicate
-          if (!insertedSub?.id || !existing.some((s: any) => s.submissionId === insertedSub.id)) {
+          if (!finalSubId || !existing.some((s: any) => s.submissionId === finalSubId)) {
             existing.push(newEntry);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
           }

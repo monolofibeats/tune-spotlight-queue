@@ -136,6 +136,57 @@ serve(async (req) => {
 
     const finalUserId = (metadata.user_id && metadata.user_id.length > 0) ? metadata.user_id : (autoUserId || null);
 
+    // If upgrading an existing submission, update in-place to preserve song_url etc.
+    const originalSubId = (metadata.original_submission_id || "").trim();
+    if (originalSubId) {
+      logStep("Upgrading existing submission to priority", { originalSubId, amountPaid });
+
+      const { data: upgraded, error: upgradeErr } = await supabase
+        .from("submissions")
+        .update({
+          is_priority: true,
+          amount_paid: amountPaid,
+          stripe_session_id: sessionId,
+          email: stripeEmail || undefined,
+          user_id: finalUserId || undefined,
+        })
+        .eq("id", originalSubId)
+        .select()
+        .single();
+
+      if (!upgradeErr && upgraded) {
+        logStep("Submission upgraded", { submissionId: upgraded.id });
+
+        if (metadata.streamer_id) {
+          try {
+            await recordEarning({
+              stripeSessionId: sessionId,
+              streamerId: metadata.streamer_id,
+              submissionId: upgraded.id,
+              paymentType: "priority",
+              customerEmail: stripeEmail,
+            });
+            logStep("Earnings recorded for upgrade");
+          } catch (e) {
+            logStep("Warning: Failed to record earnings (non-fatal)", { error: String(e) });
+          }
+        }
+
+        return new Response(JSON.stringify({
+          success: true,
+          submissionId: upgraded.id,
+          message: "Your submission has been upgraded to priority!",
+          actionLink: actionLink || null,
+          hashedToken: hashedToken || null,
+          accountCreated: accountCreated || false,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      logStep("Upgrade failed, falling back to insert", { error: upgradeErr?.message });
+    }
+
     logStep("Creating submission", { metadata, amountPaid, accountCreated });
 
     const { data: submission, error: insertError } = await supabase
@@ -159,7 +210,6 @@ serve(async (req) => {
       .single();
 
     if (insertError) {
-      // Duplicate key = already processed (race condition safety net)
       if (insertError.code === '23505') {
         logStep("Duplicate insert detected, returning success");
         return new Response(JSON.stringify({
@@ -175,17 +225,6 @@ serve(async (req) => {
     }
 
     logStep("Submission created", { submissionId: submission.id });
-
-    // Soft-delete the original free submission if this is an upgrade
-    const originalSubId = metadata.original_submission_id;
-    if (originalSubId) {
-      const { error: deleteErr } = await supabase
-        .from("submissions")
-        .update({ status: "deleted" })
-        .eq("id", originalSubId)
-        .eq("status", "pending");
-      logStep("Original submission soft-deleted", { originalSubId, error: deleteErr?.message || null });
-    }
 
     // Record earnings for the streamer
     if (metadata.streamer_id) {
