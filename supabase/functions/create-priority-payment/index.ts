@@ -52,6 +52,8 @@ serve(async (req) => {
       originalSubmissionId,
     } = await req.json();
 
+    const targetSpot = (await req.clone().json().catch(() => ({}))).targetSpot;
+
     logStep("Received request", { amount, songUrl, artistName, songTitle, email, platform, hasAudioFile: !!audioFileUrl, streamerId, streamerSlug, hasReferral: !!referralCode });
 
     // Fetch minimum amount from pricing_config (prefer streamer-specific, fall back to global)
@@ -63,8 +65,22 @@ serve(async (req) => {
       ?? pricingConfigs?.find(r => r.streamer_id === null)
       ?? pricingConfigs?.[0];
 
-    const minAmountCents = pricingConfig?.min_amount_cents ?? 50; // Default to €0.50
+    let minAmountCents = pricingConfig?.min_amount_cents ?? 50; // Default to €0.50
     const amountCents = Math.round(amount * 100);
+
+    // If targeting a specific spot, check if that spot has a lower configured price
+    if (targetSpot && streamerId) {
+      const { data: spotRow } = await supabase
+        .from('pre_stream_spots')
+        .select('price_cents')
+        .eq('streamer_id', streamerId)
+        .is('session_id', null)
+        .eq('spot_number', targetSpot)
+        .single();
+      if (spotRow && spotRow.price_cents < minAmountCents) {
+        minAmountCents = spotRow.price_cents;
+      }
+    }
     
     // Validate pre-discount amount against minimum
     if (amountCents < minAmountCents) {
