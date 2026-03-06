@@ -292,6 +292,49 @@ serve(async (req) => {
     const amountPaid = Math.round((session.amount_total || 0)) / 100;
     const audioFileUrl = (metadata.audio_file_url || metadata.audioFileUrl || "").trim();
 
+    // If this is a priority upgrade for an existing submission, update it in-place
+    const originalSubId = (metadata.original_submission_id || "").trim();
+    if (isPriorityPayment && originalSubId) {
+      logStep("Upgrading existing submission to priority", { originalSubId, amountPaid });
+
+      const { data: upgraded, error: upgradeErr } = await supabase
+        .from("submissions")
+        .update({
+          is_priority: true,
+          amount_paid: amountPaid,
+          stripe_session_id: sessionId,
+          email: stripeEmail || undefined,
+          user_id: finalUserId || undefined,
+        })
+        .eq("id", originalSubId)
+        .select()
+        .single();
+
+      if (upgradeErr) {
+        logStep("Upgrade failed, falling back to insert", { error: upgradeErr.message });
+      } else {
+        logStep("Submission upgraded", { submissionId: upgraded.id });
+
+        // Record earnings
+        if (metadata.streamer_id) {
+          try {
+            await recordEarning({
+              stripeSessionId: sessionId,
+              streamerId: metadata.streamer_id,
+              submissionId: upgraded.id,
+              paymentType: "priority",
+              customerEmail: stripeEmail,
+            });
+            logStep("Earnings recorded for upgrade");
+          } catch (e) {
+            logStep("Warning: Failed to record earnings (non-fatal)", { error: String(e) });
+          }
+        }
+
+        return new Response(JSON.stringify({ received: true, submissionId: upgraded.id }), { status: 200 });
+      }
+    }
+
     logStep("Creating submission", {
       isPriority: isPriorityPayment,
       amountPaid,
@@ -330,17 +373,6 @@ serve(async (req) => {
     }
 
     logStep("Submission created", { submissionId: submission.id });
-
-    // Soft-delete the original free submission if this is a skip/upgrade
-    const originalSubId = metadata.original_submission_id;
-    if (originalSubId) {
-      const { error: deleteErr } = await supabase
-        .from("submissions")
-        .update({ status: "deleted" })
-        .eq("id", originalSubId)
-        .eq("status", "pending");
-      logStep("Original submission soft-deleted", { originalSubId, error: deleteErr?.message || null });
-    }
 
     // Record earnings
     if (metadata.streamer_id) {
