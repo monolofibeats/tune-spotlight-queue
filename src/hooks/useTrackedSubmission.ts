@@ -101,6 +101,10 @@ export function useTrackedSubmission(streamerSlug?: string | null) {
 
   const trackSubmission = useCallback((sub: Omit<TrackedSubmission, 'trackedAt'>) => {
     const updated = [...getTrackedSubmissions()];
+    // Deduplicate: skip if this submissionId is already tracked
+    if (sub.submissionId && updated.some((s) => s.submissionId === sub.submissionId)) {
+      return;
+    }
     const newSub: TrackedSubmission = { ...sub, trackedAt: Date.now() };
     updated.push(newSub);
     saveTrackedSubmissions(updated);
