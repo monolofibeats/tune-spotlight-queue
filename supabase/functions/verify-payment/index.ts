@@ -175,7 +175,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: true,
           submissionId: upgraded.id,
-          message: "Your submission has been upgraded to priority!",
+          message: "Your submission has been upgraded to VIP!",
           actionLink: actionLink || null,
           hashedToken: hashedToken || null,
           accountCreated: accountCreated || false,
