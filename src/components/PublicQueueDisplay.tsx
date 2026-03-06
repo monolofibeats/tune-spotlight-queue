@@ -152,7 +152,7 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
                   {item.is_priority && (
                     <Badge className="text-[10px] bg-amber-500/20 text-amber-400 border-amber-500/30 border">
                       <Zap className="w-2.5 h-2.5 mr-0.5" />
-                      Priority
+                      VIP
                     </Badge>
                   )}
 

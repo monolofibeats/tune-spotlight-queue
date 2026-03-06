@@ -52,7 +52,7 @@ serve(async (req) => {
       <h3 style="font-size:15px;margin:20px 0 8px;color:#EAB308;">💰 Revenue & Earnings</h3>
       <ul style="padding-left:20px;color:#ccc;font-size:13px;line-height:1.8;">
         <li><strong style="color:#fff;">80/20 revenue split</strong> – You keep 80% of all earnings (after processing fees)</li>
-        <li>Multiple revenue streams: paid submissions, priority queue, pre-stream spots, and bidding</li>
+        <li>Multiple revenue streams: paid submissions, VIP queue, pre-stream spots, and bidding</li>
         <li>Flexible payouts via Bank/SEPA or PayPal (minimum €50 threshold)</li>
       </ul>
       

@@ -466,7 +466,7 @@ export function NowPlayingPanel({
                       {submission.is_priority && (
                         <Badge variant="premium" className="shrink-0 text-[10px] px-1.5 py-0">
                           <Zap className="w-2.5 h-2.5 mr-0.5" />
-                          Priority
+                          VIP
                         </Badge>
                       )}
                     </div>

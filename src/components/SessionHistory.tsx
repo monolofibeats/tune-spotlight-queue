@@ -215,7 +215,7 @@ function SessionDetailView({ session, streamerId, onClickSubmission }: {
           {[
             { icon: Clock, label: 'Duration', value: formatDuration(stats.durationSeconds) },
             { icon: Music2, label: 'Tracks', value: String(stats.totalSubmissions) },
-            { icon: Star, label: 'Priority', value: String(stats.prioritySubmissions) },
+            { icon: Star, label: 'VIP', value: String(stats.prioritySubmissions) },
             { icon: Euro, label: 'Revenue', value: `€${stats.totalEarnings.toFixed(2)}` },
           ].map(item => (
             <div key={item.label} className="flex flex-col items-center p-2.5 rounded-lg bg-muted/30 border border-border/30">

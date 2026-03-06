@@ -187,7 +187,7 @@ export function SessionEndSummary({ open, onClose, streamerId, startedAt, endedA
                   {[
                     { icon: Clock, label: 'Duration', value: <CountUp to={Math.floor(stats.durationSeconds / 60)} suffix="m" delay={(STATS_DELAY + 0.2) * 1000} /> },
                     { icon: Music2, label: 'Submissions', value: <CountUp to={stats.totalSubmissions} delay={(STATS_DELAY + 0.3) * 1000} /> },
-                    { icon: Star, label: 'Priority', value: <CountUp to={stats.prioritySubmissions} delay={(STATS_DELAY + 0.4) * 1000} /> },
+                    { icon: Star, label: 'VIP', value: <CountUp to={stats.prioritySubmissions} delay={(STATS_DELAY + 0.4) * 1000} /> },
                     { icon: Euro, label: 'Your Earnings', value: <CountUp to={stats.totalEarnings} decimals={2} prefix="€" delay={(STATS_DELAY + 0.5) * 1000} />, sub: `Platform: €${stats.platformFees.toFixed(2)}` },
                   ].map((item, i) => {
                     const Icon = item.icon;

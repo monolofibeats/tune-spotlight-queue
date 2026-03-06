@@ -347,7 +347,7 @@ export function PreStreamSpots() {
             <Crown className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold">Pre-Stream Priority Spots</h3>
+            <h3 className="font-semibold">Pre-Stream VIP Spots</h3>
             <p className="text-xs text-muted-foreground">
               Secure your spot at the start of the next stream
             </p>

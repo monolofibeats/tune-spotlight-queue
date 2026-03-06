@@ -83,7 +83,7 @@ serve(async (req) => {
 
       return new Response(JSON.stringify({
         success: true,
-        message: "Your priority submission has been added to the queue!",
+        message: "Your VIP submission has been added to the queue!",
         submissionId: alreadyProcessedId,
         actionLink,
         hashedToken,
@@ -175,7 +175,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: true,
           submissionId: upgraded.id,
-          message: "Your submission has been upgraded to priority!",
+          message: "Your submission has been upgraded to VIP!",
           actionLink: actionLink || null,
           hashedToken: hashedToken || null,
           accountCreated: accountCreated || false,
@@ -214,7 +214,7 @@ serve(async (req) => {
         logStep("Duplicate insert detected, returning success");
         return new Response(JSON.stringify({
           success: true,
-          message: "Your priority submission has been added to the queue!",
+          message: "Your VIP submission has been added to the queue!",
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -249,7 +249,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       success: true, 
       submission,
-      message: `Your priority submission has been added to the queue!${accountMessage}`,
+      message: `Your VIP submission has been added to the queue!${accountMessage}`,
       accountCreated,
       actionLink: actionLink || null,
       hashedToken: hashedToken || null,

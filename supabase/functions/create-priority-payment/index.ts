@@ -120,7 +120,7 @@ serve(async (req) => {
       price_data: {
             currency: "eur",
             product_data: {
-              name: `Priority Submission: ${songTitle || 'Song'}`,
+              name: `VIP Submission: ${songTitle || 'Song'}`,
               description: `Skip the watchlist for "${songTitle}" by ${artistName}${discountPercent > 0 ? ` (${discountPercent}% discount applied)` : ''}`,
             },
             unit_amount: finalAmountCents,
