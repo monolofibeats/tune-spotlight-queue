@@ -1318,6 +1318,7 @@ const StreamerDashboard = () => {
           );
         })}
       </div>
+      {streamer && <PrioritySubmissionAlert streamerId={streamer.id} />}
     </StreamSessionProvider>
   );
 };
