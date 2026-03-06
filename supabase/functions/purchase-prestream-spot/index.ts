@@ -118,7 +118,7 @@ serve(async (req) => {
             currency: "eur",
             product_data: {
               name: `Pre-Stream Spot #${spotNumber}`,
-              description: `Priority spot #${spotNumber} for the next stream`,
+              description: `VIP spot #${spotNumber} for the next stream`,
             },
             unit_amount: actualPriceCents,
           },
