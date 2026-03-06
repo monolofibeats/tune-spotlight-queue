@@ -271,7 +271,7 @@ const translations: Record<Language, Record<string, string>> = {
     'submission.status.deleted': 'deleted',
     'submission.select': 'Select',
     'submission.deselect': 'Deselect',
-    'submission.priority': 'Priority',
+    'submission.priority': 'VIP',
     'submission.uploadedAudio': 'Uploaded Audio File',
     'submission.play': 'Play',
     'submission.download': 'Download',
