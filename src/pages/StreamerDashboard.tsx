@@ -1174,6 +1174,7 @@ const StreamerDashboard = () => {
                       </NowPlayingDropZone>
                     </PhoneAwareSubmissionsLayout>
                   </PhoneOptimizedNowPlaying>
+                  <PrioritySubmissionAlert streamerId={streamer.id} />
                   <LiveAwareDashboardGrid
                     dashboardLayout={dashboardLayout}
                     isBuilderEditing={isBuilderEditing}
