@@ -13,17 +13,10 @@ export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) 
   const [alerts, setAlerts] = useState<PriorityAlert[]>([]);
   const seenIdsRef = useRef<Set<string>>(new Set());
   const initialLoadRef = useRef(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { language } = useLanguage();
-
-  useEffect(() => {
-    audioRef.current = new Audio('/sfx/chimes.wav');
-    audioRef.current.volume = 0.15;
-  }, []);
 
   const showAlert = useCallback((alert: PriorityAlert) => {
     setAlerts(prev => [...prev, alert]);
-    audioRef.current?.play().catch(() => {});
     setTimeout(() => {
       setAlerts(prev => prev.filter(a => a.id !== alert.id));
     }, 6000);
