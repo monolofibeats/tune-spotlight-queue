@@ -19,7 +19,6 @@ export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) 
 
   const showAlert = useCallback((alert: PriorityAlert) => {
     setAlerts(prev => [...prev, alert]);
-    audioRef.current?.play().catch(() => {});
     setTimeout(() => {
       setAlerts(prev => prev.filter(a => a.id !== alert.id));
     }, 6000);
