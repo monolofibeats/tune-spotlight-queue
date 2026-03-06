@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw, Pin } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, X, CheckSquare, Square, Loader2, RotateCcw, Pin, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -40,6 +40,7 @@ export function BulkActionBar({
   const { t } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const allSelected = selectedCount === totalCount && totalCount > 0;
 
   const handleAction = async (action: () => Promise<void>) => {
@@ -48,6 +49,7 @@ export function BulkActionBar({
       await action();
     } finally {
       setIsProcessing(false);
+      setExpanded(false);
     }
   };
 
@@ -57,134 +59,119 @@ export function BulkActionBar({
     <>
       <AnimatePresence>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-[9999] w-[95vw] max-w-xl"
+          exit={{ opacity: 0, y: -10 }}
+          className="fixed top-3 left-1/2 -translate-x-1/2 z-[9999]"
         >
-          <div className="rounded-xl border border-primary/30 bg-background/80 backdrop-blur-sm shadow-lg shadow-primary/10 px-4 py-3 flex items-center gap-3 flex-wrap">
-            {/* Selection info */}
-            <span className="text-sm font-medium whitespace-nowrap">
-              {selectedCount} {t('bulk.selected')}
-            </span>
-
-            {/* Select / Deselect all */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={allSelected ? onDeselectAll : onSelectAll}
-            >
-              {allSelected ? (
-                <>
-                  <Square className="w-3 h-3" />
-                  {t('bulk.deselectAll')}
-                </>
-              ) : (
-                <>
-                  <CheckSquare className="w-3 h-3" />
-                  {t('bulk.selectAll')} ({totalCount})
-                </>
-              )}
-            </Button>
-
-            <div className="h-4 w-px bg-border" />
-
-            {/* Actions */}
-            {isProcessing ? (
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            ) : isTrashView ? (
-              <>
-                {onBulkRestore && (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs gap-1"
-                    onClick={() => handleAction(() => onBulkRestore())}
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    {t('bulk.restore')}
-                  </Button>
-                )}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  {t('bulk.deleteForever')}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => handleAction(() => onBulkStatusChange('reviewed'))}
-                >
-                  <CheckCircle className="w-3 h-3" />
-                  {t('bulk.done')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => handleAction(() => onBulkStatusChange('skipped'))}
-                >
-                  <XCircle className="w-3 h-3" />
-                  {t('bulk.skip')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={() => handleAction(() => onBulkStatusChange('pending'))}
-                >
-                  {t('bulk.pending')}
-                </Button>
-                {onBulkMarkPriority && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs gap-1 text-amber-500 hover:text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
-                    onClick={() => handleAction(() => onBulkMarkPriority(true))}
-                  >
-                    <Pin className="w-3 h-3" />
-                    Priority
-                  </Button>
-                )}
+          <AnimatePresence mode="wait">
+            {!expanded ? (
+              <motion.div
+                key="compact"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-background shadow-md px-3 py-1.5"
+              >
+                <span className="text-xs font-semibold text-primary tabular-nums">
+                  {selectedCount}
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
+                  className="h-6 text-[11px] gap-1 px-2 rounded-full"
+                  onClick={allSelected ? onDeselectAll : onSelectAll}
                 >
-                  <Trash2 className="w-3 h-3" />
-                  {t('bulk.trash')}
+                  {allSelected ? (
+                    <><Square className="w-3 h-3" />{t('bulk.deselectAll')}</>
+                  ) : (
+                    <><CheckSquare className="w-3 h-3" />All ({totalCount})</>
+                  )}
                 </Button>
-              </>
+                <Button
+                  size="sm"
+                  className="h-6 text-[11px] gap-0.5 px-2.5 rounded-full"
+                  onClick={() => setExpanded(true)}
+                >
+                  Actions <ChevronRight className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 rounded-full text-muted-foreground"
+                  onClick={onDeselectAll}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="expanded"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex items-center gap-1.5 rounded-xl border border-primary/40 bg-background shadow-lg px-3 py-2 flex-wrap max-w-[90vw]"
+              >
+                <span className="text-xs font-semibold text-primary mr-1">
+                  {selectedCount} {t('bulk.selected')}
+                </span>
+
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                ) : isTrashView ? (
+                  <>
+                    {onBulkRestore && (
+                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1"
+                        onClick={() => handleAction(() => onBulkRestore())}>
+                        <RotateCcw className="w-3 h-3" />{t('bulk.restore')}
+                      </Button>
+                    )}
+                    <Button variant="destructive" size="sm" className="h-7 text-xs gap-1"
+                      onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="w-3 h-3" />{t('bulk.deleteForever')}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="default" size="sm" className="h-7 text-xs gap-1"
+                      onClick={() => handleAction(() => onBulkStatusChange('reviewed'))}>
+                      <CheckCircle className="w-3 h-3" />{t('bulk.done')}
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs gap-1"
+                      onClick={() => handleAction(() => onBulkStatusChange('skipped'))}>
+                      <XCircle className="w-3 h-3" />{t('bulk.skip')}
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs gap-1"
+                      onClick={() => handleAction(() => onBulkStatusChange('pending'))}>
+                      {t('bulk.pending')}
+                    </Button>
+                    {onBulkMarkPriority && (
+                      <Button variant="outline" size="sm"
+                        className="h-7 text-xs gap-1 text-amber-500 hover:text-amber-500 border-amber-500/30 hover:bg-amber-500/10"
+                        onClick={() => handleAction(() => onBulkMarkPriority(true))}>
+                        <Pin className="w-3 h-3" />Priority
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm"
+                      className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
+                      onClick={() => setShowDeleteDialog(true)}>
+                      <Trash2 className="w-3 h-3" />{t('bulk.trash')}
+                    </Button>
+                  </>
+                )}
+
+                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+                  onClick={() => { setExpanded(false); onDeselectAll(); }}>
+                  <X className="w-3 h-3" />{t('bulk.cancel')}
+                </Button>
+              </motion.div>
             )}
-
-            <div className="h-4 w-px bg-border" />
-
-            {/* Cancel */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={onDeselectAll}
-            >
-              <X className="w-3 h-3" />
-              {t('bulk.cancel')}
-            </Button>
-          </div>
+          </AnimatePresence>
         </motion.div>
       </AnimatePresence>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="glass-strong">
+        <AlertDialogContent className="z-[99999]">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {isTrashView ? t('bulk.permanentDeleteTitle') : t('bulk.moveToTrashTitle')}
