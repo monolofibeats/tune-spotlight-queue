@@ -156,11 +156,11 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
                     </Badge>
                   )}
 
-                  {isOwn && tracked && !item.is_priority && (
+                  {!item.is_priority && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setBiddingSub(tracked)}
+                      onClick={() => setBiddingItem(item)}
                       className="text-xs gap-1 h-7 px-2.5 border-primary/40 text-primary hover:bg-primary/10"
                     >
                       <Zap className="w-3 h-3" />
