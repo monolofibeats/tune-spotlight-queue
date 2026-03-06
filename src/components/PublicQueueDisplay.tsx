@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/hooks/useLanguage';
-import { TrackedSubmission } from '@/hooks/useTrackedSubmission';
+import type { TrackedSubmission } from '@/hooks/useTrackedSubmission';
 import { SpotBiddingDialog } from './SpotBiddingDialog';
 import { PositionBadge } from './queue/PositionBadge';
 
