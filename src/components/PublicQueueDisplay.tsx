@@ -181,17 +181,16 @@ export function PublicQueueDisplay({ streamerId, streamerSlug, trackedSubmission
       </div>
 
       {/* Bidding Dialog */}
-      {biddingSub && (
+      {biddingItem && (
         <SpotBiddingDialog
-          open={!!biddingSub}
-          onOpenChange={(open) => { if (!open) setBiddingSub(null); }}
-          songUrl={biddingSub.songUrl}
-          artistName={biddingSub.artistName}
-          songTitle={biddingSub.songTitle}
+          open={!!biddingItem}
+          onOpenChange={(open) => { if (!open) setBiddingItem(null); }}
+          songUrl=""
+          artistName={biddingItem.artist_name}
+          songTitle={biddingItem.song_title}
           email=""
-          platform={biddingSub.platform}
-          audioFileUrl={biddingSub.audioFileUrl}
-          originalSubmissionId={biddingSub.submissionId || null}
+          platform={biddingItem.platform}
+          originalSubmissionId={biddingItem.id}
           streamerId={streamerId}
           streamerSlug={streamerSlug || ''}
         />
