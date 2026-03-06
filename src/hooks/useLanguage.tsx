@@ -508,7 +508,7 @@ const translations: Record<Language, Record<string, string>> = {
     'toast.streamEnded': 'Stream ended',
     'toast.streamStopped': 'Screen share has stopped',
     'toast.loginRequired': 'Login required',
-    'toast.signInForPriority': 'Please sign in to use priority submissions',
+    'toast.signInForPriority': 'Please sign in to use VIP submissions',
     
     // Discovery Page
     'discovery.badge': 'Creator Review Platform',
