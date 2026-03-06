@@ -981,7 +981,7 @@ const translations: Record<Language, Record<string, string>> = {
     'bidding.discountAppliedToastDesc': 'Your discount will be applied at checkout.',
     'bidding.error': 'Error',
     'bidding.errorLoadSpots': 'Failed to load spot prices',
-    'bidding.adminBypass': 'Priority submission added! 🎉',
+    'bidding.adminBypass': 'VIP submission added! 🎉',
     'bidding.adminBypassDesc': 'Admin bypass: Claimed spot #{position}',
     'bidding.failed': 'Failed',
   },
