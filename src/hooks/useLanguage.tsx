@@ -1027,7 +1027,7 @@ const translations: Record<Language, Record<string, string>> = {
     'howItWorks.needHelp': 'Brauchst du Hilfe?',
     
     // Pre-Stream Spots
-    'spots.title': 'Pre-Stream Prioritätsplätze',
+    'spots.title': 'Pre-Stream VIP-Plätze',
     'spots.subtitle': 'Sichere dir deinen Platz im nächsten Stream',
     'spots.available': 'Verfügbar',
     'spots.sold': 'Verkauft',
