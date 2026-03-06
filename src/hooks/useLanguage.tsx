@@ -1479,7 +1479,7 @@ const translations: Record<Language, Record<string, string>> = {
     'toast.streamEnded': 'Stream beendet',
     'toast.streamStopped': 'Bildschirmübertragung wurde beendet',
     'toast.loginRequired': 'Anmeldung erforderlich',
-    'toast.signInForPriority': 'Bitte melde dich an für Prioritäts-Einreichungen',
+    'toast.signInForPriority': 'Bitte melde dich an für VIP-Einreichungen',
     
     // Discovery Page
     'discovery.badge': 'Creator Review Platform',
