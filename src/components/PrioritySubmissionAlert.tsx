@@ -12,7 +12,7 @@ interface PriorityAlert {
 export function PrioritySubmissionAlert({ streamerId }: { streamerId: string }) {
   const [alerts, setAlerts] = useState<PriorityAlert[]>([]);
   const seenIdsRef = useRef<Set<string>>(new Set());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const initialLoadRef = useRef(true);
   const { language } = useLanguage();
 
   useEffect(() => {
